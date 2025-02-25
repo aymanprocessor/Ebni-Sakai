@@ -5,6 +5,9 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { InputMaskModule } from 'primeng/inputmask';
 import { ReactiveFormsModule } from '@angular/forms';
+import { UserProfileService } from '../../services/user-profile.service';
+import { AuthService } from '../../services/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-user-profile',
@@ -14,24 +17,56 @@ import { ReactiveFormsModule } from '@angular/forms';
 })
 export class UserProfileComponent {
     profileForm: FormGroup = new FormGroup({});
+
     avatarUrl: string = 'assets/images/default-avatar.png'; // Default avatar
+    private userSub: Subscription | null = null;
 
-    constructor(private fb: FormBuilder) {}
-
-    ngOnInit() {
+    constructor(
+        private fb: FormBuilder,
+        private userProfileServ: UserProfileService,
+        private authServ:AuthService
+    ) {
         this.profileForm = this.fb.group({
             displayName: ['', Validators.required],
             firstName: ['', Validators.required],
             lastName: ['', Validators.required],
-            mobile: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
+            mobile: ['', [Validators.required, Validators.pattern('^[0-9]{11}$')]],
             email: ['', [Validators.required, Validators.email]]
         });
     }
 
-    onSubmit() {
+    ngOnInit() {
+        this.userSub = this.authServ.currentUser$.subscribe((user) => {
+            if (user) {
+                this.loadUserProfile(user.uid);
+            }
+        });
+    }
+    private async loadUserProfile(uid: string): Promise<void> {
+        try {
+            // console.log('USER ', this.authServ.getCurrentUser());
+            const profile = await this.userProfileServ.getUserProfile(uid);
+            if (profile) {
+                console.log('USER ', profile);
+
+                this.profileForm.patchValue(profile);
+            } else {
+                console.log('NO USER');
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+   async onSubmit() {
         if (this.profileForm.valid) {
-            console.log(this.profileForm.value);
-            // Handle form submission
+            try {
+
+                console.log(this.profileForm.value);
+                await this.userProfileServ.updateUserProfile(this.profileForm.value);
+            } catch (error) {
+                console.log(error);
+
+            }
         }
     }
 
