@@ -1,7 +1,8 @@
 import { Routes } from '@angular/router';
 import { UserProfileComponent } from './user-profile/user-profile.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
+import { authGuard } from '../auth.guard';
 
 export default [
-    {path:'user-profile',component:UserProfileComponent},
-    { path: '**', redirectTo: '/notfound' }
+
 ] as Routes;
