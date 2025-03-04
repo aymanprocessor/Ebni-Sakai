@@ -1,14 +1,11 @@
 import { Routes } from '@angular/router';
 import { AppLayout } from './app/layout/component/app.layout';
-<<<<<<< HEAD
 import { ForgetPasswordComponent } from './app/pages/forget-password/forget-password.component';
 import { ResetPasswordComponent } from './app/pages/reset-password/reset-password.component';
-=======
 import { Access } from './app/pages/auth/access';
 import { Login } from './app/pages/auth/login';
 import { authGuard } from './app/auth.guard';
 import { DashboardComponent } from './app/pages/dashboard/dashboard.component';
->>>>>>> baf7c1be8c6bfb200a6d8eb379b5d9a1b603f283
 import { UserProfileComponent } from './app/pages/user-profile/user-profile.component';
 
 export const appRoutes: Routes = [
@@ -17,14 +14,10 @@ export const appRoutes: Routes = [
     {
         path: '',
         component: AppLayout,
-<<<<<<< HEAD
-        children: [{ path: 'user-profile', component: UserProfileComponent }]
-=======
         children: [
             { path: 'dashboard', component: DashboardComponent },
             { path: 'user-profile', component: UserProfileComponent, canActivate: [authGuard] }
         ]
->>>>>>> baf7c1be8c6bfb200a6d8eb379b5d9a1b603f283
     },
 
     { path: 'access', component: Access },
