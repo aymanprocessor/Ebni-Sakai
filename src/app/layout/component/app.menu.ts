@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 import { AppMenuitem } from './app.menuitem';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-menu',
@@ -17,15 +18,15 @@ import { AppMenuitem } from './app.menuitem';
 })
 export class AppMenu {
     model: MenuItem[] = [];
-
+    constructor(private translate: TranslateService) {}
     ngOnInit() {
         this.model = [
             {
                 label: '',
                 items: [
-                    { label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/dashboard'] },
-                    { label: 'Assessments', icon: 'pi pi-fw pi-file', routerLink: ['/assessments'] },
-                    { label: 'User Profile', icon: 'pi pi-fw pi-user', routerLink: ['user-profile'] }
+                    { label: 'navigation.dashboard', icon: 'pi pi-fw pi-home', routerLink: ['dashboard'] },
+                    { label: 'navigation.survey', icon: 'pi pi-fw pi-file', routerLink: ['survey'] },
+                    { label: 'navigation.user-profile', icon: 'pi pi-fw pi-user', routerLink: ['user-profile'] }
                 ]
             }
         ];

@@ -8,10 +8,11 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { UserProfileService } from '../../services/user-profile.service';
 import { AuthService } from '../../services/auth.service';
 import { Subscription } from 'rxjs';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-user-profile',
-    imports: [NgIf, InputTextModule, ButtonModule, InputMaskModule, ReactiveFormsModule],
+    imports: [NgIf, InputTextModule, ButtonModule, InputMaskModule, ReactiveFormsModule, TranslateModule],
     templateUrl: './user-profile.component.html',
     styleUrl: './user-profile.component.scss'
 })
@@ -24,14 +25,14 @@ export class UserProfileComponent {
     constructor(
         private fb: FormBuilder,
         private userProfileServ: UserProfileService,
-        private authServ:AuthService
+        private authServ: AuthService
     ) {
         this.profileForm = this.fb.group({
-            displayName: ['', Validators.required],
+            //displayName: ['', Validators.required],
             firstName: ['', Validators.required],
             lastName: ['', Validators.required],
             mobile: ['', [Validators.required, Validators.pattern('^[0-9]{11}$')]],
-            email: ['', [Validators.required, Validators.email]]
+            email: [{ value: '', disabled: true }, [Validators.required, Validators.email]]
         });
     }
 
@@ -47,25 +48,20 @@ export class UserProfileComponent {
             // console.log('USER ', this.authServ.getCurrentUser());
             const profile = await this.userProfileServ.getUserProfile(uid);
             if (profile) {
-                console.log('USER ', profile);
-
                 this.profileForm.patchValue(profile);
-            } else {
-                console.log('NO USER');
+                this.avatarUrl = profile.photoURL || 'assets/images/default-avatar.png';
             }
         } catch (err) {
             console.error(err);
         }
     }
-   async onSubmit() {
+    async onSubmit() {
         if (this.profileForm.valid) {
             try {
-
                 console.log(this.profileForm.value);
                 await this.userProfileServ.updateUserProfile(this.profileForm.value);
             } catch (error) {
                 console.log(error);
-
             }
         }
     }

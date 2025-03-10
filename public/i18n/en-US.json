@@ -1,0 +1,167 @@
+{
+  "common": {
+    "buttons": {
+      "add": "Add",
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save",
+      "cancel": "Cancel",
+      "close": "Close",
+      "back": "Back",
+      "next": "Next",
+      "submit": "Submit",
+      "search": "Search",
+      "filter": "Filter",
+      "clear": "Clear",
+      "reset": "Reset",
+      "confirm": "Confirm",
+      "logout": "Logout",
+      "login": "Login",
+      "register": "Register",
+      "loginWithGoogle": "Login with Google"
+    },
+    "labels": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "address": "Address",
+      "description": "Description",
+      "status": "Status",
+      "date": "Date",
+      "time": "Time",
+      "username": "Username",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "language": "Language",
+      "rememberMe": "Remember Me",
+      "forgotPassword": "Forgot Password",
+      "or": "OR",
+      "alreadyHaveAccount": "Already Have an Account?",
+      "firstName": "First Name",
+      "lastName": "Last Name"
+    },
+    "messages": {
+      "loading": "Loading...",
+      "noData": "No data available",
+      "confirmDelete": "Are you sure you want to delete this item?",
+      "itemSaved": "Item saved successfully",
+      "itemDeleted": "Item deleted successfully",
+      "unauthorized": "You are not authorized to access this resource",
+      "sessionExpired": "Your session has expired, please login again",
+      "error": "An error occurred",
+      "welcome": "Welcome, {{name}}!"
+    },
+    "validation": {
+      "required": "This field is required",
+      "email": "Please enter a valid email address",
+      "minLength": "Minimum length is {{length}} characters",
+      "maxLength": "Maximum length is {{length}} characters",
+      "passwordMismatch": "Passwords do not match",
+      "invalidFormat": "Invalid format"
+    },
+    "statuses": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "pending": "Pending",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    }
+  },
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "products": "Products",
+    "orders": "Orders",
+    "settings": "Settings",
+    "logout": "Logout",
+    "profile": "Profile",
+    "user-profile": "User Profile",
+    "survey": "Survey"
+  },
+  "pages": {
+    "login": {
+      "title": "Login",
+      "subtitle": "Enter your credentials to access your account",
+      "forgotPassword": "Forgot Password?",
+      "noAccount": "Don't have an account?",
+      "register": "Register here",
+      "welcome": "Welcome to Kid Skills"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "summary": "Summary",
+      "recentActivity": "Recent Activity",
+      "statistics": "Statistics"
+    },
+    "users": {
+      "title": "User Management",
+      "addUser": "Add User",
+      "editUser": "Edit User",
+      "userDetails": "User Details",
+      "userList": "User List",
+      "displayName": "Display Name",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "mobile": "Mobile",
+      "email": "Email"
+    },
+    "settings": {
+      "title": "Settings",
+      "general": "General Settings",
+      "account": "Account Settings",
+      "notifications": "Notification Settings",
+      "security": "Security Settings",
+      "appearance": "Appearance",
+      "language": "Language Settings"
+    },
+    "error": {
+      "notFound": "Page not found",
+      "accessDenied": "Access Denied",
+      "serverError": "Server Error",
+      "goHome": "Go to Home Page"
+    },
+    "register": {
+      "welcome": "Welcome To Kid Skills"
+    }
+  },
+  "dateTime": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "tomorrow": "Tomorrow",
+    "days": {
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday"
+    },
+    "months": {
+      "january": "January",
+      "february": "February",
+      "march": "March",
+      "april": "April",
+      "may": "May",
+      "june": "June",
+      "july": "July",
+      "august": "August",
+      "september": "September",
+      "october": "October",
+      "november": "November",
+      "december": "December"
+    },
+    "formats": {
+      "shortDate": "MM/DD/YYYY",
+      "longDate": "MMMM D, YYYY",
+      "time": "HH:mm",
+      "dateTime": "MMMM D, YYYY HH:mm"
+    }
+  },
+  "topbar": {
+    "messages": "Messages",
+    "profile": "Profile"
+  },
+  "users": {}
+}

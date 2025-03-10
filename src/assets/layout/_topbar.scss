@@ -81,9 +81,16 @@
     }
 
     .layout-topbar-actions {
-        margin-left: auto;
         display: flex;
         gap: 1rem;
+
+        [dir='rtl'] & {
+            margin-right: auto;
+        }
+
+        [dir='ltr'] & {
+            margin-left: auto;
+        }
     }
 
     .layout-topbar-menu-content {
@@ -124,11 +131,17 @@
                 0px 1px 4px rgba(0, 0, 0, 0.08);
             border-radius: var(--content-border-radius);
             padding: 1rem;
-            right: 2rem;
             top: 4rem;
             min-width: 15rem;
             border: 1px solid var(--surface-border);
 
+            [dir='ltr'] & {
+                right: 2rem;
+            }
+
+            [dir='rtl'] & {
+                left: 2rem;
+            }
             .layout-topbar-menu-content {
                 gap: 0.5rem;
             }
@@ -143,7 +156,12 @@
 
                 i {
                     font-size: 1rem;
-                    margin-right: 0.5rem;
+                    [dir='ltr'] & {
+                        margin-right: 0.5rem;
+                    }
+                    [dir='rtl'] & {
+                        margin-left: 0.5rem;
+                    }
                 }
 
                 span {

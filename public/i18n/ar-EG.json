@@ -1,0 +1,166 @@
+{
+  "common": {
+    "buttons": {
+      "add": "إضافة",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "save": "حفظ",
+      "cancel": "إلغاء",
+      "close": "إغلاق",
+      "back": "رجوع",
+      "next": "التالي",
+      "submit": "إرسال",
+      "search": "بحث",
+      "filter": "تصفية",
+      "clear": "مسح",
+      "reset": "إعادة ضبط",
+      "confirm": "تأكيد",
+      "login": "تسجيل الدخول",
+      "logout": "تسجيل الخروج",
+      "register": "تسجيل",
+      "loginWithGoogle": "تسجيل الدخول مع جوجل"
+    },
+    "labels": {
+      "name": "الاسم",
+      "email": "البريد الإلكتروني",
+      "phone": "رقم الهاتف",
+      "address": "العنوان",
+      "description": "الوصف",
+      "status": "الحالة",
+      "date": "التاريخ",
+      "time": "الوقت",
+      "username": "اسم المستخدم",
+      "password": "كلمة المرور",
+      "confirmPassword": "تأكيد كلمة المرور",
+      "language": "اللغة",
+      "rememberMe": "تتذكرني",
+      "forgotPassword": "نسيت كلمة المرور",
+      "or": "او",
+      "alreadyHaveAccount": "لديك حساب؟",
+      "firstName": "الاسم الاول",
+      "lastName": "الاسم الاخير"
+    },
+    "messages": {
+      "loading": "جاري التحميل...",
+      "noData": "لا توجد بيانات متاحة",
+      "confirmDelete": "هل أنت متأكد من حذف هذا العنصر؟",
+      "itemSaved": "تم حفظ العنصر بنجاح",
+      "itemDeleted": "تم حذف العنصر بنجاح",
+      "unauthorized": "غير مصرح لك بالوصول إلى هذا المورد",
+      "sessionExpired": "انتهت صلاحية جلستك، يرجى تسجيل الدخول مرة أخرى",
+      "error": "حدث خطأ",
+      "welcome": "مرحبًا، {{name}}!"
+    },
+    "validation": {
+      "required": "هذا الحقل مطلوب",
+      "email": "يرجى إدخال عنوان بريد إلكتروني صالح",
+      "minLength": "الحد الأدنى للطول هو {{length}} أحرف",
+      "maxLength": "الحد الأقصى للطول هو {{length}} أحرف",
+      "passwordMismatch": "كلمات المرور غير متطابقة",
+      "invalidFormat": "تنسيق غير صالح"
+    },
+    "statuses": {
+      "active": "نشط",
+      "inactive": "غير نشط",
+      "pending": "قيد الانتظار",
+      "completed": "مكتمل",
+      "cancelled": "ملغي"
+    }
+  },
+  "navigation": {
+    "home": "الرئيسية",
+    "dashboard": "لوحة التحكم",
+    "users": "المستخدمين",
+    "products": "المنتجات",
+    "orders": "الطلبات",
+    "settings": "الإعدادات",
+    "logout": "تسجيل الخروج",
+    "profile": "الملف الشخصي",
+    "user-profile": "بيانات المستخدم",
+    "survey": "استبيان"
+  },
+  "pages": {
+    "login": {
+      "title": "تسجيل الدخول",
+      "subtitle": "أدخل بيانات الاعتماد الخاصة بك للوصول إلى حسابك",
+      "forgotPassword": "نسيت كلمة المرور؟",
+      "noAccount": "ليس لديك حساب؟",
+      "register": "سجل هنا",
+      "welcome": "مرحبا بكم في كيد سكيلز"
+    },
+    "dashboard": {
+      "title": "لوحة التحكم",
+      "summary": "ملخص",
+      "recentActivity": "النشاط الأخير",
+      "statistics": "الإحصائيات"
+    },
+    "users": {
+      "title": "إدارة المستخدمين",
+      "addUser": "إضافة مستخدم",
+      "editUser": "تعديل مستخدم",
+      "userDetails": "تفاصيل المستخدم",
+      "userList": "قائمة المستخدمين",
+      "displayName": "اسم العرض",
+      "email": "بريد إلكتروني",
+      "firstName": "الاسم الأول",
+      "lastName": "اسم العائلة",
+      "mobile": "موبايل"
+    },
+    "settings": {
+      "title": "الإعدادات",
+      "general": "الإعدادات العامة",
+      "account": "إعدادات الحساب",
+      "notifications": "إعدادات الإشعارات",
+      "security": "إعدادات الأمان",
+      "appearance": "المظهر",
+      "language": "إعدادات اللغة"
+    },
+    "error": {
+      "notFound": "الصفحة غير موجودة",
+      "accessDenied": "تم رفض الوصول",
+      "serverError": "خطأ في الخادم",
+      "goHome": "الذهاب إلى الصفحة الرئيسية"
+    },
+    "register": {
+      "welcome": "مرحبا بكم في كيد سكيلز"
+    }
+  },
+  "dateTime": {
+    "today": "اليوم",
+    "yesterday": "أمس",
+    "tomorrow": "غدًا",
+    "days": {
+      "monday": "الاثنين",
+      "tuesday": "الثلاثاء",
+      "wednesday": "الأربعاء",
+      "thursday": "الخميس",
+      "friday": "الجمعة",
+      "saturday": "السبت",
+      "sunday": "الأحد"
+    },
+    "months": {
+      "january": "يناير",
+      "february": "فبراير",
+      "march": "مارس",
+      "april": "أبريل",
+      "may": "مايو",
+      "june": "يونيو",
+      "july": "يوليو",
+      "august": "أغسطس",
+      "september": "سبتمبر",
+      "october": "أكتوبر",
+      "november": "نوفمبر",
+      "december": "ديسمبر"
+    },
+    "formats": {
+      "shortDate": "DD/MM/YYYY",
+      "longDate": "D MMMM, YYYY",
+      "time": "HH:mm",
+      "dateTime": "D MMMM, YYYY HH:mm"
+    }
+  },
+  "topbar": {
+    "messages": "رسائل",
+    "profile": "بيانات شخصية"
+  }
+}

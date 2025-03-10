@@ -1,0 +1,23 @@
+<!-- language-selector.component.html -->
+<div class="relative">
+    <!-- Language button with current flag -->
+    <button severity="secondary" (click)="toggleOverlay()" pButton type="button" class="flex items-center space-x-1 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none">
+        <span class="flag-icon flag-icon-{{ selectedLanguage.flag }}"></span>
+        <i class="pi pi-chevron-down text-xs ml-1"></i>
+    </button>
+
+    <!-- Language overlay -->
+    <p-overlay [(visible)]="visible" [showTransitionOptions]="'150ms'" [hideTransitionOptions]="'150ms'">
+        <div class="bg-white dark:bg-gray-800 shadow-lg rounded-md py-2 w-48 mt-1">
+            <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+                <li *ngFor="let lang of languages" class="px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" [class.bg-gray-50]="selectedLanguage.code === lang.code" (click)="selectLanguage(lang)">
+                    <div class="flex items-center gap-2">
+                        <span class="flag-icon flag-icon-{{ lang.flag }}"></span>
+                        <span>{{ lang.name }}</span>
+                        <i *ngIf="selectedLanguage.code === lang.code" class="pi pi-check ml-auto text-primary"></i>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </p-overlay>
+</div>

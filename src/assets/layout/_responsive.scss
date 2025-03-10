@@ -41,13 +41,26 @@
 
         &.layout-static {
             .layout-main-container {
-                margin-left: 22rem;
+                [dir='rtl'] & {
+                    margin-right: 22rem;
+                }
+
+                [dir='ltr'] & {
+                    margin-left: 22rem;
+                }
             }
 
             &.layout-static-inactive {
                 .layout-sidebar {
-                    transform: translateX(-100%);
-                    left: 0;
+                    [dir='rtl'] & {
+                        transform: translateX(100%);
+                        right: 0;
+                    }
+
+                    [dir='ltr'] & {
+                        transform: translateX(-100%);
+                        left: 0;
+                    }
                 }
 
                 .layout-main-container {
@@ -75,8 +88,6 @@
         }
 
         .layout-sidebar {
-            transform: translateX(-100%);
-            left: 0;
             top: 0;
             height: 100vh;
             border-top-left-radius: 0;
@@ -84,6 +95,15 @@
             transition:
                 transform 0.4s cubic-bezier(0.05, 0.74, 0.2, 0.99),
                 left 0.4s cubic-bezier(0.05, 0.74, 0.2, 0.99);
+
+            [dir='ltr'] & {
+                transform: translateX(-100%);
+                left: 0;
+            }
+            [dir='rtl'] & {
+                transform: translateX(100%);
+                right: 0;
+            }
         }
 
         .layout-mask {

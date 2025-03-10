@@ -2,11 +2,13 @@ export interface UserProfile {
     uid: string;
     firstName: string;
     lastName: string;
-    mobile: string;
+    mobile?: string;
     email: string;
     displayName?: string;
-    avatar?: string;
+    photoURL?: string;
     role?: string;
+    isNewUser: boolean;
     createdAt: Date;
-    updatedAt: Date;
+    updatedAt?: Date;
+    lastLogin: Date;
 }
