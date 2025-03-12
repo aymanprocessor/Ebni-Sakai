@@ -15,8 +15,8 @@
       "clear": "مسح",
       "reset": "إعادة ضبط",
       "confirm": "تأكيد",
-      "login": "تسجيل الدخول",
       "logout": "تسجيل الخروج",
+      "login": "تسجيل الدخول",
       "register": "تسجيل",
       "loginWithGoogle": "تسجيل الدخول مع جوجل"
     },
@@ -33,12 +33,23 @@
       "password": "كلمة المرور",
       "confirmPassword": "تأكيد كلمة المرور",
       "language": "اللغة",
-      "rememberMe": "تتذكرني",
+      "rememberMe": "تذكرني",
       "forgotPassword": "نسيت كلمة المرور",
-      "or": "او",
-      "alreadyHaveAccount": "لديك حساب؟",
-      "firstName": "الاسم الاول",
-      "lastName": "الاسم الاخير"
+      "or": "أو",
+      "alreadyHaveAccount": "هل لديك حساب بالفعل؟",
+      "firstName": "الاسم الأول",
+      "lastName": "الاسم الأخير",
+      "createAnAccount": "إنشاء حساب جديد؟",
+      "gender": "الجنس",
+      "selectGender": "اختر الجنس",
+      "years": "سنة",
+      "female": "أنثى",
+      "male": "ذكر",
+      "age": "العمر",
+      "actions": "الاجراءات"
+    },
+    "age": {
+      "format": "{{years}} سنة، {{months}} شهر"
     },
     "messages": {
       "loading": "جاري التحميل...",
@@ -49,7 +60,12 @@
       "unauthorized": "غير مصرح لك بالوصول إلى هذا المورد",
       "sessionExpired": "انتهت صلاحية جلستك، يرجى تسجيل الدخول مرة أخرى",
       "error": "حدث خطأ",
-      "welcome": "مرحبًا، {{name}}!"
+      "welcome": "مرحبًا، {{name}}!",
+      "birthdayHelp": "اختر تاريخ ميلاد الطفل",
+      "paginatorTemplate": "عرض {first} إلى {last} من أصل {totalRecords} إدخال",
+      "loadingFailed": "فشل تحميل البيانات",
+      "deleteFailed": "فشل حذف العنصر",
+      "saveFailed": "فشل حفظ العنصر"
     },
     "validation": {
       "required": "هذا الحقل مطلوب",
@@ -67,6 +83,17 @@
       "cancelled": "ملغي"
     }
   },
+  "pages": {
+    "users": {
+      "title": "إدارة المستخدمين"
+    },
+    "login": {
+      "welcome": "مرحبا بكم في كيد سكيلز"
+    },
+    "register": {
+      "welcome": "مرحبا بكم في كيد سكيلز"
+    }
+  },
   "navigation": {
     "home": "الرئيسية",
     "dashboard": "لوحة التحكم",
@@ -77,90 +104,12 @@
     "logout": "تسجيل الخروج",
     "profile": "الملف الشخصي",
     "user-profile": "بيانات المستخدم",
-    "survey": "استبيان"
-  },
-  "pages": {
-    "login": {
-      "title": "تسجيل الدخول",
-      "subtitle": "أدخل بيانات الاعتماد الخاصة بك للوصول إلى حسابك",
-      "forgotPassword": "نسيت كلمة المرور؟",
-      "noAccount": "ليس لديك حساب؟",
-      "register": "سجل هنا",
-      "welcome": "مرحبا بكم في كيد سكيلز"
-    },
-    "dashboard": {
-      "title": "لوحة التحكم",
-      "summary": "ملخص",
-      "recentActivity": "النشاط الأخير",
-      "statistics": "الإحصائيات"
-    },
-    "users": {
-      "title": "إدارة المستخدمين",
-      "addUser": "إضافة مستخدم",
-      "editUser": "تعديل مستخدم",
-      "userDetails": "تفاصيل المستخدم",
-      "userList": "قائمة المستخدمين",
-      "displayName": "اسم العرض",
-      "email": "بريد إلكتروني",
-      "firstName": "الاسم الأول",
-      "lastName": "اسم العائلة",
-      "mobile": "موبايل"
-    },
-    "settings": {
-      "title": "الإعدادات",
-      "general": "الإعدادات العامة",
-      "account": "إعدادات الحساب",
-      "notifications": "إعدادات الإشعارات",
-      "security": "إعدادات الأمان",
-      "appearance": "المظهر",
-      "language": "إعدادات اللغة"
-    },
-    "error": {
-      "notFound": "الصفحة غير موجودة",
-      "accessDenied": "تم رفض الوصول",
-      "serverError": "خطأ في الخادم",
-      "goHome": "الذهاب إلى الصفحة الرئيسية"
-    },
-    "register": {
-      "welcome": "مرحبا بكم في كيد سكيلز"
-    }
+    "survey": "استبيان",
+    "children": "الأطفال"
   },
   "dateTime": {
-    "today": "اليوم",
-    "yesterday": "أمس",
-    "tomorrow": "غدًا",
-    "days": {
-      "monday": "الاثنين",
-      "tuesday": "الثلاثاء",
-      "wednesday": "الأربعاء",
-      "thursday": "الخميس",
-      "friday": "الجمعة",
-      "saturday": "السبت",
-      "sunday": "الأحد"
-    },
-    "months": {
-      "january": "يناير",
-      "february": "فبراير",
-      "march": "مارس",
-      "april": "أبريل",
-      "may": "مايو",
-      "june": "يونيو",
-      "july": "يوليو",
-      "august": "أغسطس",
-      "september": "سبتمبر",
-      "october": "أكتوبر",
-      "november": "نوفمبر",
-      "december": "ديسمبر"
-    },
     "formats": {
-      "shortDate": "DD/MM/YYYY",
-      "longDate": "D MMMM, YYYY",
-      "time": "HH:mm",
-      "dateTime": "D MMMM, YYYY HH:mm"
+      "shortDate": "DD/MM/YYYY"
     }
-  },
-  "topbar": {
-    "messages": "رسائل",
-    "profile": "بيانات شخصية"
   }
 }

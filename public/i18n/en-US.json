@@ -38,7 +38,34 @@
       "or": "OR",
       "alreadyHaveAccount": "Already Have an Account?",
       "firstName": "First Name",
-      "lastName": "Last Name"
+      "lastName": "Last Name",
+      "createAnAccount": "Create an Account?",
+      "gender": "Gender",
+      "selectGender": "Select Gender",
+      "years": "years",
+      "female": "Female",
+      "male": "Male",
+      "age": "Age",
+      "actions": "Actions"
+    },
+    "age": {
+      "years": {
+        "zero": "0 years",
+        "one": "1 year",
+        "two": "2 years",
+        "few": "{{years}} years",
+        "many": "{{years}} years",
+        "other": "{{years}} years"
+      },
+      "months": {
+        "zero": "0 months",
+        "one": "1 month",
+        "two": "2 months",
+        "few": "{{months}} months",
+        "many": "{{months}} months",
+        "other": "{{months}} months"
+      },
+      "format": "{{yearsText}}, {{monthsText}}"
     },
     "messages": {
       "loading": "Loading...",
@@ -49,7 +76,12 @@
       "unauthorized": "You are not authorized to access this resource",
       "sessionExpired": "Your session has expired, please login again",
       "error": "An error occurred",
-      "welcome": "Welcome, {{name}}!"
+      "welcome": "Welcome, {{name}}!",
+      "birthdayHelp": "Select the child's date of birth",
+      "paginatorTemplate": "Showing {first} to {last} of {totalRecords} entries",
+      "loadingFailed": "Failed to load data. Please try again.",
+      "deleteFailed": "Failed to delete the item. Please try again.",
+      "saveFailed": "Failed to save the item. Please try again."
     },
     "validation": {
       "required": "This field is required",
@@ -67,6 +99,17 @@
       "cancelled": "Cancelled"
     }
   },
+  "pages": {
+    "users": {
+      "title": "User Management"
+    },
+    "login": {
+      "welcome": "Welcome To Kid Skills"
+    },
+    "register": {
+      "welcome": "Welcome to Kid Skills"
+    }
+  },
   "navigation": {
     "home": "Home",
     "dashboard": "Dashboard",
@@ -77,91 +120,12 @@
     "logout": "Logout",
     "profile": "Profile",
     "user-profile": "User Profile",
-    "survey": "Survey"
-  },
-  "pages": {
-    "login": {
-      "title": "Login",
-      "subtitle": "Enter your credentials to access your account",
-      "forgotPassword": "Forgot Password?",
-      "noAccount": "Don't have an account?",
-      "register": "Register here",
-      "welcome": "Welcome to Kid Skills"
-    },
-    "dashboard": {
-      "title": "Dashboard",
-      "summary": "Summary",
-      "recentActivity": "Recent Activity",
-      "statistics": "Statistics"
-    },
-    "users": {
-      "title": "User Management",
-      "addUser": "Add User",
-      "editUser": "Edit User",
-      "userDetails": "User Details",
-      "userList": "User List",
-      "displayName": "Display Name",
-      "firstName": "First Name",
-      "lastName": "Last Name",
-      "mobile": "Mobile",
-      "email": "Email"
-    },
-    "settings": {
-      "title": "Settings",
-      "general": "General Settings",
-      "account": "Account Settings",
-      "notifications": "Notification Settings",
-      "security": "Security Settings",
-      "appearance": "Appearance",
-      "language": "Language Settings"
-    },
-    "error": {
-      "notFound": "Page not found",
-      "accessDenied": "Access Denied",
-      "serverError": "Server Error",
-      "goHome": "Go to Home Page"
-    },
-    "register": {
-      "welcome": "Welcome To Kid Skills"
-    }
+    "survey": "Survey",
+    "children": "Children"
   },
   "dateTime": {
-    "today": "Today",
-    "yesterday": "Yesterday",
-    "tomorrow": "Tomorrow",
-    "days": {
-      "monday": "Monday",
-      "tuesday": "Tuesday",
-      "wednesday": "Wednesday",
-      "thursday": "Thursday",
-      "friday": "Friday",
-      "saturday": "Saturday",
-      "sunday": "Sunday"
-    },
-    "months": {
-      "january": "January",
-      "february": "February",
-      "march": "March",
-      "april": "April",
-      "may": "May",
-      "june": "June",
-      "july": "July",
-      "august": "August",
-      "september": "September",
-      "october": "October",
-      "november": "November",
-      "december": "December"
-    },
     "formats": {
-      "shortDate": "MM/DD/YYYY",
-      "longDate": "MMMM D, YYYY",
-      "time": "HH:mm",
-      "dateTime": "MMMM D, YYYY HH:mm"
+      "shortDate": "MM/DD/YYYY"
     }
-  },
-  "topbar": {
-    "messages": "Messages",
-    "profile": "Profile"
-  },
-  "users": {}
+  }
 }
