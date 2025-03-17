@@ -37,6 +37,7 @@ export const appConfig: ApplicationConfig = {
         provideRouter(routes, withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' }), withEnabledBlockingInitialNavigation()),
         provideHttpClient(withFetch()),
         provideAnimationsAsync(),
+        { provide: 'googleTagManagerId', useValue: 'GTM-KR39448R' },
         providePrimeNG({
             theme: {
                 preset: Aura,

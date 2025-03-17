@@ -1,6 +1,6 @@
 import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 
 // PrimeNG Modules
@@ -8,22 +8,25 @@ import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { DialogModule } from 'primeng/dialog';
 import { CalendarModule } from 'primeng/calendar';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { ToolbarModule } from 'primeng/toolbar';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
+import { InputTextModule } from 'primeng/inputtext';
 
 import { TranslateService } from '@ngx-translate/core';
 import { ChildrenService } from '../../services/children.service';
 import { SweetalertService } from '../../services/sweetalert.service';
 import { Child } from '../../models/child.model';
+import { DatePicker } from 'primeng/datepicker';
+import { AgeSageComponent } from '../../shared/components/age-sage/age-sage.component';
 
 @Component({
     selector: 'app-children',
     templateUrl: './children.component.html',
     styleUrls: ['./children.component.scss'],
     standalone: true,
-    imports: [CommonModule, FormsModule, TranslateModule, ButtonModule, TableModule, DialogModule, CalendarModule, DropdownModule, ToolbarModule, ConfirmDialogModule],
+    imports: [CommonModule, AgeSageComponent, ReactiveFormsModule, TranslateModule, ButtonModule, TableModule, DialogModule, DatePicker, SelectModule, ToolbarModule, ConfirmDialogModule, InputTextModule],
     providers: [ConfirmationService],
     schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
@@ -33,6 +36,7 @@ export class ChildrenComponent implements OnInit {
     selectedChild: Child | null = null;
     submitted: boolean = false;
     maxBirthdayDate: Date = new Date();
+    childForm!: FormGroup;
 
     genderOptions: { label: string; value: 'Male' | 'Female' }[] = [];
 
@@ -40,7 +44,8 @@ export class ChildrenComponent implements OnInit {
         public childrenService: ChildrenService,
         private translateService: TranslateService,
         private sweetalertService: SweetalertService,
-        private confirmationService: ConfirmationService
+        private confirmationService: ConfirmationService,
+        private fb: FormBuilder
     ) {
         this.maxBirthdayDate = new Date();
     }
@@ -48,6 +53,16 @@ export class ChildrenComponent implements OnInit {
     ngOnInit() {
         this.loadChildren();
         this.setupGenderOptions();
+        this.initForm();
+    }
+
+    initForm() {
+        this.childForm = this.fb.group({
+            id: [null],
+            name: ['', [Validators.required, Validators.minLength(2)]],
+            birthday: [Date, Validators.required],
+            gender: ['Male', Validators.required]
+        });
     }
 
     setupGenderOptions() {
@@ -75,17 +90,17 @@ export class ChildrenComponent implements OnInit {
     }
 
     openNew() {
-        this.selectedChild = {
+        this.childForm.reset({
             name: '',
             birthday: new Date(),
             gender: 'Male'
-        };
+        });
         this.submitted = false;
         this.childDialog = true;
     }
 
     editChild(child: Child) {
-        this.selectedChild = { ...child };
+        this.childForm.patchValue(child);
         this.childDialog = true;
     }
 
@@ -108,22 +123,25 @@ export class ChildrenComponent implements OnInit {
     hideDialog() {
         this.childDialog = false;
         this.submitted = false;
+        this.childForm.reset();
     }
 
     saveChild() {
         this.submitted = true;
 
-        if (!this.selectedChild?.name) {
+        if (this.childForm.invalid) {
             return;
         }
 
-        if (this.selectedChild.id) {
+        const childData: Child = this.childForm.value;
+
+        if (childData.id) {
             // Update existing child
-            this.childrenService.updateChild(this.selectedChild).subscribe({
+            this.childrenService.updateChild(childData).subscribe({
                 next: () => {
-                    const index = this.children.findIndex((c) => c.id === this.selectedChild?.id);
-                    if (index !== -1 && this.selectedChild) {
-                        this.children[index] = this.selectedChild;
+                    const index = this.children.findIndex((c) => c.id === childData.id);
+                    if (index !== -1) {
+                        this.children[index] = childData;
                     }
                     this.childDialog = false;
                     this.sweetalertService.showSuccess(this.translateService.instant('common.messages.itemSaved'));
@@ -134,7 +152,7 @@ export class ChildrenComponent implements OnInit {
             });
         } else {
             // Create new child
-            this.childrenService.addChild(this.selectedChild).subscribe({
+            this.childrenService.addChild(childData).subscribe({
                 next: (newChild) => {
                     if (newChild) {
                         this.children.push(newChild);
@@ -147,5 +165,10 @@ export class ChildrenComponent implements OnInit {
                 }
             });
         }
+    }
+
+    // Getter for easy access to form controls in the template
+    get f() {
+        return this.childForm.controls;
     }
 }
