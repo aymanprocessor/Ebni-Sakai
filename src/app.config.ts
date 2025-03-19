@@ -11,6 +11,7 @@ import { environment } from './app/env/env';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+import { DatePipe } from '@angular/common';
 
 export function createTranslateLoader(http: HttpClient) {
     return new TranslateHttpLoader(http, './i18n/', '.json');
@@ -70,6 +71,7 @@ export const appConfig: ApplicationConfig = {
         provideFirestore(() => {
             console.log('Initializing Firebase Firestore');
             return getFirestore();
-        })
+        }),
+        DatePipe
     ]
 };

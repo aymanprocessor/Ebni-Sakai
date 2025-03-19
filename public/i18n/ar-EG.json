@@ -46,7 +46,8 @@
       "female": "أنثى",
       "male": "ذكر",
       "age": "العمر",
-      "actions": "الاجراءات"
+      "actions": "الاجراءات",
+      "birthdate": "تاريخ الميلاد"
     },
     "age": {
       "format": "{{years}} سنة، {{months}} شهر"
@@ -109,7 +110,7 @@
   },
   "dateTime": {
     "formats": {
-      "shortDate": "DD/MM/YYYY"
+      "shortDate": "dd-MM-yyyy"
     }
   }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
@@ -7,7 +7,6 @@ import { TranslateModule } from '@ngx-translate/core';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { DialogModule } from 'primeng/dialog';
-import { CalendarModule } from 'primeng/calendar';
 import { SelectModule } from 'primeng/select';
 import { ToolbarModule } from 'primeng/toolbar';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -19,14 +18,13 @@ import { ChildrenService } from '../../services/children.service';
 import { SweetalertService } from '../../services/sweetalert.service';
 import { Child } from '../../models/child.model';
 import { DatePicker } from 'primeng/datepicker';
-import { AgeSageComponent } from '../../shared/components/age-sage/age-sage.component';
-
+import { AgeToWordPipe } from '../../shared/pipes/age-to-word.pipe';
 @Component({
     selector: 'app-children',
     templateUrl: './children.component.html',
     styleUrls: ['./children.component.scss'],
     standalone: true,
-    imports: [CommonModule, AgeSageComponent, ReactiveFormsModule, TranslateModule, ButtonModule, TableModule, DialogModule, DatePicker, SelectModule, ToolbarModule, ConfirmDialogModule, InputTextModule],
+    imports: [CommonModule, ReactiveFormsModule, TranslateModule, ButtonModule, TableModule, DialogModule, DatePicker, SelectModule, ToolbarModule, ConfirmDialogModule, InputTextModule, AgeToWordPipe],
     providers: [ConfirmationService],
     schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
@@ -36,6 +34,8 @@ export class ChildrenComponent implements OnInit {
     selectedChild: Child | null = null;
     submitted: boolean = false;
     maxBirthdayDate: Date = new Date();
+    minBirthdayDate: Date = new Date();
+    selectedBirthday: Date = new Date();
     childForm!: FormGroup;
 
     genderOptions: { label: string; value: 'Male' | 'Female' }[] = [];
@@ -48,6 +48,11 @@ export class ChildrenComponent implements OnInit {
         private fb: FormBuilder
     ) {
         this.maxBirthdayDate = new Date();
+        this.minBirthdayDate.setMonth(this.minBirthdayDate.getMonth() - 84);
+
+        this.selectedBirthday.setHours(0, 0, 0, 0);
+        this.maxBirthdayDate.setHours(0, 0, 0, 0);
+        this.minBirthdayDate.setHours(0, 0, 0, 0);
     }
 
     ngOnInit() {
@@ -61,7 +66,7 @@ export class ChildrenComponent implements OnInit {
             id: [null],
             name: ['', [Validators.required, Validators.minLength(2)]],
             birthday: [Date, Validators.required],
-            gender: ['Male', Validators.required]
+            gender: [null, Validators.required]
         });
     }
 
@@ -91,9 +96,9 @@ export class ChildrenComponent implements OnInit {
 
     openNew() {
         this.childForm.reset({
-            name: '',
-            birthday: new Date(),
-            gender: 'Male'
+            name: ''
+            //birthday: new Date()
+            // gender: 'Male'
         });
         this.submitted = false;
         this.childDialog = true;
@@ -170,5 +175,10 @@ export class ChildrenComponent implements OnInit {
     // Getter for easy access to form controls in the template
     get f() {
         return this.childForm.controls;
+    }
+
+    onTodayClick(date: any) {
+        this.selectedBirthday = date;
+        console.log(this.selectedBirthday);
     }
 }

@@ -4,7 +4,7 @@ import { getAuth, onAuthStateChanged, signOut, updateProfile, User } from '@angu
 import { initializeApp } from '@angular/fire/app';
 import { doc, getDoc, getFirestore, setDoc, updateDoc } from '@angular/fire/firestore';
 import { environment } from '../env/env';
-import {UserProfile} from '../models/user.model'
+import { UserProfile } from '../models/user.model';
 
 @Injectable({
     providedIn: 'root'
@@ -13,7 +13,7 @@ export class UserProfileService {
     private auth = getAuth(initializeApp(environment.firebase));
     private db = getFirestore();
 
-    private currentUser = new BehaviorSubject<User | null>(null);
+    currentUser = new BehaviorSubject<User | null>(null);
     currentUser$ = this.currentUser.asObservable();
     constructor() {
         onAuthStateChanged(this.auth, (user) => {

@@ -22,7 +22,7 @@
                 <ng-template pTemplate="header">
                     <tr>
                         <th>{{ 'common.labels.name' | translate }}</th>
-                        <th>{{ 'common.labels.date' | translate }}</th>
+                        <th>{{ 'common.labels.birthdate' | translate }}</th>
                         <th>{{ 'common.labels.age' | translate }}</th>
                         <th>{{ 'common.labels.status' | translate }}</th>
                         <th>{{ 'common.labels.actions' | translate }}</th>
@@ -37,7 +37,7 @@
                             <span>{{ child.birthday | date: ('dateTime.formats.shortDate' | translate) }}</span>
                         </td>
                         <td>
-                            <span>{{ childrenService.calculateAge(child.birthday) }} {{ 'common.labels.years' | translate }}</span>
+                            {{ child.birthday | ageToWord: 'arabic' }}
                         </td>
                         <td>
                             <span
@@ -70,17 +70,18 @@
     </div>
 </div>
 
-<p-dialog [(visible)]="childDialog" [style]="{ width: '500px' }" [header]="(childForm.get('id')?.value ? 'common.buttons.edit' : 'common.buttons.add') | translate" [modal]="true" class="p-fluid" [breakpoints]="{ '960px': '75vw', '640px': '90vw' }">
+<p-dialog
+    [contentStyle]="{ overflow: 'visible' }"
+    [(visible)]="childDialog"
+    [style]="{ width: '500px' }"
+    [header]="(childForm.get('id')?.value ? 'common.buttons.edit' : 'common.buttons.add') | translate"
+    [modal]="true"
+    class="p-fluid"
+    [breakpoints]="{ '960px': '75vw', '640px': '90vw' }"
+>
     <ng-template pTemplate="content">
         <form [formGroup]="childForm">
             <div class="grid grid-cols-1 gap-4">
-                <div class="field">
-                    <label for="name" class="block text-sm font-medium text-gray-700">
-                        {{ 'common.labels.age' | translate }}
-                        <span class="text-red-500">*</span>
-                    </label>
-                    <age-sage></age-sage>
-                </div>
                 <div class="field">
                     <label for="name" class="block text-sm font-medium text-gray-700">
                         {{ 'common.labels.name' | translate }}
@@ -110,9 +111,21 @@
                         {{ 'common.labels.date' | translate }}
                         <span class="text-red-500">*</span>
                     </label>
-                    <p-datepicker formControlName="birthday" [showIcon]="true" [maxDate]="maxBirthdayDate" dateFormat="dd/mm/yyyy" [readonlyInput]="true" class="w-full" aria-describedby="birthday-help"></p-datepicker>
+                    <p-datepicker
+                        formControlName="birthday"
+                        [showIcon]="true"
+                        [maxDate]="maxBirthdayDate"
+                        [minDate]="minBirthdayDate"
+                        [showTime]="false"
+                        (onSelect)="onTodayClick($event)"
+                        dateFormat="dd-mm-yy"
+                        [dateo]
+                        [readonlyInput]="true"
+                        class="w-full"
+                        aria-describedby="birthday-help"
+                    ></p-datepicker>
 
-                    <small class="p-error" *ngIf="submitted && f['birthday'].errors?.['required']">
+                    <small class="p-error text-red-500" *ngIf="submitted && f['birthday'].errors?.['required']">
                         {{ 'common.validation.required' | translate }}
                     </small>
                 </div>
@@ -122,8 +135,9 @@
                         {{ 'common.labels.gender' | translate }}
                         <span class="text-red-500">*</span>
                     </label>
+
                     <p-select [options]="genderOptions" formControlName="gender" optionLabel="label" optionValue="value" [placeholder]="'common.labels.selectGender' | translate" class="w-full" aria-describedby="gender-help"> </p-select>
-                    <small class="p-error" *ngIf="submitted && f['gender'].errors?.['required']">
+                    <small class="p-error text-red-500" *ngIf="submitted && f['gender'].errors?.['required']">
                         {{ 'common.validation.required' | translate }}
                     </small>
                 </div>

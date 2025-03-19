@@ -46,7 +46,8 @@
       "female": "Female",
       "male": "Male",
       "age": "Age",
-      "actions": "Actions"
+      "actions": "Actions",
+      "birthdate": "Birthdate"
     },
     "age": {
       "years": {
@@ -125,7 +126,7 @@
   },
   "dateTime": {
     "formats": {
-      "shortDate": "MM/DD/YYYY"
+      "shortDate": "dd-MM-yyyy"
     }
   }
 }

@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Child } from '../models/child.model';
 import { BehaviorSubject, Observable, from, of } from 'rxjs';
-import { map, catchError, tap } from 'rxjs/operators';
+import { map, catchError, tap, switchMap } from 'rxjs/operators';
 import { Firestore, collection, collectionData, addDoc, doc, updateDoc, deleteDoc, query } from '@angular/fire/firestore';
+import { DatePipe } from '@angular/common';
+import { UserProfileService } from './user-profile.service';
 
 @Injectable({
     providedIn: 'root'
@@ -11,7 +13,10 @@ export class ChildrenService {
     private childrenCollection;
     private childrenSubject = new BehaviorSubject<Child[]>([]);
 
-    constructor(private firestore: Firestore) {
+    constructor(
+        private firestore: Firestore,
+        private userServ: UserProfileService
+    ) {
         this.childrenCollection = collection(this.firestore, 'children');
         this.loadChildren();
     }
@@ -42,23 +47,36 @@ export class ChildrenService {
     }
 
     addChild(child: Omit<Child, 'id'>): Observable<Child> {
+        child.birthday.setHours(0, 0, 0, 0);
+        console.debug('Adding child:', child);
         const childToAdd = {
             ...child,
-            birthday: child.birthday instanceof Date ? child.birthday.toISOString() : child.birthday
+            birthday: child.birthday.toDateString(),
+            uid: this.userServ.currentUser.value?.uid
         };
 
         return from(addDoc(this.childrenCollection, childToAdd)).pipe(
-            map((docRef) => {
-                const newChild: Child = {
-                    ...child,
-                    id: docRef.id
-                };
+            switchMap((docRef) => {
+                console.debug('from Doc', docRef);
+                // Ensure id is a non-null string
+                const childId = docRef.id || '';
 
-                const currentChildren = this.childrenSubject.value;
-                const updatedChildren = [...currentChildren, newChild];
-                this.childrenSubject.next(updatedChildren);
+                // Update the document to include its own ID
+                const docReference = doc(this.firestore, this.childrenCollection.path, childId);
+                return from(updateDoc(docReference, { id: childId })).pipe(
+                    map(() => {
+                        const newChild: Child = {
+                            ...child,
+                            id: childId
+                        };
 
-                return newChild;
+                        const currentChildren = this.childrenSubject.value;
+                        const updatedChildren = [...currentChildren, newChild];
+                        this.childrenSubject.next(updatedChildren);
+
+                        return newChild;
+                    })
+                );
             }),
             catchError((error) => {
                 console.error('Error adding child:', error);
@@ -66,8 +84,9 @@ export class ChildrenService {
             })
         );
     }
-
     updateChild(updatedChild: Child): Observable<Child | null> {
+        updatedChild.birthday.setHours(0, 0, 0, 0);
+
         if (!updatedChild.id) {
             return of(null);
         }
@@ -78,7 +97,7 @@ export class ChildrenService {
         // Convert birthday to ISO string for Firestore
         const dataToUpdate = {
             ...childData,
-            birthday: childData.birthday instanceof Date ? childData.birthday.toISOString() : childData.birthday
+            birthday: childData.birthday.toDateString()
         };
 
         return from(updateDoc(childDocRef, dataToUpdate)).pipe(
