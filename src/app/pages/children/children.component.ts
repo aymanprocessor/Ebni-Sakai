@@ -37,6 +37,7 @@ export class ChildrenComponent implements OnInit {
     minBirthdayDate: Date = new Date();
     selectedBirthday: Date = new Date();
     childForm!: FormGroup;
+    currentLocale: string = 'en-US';
 
     genderOptions: { label: string; value: 'Male' | 'Female' }[] = [];
 
@@ -53,14 +54,24 @@ export class ChildrenComponent implements OnInit {
         this.selectedBirthday.setHours(0, 0, 0, 0);
         this.maxBirthdayDate.setHours(0, 0, 0, 0);
         this.minBirthdayDate.setHours(0, 0, 0, 0);
+
+        this.currentLocale = this.translateService.defaultLang;
+
+        // Get current locale
     }
 
     ngOnInit() {
         this.loadChildren();
         this.setupGenderOptions();
         this.initForm();
+        this.onLangChange();
     }
 
+    onLangChange() {
+        this.translateService.onLangChange.subscribe((event) => {
+            this.currentLocale = event.lang;
+        });
+    }
     initForm() {
         this.childForm = this.fb.group({
             id: [null],
@@ -94,7 +105,14 @@ export class ChildrenComponent implements OnInit {
         });
     }
 
-    openNew() {
+    openNew(event?: MouseEvent) {
+        // Prevent default navigation
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        console.debug(event);
+
         this.childForm.reset({
             name: ''
             //birthday: new Date()
@@ -179,6 +197,5 @@ export class ChildrenComponent implements OnInit {
 
     onTodayClick(date: any) {
         this.selectedBirthday = date;
-        console.log(this.selectedBirthday);
     }
 }

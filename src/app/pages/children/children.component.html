@@ -4,7 +4,16 @@
             <p-toolbar>
                 <div class="flex justify-between items-center">
                     <div class="p-toolbar-group-left">
-                        <button pButton pRipple [label]="'common.buttons.add' | translate" icon="pi pi-plus" class="p-button-success mr-2" (click)="openNew()" [attr.aria-label]="'common.buttons.add' | translate"></button>
+                        <button
+                            pButton
+                            pRipple
+                            [label]="'common.buttons.add' | translate"
+                            icon="pi pi-plus"
+                            class="p-button-success mr-2"
+                            (click)="openNew($event)"
+                            (mousedown)="$event.preventDefault()"
+                            [attr.aria-label]="'common.buttons.add' | translate"
+                        ></button>
                     </div>
                 </div>
             </p-toolbar>
@@ -14,6 +23,7 @@
                 responsiveLayout="scroll"
                 [paginator]="true"
                 [rows]="10"
+                [responsive]="true"
                 [showCurrentPageReport]="true"
                 [tableStyle]="{ 'min-width': '50rem' }"
                 [currentPageReportTemplate]="'common.messages.paginatorTemplate' | translate"
@@ -37,7 +47,7 @@
                             <span>{{ child.birthday | date: ('dateTime.formats.shortDate' | translate) }}</span>
                         </td>
                         <td>
-                            {{ child.birthday | ageToWord: 'arabic' }}
+                            {{ child.birthday | ageToWord: (currentLocale === 'ar-EG' ? 'arabic' : 'english') }}
                         </td>
                         <td>
                             <span
@@ -73,10 +83,12 @@
 <p-dialog
     [contentStyle]="{ overflow: 'visible' }"
     [(visible)]="childDialog"
-    [style]="{ width: '500px' }"
     [header]="(childForm.get('id')?.value ? 'common.buttons.edit' : 'common.buttons.add') | translate"
     [modal]="true"
+    [responsive]="true"
     class="p-fluid"
+    [style]="{ width: '90vw', maxWidth: '400px' }"
+    [dismissableMask]="true"
     [breakpoints]="{ '960px': '75vw', '640px': '90vw' }"
 >
     <ng-template pTemplate="content">

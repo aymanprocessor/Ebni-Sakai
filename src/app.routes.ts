@@ -21,13 +21,23 @@ export const routes: Routes = [
                 canActivate: [authGuard]
             },
             {
+                path: 'survey',
+                loadComponent: () => import('./app/pages/survey/survey.component').then((m) => m.SurveyComponent),
+                canActivate: [authGuard]
+            },
+            {
                 path: 'user-profile',
                 loadComponent: () => import('./app/pages/user-profile/user-profile.component').then((m) => m.UserProfileComponent),
                 canActivate: [authGuard]
             },
             {
                 path: '',
-                redirectTo: '/dashboard',
+                redirectTo: 'dashboard',
+                pathMatch: 'full'
+            },
+            {
+                path: '**',
+                redirectTo: 'error',
                 pathMatch: 'full'
             }
         ]
@@ -52,6 +62,11 @@ export const routes: Routes = [
     {
         path: 'complete-profile',
         loadComponent: () => import('./app/pages/complete-profile/complete-profile.component').then((m) => m.CompleteProfileComponent),
+        canActivate: [authGuard]
+    },
+    {
+        path: 'error',
+        loadComponent: () => import('./app/pages/auth/error').then((m) => m.Error),
         canActivate: [authGuard]
     }
 ];

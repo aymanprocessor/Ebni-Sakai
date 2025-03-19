@@ -9,3 +9,8 @@
         margin-bottom: 1rem;
     }
 }
+@media (max-width: 600px) {
+    ::ng-deep .p-dialog {
+        width: 90% !important;
+    }
+}
