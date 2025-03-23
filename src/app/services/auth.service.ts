@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Auth, authState, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, User, GoogleAuthProvider, signInWithPopup } from '@angular/fire/auth';
-import { BehaviorSubject, from, Observable, of, switchMap } from 'rxjs';
+import { BehaviorSubject, from, map, Observable, of, switchMap } from 'rxjs';
 import { UserProfile } from '../models/user.model';
-import { doc, Firestore, getDoc, setDoc } from '@angular/fire/firestore';
+import { doc, docData, Firestore, getDoc, setDoc } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 import { FirebaseError } from '@angular/fire/app';
 import { SweetalertService } from './sweetalert.service';
@@ -13,7 +13,7 @@ import { RegisterModel } from '../pages/register-parent/register.model';
 })
 export class AuthService {
     private userSubject: BehaviorSubject<User | null> = new BehaviorSubject<User | null>(null);
-    currentUser$: Observable<User | null> = this.userSubject.asObservable();
+    currentUser$: BehaviorSubject<UserProfile | null> = new BehaviorSubject<UserProfile | null>(null);
 
     userProfile$: Observable<UserProfile | null> = this.currentUser$.pipe(
         switchMap((user) => {
@@ -29,7 +29,29 @@ export class AuthService {
         private router: Router,
         private sweetalert: SweetalertService
     ) {
-        this.currentUser$ = authState(this.auth);
+        authState(this.auth)
+            .pipe(
+                switchMap((firebaseUser) => {
+                    if (firebaseUser) {
+                        const userDocRef = doc(this.firestore, `users/${firebaseUser.uid}`);
+                        return docData(userDocRef).pipe(
+                            map((userProfile) => {
+                                if (userProfile) {
+                                    localStorage.setItem('currentUser', JSON.stringify(userProfile));
+                                    return userProfile;
+                                }
+                                return null;
+                            })
+                        );
+                    } else {
+                        localStorage.removeItem('currentUser');
+                        return of(null);
+                    }
+                })
+            )
+            .subscribe((user) => {
+                this.currentUser$.next(user as UserProfile);
+            });
 
         this.auth.onAuthStateChanged(async (user) => {
             this.userSubject.next(user);
