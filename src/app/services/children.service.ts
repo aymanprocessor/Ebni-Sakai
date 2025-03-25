@@ -6,6 +6,7 @@ import { Firestore, collection, collectionData, addDoc, doc, updateDoc, deleteDo
 import { DatePipe } from '@angular/common';
 import { UserProfileService } from './user-profile.service';
 import { AuthService } from './auth.service';
+import { authState, Auth } from '@angular/fire/auth';
 
 @Injectable({
     providedIn: 'root'
@@ -17,8 +18,10 @@ export class ChildrenService {
     constructor(
         private firestore: Firestore,
         private userServ: UserProfileService,
-        private authServ: AuthService
+        private authServ: AuthService,
+        private auth: Auth
     ) {
+        console.log('Children Constructor Started');
         this.childrenCollection = collection(this.firestore, 'children');
         this.loadChildren();
     }
@@ -45,11 +48,11 @@ export class ChildrenService {
     }
 
     getUserChildren(): Observable<Child[]> {
-        this.authServ.currentUser$.pipe(
+        return authState(this.auth).pipe(
             switchMap((user) => {
                 if (!user) return of([]);
                 const childrenQuery = query(this.childrenCollection, where('uid', '==', user.uid));
-                return collectionData(childrenQuery, { idField: 'id' });
+                return collectionData(childrenQuery, { idField: 'id' }) as Observable<Child[]>;
             })
         );
     }
@@ -63,6 +66,7 @@ export class ChildrenService {
         const childToAdd = {
             ...child,
             birthday: child.birthday.toDateString(),
+            status: 'active',
             uid: this.userServ.currentUser.value?.uid
         };
 

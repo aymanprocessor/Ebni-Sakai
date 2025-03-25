@@ -12,6 +12,7 @@ import { ToolbarModule } from 'primeng/toolbar';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
 import { InputTextModule } from 'primeng/inputtext';
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 import { TranslateService } from '@ngx-translate/core';
 import { ChildrenService } from '../../services/children.service';
@@ -19,17 +20,18 @@ import { SweetalertService } from '../../services/sweetalert.service';
 import { Child } from '../../models/child.model';
 import { DatePicker } from 'primeng/datepicker';
 import { AgeToWordPipe } from '../../shared/pipes/age-to-word.pipe';
+import { delay, Observable, switchMap } from 'rxjs';
 @Component({
     selector: 'app-children',
     templateUrl: './children.component.html',
     styleUrls: ['./children.component.scss'],
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, TranslateModule, ButtonModule, TableModule, DialogModule, DatePicker, SelectModule, ToolbarModule, ConfirmDialogModule, InputTextModule, AgeToWordPipe],
+    imports: [CommonModule, ProgressSpinner, ReactiveFormsModule, TranslateModule, ButtonModule, TableModule, DialogModule, DatePicker, SelectModule, ToolbarModule, ConfirmDialogModule, InputTextModule, AgeToWordPipe],
     providers: [ConfirmationService],
     schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class ChildrenComponent implements OnInit {
-    children: Child[] = [];
+    childrens: Child[] = [];
     childDialog: boolean = false;
     selectedChild: Child | null = null;
     submitted: boolean = false;
@@ -38,9 +40,9 @@ export class ChildrenComponent implements OnInit {
     selectedBirthday: Date = new Date();
     childForm!: FormGroup;
     currentLocale: string = 'en-US';
-
+    children$: Observable<Child[]>;
     genderOptions: { label: string; value: 'Male' | 'Female' }[] = [];
-
+    loading: boolean = false;
     constructor(
         public childrenService: ChildrenService,
         private translateService: TranslateService,
@@ -48,6 +50,15 @@ export class ChildrenComponent implements OnInit {
         private confirmationService: ConfirmationService,
         private fb: FormBuilder
     ) {
+        this.children$ = this.childrenService.getUserChildren();
+        // this.childrenService.getUserChildren().subscribe({
+        //     next: (childrens) => {
+        //         this.childrens = childrens;
+        //     },
+        //     error: (err) => {
+        //         console.log(err);
+        //     }
+        // });
         this.maxBirthdayDate = new Date();
         this.minBirthdayDate.setMonth(this.minBirthdayDate.getMonth() - 84);
 
@@ -75,8 +86,8 @@ export class ChildrenComponent implements OnInit {
     initForm() {
         this.childForm = this.fb.group({
             id: [null],
-            name: ['', [Validators.required, Validators.minLength(2)]],
-            birthday: [Date, Validators.required],
+            name: ['aa', [Validators.required, Validators.minLength(2)]],
+            birthday: [new Date(), Validators.required],
             gender: [null, Validators.required]
         });
     }
@@ -95,11 +106,15 @@ export class ChildrenComponent implements OnInit {
     }
 
     loadChildren() {
-        this.childrenService.getChildren().subscribe({
+        this.loading = true;
+        this.childrenService.getUserChildren().subscribe({
             next: (children) => {
-                this.children = children;
+                this.childrens = children;
+                this.loading = false;
             },
             error: (error) => {
+                this.loading = false;
+
                 this.sweetalertService.showError(this.translateService.instant('common.messages.error'), this.translateService.instant('common.messages.loadingFailed'));
             }
         });
@@ -116,6 +131,7 @@ export class ChildrenComponent implements OnInit {
         this.childForm.reset({
             name: ''
             //birthday: new Date()
+
             // gender: 'Male'
         });
         this.submitted = false;
@@ -123,7 +139,8 @@ export class ChildrenComponent implements OnInit {
     }
 
     editChild(child: Child) {
-        this.childForm.patchValue(child);
+        console.debug(child);
+        this.childForm.patchValue({ ...child, birthday: new Date(child.birthday) });
         this.childDialog = true;
     }
 
@@ -132,7 +149,7 @@ export class ChildrenComponent implements OnInit {
             if (child.id) {
                 this.childrenService.deleteChild(child.id).subscribe({
                     next: () => {
-                        this.children = this.children.filter((c) => c.id !== child.id);
+                        this.childrens = this.childrens.filter((c) => c.id !== child.id);
                         this.sweetalertService.showSuccess(this.translateService.instant('common.messages.itemDeleted'));
                     },
                     error: () => {
@@ -162,9 +179,9 @@ export class ChildrenComponent implements OnInit {
             // Update existing child
             this.childrenService.updateChild(childData).subscribe({
                 next: () => {
-                    const index = this.children.findIndex((c) => c.id === childData.id);
+                    const index = this.childrens.findIndex((c) => c.id === childData.id);
                     if (index !== -1) {
-                        this.children[index] = childData;
+                        this.childrens[index] = childData;
                     }
                     this.childDialog = false;
                     this.sweetalertService.showSuccess(this.translateService.instant('common.messages.itemSaved'));
@@ -178,7 +195,7 @@ export class ChildrenComponent implements OnInit {
             this.childrenService.addChild(childData).subscribe({
                 next: (newChild) => {
                     if (newChild) {
-                        this.children.push(newChild);
+                        this.childrens.push(newChild);
                     }
                     this.childDialog = false;
                     this.sweetalertService.showSuccess(this.translateService.instant('common.messages.itemSaved'));

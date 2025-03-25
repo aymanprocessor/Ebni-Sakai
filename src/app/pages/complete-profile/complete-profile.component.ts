@@ -36,17 +36,17 @@ export class CompleteProfileComponent implements OnInit {
 
     ngOnInit(): void {
         // Get user profile data
-        this.authService.userProfile$.pipe(take(1)).subscribe((profile) => {
-            if (profile) {
-                this.profile = profile;
-                this.profileForm.patchValue({
-                    firstName: profile.firstName,
-                    lastName: profile.lastName,
-                    email: profile.email,
-                    uid: profile.uid
-                });
-            }
-        });
+        // this.authService.userProfile$.pipe(take(1)).subscribe((profile) => {
+        //     if (profile) {
+        //         this.profile = profile;
+        //         this.profileForm.patchValue({
+        //             firstName: profile.firstName,
+        //             lastName: profile.lastName,
+        //             email: profile.email,
+        //             uid: profile.uid
+        //         });
+        //     }
+        // });
     }
 
     isFieldInvalid(field: string): boolean {

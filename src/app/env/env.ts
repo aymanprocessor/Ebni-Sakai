@@ -1,5 +1,22 @@
-export const environment = {
+interface FirebaseConfig {
+    apiKey: string;
+    authDomain: string;
+    projectId: string;
+    storageBucket: string;
+    messagingSenderId: string;
+    appId: string;
+    measurementId?: string;
+}
+
+interface Environment {
+    production: boolean;
+    useEmulators: boolean;
+    firebase: FirebaseConfig;
+}
+
+export const environment: Environment = {
     production: false,
+    useEmulators: false, // Set to true for local development
     firebase: {
         apiKey: 'AIzaSyADNdy8cCZmAx3MkZNtFukpETTXXd18UU0',
         authDomain: 'ebni-81db7.firebaseapp.com',

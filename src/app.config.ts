@@ -59,19 +59,39 @@ export const appConfig: ApplicationConfig = {
                 }
             }
         }),
-        provideFirebaseApp(() => {
-            console.log('Initializing Firebase app with config:', environment.firebase);
-            return initializeApp(environment.firebase);
-        }),
-        // Provide Firebase services
-        provideAuth(() => {
-            console.log('Initializing Firebase Auth');
-            return getAuth();
-        }),
-        provideFirestore(() => {
-            console.log('Initializing Firebase Firestore');
-            return getFirestore();
-        }),
+        provideFirebaseApp(() => initializeApp(environment.firebase)),
+        provideAuth(() => getAuth()),
+        provideFirestore(() => getFirestore()),
+        {
+            provide: 'FIREBASE_INITIALIZATION_TIMEOUT',
+            useValue: 10000 // 10 seconds timeout
+        },
+        {
+            provide: 'APP_INITIALIZER',
+            useFactory: (timeout: number) => {
+                return () =>
+                    new Promise((resolve, reject) => {
+                        const timer = setTimeout(() => {
+                            console.error('Firebase initialization timed out');
+                            reject(new Error('Firebase initialization timeout'));
+                        }, timeout);
+
+                        Promise.all([initializeApp(environment.firebase), getAuth(), getFirestore()])
+                            .then((results) => {
+                                clearTimeout(timer);
+                                console.log('Firebase initialized successfully');
+                                resolve(results);
+                            })
+                            .catch((error) => {
+                                clearTimeout(timer);
+                                console.error('Firebase initialization error:', error);
+                                reject(error);
+                            });
+                    });
+            },
+            deps: ['FIREBASE_INITIALIZATION_TIMEOUT'],
+            multi: true
+        },
         DatePipe
     ]
 };
