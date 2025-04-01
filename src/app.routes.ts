@@ -24,9 +24,30 @@ export const routes: Routes = [
             },
             {
                 path: 'survey',
-                loadComponent: () => import('./app/pages/survey/survey-list/survey.component').then((m) => m.SurveyComponent),
-                canActivate: [authGuard]
+                children: [
+                    {
+                        path: 'list',
+                        loadComponent: () => import('./app/pages/survey/survey-list/survey-list.component').then((m) => m.SurveyListComponent),
+                        canActivate: [authGuard]
+                    },
+                    {
+                        path: 'questions',
+                        loadComponent: () => import('./app/pages/survey/survey-question/survey-question.component').then((m) => m.SurveyQuestionComponent),
+                        canActivate: [authGuard]
+                    },
+                    {
+                        path: 'result',
+                        loadComponent: () => import('./app/pages/survey/survey-result/survey-result.component').then((m) => m.SurveyResultComponent),
+                        canActivate: [authGuard]
+                    },
+                    {
+                        path: '',
+                        redirectTo: 'list',
+                        pathMatch: 'full'
+                    }
+                ]
             },
+
             {
                 path: 'user-profile',
                 loadComponent: () => import('./app/pages/user-profile/user-profile.component').then((m) => m.UserProfileComponent),

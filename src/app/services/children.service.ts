@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Child } from '../models/child.model';
 import { BehaviorSubject, Observable, from, of } from 'rxjs';
 import { map, catchError, tap, switchMap } from 'rxjs/operators';
-import { Firestore, collection, collectionData, addDoc, doc, updateDoc, deleteDoc, query, where } from '@angular/fire/firestore';
+import { Firestore, collection, collectionData, addDoc, doc, updateDoc, deleteDoc, query, where, docData } from '@angular/fire/firestore';
 import { DatePipe } from '@angular/common';
 import { UserProfileService } from './user-profile.service';
 import { AuthService } from './auth.service';
@@ -45,6 +45,10 @@ export class ChildrenService {
             .subscribe((children) => {
                 this.childrenSubject.next(children);
             });
+    }
+
+    getChildrenByUid(uid: string): Observable<Child> {
+        return docData(doc(this.firestore, `children/${uid}`), { idField: 'id' }).pipe(map((child) => child as Child)) as Observable<Child>;
     }
 
     getUserChildren(): Observable<Child[]> {

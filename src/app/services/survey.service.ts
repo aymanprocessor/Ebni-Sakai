@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { collection, collectionData, Firestore, orderBy, query } from '@angular/fire/firestore';
 import { map, Observable } from 'rxjs';
+import { SurveyDomain } from '../models/survey-domain.model';
+import { Survey } from '../models/survey.model';
 
 @Injectable({
     providedIn: 'root'

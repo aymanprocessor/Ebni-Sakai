@@ -1,1 +1,76 @@
-<p>survey-list works!</p>
+<div class="container p-3">
+    <div class="card">
+        <div class="card-header">
+            <div class="flex justify-between items-center">
+                <h2>قائمة استبيان</h2>
+                <p-button label="استبيان جديد" icon="pi pi-plus" (onClick)="openNewSurveyDialog()"></p-button>
+            </div>
+        </div>
+        <div class="card-body">
+            <p-table [value]="(surveys$ | async) || []" [rows]="10" [paginator]="true" [responsive]="true" styleClass="p-datatable-sm p-datatable-gridlines">
+                <ng-template #header>
+                    <tr>
+                        <th style="width: 30%">الطفل</th>
+                        <th style="width: 25%">المجال</th>
+                        <th style="width: 15%">التاريخ</th>
+                        <th style="width: 10%">الحالة</th>
+                        <th style="width: 20%">الإجراءات</th>
+                    </tr>
+                </ng-template>
+
+                <ng-template #body let-survey>
+                    <tr>
+                        <td>{{ survey.childName }}</td>
+                        <td>{{ survey.domainName }}</td>
+                        <td>{{ survey.createdAt | date: 'short' }}</td>
+                        <td>
+                            <p-tag [severity]="survey.completed ? 'success' : 'warn'" [value]="survey.completed ? 'مكتمل' : 'قيد التنفيذ'"></p-tag>
+                        </td>
+                        <td>
+                            <div class="flex gap-2">
+                                <button pButton *ngIf="!survey.completed" icon="pi pi-play" class="p-button-sm p-button-primary" (click)="continueSurvey(survey.id)" pTooltip="استكمال الاستبيان"></button>
+
+                                <button pButton icon="pi pi-chart-bar" class="p-button-sm p-button-success" (click)="viewResults(survey.id)" pTooltip="عرض النتائج"></button>
+
+                                <button pButton icon="pi pi-trash" class="p-button-sm p-button-danger" (click)="deleteSurvey(survey.id)" pTooltip="حذف"></button>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+
+                <ng-template #emptymessage>
+                    <tr>
+                        <td colspan="5" class="text-center !p-5">
+                            <div class="flex flex-col items-center">
+                                <i class="pi pi-file" style="font-size: 2rem"></i>
+                                <span>لا توجد استبيانات</span>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+    </div>
+</div>
+
+<!-- New Survey Dialog -->
+<p-dialog header="استبيان جديد" [(visible)]="displayNewSurveyDialog" [style]="{ width: '450px' }" [modal]="true" styleClass="p-fluid" [contentStyle]="{ overflow: 'visible' }">
+    <form [formGroup]="newSurveyForm">
+        <div class="field">
+            <label for="childId">الطفل</label>
+            <p-dropdown id="childId" formControlName="childId" [options]="(children$ | async) || []" optionLabel="name" optionValue="id" placeholder="اختر الطفل" [filter]="true" filterBy="name" styleClass="w-full"></p-dropdown>
+            <small *ngIf="newSurveyForm.get('childId')?.invalid && newSurveyForm.get('childId')?.touched" class="p-error">يرجى اختيار طفل</small>
+        </div>
+
+        <div class="field">
+            <label for="domain">مجال التقييم</label>
+            <p-dropdown id="domain" formControlName="domain" [options]="domains" optionLabel="name" optionValue="id" placeholder="اختر المجال" styleClass="w-full"></p-dropdown>
+            <small *ngIf="newSurveyForm.get('domain')?.invalid && newSurveyForm.get('domain')?.touched" class="p-error">يرجى اختيار مجال التقييم</small>
+        </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+        <button pButton label="إلغاء" icon="pi pi-times" class="p-button-text" (click)="displayNewSurveyDialog = false"></button>
+        <button pButton label="بدء" icon="pi pi-check" [disabled]="newSurveyForm.invalid || loading" [loading]="loading" (click)="startSurvey()"></button>
+    </ng-template>
+</p-dialog>

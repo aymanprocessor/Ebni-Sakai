@@ -1,4 +1,4 @@
-interface Survey {
+export interface Survey {
     id: string;
     childId: string;
     childName: string;
