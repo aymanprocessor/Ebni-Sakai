@@ -4,4 +4,5 @@ export interface Child {
     birthday: Date;
     gender: 'Male' | 'Female';
     status: string;
+    uid: string;
 }

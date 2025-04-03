@@ -187,4 +187,39 @@ export class ChildrenService {
             ar: `${years} سنة${years !== 1 ? '' : ''}, ${months} شهر${months !== 1 ? '' : ''}`
         };
     }
+
+    // Calculate age in months from birth date
+    calculateAgeInMonths(birthDate: Date): number {
+        const today = new Date();
+        let months = (today.getFullYear() - birthDate.getFullYear()) * 12;
+        months -= birthDate.getMonth();
+        months += today.getMonth();
+
+        // Adjust for day of month
+        if (today.getDate() < birthDate.getDate()) {
+            months--;
+        }
+
+        return months;
+    }
+    // Get age range from birth date
+    getAgeRangeFromBirthDate(birthDate: Date): string {
+        const ageInMonths = this.calculateAgeInMonths(birthDate);
+        return this.getAgeRange(ageInMonths);
+    }
+
+    // Calculate age range based on age in months
+    getAgeRange(ageInMonths: number): string {
+        if (ageInMonths <= 6) return '0-6';
+        if (ageInMonths <= 12) return '7-12';
+        if (ageInMonths <= 18) return '13-18';
+        if (ageInMonths <= 24) return '19-24';
+        if (ageInMonths <= 30) return '25-30';
+        if (ageInMonths <= 36) return '31-36';
+        if (ageInMonths <= 42) return '37-42';
+        if (ageInMonths <= 54) return '43-54';
+        if (ageInMonths <= 66) return '55-66';
+        if (ageInMonths <= 78) return '67-78';
+        return '79-90';
+    }
 }

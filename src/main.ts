@@ -57,7 +57,7 @@ bootstrapApplication(AppComponent, {
         top: 0;
         left: 0;
         width: 100%;
-        background-color: #ff0000;
+        background-color: #4c1d95;
         color: white;
         padding: 20px;
         text-align: center;

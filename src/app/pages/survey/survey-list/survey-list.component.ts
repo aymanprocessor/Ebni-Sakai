@@ -1,5 +1,6 @@
+import { $t } from '@primeng/themes';
 import { Component } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, switchMap, take } from 'rxjs';
 import { Child } from '../../../models/child.model';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -10,9 +11,9 @@ import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { CommonModule } from '@angular/common';
 import { SurveyDomain } from '../../../models/survey-domain.model';
-import { Survey } from '../../../models/survey.model';
 import { DropdownModule } from 'primeng/dropdown';
 import { DialogModule } from 'primeng/dialog';
+import { Survey } from '../../../models/survey.model';
 
 @Component({
     selector: 'app-survey-list',
@@ -23,6 +24,7 @@ import { DialogModule } from 'primeng/dialog';
 export class SurveyListComponent {
     surveys$: Observable<Survey[]>;
     children$: Observable<Child[]>;
+    newSurvey: Survey | null = null;
     domains: SurveyDomain[] = [
         { id: 'التطور الجسمي', name: 'التطور الجسمي' },
         { id: 'التطور الاجتماعي', name: 'التطور الاجتماعي' },
@@ -56,11 +58,13 @@ export class SurveyListComponent {
         this.newSurveyForm.reset();
     }
 
-    continueSurvey(id: string): void {}
-
-    viewResults(id: string): void {}
-    deleteSurvey(id: string): void {}
-    startSurvey(): void {
-        this.displayNewSurveyDialog = false;
+    continueSurvey(surveyId: string): void {
+        this.router.navigate(['/survey-question', surveyId]);
     }
+
+    viewResults(surveyId: string): void {
+        this.router.navigate(['/survey-result', surveyId]);
+    }
+    deleteSurvey(id: string): void {}
+    startSurvey(): void {}
 }

@@ -46,14 +46,14 @@ export const appConfig: ApplicationConfig = {
                     darkModeSelector: '.app-dark',
                     colors: {
                         primary: {
-                            main: '#8A56AC', // Indigo as primary color
-                            surface: '#EEF2FF' // Light indigo surface
+                            main: '#8A4FFF', // Vibrant purple as primary color
+                            surface: '#F3E8FF' // Light lavender surface
                         },
                         secondary: {
-                            main: '#8B5CF6' // Purple as secondary color
+                            main: '#6D28D9' // Deep purple as secondary color
                         },
                         accent: {
-                            main: '#F59E0B' // Amber as accent color
+                            main: '#C084FC' // Lighter purple as accent color
                         }
                     }
                 }
