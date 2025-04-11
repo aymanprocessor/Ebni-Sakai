@@ -5,4 +5,5 @@ export interface Child {
     gender: 'Male' | 'Female';
     status: string;
     uid: string;
+    ageInMonths: number;
 }

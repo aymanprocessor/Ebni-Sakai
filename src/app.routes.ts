@@ -31,15 +31,15 @@ export const routes: Routes = [
                         canActivate: [authGuard]
                     },
                     {
-                        path: 'questions',
+                        path: 'question/:id',
                         loadComponent: () => import('./app/pages/survey/survey-question/survey-question.component').then((m) => m.SurveyQuestionComponent),
                         canActivate: [authGuard]
                     },
-                    {
-                        path: 'result',
-                        loadComponent: () => import('./app/pages/survey/survey-result/survey-result.component').then((m) => m.SurveyResultComponent),
-                        canActivate: [authGuard]
-                    },
+                    // {
+                    //     path: 'result',
+                    //     loadComponent: () => import('./app/pages/survey/survey-result/survey-result.component').then((m) => m.SurveyResultComponent),
+                    //     canActivate: [authGuard]
+                    // },
                     {
                         path: '',
                         redirectTo: 'list',

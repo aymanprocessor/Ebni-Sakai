@@ -1,1 +1,75 @@
-<p>survey-question works!</p>
+<div class="flex flex-col items-center p-6 h-full">
+    <div class="w-full max-w-3xl">
+        <!-- Loading indicator -->
+        <div *ngIf="loading" class="flex justify-center items-center flex-col my-12">
+            <p-progressSpinner strokeWidth="4" [style]="{ width: '50px', height: '50px' }" styleClass="mb-4"></p-progressSpinner>
+            <p class="text-gray-600">جاري تحميل الاستبيان...</p>
+        </div>
+
+        <!-- Error message -->
+        <div *ngIf="error" class="bg-red-50 p-6 rounded-lg text-center my-12">
+            <i class="pi pi-exclamation-triangle text-5xl text-red-500 mb-4"></i>
+            <h3 class="text-xl font-bold mb-2">لم يتم العثور على الاستبيان</h3>
+            <p>الاستبيان المطلوب غير موجود أو تم حذفه</p>
+            <p-button label="العودة للصفحة الرئيسية" styleClass="mt-4" (click)="navigateHome()"></p-button>
+        </div>
+
+        <!-- Survey content -->
+        <ng-container *ngIf="survey$ | async as survey">
+            <!-- Child info card -->
+            <div class="mb-6 p-4 bg-white rounded-lg shadow">
+                <div class="flex items-center">
+                    <i class="pi pi-user text-3xl text-blue-500 mr-3"></i>
+                    <div>
+                        <h2 class="text-xl font-bold">{{ survey.childName }}</h2>
+                        <ng-container *ngIf="child$ | async as child">
+                            <p class="text-gray-600">{{ child.ageInMonths }} شهر</p>
+                        </ng-container>
+                        <p *ngIf="!(child$ | async) && survey.ageRange" class="text-gray-600">{{ survey.ageRange }} شهر</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Session info -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-semibold mb-2">{{ survey.domainName }}</h3>
+                    <p-badge [value]="survey.ageRange + ' شهور'" severity="info"></p-badge>
+                </div>
+                <p-progressBar [value]="(survey.responses.length / totalQuestions) * 100" [showValue]="false" styleClass="h-2 mb-4"> </p-progressBar>
+            </div>
+
+            <!-- Question card -->
+            <ng-container *ngIf="!survey.completed">
+                <div *ngIf="currentQuestion$ | async as question" [@questionAnimation] class="p-6 bg-white rounded-lg shadow-lg">
+                    <div class="text-right" dir="rtl">
+                        <div class="flex items-center mb-4">
+                            <span class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold mr-3">
+                                {{ survey.currentQuestion }}
+                            </span>
+                            <h3 class="text-xl font-bold text-gray-800">{{ question.q }}</h3>
+                        </div>
+
+                        <div *ngIf="question.th" class="bg-blue-50 p-4 rounded-lg mb-6 text-gray-700">
+                            <i class="pi pi-info-circle text-blue-500 mr-2"></i>
+                            {{ question.th }}
+                        </div>
+
+                        <div class="flex justify-center mt-8 space-x-4 space-x-reverse">
+                            <p-button (click)="answerQuestion(survey, true)" label="نعم" styleClass="p-button-success p-button-lg w-32 font-bold"> </p-button>
+                            <p-button (click)="answerQuestion(survey, false)" label="لا" styleClass="p-button-danger p-button-lg w-32 font-bold"> </p-button>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+
+            <!-- Survey completed -->
+            <div *ngIf="survey.completed" class="p-6 bg-green-50 rounded-lg text-center">
+                <i class="pi pi-check-circle text-5xl text-green-500 mb-4"></i>
+                <h3 class="text-xl font-bold mb-2">تم الانتهاء من التقييم!</h3>
+                <p>شكرا لإكمال تقييم هذا القسم</p>
+                <p-button label="العودة للصفحة الرئيسية" styleClass="mt-4" (click)="navigateHome()"></p-button>
+            </div>
+        </ng-container>
+    </div>
+</div>

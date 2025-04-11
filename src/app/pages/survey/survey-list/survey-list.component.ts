@@ -58,6 +58,24 @@ export class SurveyListComponent {
         this.newSurveyForm.reset();
     }
 
+    startSurvey(): void {
+        if (this.newSurveyForm.valid) {
+            this.loading = true;
+
+            this.surveyServ.createSurvey(this.newSurveyForm.value.childId, this.newSurveyForm.value.domain).subscribe({
+                next: (surveyId) => {
+                    this.loading = false;
+                    this.displayNewSurveyDialog = false;
+                    this.router.navigate(['app/survey/question', surveyId]);
+                },
+                error: (error) => {
+                    this.loading = false;
+                    console.error('Error creating survey:', error);
+                }
+            });
+        }
+    }
+
     continueSurvey(surveyId: string): void {
         this.router.navigate(['/survey-question', surveyId]);
     }
@@ -66,5 +84,4 @@ export class SurveyListComponent {
         this.router.navigate(['/survey-result', surveyId]);
     }
     deleteSurvey(id: string): void {}
-    startSurvey(): void {}
 }

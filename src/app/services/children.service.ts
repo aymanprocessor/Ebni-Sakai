@@ -48,7 +48,13 @@ export class ChildrenService {
     }
 
     getChildrenByUid(uid: string): Observable<Child> {
-        return docData(doc(this.firestore, `children/${uid}`), { idField: 'id' }).pipe(map((child) => child as Child)) as Observable<Child>;
+        return docData(doc(this.firestore, `children/${uid}`), { idField: 'id' }).pipe(
+            map((child) => child as Child),
+            catchError((error) => {
+                console.error('Error fetching child:', error);
+                return of(null);
+            })
+        ) as Observable<Child>;
     }
 
     getUserChildren(): Observable<Child[]> {
@@ -191,12 +197,14 @@ export class ChildrenService {
     // Calculate age in months from birth date
     calculateAgeInMonths(birthDate: Date): number {
         const today = new Date();
-        let months = (today.getFullYear() - birthDate.getFullYear()) * 12;
-        months -= birthDate.getMonth();
+        const birthDateT = new Date(birthDate);
+        debugger;
+        let months = (today.getFullYear() - birthDateT.getFullYear()) * 12;
+        months -= birthDateT.getMonth();
         months += today.getMonth();
 
         // Adjust for day of month
-        if (today.getDate() < birthDate.getDate()) {
+        if (today.getDate() < birthDateT.getDate()) {
             months--;
         }
 

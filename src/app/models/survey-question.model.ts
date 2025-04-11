@@ -1,6 +1,16 @@
-export interface SurveyQuestion {
-    id: string;
+export interface QuestionItem {
     q: string;
     th?: string;
-    response?: boolean;
+}
+
+export interface AgeRange {
+    [questionIndex: string]: QuestionItem;
+}
+
+export interface Domain {
+    [ageRange: string]: AgeRange;
+}
+
+export interface SurveyQuestion {
+    [domain: string]: Domain;
 }

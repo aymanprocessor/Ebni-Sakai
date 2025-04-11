@@ -54,23 +54,66 @@
 </div>
 
 <!-- New Survey Dialog -->
-<p-dialog header="استبيان جديد" [(visible)]="displayNewSurveyDialog" [style]="{ width: '450px' }" [modal]="true" styleClass="p-fluid" [contentStyle]="{ overflow: 'visible' }">
-    <form [formGroup]="newSurveyForm">
-        <div class="field">
-            <label for="childId">الطفل</label>
-            <p-dropdown id="childId" formControlName="childId" [options]="(children$ | async) || []" optionLabel="name" optionValue="id" placeholder="اختر الطفل" [filter]="true" filterBy="name" styleClass="w-full"></p-dropdown>
-            <small *ngIf="newSurveyForm.get('childId')?.invalid && newSurveyForm.get('childId')?.touched" class="p-error">يرجى اختيار طفل</small>
-        </div>
+<p-dialog
+    header="استبيان جديد"
+    [(visible)]="displayNewSurveyDialog"
+    [style]="{ width: '90vw', maxWidth: '500px' }"
+    [modal]="true"
+    styleClass="p-fluid"
+    [contentStyle]="{ overflow: 'visible' }"
+    [dismissableMask]="false"
+    [breakpoints]="{ '960px': '75vw', '640px': '90vw' }"
+>
+    <div class="p-6 rounded-lg transition-colors">
+        <p class="text-gray-600 dark:text-gray-300 mb-6">أكمل المعلومات التالية لبدء استبيان جديد</p>
 
-        <div class="field">
-            <label for="domain">مجال التقييم</label>
-            <p-dropdown id="domain" formControlName="domain" [options]="domains" optionLabel="name" optionValue="id" placeholder="اختر المجال" styleClass="w-full"></p-dropdown>
-            <small *ngIf="newSurveyForm.get('domain')?.invalid && newSurveyForm.get('domain')?.touched" class="p-error">يرجى اختيار مجال التقييم</small>
-        </div>
-    </form>
+        <form [formGroup]="newSurveyForm">
+            <div class="grid gap-6">
+                <div class="field">
+                    <label for="childId" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                        الطفل
+                        <span class="text-red-500 dark:text-red-400">*</span>
+                    </label>
+                    <p-dropdown
+                        id="childId"
+                        formControlName="childId"
+                        [options]="(children$ | async) || []"
+                        optionLabel="name"
+                        optionValue="id"
+                        placeholder="اختر الطفل"
+                        [filter]="true"
+                        filterBy="name"
+                        styleClass="w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm dark:text-white"
+                        [panelStyleClass]="'dark:text-gray-200'"
+                    ></p-dropdown>
+                    <small *ngIf="newSurveyForm.get('childId')?.invalid && newSurveyForm.get('childId')?.touched" class="p-error text-red-500 dark:text-red-400"> يرجى اختيار طفل </small>
+                </div>
+
+                <div class="field">
+                    <label for="domain" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                        مجال التقييم
+                        <span class="text-red-500 dark:text-red-400">*</span>
+                    </label>
+                    <p-dropdown
+                        id="domain"
+                        formControlName="domain"
+                        [options]="domains"
+                        optionLabel="name"
+                        optionValue="id"
+                        placeholder="اختر المجال"
+                        styleClass="w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm dark:text-white"
+                        [panelStyleClass]="'dark:text-gray-200'"
+                    ></p-dropdown>
+                    <small *ngIf="newSurveyForm.get('domain')?.invalid && newSurveyForm.get('domain')?.touched" class="p-error text-red-500 dark:text-red-400"> يرجى اختيار مجال التقييم </small>
+                </div>
+            </div>
+        </form>
+    </div>
 
     <ng-template pTemplate="footer">
-        <button pButton label="إلغاء" icon="pi pi-times" class="p-button-text" (click)="displayNewSurveyDialog = false"></button>
-        <button pButton label="بدء" icon="pi pi-check" [disabled]="newSurveyForm.invalid || loading" [loading]="loading" (click)="startSurvey()"></button>
+        <div class="flex justify-end gap-3 p-3 border-t dark:border-slate-700">
+            <button pButton label="إلغاء" icon="pi pi-times" class="p-button-text p-button-secondary rounded-md px-4 py-2 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800" (click)="displayNewSurveyDialog = false"></button>
+            <button pButton label="بدء" icon="pi pi-check" [disabled]="newSurveyForm.invalid || loading" [loading]="loading" class="rounded-md px-6 py-2 shadow-sm text-white" (click)="startSurvey()"></button>
+        </div>
     </ng-template>
 </p-dialog>
