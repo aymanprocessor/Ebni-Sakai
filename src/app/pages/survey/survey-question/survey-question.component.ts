@@ -54,6 +54,7 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.initSurvey();
+        console.log(this.assessmentService.getAgeRangeWithOffset('55-66', -2));
     }
 
     private initSurvey(): void {
@@ -109,8 +110,7 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
                 const currentQuestionId = survey.currentQuestion.toString();
                 const domain = survey.domainName;
                 const ageRange = survey.ageRange || '0-6';
-
-                return this.assessmentService.getQuestionByDetails(domain, ageRange, currentQuestionId);
+                return this.assessmentService.getAgeRangeFirstQuestionByOffset(-2, ageRange, domain);
             })
         );
     }
