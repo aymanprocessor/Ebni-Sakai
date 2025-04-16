@@ -1,9 +1,9 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, of, Subscription, BehaviorSubject } from 'rxjs';
+import { Observable, of, Subscription, BehaviorSubject, combineLatest } from 'rxjs';
 import { switchMap, tap, map, finalize, catchError, take } from 'rxjs/operators';
 import { trigger, transition, style, animate } from '@angular/animations';
-import { AssessmentService } from '../../../services/assessment.service';
+import { AssessmentService, SequenceStep } from '../../../services/assessment.service';
 import { SurveyService } from '../../../services/survey.service';
 import { ChildrenService } from '../../../services/children.service';
 import { Child } from '../../../models/child.model';
@@ -16,11 +16,15 @@ import { ProgressBarModule } from 'primeng/progressbar';
 import { BadgeModule } from 'primeng/badge';
 import { CommonModule } from '@angular/common';
 import { QuestionItem } from '../../../models/survey-question.model';
+import { AssessmentSession } from '../../../models/assessment.model';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 @Component({
     selector: 'app-survey-question',
     standalone: true,
-    imports: [CommonModule, ButtonModule, ToolbarModule, CardModule, ProgressBarModule, BadgeModule, ProgressSpinnerModule],
+    imports: [CommonModule, ButtonModule, ToolbarModule, CardModule, ProgressBarModule, BadgeModule, ProgressSpinnerModule, ToastModule],
+    providers: [MessageService],
     templateUrl: './survey-question.component.html',
     styleUrls: ['./survey-question.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -38,6 +42,10 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
     loading = true;
     error = false;
     totalQuestions = 0;
+    assessmentSession: AssessmentSession | null = null;
+    navigationSequence: any;
+    showAgeRangeNavigation = true;
+    currentAgeRange = '';
     private subscriptions: Subscription[] = [];
 
     constructor(
@@ -45,7 +53,9 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
         private router: Router,
         private surveyService: SurveyService,
         private childService: ChildrenService,
-        private assessmentService: AssessmentService
+        private assessmentService: AssessmentService,
+        private messageService: MessageService,
+        private cdr: ChangeDetectorRef
     ) {
         this.survey$ = of(undefined);
         this.currentQuestion$ = of(null);
@@ -54,7 +64,6 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.initSurvey();
-        console.log(this.assessmentService.getAgeRangeWithOffset('55-66', -2));
     }
 
     private initSurvey(): void {
@@ -74,13 +83,19 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
                             this.error = true;
                         } else {
                             this.loadTotalQuestions(survey);
+                            this.initAssessmentSession(survey);
+                            this.currentAgeRange = survey.ageRange || '';
                         }
                     }),
                     catchError((error) => {
                         console.error('Error loading survey:', error);
                         this.loading = false;
                         this.error = true;
-                        // this.showErrorMessage('فشل في تحميل بيانات الاستبيان');
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'خطأ',
+                            detail: 'فشل في تحميل بيانات الاستبيان'
+                        });
                         return of(undefined);
                     }),
                     finalize(() => {
@@ -93,6 +108,23 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
         this.initRelatedData();
     }
 
+    private initAssessmentSession(survey: Survey): void {
+        // Create assessment session from survey data
+        const session: AssessmentSession = {
+            ageRange: survey.ageRange || '0-6',
+            childId: survey.childId,
+            domainName: survey.domain,
+            currentQuestion: survey.currentQuestion.toString(),
+            responses: survey.responses.map((r) => ({
+                questionId: r.questionId,
+                response: r.value
+            }))
+        };
+
+        this.assessmentSession = session;
+        this.assessmentService.startSession(session);
+    }
+
     private initRelatedData(): void {
         // Get child data when survey is loaded
         this.child$ = this.survey$.pipe(
@@ -103,21 +135,15 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
         );
 
         // Get the current question from the assessment data
-        this.currentQuestion$ = this.survey$.pipe(
-            switchMap((survey) => {
-                if (!survey) return of(null);
-
-                const currentQuestionId = survey.currentQuestion.toString();
-                const domain = survey.domainName;
-                const ageRange = survey.ageRange || '0-6';
-                return this.assessmentService.getAgeRangeFirstQuestionByOffset(-2, ageRange, domain);
-            })
-        );
+        this.currentQuestion$ = this.assessmentService.getCurrentQuestion();
     }
 
     private loadTotalQuestions(survey: Survey): void {
         const subscription = this.assessmentService.getTotalQuestionsCount(survey.domainName, survey.ageRange || '0-6').subscribe(
-            (count) => (this.totalQuestions = count),
+            (count) => {
+                this.totalQuestions = count;
+                this.cdr.markForCheck();
+            },
             (error) => console.error('Error loading question count:', error)
         );
 
@@ -183,28 +209,218 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
             // Move to next question
             survey.currentQuestion += 1;
         } else {
-            // Complete the survey
+            // Complete the survey since all questions in this age range are answered
             survey.completed = true;
             survey.completedAt = new Date();
+
+            this.messageService.add({
+                severity: 'success',
+                summary: 'اكتمل',
+                detail: 'تم الانتهاء من هذه الفئة العمرية بنجاح'
+            });
         }
+    }
+
+    navigateToPreviousQuestion(): void {
+      
+        this.survey$.pipe(take(1)).subscribe((survey) => {
+            if (!survey) return;
+
+            // Check if there are more questions in this age range
+            this.assessmentService
+                .getTotalQuestionsCount(survey.domainName, survey.ageRange || '0-6')
+                .pipe(take(1))
+                .subscribe((totalQuestions) => {
+                    console.log('totalQuestions', totalQuestions);
+                    console.log('survey.currentQuestion', survey.currentQuestion);
+                    this.assessmentService.getCurrentQuestionIndex(survey.domainName, survey.ageRange || '0-6', survey.currentQuestion).subscribe((questionNumber) => {
+                        console.log('questionNumber', questionNumber);
+                        if (questionNumber >= totalQuestions) {
+                            this.messageService.add({
+                                severity: 'info',
+                                summary: 'تنبيه',
+                                detail: 'أنت في السؤال الأخير'
+                            });
+                            return;
+                        }
+
+                        if (questionNumber == 0) {
+                            this.assessmentService.getPrevAgeRange(survey.domainName, survey.ageRange || '0-6').subscribe((prevAgeRange) => {
+                                if (prevAgeRange) {
+                                    survey.ageRange = prevAgeRange;
+                                }
+                            });
+                        }
+                        // Navigate to next question
+                        survey.currentQuestion -= 1;
+                        this.surveyService.updateSurvey(survey).subscribe();
+
+                        // Also update assessment session
+                        // if (this.assessmentSession) {
+                        //     this.assessmentSession.currentQuestion = survey.currentQuestion.toString();
+                        //     this.assessmentService.startSession(this.assessmentSession);
+                        // }
+                    });
+                    // If we're at the last question, show message
+
+                });
+        });
+    }
+
+    navigateToNextQuestion(): void {
+
+
+        this.survey$.pipe(take(1)).subscribe((survey) => {
+            if (!survey) return;
+
+            // Check if there are more questions in this age range
+            this.assessmentService
+                .getTotalQuestionsCount(survey.domainName, survey.ageRange || '0-6')
+                .pipe(take(1))
+                .subscribe((totalQuestions) => {
+                    console.log('totalQuestions', totalQuestions);
+                    console.log('survey.currentQuestion', survey.currentQuestion);
+                    this.assessmentService.getCurrentQuestionIndex(survey.domainName, survey.ageRange || '0-6', survey.currentQuestion).subscribe((questionNumber) => {
+                        console.log('questionNumber', questionNumber);
+                        if (questionNumber >= totalQuestions) {
+                            this.messageService.add({
+                                severity: 'info',
+                                summary: 'تنبيه',
+                                detail: 'أنت في السؤال الأخير'
+                            });
+                            return;
+                        }
+
+                        if (questionNumber == totalQuestions-1) {
+                            this.assessmentService.getNextAgeRange(survey.domainName, survey.ageRange || '0-6').subscribe((nextAgeRange) => {
+                                if (nextAgeRange) {
+                                    survey.ageRange = nextAgeRange;
+                                }
+                            });
+                        }
+                        // Navigate to next question
+                        survey.currentQuestion += 1;
+                        this.surveyService.updateSurvey(survey).subscribe();
+
+                        // Also update assessment session
+                        // if (this.assessmentSession) {
+                        //     this.assessmentSession.currentQuestion = survey.currentQuestion.toString();
+                        //     this.assessmentService.startSession(this.assessmentSession);
+                        // }
+                    });
+                    // If we're at the last question, show message
+
+                });
+        });
+    }
+
+    navigateToPreviousAgeRange(): void {
+        if (!this.assessmentSession) return;
+
+        const subscription = this.assessmentService.getAgeRangeFirstQuestionByOffset(-1, this.currentAgeRange, this.assessmentSession.domainName).subscribe((result) => {
+            if (result) {
+                // Navigate to the previous age range
+                this.assessmentService.setSpecificQuestion(this.assessmentSession!.domainName, result.ageRange, result.questionId);
+
+                // Update current survey if available
+                this.survey$.pipe(take(1)).subscribe((survey) => {
+                    if (survey) {
+                        survey.ageRange = result.ageRange;
+                        survey.currentQuestion = parseInt(result.questionId);
+                        this.surveyService.updateSurvey(survey).subscribe();
+                    }
+                });
+
+                // Update current age range for UI
+                this.currentAgeRange = result.ageRange;
+
+                this.messageService.add({
+                    severity: 'info',
+                    summary: 'انتقال',
+                    detail: `تم الانتقال إلى الفئة العمرية ${result.ageRange}`
+                });
+
+                this.cdr.markForCheck();
+            } else {
+                this.messageService.add({
+                    severity: 'warn',
+                    summary: 'تنبيه',
+                    detail: 'لا توجد فئة عمرية سابقة'
+                });
+            }
+        });
+
+        this.subscriptions.push(subscription);
+    }
+
+    navigateToNextAgeRange(): void {
+        if (!this.assessmentSession) return;
+
+        const subscription = this.assessmentService.getAgeRangeFirstQuestionByOffset(1, this.currentAgeRange, this.assessmentSession.domainName).subscribe((result) => {
+            if (result) {
+                // Navigate to the next age range
+                this.assessmentService.setSpecificQuestion(this.assessmentSession!.domainName, result.ageRange, result.questionId);
+
+                // Update current survey if available
+                this.survey$.pipe(take(1)).subscribe((survey) => {
+                    if (survey) {
+                        survey.ageRange = result.ageRange;
+                        survey.currentQuestion = parseInt(result.questionId);
+                        this.surveyService.updateSurvey(survey).subscribe();
+                    }
+                });
+
+                // Update current age range for UI
+                this.currentAgeRange = result.ageRange;
+
+                this.messageService.add({
+                    severity: 'info',
+                    summary: 'انتقال',
+                    detail: `تم الانتقال إلى الفئة العمرية ${result.ageRange}`
+                });
+
+                this.cdr.markForCheck();
+            } else {
+                this.messageService.add({
+                    severity: 'warn',
+                    summary: 'تنبيه',
+                    detail: 'لا توجد فئة عمرية تالية'
+                });
+            }
+        });
+
+        this.subscriptions.push(subscription);
     }
 
     private handleAnswerResult(success: boolean, survey: Survey): void {
         if (success) {
             if (survey.completed) {
-                console.log('Survey completed successfully');
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'اكتمل',
+                    detail: 'تم إكمال الاستبيان بنجاح'
+                });
             }
         } else {
-            console.error('Failed to update survey');
+            this.messageService.add({
+                severity: 'error',
+                summary: 'خطأ',
+                detail: 'فشل في تحديث الاستبيان'
+            });
         }
     }
 
     private handleAnswerError(error: any): void {
         console.error('Error updating survey:', error);
+        this.messageService.add({
+            severity: 'error',
+            summary: 'خطأ',
+            detail: 'حدث خطأ أثناء معالجة إجابتك'
+        });
     }
 
     navigateHome(): void {
-        this.router.navigate(['/']);
+        this.router.navigate(['/app/survey/list']);
     }
 
     ngOnDestroy(): void {

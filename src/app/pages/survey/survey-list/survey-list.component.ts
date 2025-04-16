@@ -77,7 +77,7 @@ export class SurveyListComponent {
     }
 
     continueSurvey(surveyId: string): void {
-        this.router.navigate(['/survey-question', surveyId]);
+        this.router.navigate(['app/survey/question', surveyId]);
     }
 
     viewResults(surveyId: string): void {
