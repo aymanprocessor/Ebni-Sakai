@@ -6,4 +6,5 @@ export interface Child {
     status: string;
     uid: string;
     ageInMonths: number;
+    hasDisability?: boolean;
 }

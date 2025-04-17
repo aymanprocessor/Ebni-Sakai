@@ -86,9 +86,10 @@ export class ChildrenComponent implements OnInit {
     initForm() {
         this.childForm = this.fb.group({
             id: [null],
-            name: ['aa', [Validators.required, Validators.minLength(2)]],
+            name: [null, [Validators.required, Validators.minLength(2)]],
             birthday: [new Date(), Validators.required],
-            gender: [null, Validators.required]
+            gender: [null, Validators.required],
+            hasDisability: [false]
         });
     }
 
