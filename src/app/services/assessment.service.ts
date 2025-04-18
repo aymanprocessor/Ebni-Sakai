@@ -1,9 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, BehaviorSubject } from 'rxjs';
+import { Observable, of, BehaviorSubject, combineLatest } from 'rxjs';
 import { map, shareReplay, catchError, switchMap } from 'rxjs/operators';
 import { DevelopmentAssessment, AssessmentSession } from '../models/assessment.model';
 import { QuestionItem } from '../models/survey-question.model';
+import { Child } from '../models/child.model';
+import { ChildrenService } from './children.service';
+import { DateUtilsService } from './date-utils.service';
 
 /**
  * Interface to define a question sequence step
@@ -17,10 +20,14 @@ export interface SequenceStep {
     providedIn: 'root'
 })
 export class AssessmentService {
+    private ageBlocks = ['0-6', '7-12', '13-18', '19-24', '25-30', '31-36', '37-42', '43-54', '55-66', '67-78', '79-90'];
     private assessmentData$: Observable<DevelopmentAssessment>;
     private currentSession = new BehaviorSubject<AssessmentSession | null>(null);
 
-    constructor(private http: HttpClient) {
+    constructor(
+        private http: HttpClient,
+        private dataUtilsService: DateUtilsService
+    ) {
         // Load assessment data from the JSON file
         this.assessmentData$ = this.loadAssessmentData().pipe(
             shareReplay(1) // Cache the result
@@ -49,41 +56,70 @@ export class AssessmentService {
         return this.currentSession.asObservable();
     }
 
+    getStartBlock(child: Child): Observable<string | null> {
+        const ageInMonths = this.dataUtilsService.ageInMonthsFromDate(child.birthday);
+        debugger;
+        const ageBlockIdx = this.ageBlocks.findIndex((block) => {
+            const [start, end] = block.split('-').map(Number);
+            return ageInMonths >= start && ageInMonths <= end;
+        });
+
+        if (child.hasDisability === null || child.hasDisability === false || child.hasDisability === undefined) {
+            const previousBlock = ageBlockIdx > 0 ? this.ageBlocks[ageBlockIdx - 1] : null;
+            return of(previousBlock);
+        } else {
+            const previousBlock = ageBlockIdx > 0 ? this.ageBlocks[ageBlockIdx - 2] : null;
+            return of(previousBlock);
+        }
+    }
+
     getCurrentQuestion(): Observable<QuestionItem | null> {
+        debugger;
         return this.currentSession.pipe(
             switchMap((session) => {
                 if (!session) return of(null);
-                return this.getQuestionByDetails(session.domainName, session.ageRange, session.currentQuestion);
+                return this.getQuestionByDetails(session.domainName, session.currentAgeBlock, session.currentQuestionIdx);
             })
         );
     }
     getNextAgeRange(domainName: string, currentAgeRange: string): Observable<string | null> {
-        return this.assessmentData$.pipe(map((data) => {
-            const ranges = Object.keys(data[domainName]);
-            const currentIndex = ranges.indexOf(currentAgeRange);
+        return this.assessmentData$.pipe(
+            map((data) => {
+                const ranges = Object.keys(data[domainName]);
+                const currentIndex = ranges.indexOf(currentAgeRange);
 
-            if (currentIndex !== -1 && currentIndex < ranges.length - 1) {
-                return ranges[currentIndex + 1];
-            }
-            return null;
-        }));
+                if (currentIndex !== -1 && currentIndex < ranges.length - 1) {
+                    return ranges[currentIndex + 1];
+                }
+                return null;
+            })
+        );
     }
     getPrevAgeRange(domainName: string, currentAgeRange: string): Observable<string | null> {
-        return this.assessmentData$.pipe(map((data) => {
-            const ranges = Object.keys(data[domainName]);
-            const currentIndex = ranges.indexOf(currentAgeRange);
+        return this.assessmentData$.pipe(
+            map((data) => {
+                const ranges = Object.keys(data[domainName]);
+                const currentIndex = ranges.indexOf(currentAgeRange);
 
-            if ( currentIndex > 0) {
-                return ranges[currentIndex -1];
-            }
-            return null;
-        }));
+                if (currentIndex > 0) {
+                    return ranges[currentIndex - 1];
+                }
+                return null;
+            })
+        );
     }
-    getQuestionByDetails(domainName: string, ageRange: string, questionId: string): Observable<QuestionItem | null> {
+    getQuestionByDetails(domainName: string, ageRange: string, questionIdx: number): Observable<QuestionItem | null> {
         return this.assessmentData$.pipe(
             map((data) => {
                 if (!data || !data[domainName] || !data[domainName][ageRange]) return null;
-                return data[domainName][ageRange][questionId] || null;
+
+                const questionMap = data[domainName][ageRange];
+                const keys = Object.keys(questionMap);
+
+                if (questionIdx < 0 || questionIdx >= keys.length) return null;
+
+                const key = keys[questionIdx];
+                return questionMap[key] || null;
             })
         );
     }
@@ -98,22 +134,24 @@ export class AssessmentService {
     }
 
     getCurrentQuestionNumber(domainName: string, ageRange: string, index: number): Observable<number> {
-        return this.assessmentData$.pipe(map((data) => {
-            const keys = Object.keys(data[domainName][ageRange]);
-            if (index >= 0 && index < keys.length) {
-                return parseInt(keys[index], 10);
-            }
-            return 0;
-        }));
-
+        return this.assessmentData$.pipe(
+            map((data) => {
+                const keys = Object.keys(data[domainName][ageRange]);
+                if (index >= 0 && index < keys.length) {
+                    return parseInt(keys[index], 10);
+                }
+                return 0;
+            })
+        );
     }
 
     getCurrentQuestionIndex(domainName: string, ageRange: string, questionNumber: number): Observable<number> {
-        return this.assessmentData$.pipe(map((data) => {
-            const keys = Object.keys(data[domainName][ageRange]);
-            return keys.indexOf(String(questionNumber));
-        }));
-
+        return this.assessmentData$.pipe(
+            map((data) => {
+                const keys = Object.keys(data[domainName][ageRange]);
+                return keys.indexOf(String(questionNumber));
+            })
+        );
     }
     /**
      * Method to set assessment to a specific age range and question
@@ -121,19 +159,19 @@ export class AssessmentService {
      * @param ageRange The age range to navigate to
      * @param questionId The specific question ID to set
      */
-    setSpecificQuestion(domainName: string, ageRange: string, questionId: string): void {
+    setSpecificQuestion(domainName: string, ageRange: string, questionIdx: number): void {
         const session = this.currentSession.value;
         if (!session) return;
 
         // Update the session with new values
-        session.ageRange = ageRange;
-        session.currentQuestion = questionId;
+        session.currentAgeBlock = ageRange;
+        session.currentQuestionIdx = questionIdx;
 
         // Update the session
-        this.currentSession.next({ ...session });
+        this.currentSession.next(session);
 
         // For logging/debugging purposes
-        console.log(`Set session to domain: ${domainName}, age range: ${ageRange}, question: ${questionId}`);
+        console.log(`Set session to domain: ${domainName}, age range: ${ageRange}, question index: ${questionIdx}`);
     }
 
     /**
@@ -198,122 +236,6 @@ export class AssessmentService {
                 };
             })
         );
-    }
-
-    /**
-     * Creates a navigation sequence for a specific domain
-     * @param domainName The domain to navigate within
-     * @param sequence Array of SequenceStep objects defining the navigation order
-     */
-    createNavigationSequence(
-        domainName: string,
-        sequence: SequenceStep[]
-    ): {
-        start: () => Observable<{ ageRange: string; questionId: string; question: QuestionItem } | null>;
-        next: () => Observable<{ ageRange: string; questionId: string; question: QuestionItem } | null>;
-        previous: () => Observable<{ ageRange: string; questionId: string; question: QuestionItem } | null>;
-        jumpTo: (index: number) => Observable<{ ageRange: string; questionId: string; question: QuestionItem } | null>;
-        getCurrentIndex: () => Observable<number>;
-        getSequenceLength: () => number;
-    } {
-        // Store sequence information
-        const navigationSequence = [...sequence];
-
-        // Create navigation handlers
-        const navigator = {
-            // Start the sequence
-            start: (): Observable<{ ageRange: string; questionId: string; question: QuestionItem } | null> => {
-                if (navigationSequence.length === 0) return of(null);
-                return this.navigateToSequenceIndex(domainName, navigationSequence, 0);
-            },
-
-            // Move to next question in sequence
-            next: (): Observable<{ ageRange: string; questionId: string; question: QuestionItem } | null> => {
-                return this.getCurrentSequenceIndex(domainName, navigationSequence).pipe(
-                    switchMap((index) => {
-                        if (index === -1 || index >= navigationSequence.length - 1) return of(null);
-                        return this.navigateToSequenceIndex(domainName, navigationSequence, index + 1);
-                    })
-                );
-            },
-
-            // Move to previous question in sequence
-            previous: (): Observable<{ ageRange: string; questionId: string; question: QuestionItem } | null> => {
-                return this.getCurrentSequenceIndex(domainName, navigationSequence).pipe(
-                    switchMap((index) => {
-                        if (index <= 0) return of(null);
-                        return this.navigateToSequenceIndex(domainName, navigationSequence, index - 1);
-                    })
-                );
-            },
-
-            // Jump to specific index in sequence
-            jumpTo: (index: number): Observable<{ ageRange: string; questionId: string; question: QuestionItem } | null> => {
-                if (index < 0 || index >= navigationSequence.length) return of(null);
-                return this.navigateToSequenceIndex(domainName, navigationSequence, index);
-            },
-
-            // Get current position in sequence
-            getCurrentIndex: (): Observable<number> => {
-                return this.getCurrentSequenceIndex(domainName, navigationSequence);
-            },
-
-            // Get total sequence length
-            getSequenceLength: (): number => {
-                return navigationSequence.length;
-            }
-        };
-
-        return navigator;
-    }
-
-    /**
-     * Helper method to navigate to a specific index in a sequence
-     * @private
-     */
-    private navigateToSequenceIndex(domainName: string, sequence: SequenceStep[], index: number): Observable<{ ageRange: string; questionId: string; question: QuestionItem } | null> {
-        if (index < 0 || index >= sequence.length) return of(null);
-
-        const targetStep = sequence[index];
-
-        return this.assessmentData$.pipe(
-            map((data) => {
-                if (!data || !data[domainName] || !data[domainName][targetStep.ageRange] || !data[domainName][targetStep.ageRange][targetStep.questionId]) {
-                    return null;
-                }
-
-                const questionItem = data[domainName][targetStep.ageRange][targetStep.questionId];
-
-                // Update session to this question
-                this.setSpecificQuestion(domainName, targetStep.ageRange, targetStep.questionId);
-
-                return {
-                    ageRange: targetStep.ageRange,
-                    questionId: targetStep.questionId,
-                    question: questionItem
-                };
-            })
-        );
-    }
-
-    /**
-     * Helper method to get the current index in a sequence
-     * @private
-     */
-    private getCurrentSequenceIndex(domainName: string, sequence: SequenceStep[]): Observable<number> {
-        const session = this.currentSession.value;
-        if (!session) return of(-1);
-
-        // If domain doesn't match, we're not in this sequence
-        if (session.domainName !== domainName) return of(-1);
-
-        const currentAgeRange = session.ageRange;
-        const currentQuestionId = session.currentQuestion;
-
-        // Find current position in sequence
-        const index = sequence.findIndex((step) => step.ageRange === currentAgeRange && step.questionId === currentQuestionId);
-
-        return of(index);
     }
 
     answerQuestion(answer: boolean): void {

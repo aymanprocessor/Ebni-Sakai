@@ -10,4 +10,6 @@ export interface AssessmentSession {
     domainName: string;
     responses: Array<{ questionId: string; response: boolean }>;
     currentQuestion: string;
+    currentQuestionIdx: number;
+    currentAgeBlock: string;
 }

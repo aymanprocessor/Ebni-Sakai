@@ -5,6 +5,7 @@ import { SurveyDomain } from '../models/survey-domain.model';
 import { Survey } from '../models/survey.model';
 import { ChildrenService } from './children.service';
 import { Child } from '../models/child.model';
+import { AssessmentService } from './assessment.service';
 
 @Injectable({
     providedIn: 'root'
@@ -17,9 +18,11 @@ export class SurveyService {
         { id: 'التطور لغة الاتصال', name: 'التطور لغة الاتصال' },
         { id: 'التطور المساعدة الذاتية', name: 'التطور المساعدة الذاتية' }
     ];
+    currentAgeBlock: string = '';
     constructor(
         private firestore: Firestore,
-        private childServ: ChildrenService
+        private childServ: ChildrenService,
+        private assessmentServ: AssessmentService
     ) {}
 
     // Get single child by ID
@@ -68,21 +71,27 @@ export class SurveyService {
             switchMap((child) => {
                 const domainObj = this.domains.find((d) => d.id === domain);
 
-                const ageRange = this.childServ.getAgeRangeFromBirthDate(child.birthday);
-                const newSurvey: Survey = {
-                    childId: childId,
-                    childName: child.name,
-                    domain: domain,
-                    domainName: domainObj?.name || domain,
-                    ageRange: ageRange,
-                    createdAt: new Date(),
-                    completed: false,
-                    responses: [],
-                    currentQuestion: 0
-                };
+                return this.assessmentServ.getStartBlock(child).pipe(
+                    take(1),
+                    switchMap((currentAgeBlock) => {
+                        const newSurvey: Survey = {
+                            childId: childId,
+                            childName: child.name,
+                            domain: domain,
+                            domainName: domainObj?.name || domain,
+                            ageRange: currentAgeBlock!,
+                            createdAt: new Date(),
+                            completed: false,
+                            responses: [],
+                            currentQuestion: '',
+                            currentQuestionIdx: 0,
+                            currentAgeBlock: currentAgeBlock!
+                        };
 
-                const surveysCollection = collection(this.firestore, 'surveys');
-                return from(addDoc(surveysCollection, newSurvey)).pipe(map((docRef) => docRef.id));
+                        const surveysCollection = collection(this.firestore, 'surveys');
+                        return from(addDoc(surveysCollection, newSurvey)).pipe(map((docRef) => docRef.id));
+                    })
+                );
             })
         );
     }

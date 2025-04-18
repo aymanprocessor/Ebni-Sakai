@@ -41,11 +41,10 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
     child$: Observable<Child | undefined>;
     loading = true;
     error = false;
-    totalQuestions = 0;
-    assessmentSession: AssessmentSession | null = null;
-    navigationSequence: any;
-    showAgeRangeNavigation = true;
+    currentQuestionIndex = 0;
     currentAgeRange = '';
+    assessmentSession: AssessmentSession | null = null;
+
     private subscriptions: Subscription[] = [];
 
     constructor(
@@ -82,9 +81,7 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
                         if (!survey) {
                             this.error = true;
                         } else {
-                            this.loadTotalQuestions(survey);
                             this.initAssessmentSession(survey);
-                            this.currentAgeRange = survey.ageRange || '';
                         }
                     }),
                     catchError((error) => {
@@ -110,17 +107,25 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
 
     private initAssessmentSession(survey: Survey): void {
         // Create assessment session from survey data
+        // if (survey.currentAgeBlock == null || survey.currentAgeBlock == '') {
+
+        // };
+
         const session: AssessmentSession = {
             ageRange: survey.ageRange || '0-6',
             childId: survey.childId,
             domainName: survey.domain,
-            currentQuestion: survey.currentQuestion.toString(),
+            currentQuestion: survey.currentQuestion,
+            currentQuestionIdx: survey.currentQuestionIdx,
+            currentAgeBlock: survey.currentAgeBlock,
             responses: survey.responses.map((r) => ({
                 questionId: r.questionId,
                 response: r.value
             }))
         };
 
+        this.currentAgeRange = session.currentAgeBlock;
+        this.currentQuestionIndex = session.currentQuestionIdx;
         this.assessmentSession = session;
         this.assessmentService.startSession(session);
     }
@@ -136,18 +141,6 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
 
         // Get the current question from the assessment data
         this.currentQuestion$ = this.assessmentService.getCurrentQuestion();
-    }
-
-    private loadTotalQuestions(survey: Survey): void {
-        const subscription = this.assessmentService.getTotalQuestionsCount(survey.domainName, survey.ageRange || '0-6').subscribe(
-            (count) => {
-                this.totalQuestions = count;
-                this.cdr.markForCheck();
-            },
-            (error) => console.error('Error loading question count:', error)
-        );
-
-        this.subscriptions.push(subscription);
     }
 
     answerQuestion(survey: Survey, answer: boolean): void {
@@ -205,9 +198,12 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
     }
 
     private updateSurveyProgress(survey: Survey, totalQuestions: number): void {
-        if (survey.currentQuestion < totalQuestions) {
+        if (this.currentQuestionIndex < totalQuestions) {
             // Move to next question
-            survey.currentQuestion += 1;
+            this.currentQuestionIndex++;
+
+            this.assessmentService.setSpecificQuestion(survey.domainName, survey.ageRange || '0-6', this.currentQuestionIndex);
+            this.currentQuestion$ = this.assessmentService.getCurrentQuestion();
         } else {
             // Complete the survey since all questions in this age range are answered
             survey.completed = true;
@@ -222,7 +218,6 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
     }
 
     navigateToPreviousQuestion(): void {
-      
         this.survey$.pipe(take(1)).subscribe((survey) => {
             if (!survey) return;
 
@@ -233,43 +228,38 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
                 .subscribe((totalQuestions) => {
                     console.log('totalQuestions', totalQuestions);
                     console.log('survey.currentQuestion', survey.currentQuestion);
-                    this.assessmentService.getCurrentQuestionIndex(survey.domainName, survey.ageRange || '0-6', survey.currentQuestion).subscribe((questionNumber) => {
-                        console.log('questionNumber', questionNumber);
-                        if (questionNumber >= totalQuestions) {
-                            this.messageService.add({
-                                severity: 'info',
-                                summary: 'تنبيه',
-                                detail: 'أنت في السؤال الأخير'
-                            });
-                            return;
-                        }
+                    if (this.currentQuestionIndex >= totalQuestions) {
+                        this.messageService.add({
+                            severity: 'info',
+                            summary: 'تنبيه',
+                            detail: 'أنت في السؤال الأخير'
+                        });
+                        return;
+                    }
 
-                        if (questionNumber == 0) {
-                            this.assessmentService.getPrevAgeRange(survey.domainName, survey.ageRange || '0-6').subscribe((prevAgeRange) => {
-                                if (prevAgeRange) {
-                                    survey.ageRange = prevAgeRange;
-                                }
-                            });
-                        }
-                        // Navigate to next question
-                        survey.currentQuestion -= 1;
-                        this.surveyService.updateSurvey(survey).subscribe();
+                    if (this.currentQuestionIndex == 0) {
+                        this.assessmentService.getPrevAgeRange(survey.domainName, survey.ageRange || '0-6').subscribe((prevAgeRange) => {
+                            if (prevAgeRange) {
+                                survey.ageRange = prevAgeRange;
+                            }
+                        });
+                    }
+                    // Navigate to next question
+                    this.currentQuestionIndex--;
+                    this.surveyService.updateSurvey(survey).subscribe();
 
-                        // Also update assessment session
-                        // if (this.assessmentSession) {
-                        //     this.assessmentSession.currentQuestion = survey.currentQuestion.toString();
-                        //     this.assessmentService.startSession(this.assessmentSession);
-                        // }
-                    });
+                    // Also update assessment session
+                    // if (this.assessmentSession) {
+                    //     this.assessmentSession.currentQuestion = survey.currentQuestion.toString();
+                    //     this.assessmentService.startSession(this.assessmentSession);
+                    // }
+
                     // If we're at the last question, show message
-
                 });
         });
     }
 
     navigateToNextQuestion(): void {
-
-
         this.survey$.pipe(take(1)).subscribe((survey) => {
             if (!survey) return;
 
@@ -280,53 +270,50 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
                 .subscribe((totalQuestions) => {
                     console.log('totalQuestions', totalQuestions);
                     console.log('survey.currentQuestion', survey.currentQuestion);
-                    this.assessmentService.getCurrentQuestionIndex(survey.domainName, survey.ageRange || '0-6', survey.currentQuestion).subscribe((questionNumber) => {
-                        console.log('questionNumber', questionNumber);
-                        if (questionNumber >= totalQuestions) {
-                            this.messageService.add({
-                                severity: 'info',
-                                summary: 'تنبيه',
-                                detail: 'أنت في السؤال الأخير'
-                            });
-                            return;
-                        }
 
-                        if (questionNumber == totalQuestions-1) {
-                            this.assessmentService.getNextAgeRange(survey.domainName, survey.ageRange || '0-6').subscribe((nextAgeRange) => {
-                                if (nextAgeRange) {
-                                    survey.ageRange = nextAgeRange;
-                                }
-                            });
-                        }
-                        // Navigate to next question
-                        survey.currentQuestion += 1;
-                        this.surveyService.updateSurvey(survey).subscribe();
+                    if (this.currentQuestionIndex >= totalQuestions) {
+                        this.messageService.add({
+                            severity: 'info',
+                            summary: 'تنبيه',
+                            detail: 'أنت في السؤال الأخير'
+                        });
+                        return;
+                    }
 
-                        // Also update assessment session
-                        // if (this.assessmentSession) {
-                        //     this.assessmentSession.currentQuestion = survey.currentQuestion.toString();
-                        //     this.assessmentService.startSession(this.assessmentSession);
-                        // }
-                    });
+                    if (this.currentQuestionIndex == totalQuestions - 1) {
+                        this.assessmentService.getNextAgeRange(survey.domainName, survey.ageRange || '0-6').subscribe((nextAgeRange) => {
+                            if (nextAgeRange) {
+                                survey.ageRange = nextAgeRange;
+                            }
+                        });
+                    }
+                    // Navigate to next question
+                    survey.currentQuestion += 1;
+                    this.surveyService.updateSurvey(survey).subscribe();
+
+                    // Also update assessment session
+                    // if (this.assessmentSession) {
+                    //     this.assessmentSession.currentQuestion = survey.currentQuestion.toString();
+                    //     this.assessmentService.startSession(this.assessmentSession);
+                    // }
                     // If we're at the last question, show message
-
                 });
         });
     }
 
     navigateToPreviousAgeRange(): void {
         if (!this.assessmentSession) return;
-
+        this.currentQuestionIndex = 0;
         const subscription = this.assessmentService.getAgeRangeFirstQuestionByOffset(-1, this.currentAgeRange, this.assessmentSession.domainName).subscribe((result) => {
             if (result) {
                 // Navigate to the previous age range
-                this.assessmentService.setSpecificQuestion(this.assessmentSession!.domainName, result.ageRange, result.questionId);
+                this.assessmentService.setSpecificQuestion(this.assessmentSession!.domainName, result.ageRange, this.currentQuestionIndex);
 
                 // Update current survey if available
                 this.survey$.pipe(take(1)).subscribe((survey) => {
                     if (survey) {
                         survey.ageRange = result.ageRange;
-                        survey.currentQuestion = parseInt(result.questionId);
+
                         this.surveyService.updateSurvey(survey).subscribe();
                     }
                 });
@@ -339,8 +326,6 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
                     summary: 'انتقال',
                     detail: `تم الانتقال إلى الفئة العمرية ${result.ageRange}`
                 });
-
-                this.cdr.markForCheck();
             } else {
                 this.messageService.add({
                     severity: 'warn',
@@ -355,17 +340,16 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
 
     navigateToNextAgeRange(): void {
         if (!this.assessmentSession) return;
-
+        this.currentQuestionIndex = 0;
         const subscription = this.assessmentService.getAgeRangeFirstQuestionByOffset(1, this.currentAgeRange, this.assessmentSession.domainName).subscribe((result) => {
             if (result) {
                 // Navigate to the next age range
-                this.assessmentService.setSpecificQuestion(this.assessmentSession!.domainName, result.ageRange, result.questionId);
+                this.assessmentService.setSpecificQuestion(this.assessmentSession!.domainName, result.ageRange, this.currentQuestionIndex);
 
                 // Update current survey if available
                 this.survey$.pipe(take(1)).subscribe((survey) => {
                     if (survey) {
                         survey.ageRange = result.ageRange;
-                        survey.currentQuestion = parseInt(result.questionId);
                         this.surveyService.updateSurvey(survey).subscribe();
                     }
                 });

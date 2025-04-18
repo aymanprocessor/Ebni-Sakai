@@ -11,5 +11,7 @@ export interface Survey {
     completedAt?: Date;
     completed: boolean;
     responses: SurveyResponse[];
-    currentQuestion: number;
+    currentQuestion: string;
+    currentQuestionIdx: number;
+    currentAgeBlock: string;
 }
