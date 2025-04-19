@@ -8,7 +8,7 @@ export interface AssessmentSession {
     ageRange: string;
     childId: string;
     domainName: string;
-    responses: Array<{ questionId: string; response: boolean }>;
+    responses: { [key: string]: string[] };
     currentQuestion: string;
     currentQuestionIdx: number;
     currentAgeBlock: string;

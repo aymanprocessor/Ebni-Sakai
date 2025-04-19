@@ -82,7 +82,7 @@ export class SurveyService {
                             ageRange: currentAgeBlock!,
                             createdAt: new Date(),
                             completed: false,
-                            responses: [],
+                            responses: {},
                             currentQuestion: '',
                             currentQuestionIdx: 0,
                             currentAgeBlock: currentAgeBlock!

@@ -242,17 +242,27 @@ export class AssessmentService {
         const session = this.currentSession.value;
         if (!session) return;
 
-        // Add response
-        const responseExists = session.responses.some((r) => r.questionId === session.currentQuestion);
+        // Parse the current question ID to determine the age range and question index
+        const [ageRange, questionIndexStr] = session.currentQuestion.split('-');
+        const questionIndex = parseInt(questionIndexStr) - 1; // Convert to 0-based index
 
-        if (responseExists) {
-            session.responses = session.responses.map((r) => (r.questionId === session.currentQuestion ? { ...r, response: answer } : r));
-        } else {
-            session.responses.push({
-                questionId: session.currentQuestion,
-                response: answer
-            });
+        // Initialize responses object if it doesn't exist
+        if (!session.responses) {
+            session.responses = {};
         }
+
+        // Initialize the array for this age range if it doesn't exist
+        if (!session.responses[ageRange]) {
+            session.responses[ageRange] = [];
+        }
+
+        // Ensure the array has enough elements
+        while (session.responses[ageRange].length <= questionIndex) {
+            session.responses[ageRange].push('');
+        }
+
+        // Update the response
+        session.responses[ageRange][questionIndex] = answer ? 'y' : 'n';
 
         // Move to next question
         this.assessmentData$.subscribe((data) => {

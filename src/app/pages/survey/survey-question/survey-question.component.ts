@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, HostListener } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, of, Subscription, BehaviorSubject, combineLatest } from 'rxjs';
 import { switchMap, tap, map, finalize, catchError, take } from 'rxjs/operators';
@@ -44,8 +44,15 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
     currentQuestionIndex = 0;
     currentAgeRange = '';
     assessmentSession: AssessmentSession | null = null;
-
+    isNavigating = false;
+    response$ = new BehaviorSubject<{ [key: string]: string[] }>({});
     private subscriptions: Subscription[] = [];
+
+    // Add event listener for when user leaves the page
+    @HostListener('window:beforeunload', ['$event'])
+    beforeUnloadHandler(event: BeforeUnloadEvent) {
+        this.storeCurrentResponses();
+    }
 
     constructor(
         private route: ActivatedRoute,
@@ -62,6 +69,7 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
+        console.log('SurveyQuestionComponent initialized');
         this.initSurvey();
     }
 
@@ -107,21 +115,14 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
 
     private initAssessmentSession(survey: Survey): void {
         // Create assessment session from survey data
-        // if (survey.currentAgeBlock == null || survey.currentAgeBlock == '') {
-
-        // };
-
         const session: AssessmentSession = {
             ageRange: survey.ageRange || '0-6',
             childId: survey.childId,
             domainName: survey.domain,
             currentQuestion: survey.currentQuestion,
             currentQuestionIdx: survey.currentQuestionIdx,
-            currentAgeBlock: survey.currentAgeBlock,
-            responses: survey.responses.map((r) => ({
-                questionId: r.questionId,
-                response: r.value
-            }))
+            currentAgeBlock: survey.currentAgeBlock || survey.ageRange || '0-6',
+            responses: survey.responses || {}
         };
 
         this.currentAgeRange = session.currentAgeBlock;
@@ -143,15 +144,50 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
         this.currentQuestion$ = this.assessmentService.getCurrentQuestion();
     }
 
+    /**
+     * Store current survey responses to database
+     * Called when leaving page or finishing survey
+     */
+    private storeCurrentResponses(): void {
+        if (this.isNavigating) return;
+
+        this.survey$.pipe(take(1)).subscribe((survey) => {
+            if (survey && survey.id) {
+                // Only update if survey exists and has an ID
+                this.surveyService.updateSurvey(survey).subscribe({
+                    next: () => console.log('Survey responses saved'),
+                    error: (err) => console.error('Error saving survey responses:', err)
+                });
+            }
+        });
+    }
+
     answerQuestion(survey: Survey, answer: boolean): void {
-        if (!survey) return;
+        if (!survey || this.isNavigating) return;
+
+        // Set flag to prevent multiple navigations
+        this.isNavigating = true;
 
         // Make a copy of the survey to avoid modifying the observable directly
         const updatedSurvey = { ...survey };
 
         const subscription = this.processAnswer(updatedSurvey, answer).subscribe(
-            (success) => this.handleAnswerResult(success, updatedSurvey),
-            (error) => this.handleAnswerError(error)
+            (result) => {
+                if (result.success) {
+                    // If we need to move to next age block
+                    // if (result.moveToNextAgeBlock) {
+                    //this.navigateToNextAgeBlock();
+                    // }
+                    this.isNavigating = false;
+                    this.cdr.markForCheck();
+                } else {
+                    this.handleAnswerError(new Error('Failed to process answer'));
+                }
+            },
+            (error) => {
+                this.handleAnswerError(error);
+                this.isNavigating = false;
+            }
         );
 
         this.subscriptions.push(subscription);
@@ -161,195 +197,73 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
         return this.currentQuestion$.pipe(
             take(1),
             switchMap((question) => {
-                if (!question) return of(false);
+                if (!question) return of({ success: false });
 
-                this.updateSurveyResponses(survey, question, answer);
+                this.updateSurveyResponses(survey, answer);
 
-                return this.assessmentService.getTotalQuestionsCount(survey.domainName, survey.ageRange || '0-6').pipe(
+                return this.assessmentService.getTotalQuestionsCount(survey.domain, survey.ageRange || '0-6').pipe(
                     take(1),
                     map((totalQuestions) => {
-                        this.updateSurveyProgress(survey, totalQuestions);
-                        return true;
+                        const isLastQuestion = this.currentQuestionIndex >= totalQuestions - 1;
+                        const moveToNextAgeBlock = isLastQuestion;
+
+                        if (!isLastQuestion) {
+                            // Move to next question in current age block
+                            this.currentQuestionIndex++;
+                            survey.currentQuestionIdx = this.currentQuestionIndex;
+
+                            this.assessmentService.setSpecificQuestion(survey.domain, survey.ageRange || '0-6', this.currentQuestionIndex);
+                            this.currentQuestion$ = this.assessmentService.getCurrentQuestion();
+                        } else if (moveToNextAgeBlock) {
+                            this.navigateToNextAgeBlock();
+                            // Mark for moving to next age block after saving
+                            // We'll handle the actual navigation after saving the current response
+                        }
+
+                        return { success: true, moveToNextAgeBlock };
                     })
                 );
             }),
-            switchMap((success) => {
-                if (!success) return of(false);
-                return this.surveyService.updateSurvey(survey);
+            switchMap((result) => {
+                // Always save the current state
+                return this.surveyService.updateSurvey(survey).pipe(
+                    map(() => result),
+                    catchError((error) => {
+                        console.error('Error updating survey:', error);
+                        return of({ success: false });
+                    })
+                );
             })
         );
     }
 
-    private updateSurveyResponses(survey: Survey, question: QuestionItem, answer: boolean): void {
-        const questionId = survey.currentQuestion.toString();
-        const existingResponseIndex = survey.responses.findIndex((r) => r.questionId === questionId);
-
-        if (existingResponseIndex !== -1) {
-            // Update existing response
-            survey.responses[existingResponseIndex].value = answer;
-        } else {
-            // Add new response
-            survey.responses.push({
-                questionId: questionId,
-                question: question.q,
-                value: answer
-            });
+    private updateSurveyResponses(survey: Survey, answer: boolean): void {
+        debugger;
+        if (!survey.responses[this.currentAgeRange!]) {
+            survey.responses[this.currentAgeRange!] = []; // Or something like ["n", "n", "n"] as default
         }
+        survey.responses[this.currentAgeRange!][this.currentQuestionIndex] = answer ? 'y' : 'n';
+        localStorage.setItem('surveyResponses', JSON.stringify(survey.responses));
     }
 
-    private updateSurveyProgress(survey: Survey, totalQuestions: number): void {
-        if (this.currentQuestionIndex < totalQuestions) {
-            // Move to next question
-            this.currentQuestionIndex++;
-
-            this.assessmentService.setSpecificQuestion(survey.domainName, survey.ageRange || '0-6', this.currentQuestionIndex);
-            this.currentQuestion$ = this.assessmentService.getCurrentQuestion();
-        } else {
-            // Complete the survey since all questions in this age range are answered
-            survey.completed = true;
-            survey.completedAt = new Date();
-
-            this.messageService.add({
-                severity: 'success',
-                summary: 'اكتمل',
-                detail: 'تم الانتهاء من هذه الفئة العمرية بنجاح'
-            });
-        }
-    }
-
-    navigateToPreviousQuestion(): void {
-        this.survey$.pipe(take(1)).subscribe((survey) => {
-            if (!survey) return;
-
-            // Check if there are more questions in this age range
-            this.assessmentService
-                .getTotalQuestionsCount(survey.domainName, survey.ageRange || '0-6')
-                .pipe(take(1))
-                .subscribe((totalQuestions) => {
-                    console.log('totalQuestions', totalQuestions);
-                    console.log('survey.currentQuestion', survey.currentQuestion);
-                    if (this.currentQuestionIndex >= totalQuestions) {
-                        this.messageService.add({
-                            severity: 'info',
-                            summary: 'تنبيه',
-                            detail: 'أنت في السؤال الأخير'
-                        });
-                        return;
-                    }
-
-                    if (this.currentQuestionIndex == 0) {
-                        this.assessmentService.getPrevAgeRange(survey.domainName, survey.ageRange || '0-6').subscribe((prevAgeRange) => {
-                            if (prevAgeRange) {
-                                survey.ageRange = prevAgeRange;
-                            }
-                        });
-                    }
-                    // Navigate to next question
-                    this.currentQuestionIndex--;
-                    this.surveyService.updateSurvey(survey).subscribe();
-
-                    // Also update assessment session
-                    // if (this.assessmentSession) {
-                    //     this.assessmentSession.currentQuestion = survey.currentQuestion.toString();
-                    //     this.assessmentService.startSession(this.assessmentSession);
-                    // }
-
-                    // If we're at the last question, show message
-                });
-        });
-    }
-
-    navigateToNextQuestion(): void {
-        this.survey$.pipe(take(1)).subscribe((survey) => {
-            if (!survey) return;
-
-            // Check if there are more questions in this age range
-            this.assessmentService
-                .getTotalQuestionsCount(survey.domainName, survey.ageRange || '0-6')
-                .pipe(take(1))
-                .subscribe((totalQuestions) => {
-                    console.log('totalQuestions', totalQuestions);
-                    console.log('survey.currentQuestion', survey.currentQuestion);
-
-                    if (this.currentQuestionIndex >= totalQuestions) {
-                        this.messageService.add({
-                            severity: 'info',
-                            summary: 'تنبيه',
-                            detail: 'أنت في السؤال الأخير'
-                        });
-                        return;
-                    }
-
-                    if (this.currentQuestionIndex == totalQuestions - 1) {
-                        this.assessmentService.getNextAgeRange(survey.domainName, survey.ageRange || '0-6').subscribe((nextAgeRange) => {
-                            if (nextAgeRange) {
-                                survey.ageRange = nextAgeRange;
-                            }
-                        });
-                    }
-                    // Navigate to next question
-                    survey.currentQuestion += 1;
-                    this.surveyService.updateSurvey(survey).subscribe();
-
-                    // Also update assessment session
-                    // if (this.assessmentSession) {
-                    //     this.assessmentSession.currentQuestion = survey.currentQuestion.toString();
-                    //     this.assessmentService.startSession(this.assessmentSession);
-                    // }
-                    // If we're at the last question, show message
-                });
-        });
-    }
-
-    navigateToPreviousAgeRange(): void {
+    navigateToNextAgeBlock(): void {
         if (!this.assessmentSession) return;
+
         this.currentQuestionIndex = 0;
-        const subscription = this.assessmentService.getAgeRangeFirstQuestionByOffset(-1, this.currentAgeRange, this.assessmentSession.domainName).subscribe((result) => {
-            if (result) {
-                // Navigate to the previous age range
-                this.assessmentService.setSpecificQuestion(this.assessmentSession!.domainName, result.ageRange, this.currentQuestionIndex);
 
-                // Update current survey if available
-                this.survey$.pipe(take(1)).subscribe((survey) => {
-                    if (survey) {
-                        survey.ageRange = result.ageRange;
-
-                        this.surveyService.updateSurvey(survey).subscribe();
-                    }
-                });
-
-                // Update current age range for UI
-                this.currentAgeRange = result.ageRange;
-
-                this.messageService.add({
-                    severity: 'info',
-                    summary: 'انتقال',
-                    detail: `تم الانتقال إلى الفئة العمرية ${result.ageRange}`
-                });
-            } else {
-                this.messageService.add({
-                    severity: 'warn',
-                    summary: 'تنبيه',
-                    detail: 'لا توجد فئة عمرية سابقة'
-                });
-            }
-        });
-
-        this.subscriptions.push(subscription);
-    }
-
-    navigateToNextAgeRange(): void {
-        if (!this.assessmentSession) return;
-        this.currentQuestionIndex = 0;
         const subscription = this.assessmentService.getAgeRangeFirstQuestionByOffset(1, this.currentAgeRange, this.assessmentSession.domainName).subscribe((result) => {
             if (result) {
                 // Navigate to the next age range
-                this.assessmentService.setSpecificQuestion(this.assessmentSession!.domainName, result.ageRange, this.currentQuestionIndex);
+                this.assessmentService.setSpecificQuestion(this.assessmentSession!.domainName, result.ageRange, 0);
 
-                // Update current survey if available
+                // Update current survey
                 this.survey$.pipe(take(1)).subscribe((survey) => {
                     if (survey) {
                         survey.ageRange = result.ageRange;
+                        survey.currentAgeBlock = result.ageRange;
+                        survey.currentQuestionIdx = 0;
+                        survey.currentQuestion = '1';
+
                         this.surveyService.updateSurvey(survey).subscribe();
                     }
                 });
@@ -365,33 +279,32 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
 
                 this.cdr.markForCheck();
             } else {
-                this.messageService.add({
-                    severity: 'warn',
-                    summary: 'تنبيه',
-                    detail: 'لا توجد فئة عمرية تالية'
-                });
+                // No more age blocks, mark survey as completed
+                this.completeSurvey();
             }
         });
 
         this.subscriptions.push(subscription);
     }
 
-    private handleAnswerResult(success: boolean, survey: Survey): void {
-        if (success) {
-            if (survey.completed) {
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'اكتمل',
-                    detail: 'تم إكمال الاستبيان بنجاح'
+    completeSurvey(): void {
+        this.survey$.pipe(take(1)).subscribe((survey) => {
+            if (survey) {
+                survey.completed = true;
+                survey.completedAt = new Date();
+
+                this.surveyService.updateSurvey(survey).subscribe({
+                    next: () => {
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'اكتمل',
+                            detail: 'تم إكمال الاستبيان بنجاح'
+                        });
+                        this.cdr.markForCheck();
+                    }
                 });
             }
-        } else {
-            this.messageService.add({
-                severity: 'error',
-                summary: 'خطأ',
-                detail: 'فشل في تحديث الاستبيان'
-            });
-        }
+        });
     }
 
     private handleAnswerError(error: any): void {
@@ -404,10 +317,15 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
     }
 
     navigateHome(): void {
+        // Store current responses before navigating away
+        this.storeCurrentResponses();
         this.router.navigate(['/app/survey/list']);
     }
 
     ngOnDestroy(): void {
+        // Store responses when component is destroyed
+        this.storeCurrentResponses();
+
         // Clean up subscriptions
         this.subscriptions.forEach((sub) => sub.unsubscribe());
     }

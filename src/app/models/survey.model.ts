@@ -1,5 +1,3 @@
-import { SurveyResponse } from './survey-response.model';
-
 export interface Survey {
     id?: string;
     childId: string;
@@ -10,7 +8,7 @@ export interface Survey {
     createdAt: Date;
     completedAt?: Date;
     completed: boolean;
-    responses: SurveyResponse[];
+    responses: { [key: string]: string[] };
     currentQuestion: string;
     currentQuestionIdx: number;
     currentAgeBlock: string;
