@@ -45,7 +45,7 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
     currentAgeRange = '';
     assessmentSession: AssessmentSession | null = null;
     isNavigating = false;
-    response$ = new BehaviorSubject<{ [key: string]: string[] }>({});
+    // response$ = new BehaviorSubject<{ [key: string]: string[] }>({});
     private subscriptions: Subscription[] = [];
 
     // Add event listener for when user leaves the page
@@ -169,6 +169,8 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
         this.isNavigating = true;
 
         // Make a copy of the survey to avoid modifying the observable directly
+        this.updateSurveyResponses(survey, answer);
+        // Save the updated survey state
         const updatedSurvey = { ...survey };
 
         const subscription = this.processAnswer(updatedSurvey, answer).subscribe(
@@ -199,92 +201,113 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
             switchMap((question) => {
                 if (!question) return of({ success: false });
 
-                this.updateSurveyResponses(survey, answer);
-
-                return this.assessmentService.getTotalQuestionsCount(survey.domain, survey.ageRange || '0-6').pipe(
+                const ageRange = survey.ageRange || '0-6';
+                return this.assessmentService.getTotalQuestionsCount(survey.domain, ageRange).pipe(
                     take(1),
-                    map((totalQuestions) => {
+                    switchMap((totalQuestions) => {
                         const isLastQuestion = this.currentQuestionIndex >= totalQuestions - 1;
-                        const moveToNextAgeBlock = isLastQuestion;
 
-                        if (!isLastQuestion) {
-                            // Move to next question in current age block
-                            this.currentQuestionIndex++;
-                            survey.currentQuestionIdx = this.currentQuestionIndex;
-
-                            this.assessmentService.setSpecificQuestion(survey.domain, survey.ageRange || '0-6', this.currentQuestionIndex);
-                            this.currentQuestion$ = this.assessmentService.getCurrentQuestion();
-                        } else if (moveToNextAgeBlock) {
-                            this.navigateToNextAgeBlock();
-                            // Mark for moving to next age block after saving
-                            // We'll handle the actual navigation after saving the current response
+                        if (isLastQuestion) {
+                            return this.navigateToNextAgeBlock(survey).pipe(map(() => ({ success: true, moveToNextAgeBlock: true })));
                         }
 
-                        return { success: true, moveToNextAgeBlock };
+                        // Move to next question in current age block
+                        this.currentQuestionIndex++;
+                        survey.currentQuestionIdx = this.currentQuestionIndex;
+
+                        this.assessmentService.setSpecificQuestion(survey.domain, ageRange, this.currentQuestionIndex);
+                        this.currentQuestion$ = this.assessmentService.getCurrentQuestion();
+
+                        return of({ success: true, moveToNextAgeBlock: false });
                     })
                 );
             }),
-            switchMap((result) => {
-                // Always save the current state
-                return this.surveyService.updateSurvey(survey).pipe(
+            switchMap((result) =>
+                this.surveyService.updateSurvey(survey).pipe(
                     map(() => result),
                     catchError((error) => {
                         console.error('Error updating survey:', error);
                         return of({ success: false });
                     })
-                );
-            })
+                )
+            )
         );
     }
 
     private updateSurveyResponses(survey: Survey, answer: boolean): void {
-        debugger;
-        if (!survey.responses[this.currentAgeRange!]) {
-            survey.responses[this.currentAgeRange!] = []; // Or something like ["n", "n", "n"] as default
+        // Make sure we're working with a defined survey object
+        if (!survey) {
+            console.error('Survey object is undefined');
+            return;
         }
-        survey.responses[this.currentAgeRange!][this.currentQuestionIndex] = answer ? 'y' : 'n';
-        localStorage.setItem('surveyResponses', JSON.stringify(survey.responses));
+
+        // Initialize responses object if it doesn't exist
+        if (!survey.responses) {
+            survey.responses = {};
+        }
+
+        // Make sure currentAgeRange is defined
+        if (!this.currentAgeRange) {
+            console.error('currentAgeRange is undefined');
+            return;
+        }
+
+        // Create a new reference for the responses object to trigger change detection
+        const updatedResponses = { ...survey.responses };
+
+        // Initialize the array for this age range if it doesn't exist
+        if (!updatedResponses[this.currentAgeRange]) {
+            updatedResponses[this.currentAgeRange] = [];
+        }
+
+        // Create a new array reference for the age range
+        const updatedAgeRangeResponses = [...updatedResponses[this.currentAgeRange]];
+
+        // Ensure the array has enough elements
+        while (updatedAgeRangeResponses.length <= this.currentQuestionIndex) {
+            updatedAgeRangeResponses.push('n'); // Default to 'n'
+        }
+
+        // Update the response
+        updatedAgeRangeResponses[this.currentQuestionIndex] = answer ? 'y' : 'n';
+
+        // Update the references
+        updatedResponses[this.currentAgeRange] = updatedAgeRangeResponses;
+        survey.responses = updatedResponses;
+        console.log('updatedResponses:', updatedResponses);
     }
 
-    navigateToNextAgeBlock(): void {
-        if (!this.assessmentSession) return;
+    private navigateToNextAgeBlock(survey: Survey): Observable<boolean> {
+        if (!this.assessmentSession) return of(false);
 
         this.currentQuestionIndex = 0;
 
-        const subscription = this.assessmentService.getAgeRangeFirstQuestionByOffset(1, this.currentAgeRange, this.assessmentSession.domainName).subscribe((result) => {
-            if (result) {
-                // Navigate to the next age range
-                this.assessmentService.setSpecificQuestion(this.assessmentSession!.domainName, result.ageRange, 0);
+        return this.assessmentService.getAgeRangeFirstQuestionByOffset(1, this.currentAgeRange, this.assessmentSession.domainName).pipe(
+            map((result) => {
+                if (result) {
+                    survey.ageRange = result.ageRange;
+                    survey.currentAgeBlock = result.ageRange;
+                    survey.currentQuestionIdx = 0;
+                    survey.currentQuestion = '1';
+                    this.currentAgeRange = result.ageRange;
 
-                // Update current survey
-                this.survey$.pipe(take(1)).subscribe((survey) => {
-                    if (survey) {
-                        survey.ageRange = result.ageRange;
-                        survey.currentAgeBlock = result.ageRange;
-                        survey.currentQuestionIdx = 0;
-                        survey.currentQuestion = '1';
+                    this.messageService.add({
+                        severity: 'info',
+                        summary: 'انتقال',
+                        detail: `تم الانتقال إلى الفئة العمرية ${result.ageRange}`
+                    });
 
-                        this.surveyService.updateSurvey(survey).subscribe();
-                    }
-                });
+                    return true;
+                }
 
-                // Update current age range for UI
-                this.currentAgeRange = result.ageRange;
-
-                this.messageService.add({
-                    severity: 'info',
-                    summary: 'انتقال',
-                    detail: `تم الانتقال إلى الفئة العمرية ${result.ageRange}`
-                });
-
-                this.cdr.markForCheck();
-            } else {
-                // No more age blocks, mark survey as completed
                 this.completeSurvey();
-            }
-        });
-
-        this.subscriptions.push(subscription);
+                return true;
+            }),
+            catchError((error) => {
+                console.error('Error navigating to next age block:', error);
+                return of(false);
+            })
+        );
     }
 
     completeSurvey(): void {

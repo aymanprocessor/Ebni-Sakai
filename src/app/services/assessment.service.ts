@@ -58,7 +58,6 @@ export class AssessmentService {
 
     getStartBlock(child: Child): Observable<string | null> {
         const ageInMonths = this.dataUtilsService.ageInMonthsFromDate(child.birthday);
-        debugger;
         const ageBlockIdx = this.ageBlocks.findIndex((block) => {
             const [start, end] = block.split('-').map(Number);
             return ageInMonths >= start && ageInMonths <= end;
@@ -74,7 +73,6 @@ export class AssessmentService {
     }
 
     getCurrentQuestion(): Observable<QuestionItem | null> {
-        debugger;
         return this.currentSession.pipe(
             switchMap((session) => {
                 if (!session) return of(null);

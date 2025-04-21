@@ -198,7 +198,6 @@ export class ChildrenService {
     calculateAgeInMonths(birthDate: Date): number {
         const today = new Date();
         const birthDateT = new Date(birthDate);
-        debugger;
         let months = (today.getFullYear() - birthDateT.getFullYear()) * 12;
         months -= birthDateT.getMonth();
         months += today.getMonth();
