@@ -1,5 +1,6 @@
 import { Component, OnInit, ErrorHandler, Injectable } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { GoogleTagManagerModule } from 'angular-google-tag-manager';
 
 @Injectable()
@@ -30,7 +31,7 @@ export class GlobalErrorHandler implements ErrorHandler {
     `
 })
 export class AppComponent implements OnInit {
-    constructor() {
+    constructor(private translateService: TranslateService) {
         console.log('AppComponent constructor called');
 
         // Add global error event listeners
@@ -44,6 +45,7 @@ export class AppComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.translateService.use('ar-EG'); // Set default language
         console.log('AppComponent initialized');
 
         // Performance tracking

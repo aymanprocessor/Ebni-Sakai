@@ -23,6 +23,16 @@ export const routes: Routes = [
                 canActivate: [authGuard]
             },
             {
+                path: 'booking',
+                loadComponent: () => import('./app/pages/booking/booking-calendar/booking-calendar.component').then((m) => m.BookingCalendarComponent),
+                canActivate: [authGuard]
+            },
+            {
+                path: 'time-slots',
+                loadComponent: () => import('./app/pages/booking/time-slots/time-slots.component').then((m) => m.AdminTimeSlotsComponent),
+                canActivate: [authGuard]
+            },
+            {
                 path: 'survey',
                 children: [
                     {

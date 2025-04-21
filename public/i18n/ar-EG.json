@@ -47,7 +47,10 @@
       "male": "ذكر",
       "age": "العمر",
       "actions": "الاجراءات",
-      "birthdate": "تاريخ الميلاد"
+      "birthdate": "تاريخ الميلاد",
+      "day": "اليوم",
+      "week": "هذا الاسبوع",
+      "month": "هذا الشهر"
     },
     "age": {
       "format": "{{years}} سنة، {{months}} شهر"
@@ -93,6 +96,12 @@
     },
     "register": {
       "welcome": "مرحبا بكم في كيد سكيلز"
+    },
+    "booking": {
+      "selectTimeSlotMessage": "اختر وقتًا لحجز موعد. الأوقات المتاحة موضحة أدناه.",
+      "bookApppointment": "حجز موعد جديد",
+      "availableSlotFor": "الفترات المتاحة لـ ",
+      "noTimeSlotAvailable": "لا يوجد الفترات المتاحة"
     }
   },
   "navigation": {

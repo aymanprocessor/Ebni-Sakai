@@ -47,7 +47,9 @@
       "male": "Male",
       "age": "Age",
       "actions": "Actions",
-      "birthdate": "Birthdate"
+      "birthdate": "Birthdate",
+      "month": "This Month",
+      "week": "This Week"
     },
     "age": {
       "years": {
@@ -109,6 +111,12 @@
     },
     "register": {
       "welcome": "Welcome to Kid Skills"
+    },
+    "booking": {
+      "selectTimeSlotMessage": "Select a time slot to book an appointment. Available slots are shown below.",
+      "bookApppointment": "Book an Appointment",
+      "availableSlotFor": "Available slots for ",
+      "noTimeSlotAvailable": "No time slots available"
     }
   },
   "navigation": {

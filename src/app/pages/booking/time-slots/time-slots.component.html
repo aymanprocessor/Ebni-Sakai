@@ -1,0 +1,171 @@
+<!-- src/app/admin/components/time-slots/time-slots.component.html -->
+<div class="p-4">
+    <p-toast></p-toast>
+    <p-confirmDialog></p-confirmDialog>
+
+    <div class="mb-6">
+        <div class="flex flex-col sm:flex-row justify-between gap-4 mb-4">
+            <h1 class="text-2xl font-semibold text-gray-800 dark:text-white">Manage Time Slots</h1>
+
+            <div>
+                <button pButton pRipple label="Add New Time Slot" icon="pi pi-plus" class="p-button-primary" (click)="openNew()"></button>
+            </div>
+        </div>
+
+        <div class="bg-indigo-50 dark:bg-indigo-900 p-4 rounded-lg mb-4">
+            <div class="flex items-center text-indigo-800 dark:text-indigo-200">
+                <i class="pi pi-info-circle mr-2"></i>
+                <p>Manage available time slots for booking. You can add, edit, or delete time slots as needed.</p>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="isLoading" class="flex justify-center my-8">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+    </div>
+
+    <div *ngIf="!isLoading" class="card">
+        <p-table
+            [value]="timeSlots"
+            [paginator]="true"
+            [rows]="10"
+            [rowsPerPageOptions]="[5, 10, 25, 50]"
+            [globalFilterFields]="['id', 'startTime', 'endTime', 'isBooked']"
+            styleClass="p-datatable-responsive p-datatable-gridlines"
+            [rowHover]="true"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+            responsiveLayout="stack"
+        >
+            <ng-template pTemplate="caption">
+                <div class="flex justify-between items-center">
+                    <h5 class="text-xl font-medium">Time Slots</h5>
+                    <span class="p-input-icon-left">
+                        <i class="pi pi-search"></i>
+                        <input pInputText type="text" placeholder="Search..." class="p-inputtext p-component" />
+                    </span>
+                </div>
+            </ng-template>
+
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Status</th>
+                    <th>Created By</th>
+                    <th>Updated At</th>
+                    <th style="width: 150px">Actions</th>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-timeSlot>
+                <tr>
+                    <td>
+                        <span class="p-column-title">Start Time</span>
+                        {{ formatDateTime(timeSlot.startTime) }}
+                    </td>
+                    <td>
+                        <span class="p-column-title">End Time</span>
+                        {{ formatDateTime(timeSlot.endTime) }}
+                    </td>
+                    <td>
+                        <span class="p-column-title">Status</span>
+                        <span
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                            [ngClass]="{
+                                'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300': !timeSlot.isBooked,
+                                'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300': timeSlot.isBooked
+                            }"
+                        >
+                            {{ getStatus(timeSlot) }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="p-column-title">Created By</span>
+                        {{ timeSlot.createdBy || 'N/A' }}
+                    </td>
+                    <td>
+                        <span class="p-column-title">Updated At</span>
+                        {{ timeSlot.updatedAt ? formatDateTime(timeSlot.updatedAt) : 'N/A' }}
+                    </td>
+                    <td>
+                        <div class="flex justify-center sm:justify-start gap-2">
+                            <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success p-button-sm" (click)="editTimeSlot(timeSlot)" [disabled]="timeSlot.isBooked"></button>
+                            <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-sm" (click)="deleteTimeSlot(timeSlot)" [disabled]="timeSlot.isBooked"></button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="6" class="text-center p-4">
+                        <div class="flex flex-col items-center py-6">
+                            <i class="pi pi-calendar-times text-4xl text-gray-400 mb-2"></i>
+                            <p class="text-gray-500">No time slots found</p>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+
+    <!-- Time Slot Dialog -->
+    <p-dialog
+        [contentStyle]="{ overflow: 'visible' }"
+        [(visible)]="timeSlotDialog"
+        [style]="{ width: '450px' }"
+        [header]="isNewTimeSlot ? 'Add New Time Slot' : 'Edit Time Slot'"
+        [modal]="true"
+        styleClass="p-fluid"
+        [draggable]="false"
+        [resizable]="false"
+    >
+        <ng-template pTemplate="content">
+            <form [formGroup]="timeSlotForm">
+                <div class="field">
+                    <label for="startTime" class="font-medium mb-2 block">Start Time</label>
+                    <p-datepicker
+                        dir="ltr"
+                        formControlName="startTime"
+                        [showTime]="true"
+                        [showSeconds]="false"
+                        [showIcon]="true"
+                        hourFormat="12"
+                        inputId="startTime"
+                        placeholder="Select start time"
+                        [minDate]="minDate"
+                        dateFormat="dd/mm/yy"
+                        styleClass="w-full"
+                    >
+                    </p-datepicker>
+                    <small *ngIf="timeSlotForm.get('startTime')?.invalid && timeSlotForm.get('startTime')?.touched" class="p-error block mt-1"> Start time is required </small>
+                </div>
+
+                <div class="field mt-4">
+                    <label for="endTime" class="font-medium mb-2 block">End Time</label>
+                    <p-datepicker
+                        dir="ltr"
+                        formControlName="endTime"
+                        [showTime]="true"
+                        [showSeconds]="false"
+                        [showIcon]="true"
+                        hourFormat="12"
+                        inputId="endTime"
+                        placeholder="Select end time"
+                        [minDate]="timeSlotForm.get('endTime')?.value || minDate"
+                        dateFormat="dd/mm/yy"
+                        styleClass="w-full"
+                    >
+                    </p-datepicker>
+                    <small *ngIf="timeSlotForm.get('endTime')?.invalid && timeSlotForm.get('endTime')?.touched" class="p-error block mt-1"> End time is required </small>
+                </div>
+            </form>
+        </ng-template>
+
+        <ng-template pTemplate="footer">
+            <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+            <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-primary" (click)="saveTimeSlot()" [disabled]="timeSlotForm.invalid || isLoading"></button>
+        </ng-template>
+    </p-dialog>
+</div>

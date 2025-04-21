@@ -246,8 +246,13 @@ export class AuthService {
                     lastName: nameParts.slice(1).join(' ') || '',
                     photoURL: user.photoURL || '',
                     isNewUser: true,
+                    role: 'user',
+                    isSubscribed: false,
+                    mobile: user.phoneNumber || '',
+                    displayName: user.displayName || '',
                     createdAt: new Date(),
-                    lastLogin: new Date()
+                    lastLogin: new Date(),
+                    updatedAt: new Date()
                 };
 
                 await setDoc(userDocRef, newUser);
@@ -294,5 +299,14 @@ export class AuthService {
 
     isLoggedIn(): boolean {
         return !!this.auth.currentUser;
+    }
+
+    // Check if user is an admin
+    isAdmin(): Observable<boolean> {
+        return this.currentUser$.pipe(map((user) => user?.role === 'admin'));
+    }
+
+    isPaidUser(): Observable<boolean> {
+        return this.currentUser$.pipe(map((user) => user?.isSubscribed === true));
     }
 }
