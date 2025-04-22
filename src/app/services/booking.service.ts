@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Firestore, collection, collectionData, doc, setDoc, updateDoc, deleteDoc, query, where, getDoc, onSnapshot, DocumentReference, Timestamp, runTransaction } from '@angular/fire/firestore';
-import { Observable, from, map, switchMap, of, BehaviorSubject, combineLatest } from 'rxjs';
+import { Observable, from, map, switchMap, of, BehaviorSubject, combineLatest, async, take } from 'rxjs';
 import { AuthService } from './auth.service';
 import { Booking } from '../models/booking.model';
 import { TimeSlot } from '../models/time-slot.model';
@@ -41,127 +41,12 @@ export class BookingService {
                         updatedAt: data['updatedAt']?.toDate()
                     } as TimeSlot;
                 });
-
                 this.timeSlotsSubject.next(timeSlots);
             },
             (error) => {
-                console.error('Error getting time slots:', error);
+                console.error('Error fetching time slots:', error);
             }
         );
-    }
-
-    // Get all available time slots (not booked)
-    getAvailableTimeSlots(): Observable<TimeSlot[]> {
-        return this.timeSlots$.pipe(map((slots) => slots.filter((slot) => !slot.isBooked)));
-    }
-
-    // Get all time slots (for admin)
-    getAllTimeSlots(): Observable<TimeSlot[]> {
-        return this.timeSlots$;
-    }
-
-    // Create a new time slot (admin only)
-    async createTimeSlot(timeSlot: Omit<TimeSlot, 'id'>): Promise<string> {
-        const currentUser = await this.authService.getCurrentUser();
-
-        if (!currentUser) {
-            throw new Error('User must be authenticated to create a time slot');
-        }
-
-        const timeSlotsRef = collection(this.firestore, this.TIME_SLOTS_COLLECTION);
-        const newTimeSlotRef = doc(timeSlotsRef);
-
-        const timeSlotData = {
-            startTime: Timestamp.fromDate(timeSlot.startTime),
-            endTime: Timestamp.fromDate(timeSlot.endTime),
-            isBooked: false,
-            createdBy: currentUser.uid,
-            updatedAt: Timestamp.now()
-        };
-
-        await setDoc(newTimeSlotRef, timeSlotData);
-        return newTimeSlotRef.id;
-    }
-
-    // Update a time slot (admin only)
-    async updateTimeSlot(id: string, timeSlot: Partial<TimeSlot>): Promise<void> {
-        const timeSlotRef = doc(this.firestore, `${this.TIME_SLOTS_COLLECTION}/${id}`);
-
-        const updateData: any = {
-            updatedAt: Timestamp.now()
-        };
-
-        if (timeSlot.startTime) {
-            updateData.startTime = Timestamp.fromDate(timeSlot.startTime);
-        }
-
-        if (timeSlot.endTime) {
-            updateData.endTime = Timestamp.fromDate(timeSlot.endTime);
-        }
-
-        if (typeof timeSlot.isBooked !== 'undefined') {
-            updateData.isBooked = timeSlot.isBooked;
-        }
-
-        await updateDoc(timeSlotRef, updateData);
-    }
-
-    // Delete a time slot (admin only)
-    async deleteTimeSlot(id: string): Promise<void> {
-        const timeSlotRef = doc(this.firestore, `${this.TIME_SLOTS_COLLECTION}/${id}`);
-        await deleteDoc(timeSlotRef);
-    }
-
-    // Book a time slot
-    async bookTimeSlot(timeSlotId: string, notes?: string): Promise<string> {
-        const currentUser = await this.authService.getCurrentUser();
-
-        if (!currentUser) {
-            throw new Error('User must be authenticated to book a time slot');
-        }
-
-        const timeSlotRef = doc(this.firestore, `${this.TIME_SLOTS_COLLECTION}/${timeSlotId}`);
-
-        // Use a transaction to ensure the time slot isn't booked by someone else
-        return runTransaction(this.firestore, async (transaction) => {
-            const timeSlotDoc = await transaction.get(timeSlotRef);
-
-            if (!timeSlotDoc.exists()) {
-                throw new Error('Time slot does not exist');
-            }
-
-            const timeSlotData = timeSlotDoc.data();
-
-            if (timeSlotData['isBooked']) {
-                throw new Error('Time slot is already booked');
-            }
-
-            // Create a new booking
-            const bookingsRef = collection(this.firestore, this.BOOKINGS_COLLECTION);
-            const newBookingRef = doc(bookingsRef);
-
-            const bookingData = {
-                timeSlotId,
-                userId: currentUser.uid,
-                userName: currentUser.displayName || 'Unknown User',
-                userEmail: currentUser.email,
-                bookingDate: Timestamp.now(),
-                notes: notes || '',
-                status: 'confirmed'
-            };
-
-            // Update the time slot to mark it as booked
-            transaction.update(timeSlotRef, {
-                isBooked: true,
-                updatedAt: Timestamp.now(),
-                bookedBy: currentUser.uid
-            });
-
-            // Create the booking document
-            transaction.set(newBookingRef, bookingData);
-
-            return newBookingRef.id;
-        });
     }
 
     // Get bookings for current user
@@ -281,39 +166,178 @@ export class BookingService {
         });
     }
 
-    // Helper function to combine multiple observables
-    private combineLatest<T>(observables: Observable<T>[]): Observable<T[]> {
-        return new Observable<T[]>((observer) => {
-            if (observables.length === 0) {
-                observer.next([]);
-                observer.complete();
-                return;
+    // Get time slots in a specific date range
+    getTimeSlotsInRange(startDate: Date, endDate: Date): Observable<TimeSlot[]> {
+        return this.timeSlots$.pipe(map((slots) => slots.filter((slot) => slot.startTime >= startDate && slot.startTime <= endDate)));
+    }
+
+    // Check for time slot conflicts before creating new slots
+    async checkForConflicts(startTime: Date, endTime: Date): Promise<boolean> {
+        // Get existing time slots
+        const existingSlots = await new Promise<TimeSlot[]>((resolve) => {
+            this.timeSlots$.pipe(take(1)).subscribe((slots) => resolve(slots));
+        });
+
+        // Check if the new slot overlaps with any existing slots
+        return existingSlots.some((slot) => {
+            return (startTime >= slot.startTime && startTime < slot.endTime) || (endTime > slot.startTime && endTime <= slot.endTime) || (startTime <= slot.startTime && endTime >= slot.endTime);
+        });
+    }
+
+    // Get available slots grouped by date
+    getAvailableSlotsGroupedByDate(): Observable<{ date: string; slots: TimeSlot[] }[]> {
+        return this.getAvailableTimeSlots().pipe(
+            map((slots) => {
+                const grouped = slots.reduce(
+                    (acc, slot) => {
+                        const dateStr = slot.startTime.toDateString();
+                        if (!acc[dateStr]) {
+                            acc[dateStr] = [];
+                        }
+                        acc[dateStr].push(slot);
+                        return acc;
+                    },
+                    {} as Record<string, TimeSlot[]>
+                );
+
+                return Object.entries(grouped).map(([date, slots]) => ({
+                    date,
+                    slots: slots.sort((a, b) => a.startTime.getTime() - b.startTime.getTime())
+                }));
+            })
+        );
+    }
+
+    // Get all available time slots (not booked)
+    getAvailableTimeSlots(): Observable<TimeSlot[]> {
+        return this.timeSlots$.pipe(map((slots) => slots.filter((slot) => !slot.isBooked)));
+    }
+
+    // Get all time slots (for admin)
+    getAllTimeSlots(): Observable<TimeSlot[]> {
+        return this.timeSlots$;
+    }
+
+    // Create a new time slot (admin only)
+    async createTimeSlot(timeSlot: Omit<TimeSlot, 'id'>): Promise<string> {
+        const currentUser = await this.authService.getCurrentUser();
+
+        if (!currentUser) {
+            throw new Error('User must be authenticated to create a time slot');
+        }
+
+        const timeSlotsRef = collection(this.firestore, this.TIME_SLOTS_COLLECTION);
+        const newTimeSlotRef = doc(timeSlotsRef);
+
+        const timeSlotData = {
+            startTime: Timestamp.fromDate(timeSlot.startTime),
+            endTime: Timestamp.fromDate(timeSlot.endTime),
+            isBooked: false,
+            createdBy: currentUser.uid,
+            updatedAt: Timestamp.now()
+        };
+
+        await setDoc(newTimeSlotRef, timeSlotData);
+        return newTimeSlotRef.id;
+    }
+
+    // Create multiple time slots at once
+    async createMultipleTimeSlots(timeSlots: Omit<TimeSlot, 'id'>[]): Promise<string[]> {
+        const currentUser = await this.authService.getCurrentUser();
+
+        if (!currentUser) {
+            throw new Error('User must be authenticated to create time slots');
+        }
+
+        const timeSlotIds: string[] = [];
+
+        // Create each time slot
+        for (const timeSlot of timeSlots) {
+            const id = await this.createTimeSlot(timeSlot);
+            timeSlotIds.push(id);
+        }
+
+        return timeSlotIds;
+    }
+
+    // Update a time slot (admin only)
+    async updateTimeSlot(id: string, timeSlot: Partial<TimeSlot>): Promise<void> {
+        const timeSlotRef = doc(this.firestore, `${this.TIME_SLOTS_COLLECTION}/${id}`);
+
+        const updateData: any = {
+            updatedAt: Timestamp.now()
+        };
+
+        if (timeSlot.startTime) {
+            updateData.startTime = Timestamp.fromDate(timeSlot.startTime);
+        }
+
+        if (timeSlot.endTime) {
+            updateData.endTime = Timestamp.fromDate(timeSlot.endTime);
+        }
+
+        if (typeof timeSlot.isBooked !== 'undefined') {
+            updateData.isBooked = timeSlot.isBooked;
+        }
+
+        await updateDoc(timeSlotRef, updateData);
+    }
+
+    // Delete a time slot (admin only)
+    async deleteTimeSlot(id: string): Promise<void> {
+        const timeSlotRef = doc(this.firestore, `${this.TIME_SLOTS_COLLECTION}/${id}`);
+        await deleteDoc(timeSlotRef);
+    }
+
+    // Book a time slot
+    async bookTimeSlot(timeSlotId: string, notes?: string): Promise<string> {
+        const currentUser = await this.authService.getCurrentUser();
+
+        if (!currentUser) {
+            throw new Error('User must be authenticated to book a time slot');
+        }
+
+        const timeSlotRef = doc(this.firestore, `${this.TIME_SLOTS_COLLECTION}/${timeSlotId}`);
+
+        // Use a transaction to ensure the time slot isn't booked by someone else
+        return runTransaction(this.firestore, async (transaction) => {
+            const timeSlotDoc = await transaction.get(timeSlotRef);
+
+            if (!timeSlotDoc.exists()) {
+                throw new Error('Time slot does not exist');
             }
 
-            let values: T[] = new Array(observables.length);
-            let completed = 0;
-            let hasValues = 0;
+            const timeSlotData = timeSlotDoc.data();
 
-            observables.forEach((observable, index) => {
-                observable.subscribe(
-                    (value) => {
-                        if (values[index] === undefined) {
-                            hasValues++;
-                        }
-                        values[index] = value;
-                        if (hasValues === observables.length) {
-                            observer.next([...values]);
-                        }
-                    },
-                    (error) => observer.error(error),
-                    () => {
-                        completed++;
-                        if (completed === observables.length) {
-                            observer.complete();
-                        }
-                    }
-                );
+            if (timeSlotData['isBooked']) {
+                throw new Error('Time slot is already booked');
+            }
+
+            // Create a new booking
+            const bookingsRef = collection(this.firestore, this.BOOKINGS_COLLECTION);
+            const newBookingRef = doc(bookingsRef);
+
+            const bookingData = {
+                timeSlotId,
+                userId: currentUser.uid,
+                userName: currentUser.displayName || 'Unknown User',
+                userEmail: currentUser.email,
+                bookingDate: Timestamp.now(),
+                notes: notes || '',
+                status: 'confirmed'
+            };
+
+            // Update the time slot to mark it as booked
+            transaction.update(timeSlotRef, {
+                isBooked: true,
+                updatedAt: Timestamp.now(),
+                bookedBy: currentUser.uid
             });
+
+            // Create the booking document
+            transaction.set(newBookingRef, bookingData);
+
+            return newBookingRef.id;
         });
     }
 }

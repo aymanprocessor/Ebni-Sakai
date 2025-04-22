@@ -1,4 +1,3 @@
-<!-- src/app/admin/components/time-slots/time-slots.component.html -->
 <div class="p-4">
     <p-toast></p-toast>
     <p-confirmDialog></p-confirmDialog>
@@ -61,15 +60,12 @@
             <ng-template pTemplate="body" let-timeSlot>
                 <tr>
                     <td>
-                        <span class="p-column-title">Start Time</span>
                         {{ formatDateTime(timeSlot.startTime) }}
                     </td>
                     <td>
-                        <span class="p-column-title">End Time</span>
                         {{ formatDateTime(timeSlot.endTime) }}
                     </td>
                     <td>
-                        <span class="p-column-title">Status</span>
                         <span
                             class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
                             [ngClass]="{
@@ -81,11 +77,9 @@
                         </span>
                     </td>
                     <td>
-                        <span class="p-column-title">Created By</span>
                         {{ timeSlot.createdBy || 'N/A' }}
                     </td>
                     <td>
-                        <span class="p-column-title">Updated At</span>
                         {{ timeSlot.updatedAt ? formatDateTime(timeSlot.updatedAt) : 'N/A' }}
                     </td>
                     <td>
@@ -123,7 +117,7 @@
     >
         <ng-template pTemplate="content">
             <form [formGroup]="timeSlotForm">
-                <div class="field">
+                <div class="field mb-4">
                     <label for="startTime" class="font-medium mb-2 block">Start Time</label>
                     <p-datepicker
                         dir="ltr"
@@ -142,7 +136,7 @@
                     <small *ngIf="timeSlotForm.get('startTime')?.invalid && timeSlotForm.get('startTime')?.touched" class="p-error block mt-1"> Start time is required </small>
                 </div>
 
-                <div class="field mt-4">
+                <div class="field mb-4">
                     <label for="endTime" class="font-medium mb-2 block">End Time</label>
                     <p-datepicker
                         dir="ltr"
@@ -153,12 +147,32 @@
                         hourFormat="12"
                         inputId="endTime"
                         placeholder="Select end time"
-                        [minDate]="timeSlotForm.get('endTime')?.value || minDate"
+                        [minDate]="timeSlotForm.get('startTime')?.value || minDate"
                         dateFormat="dd/mm/yy"
                         styleClass="w-full"
                     >
                     </p-datepicker>
                     <small *ngIf="timeSlotForm.get('endTime')?.invalid && timeSlotForm.get('endTime')?.touched" class="p-error block mt-1"> End time is required </small>
+                </div>
+
+                <!-- Repeat Section - Only show for new time slots -->
+                <div *ngIf="isNewTimeSlot" class="field mb-4">
+                    <label class="font-medium mb-2 block">Repeat</label>
+                    <p-dropdown formControlName="repeat" [options]="repeatOptions" optionLabel="label" optionValue="value" styleClass="w-full"> </p-dropdown>
+                </div>
+
+                <!-- Repeat options - Only displayed when repeat is not "none" -->
+                <div *ngIf="isNewTimeSlot && isRepeatEnabled()" class="field mb-4">
+                    <label for="repeatCount" class="font-medium mb-2 block">Repeat Count</label>
+                    <p-inputNumber formControlName="repeatCount" inputId="repeatCount" [min]="1" [max]="30" styleClass="w-full"> </p-inputNumber>
+                    <small *ngIf="timeSlotForm.get('repeatCount')?.invalid && timeSlotForm.get('repeatCount')?.touched" class="p-error block mt-1"> Please enter a number between 1 and 30 </small>
+                    <small class="text-gray-600 mt-1 block"> This will create {{ timeSlotForm.get('repeatCount')?.value || 1 }} time slots </small>
+                </div>
+
+                <!-- Weekly repeat options -->
+                <div *ngIf="isNewTimeSlot && isWeeklyRepeat()" class="field mb-4">
+                    <label class="font-medium mb-2 block">Days of Week</label>
+                    <p-dropdown formControlName="repeatDays" [options]="daysOfWeek" optionLabel="label" optionValue="value" styleClass="w-full" [showClear]="true" placeholder="Select days"> </p-dropdown>
                 </div>
             </form>
         </ng-template>
