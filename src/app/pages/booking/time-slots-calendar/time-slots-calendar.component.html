@@ -1,0 +1,72 @@
+<div class="p-4">
+    <p-toast></p-toast>
+    <p-confirmDialog></p-confirmDialog>
+
+    <div *ngIf="isLoading" class="flex justify-center my-8">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+    </div>
+
+    <div *ngIf="!isLoading" class="time-slots-calendar-container">
+        <!-- Date Headers -->
+        <div class="border-b border-gray-200 dark:border-gray-700">
+            <div class="grid grid-cols-5">
+                <div *ngFor="let column of dateColumns" class="border-r last:border-r-0 border-gray-200 dark:border-gray-700 p-3 text-center">
+                    <div class="text-gray-500 dark:text-gray-400 text-sm">
+                        <span *ngIf="column.isToday">Today</span>
+                        <span *ngIf="column.isNextDay">Tomorrow</span>
+                        <span *ngIf="column.isNextWeek && !column.isToday && !column.isNextDay">Next Week</span>
+                    </div>
+                    <div class="font-semibold text-lg text-gray-800 dark:text-white">
+                        {{ column.dayName }}
+                    </div>
+                    <div class="text-gray-600 dark:text-gray-300">
+                        {{ column.dateFormatted }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Time Slots Grid -->
+        <div class="time-slots-grid">
+            <div class="grid grid-cols-5">
+                <div *ngFor="let column of dateColumns" class="border-r last:border-r-0 border-gray-200 dark:border-gray-700">
+                    <div class="p-2 space-y-3">
+                        <button
+                            *ngFor="let slot of column.timeSlots"
+                            class="w-full text-center py-2 px-3 rounded-md transition-colors duration-150 bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800"
+                            (click)="selectTimeSlot(slot)"
+                        >
+                            {{ formatTimeOnly(slot.startTime) }}
+                        </button>
+
+                        <!-- If no slots available -->
+                        <div *ngIf="column.timeSlots.length === 0" class="text-center text-gray-400 py-3">No time slots available</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Dialog -->
+    <p-dialog [(visible)]="bookingDialog" [style]="{ width: '450px' }" header="Confirm Booking" [modal]="true" styleClass="p-fluid" [draggable]="false" [resizable]="false" [closeOnEscape]="true">
+        <ng-template pTemplate="content">
+            <div *ngIf="selectedTimeSlot" class="mb-4">
+                <p class="text-lg font-medium mb-2">You're about to book this time slot:</p>
+                <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                    <p class="text-gray-800 dark:text-gray-200"><span class="font-medium">Date:</span> {{ selectedTimeSlot.startTime | date: 'fullDate' }}</p>
+                    <p class="text-gray-800 dark:text-gray-200"><span class="font-medium">Time:</span> {{ formatTimeOnly(selectedTimeSlot.startTime) }}</p>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="notes" class="font-medium mb-2 block">Notes (optional)</label>
+                <textarea pInputTextarea id="notes" [(ngModel)]="bookingNotes" rows="3" placeholder="Add any special requests or information..."></textarea>
+            </div>
+        </ng-template>
+
+        <ng-template pTemplate="footer">
+            <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="closeDialog()"></button>
+            <button pButton pRipple label="Book" icon="pi pi-check" class="p-button-primary" (click)="bookTimeSlot()" [disabled]="isLoading"></button>
+        </ng-template>
+    </p-dialog>
+</div>

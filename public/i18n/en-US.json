@@ -116,7 +116,10 @@
       "selectTimeSlotMessage": "Select a time slot to book an appointment. Available slots are shown below.",
       "bookApppointment": "Book an Appointment",
       "availableSlotFor": "Available slots for ",
-      "noTimeSlotAvailable": "No time slots available"
+      "noTimeSlotAvailable": "No time slots available",
+      "bestTimeQuestion": "What time works best for a session",
+      "30MinMeeting": "30 min meeting",
+      "selectTimeslot": "Select a time"
     }
   },
   "navigation": {

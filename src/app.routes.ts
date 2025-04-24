@@ -33,6 +33,16 @@ export const routes: Routes = [
                 canActivate: [authGuard]
             },
             {
+                path: 'time-slots-by-date',
+                loadComponent: () => import('./app/pages/booking/time-slots-by-date/time-slots-by-date.component').then((m) => m.TimeSlotsByDateComponent),
+                canActivate: [authGuard]
+            },
+            {
+                path: 'time-slots-calendar',
+                loadComponent: () => import('./app/pages/booking/time-slots-calendar/time-slots-calendar.component').then((m) => m.TimeSlotsCalendarComponent),
+                canActivate: [authGuard]
+            },
+            {
                 path: 'survey',
                 children: [
                     {

@@ -2,7 +2,8 @@
 <div class="p-4">
     <p-toast></p-toast>
     <p-confirmDialog></p-confirmDialog>
-
+    <app-booking-dialog></app-booking-dialog>
+    <button pButton label="Schedule a Call" icon="pi pi-calendar" class="p-button-primary" (click)="openBookingDialog()"></button>
     <div class="mb-6">
         <div class="flex flex-col sm:flex-row justify-between gap-4 mb-4">
             <h1 class="text-2xl font-semibold text-gray-800 dark:text-white">{{ 'pages.booking.bookApppointment' | translate }}</h1>

@@ -1,0 +1,52 @@
+.time-slots-calendar-container {
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    background-color: white;
+}
+
+.dark .time-slots-calendar-container {
+    border-color: #4b5563;
+    background-color: #1f2937;
+}
+
+.time-slots-grid {
+    min-height: 400px;
+}
+
+.time-slots-grid button {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .grid.grid-cols-5 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .grid.grid-cols-5>div:nth-child(n+4) {
+        display: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .grid.grid-cols-5 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .grid.grid-cols-5>div:nth-child(n+3) {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .grid.grid-cols-5 {
+        grid-template-columns: 1fr;
+    }
+
+    .grid.grid-cols-5>div:nth-child(n+2) {
+        display: none;
+    }
+}

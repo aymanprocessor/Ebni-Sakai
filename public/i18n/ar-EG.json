@@ -101,7 +101,10 @@
       "selectTimeSlotMessage": "اختر وقتًا لحجز موعد. الأوقات المتاحة موضحة أدناه.",
       "bookApppointment": "حجز موعد جديد",
       "availableSlotFor": "الفترات المتاحة لـ ",
-      "noTimeSlotAvailable": "لا يوجد الفترات المتاحة"
+      "noTimeSlotAvailable": "لا يوجد الفترات المتاحة",
+      "bestTimeQuestion": "ما الوقت الأنسب للجلسة",
+      "30MinMeeting": "الجلسة 30 دقيقة",
+      "selectTimeslot": "اختار الميعاد"
     }
   },
   "navigation": {

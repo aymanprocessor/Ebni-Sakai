@@ -1,0 +1,73 @@
+<div class="p-4">
+    <p-toast></p-toast>
+    <p-confirmDialog></p-confirmDialog>
+
+    <div class="mb-6">
+        <div class="flex flex-col sm:flex-row justify-between gap-4 mb-4">
+            <h1 class="text-2xl font-semibold text-gray-800 dark:text-white">{{ 'pages.booking.timeSlotsByDate' | translate }}</h1>
+        </div>
+
+        <div class="bg-indigo-50 dark:bg-indigo-900 p-4 rounded-lg mb-4">
+            <div class="flex items-center text-indigo-800 dark:text-indigo-200">
+                <i class="pi pi-info-circle me-2"></i>
+                <p>{{ 'pages.booking.selectTimeSlotMessage' | translate }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="isLoading" class="flex justify-center my-8">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+    </div>
+
+    <div *ngIf="!isLoading">
+        <div *ngIf="groupedTimeSlots.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+            <i class="pi pi-calendar-times mb-2" style="font-size: 32px"></i>
+            <p>{{ 'pages.booking.noTimeSlotAvailable' | translate }}</p>
+        </div>
+
+        <div *ngIf="groupedTimeSlots.length > 0">
+            <div *ngFor="let dateGroup of groupedTimeSlots" class="mb-6">
+                <p-card>
+                    <ng-template pTemplate="header">
+                        <div class="p-4 bg-indigo-100 dark:bg-indigo-800">
+                            <h3 class="text-xl font-medium text-indigo-800 dark:text-indigo-200">
+                                {{ formatDate(dateGroup.date) }}
+                            </h3>
+                        </div>
+                    </ng-template>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-2">
+                        <div *ngFor="let slot of dateGroup.slots" class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors" (click)="selectTimeSlot(slot)">
+                            <div class="flex flex-col">
+                                <span class="text-lg font-medium text-indigo-600 dark:text-indigo-400"> {{ formatTime(slot.startTime) }} - {{ formatTime(slot.endTime) }} </span>
+                            </div>
+                        </div>
+                    </div>
+                </p-card>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Dialog -->
+    <p-dialog [(visible)]="bookingDialog" [style]="{ width: '450px' }" header="Confirm Booking" [modal]="true" styleClass="p-fluid" [draggable]="false" [resizable]="false" [closeOnEscape]="true">
+        <ng-template pTemplate="content">
+            <div *ngIf="selectedTimeSlot" class="mb-4">
+                <p class="text-lg font-medium mb-2">You're about to book this time slot:</p>
+                <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                    <p class="text-gray-800 dark:text-gray-200"><span class="font-medium">Date:</span> {{ selectedTimeSlot.startTime | date: 'fullDate' }}</p>
+                    <p class="text-gray-800 dark:text-gray-200"><span class="font-medium">Time:</span> {{ formatTime(selectedTimeSlot.startTime) }} - {{ formatTime(selectedTimeSlot.endTime) }}</p>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="notes" class="font-medium mb-2 block">Notes (optional)</label>
+                <textarea pInputTextarea id="notes" [(ngModel)]="bookingNotes" rows="3" placeholder="Add any special requests or information..."></textarea>
+            </div>
+        </ng-template>
+
+        <ng-template pTemplate="footer">
+            <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="closeDialog()"></button>
+            <button pButton pRipple label="Book" icon="pi pi-check" class="p-button-primary" (click)="bookTimeSlot()" [disabled]="isLoading"></button>
+        </ng-template>
+    </p-dialog>
+</div>

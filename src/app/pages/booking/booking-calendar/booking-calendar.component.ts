@@ -1,5 +1,5 @@
 // src/app/booking/components/booking-calendar/booking-calendar.component.ts
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { SelectButtonModule } from 'primeng/selectbutton';
@@ -16,11 +16,12 @@ import { BookingService } from '../../../services/booking.service';
 import { TimeSlot } from '../../../models/time-slot.model';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { DatePickerModule } from 'primeng/datepicker';
+import { BookingDialogComponent } from '../dialogs/booking-dialog/booking-dialog.component';
 
 @Component({
     selector: 'app-booking-calendar',
     standalone: true,
-    imports: [CommonModule, TranslateModule, DatePickerModule, TextareaModule, FormsModule, ReactiveFormsModule, SelectButtonModule, CalendarModule, DialogModule, ButtonModule, ToastModule, ConfirmDialogModule],
+    imports: [BookingDialogComponent, CommonModule, TranslateModule, DatePickerModule, TextareaModule, FormsModule, ReactiveFormsModule, SelectButtonModule, CalendarModule, DialogModule, ButtonModule, ToastModule, ConfirmDialogModule],
     providers: [MessageService, ConfirmationService],
     templateUrl: './booking-calendar.component.html'
 })
@@ -41,6 +42,7 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
     selectedView: string = 'day';
 
     private subscriptions: Subscription = new Subscription();
+    @ViewChild(BookingDialogComponent) bookingDialogg!: BookingDialogComponent;
 
     constructor(
         private bookingService: BookingService,
@@ -209,5 +211,8 @@ export class BookingCalendarComponent implements OnInit, OnDestroy {
 
         // Convert object to array and sort by date
         return Object.values(grouped).sort((a, b) => a.date.getTime() - b.date.getTime());
+    }
+    openBookingDialog(): void {
+        this.bookingDialogg.show();
     }
 }

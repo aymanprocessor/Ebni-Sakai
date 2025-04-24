@@ -1,0 +1,91 @@
+<!-- booking-dialog.component.html -->
+<p-dialog [(visible)]="visible" [modal]="true" [draggable]="false" [resizable]="false" [style]="{ width: '500px' }" [showHeader]="false" styleClass="booking-dialog" (onHide)="hide()">
+    <div class="p-4">
+        <!-- Dialog Header with Close Button -->
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">{{ 'pages.booking.bestTimeQuestion' | translate }}</h2>
+        </div>
+
+        <!-- Calendar Week View -->
+        <div dir="ltr" class="bg-white rounded-lg shadow-sm mb-6">
+            <!-- Weekday Headers -->
+            <div class="grid grid-cols-5 text-center">
+                <div *ngFor="let day of weekdays" class="py-2 text-gray-500">
+                    {{ day }}
+                </div>
+            </div>
+
+            <!-- Date Selection -->
+            <div dir="ltr" class="grid grid-cols-5 text-center">
+                <div
+                    *ngFor="let date of dates"
+                    class="p-4 m-1 cursor-pointer relative rounded-lg"
+                    [ngClass]="{
+                        'border-purple-500 border-2 bg-purple-50': isDateSelected(date),
+                        'text-gray-400 border border-gray-200': !isDateActive(date),
+                        'border border-gray-200': isDateActive(date) && !isDateSelected(date)
+                    }"
+                    (click)="isDateActive(date) && selectDate(date)"
+                >
+                    <div class="text-2xl font-medium" [ngClass]="{ 'text-purple-500': isDateSelected(date) || (isDateActive(date) && !isDateSelected(date)), 'text-gray-400': !isDateActive(date) }">
+                        {{ date.day }}
+                    </div>
+                    <div class="text-sm" [ngClass]="{ 'text-purple-500': isDateSelected(date) || (isDateActive(date) && !isDateSelected(date)), 'text-gray-400': !isDateActive(date) }">
+                        {{ date.weekday }}
+                    </div>
+
+                    <!-- Slot count display -->
+                    <div *ngIf="date.slots > 0" class="flex items-center justify-center mt-2">
+                        <span
+                            class="w-2 h-2 rounded-full mr-1"
+                            [ngClass]="{
+                                'bg-green-500': date.slotColor === 'green',
+                                'bg-yellow-500': date.slotColor === 'yellow'
+                            }"
+                        >
+                        </span>
+                        <span class="text-sm" [ngClass]="{ 'text-gray-700': isDateActive(date), 'text-gray-400': !isDateActive(date) }"> {{ date.slots }} {{ date.slots === 1 ? 'slot' : 'slots' }} </span>
+                    </div>
+
+                    <div *ngIf="date.slots === 0" class="text-gray-400 mt-2">-</div>
+                </div>
+            </div>
+
+            <!-- Navigation Arrows -->
+            <div class="absolute left-2 top-1/2 transform -translate-y-1/2">
+                <button class="w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center focus:outline-none" (click)="prevWeek()">
+                    <i class="pi pi-chevron-left text-gray-400"></i>
+                </button>
+            </div>
+            <div class="absolute right-2 top-1/2 transform -translate-y-1/2">
+                <button class="w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center focus:outline-none" (click)="nextWeek()">
+                    <i class="pi pi-chevron-right text-gray-400"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Time Slot Selection -->
+        <div class="mb-6">
+            <h3 class="text-xl font-medium text-center mb-4">{{ 'pages.booking.selectTimeslot' | translate }}</h3>
+            <div class="flex items-center">
+                <i class="pi pi-clock mr-2"></i>
+                <span>{{ 'pages.booking.30MinMeeting' | translate }}</span>
+            </div>
+
+            <!-- Time Slots Grid -->
+            <div class="grid grid-cols-3 gap-4">
+                <div *ngFor="let slot of timeSlots">
+                    <button
+                        class="w-full py-4 rounded-lg border border-purple-100 transition-colors"
+                        [ngClass]="{ 'bg-purple-100 text-purple-500 font-medium': selectedTimeSlot === slot.value, 'bg-white text-purple-500 hover:bg-purple-50': selectedTimeSlot !== slot.value }"
+                        (click)="selectTimeSlot(slot.value)"
+                    >
+                        {{ slot.label }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <p-button label="{{ 'pages.booking.confirm' | translate }}" icon="pi pi-check" class="w-full" (click)="confirmBooking()"></p-button>
+    <p-button label="{{ 'pages.booking.cancel' | translate }}" icon="pi pi-times" class="w-full mt-2" (click)="hide()" [styleClass]="'p-button-secondary'"></p-button>
+</p-dialog>

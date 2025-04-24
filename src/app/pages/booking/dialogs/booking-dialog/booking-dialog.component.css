@@ -1,0 +1,26 @@
+/* booking-dialog.component.scss */
+:host ::ng-deep {
+    .booking-dialog {
+        .p-dialog-content {
+            padding: 0;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .p-dropdown {
+            .p-dropdown-label {
+                padding: 0.5rem;
+            }
+        }
+    }
+
+    .date-card {
+        transition: all 0.2s ease;
+
+        &:hover {
+            border-color: theme('colors.purple.300');
+            background-color: theme('colors.purple.50');
+        }
+    }
+}
+
