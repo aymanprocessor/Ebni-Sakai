@@ -1,5 +1,5 @@
 import { HttpClient, provideHttpClient, withFetch } from '@angular/common/http';
-import { ApplicationConfig, importProvidersFrom, LOCALE_ID } from '@angular/core';
+import { APP_INITIALIZER, ApplicationConfig, importProvidersFrom, LOCALE_ID } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter, withEnabledBlockingInitialNavigation, withInMemoryScrolling } from '@angular/router';
 import Aura from '@primeng/themes/aura';
@@ -12,6 +12,7 @@ import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { DatePipe } from '@angular/common';
+import { AuthService } from './app/services/auth.service';
 
 export function createTranslateLoader(http: HttpClient) {
     return new TranslateHttpLoader(http, './i18n/', '.json');
@@ -20,6 +21,10 @@ export function createTranslateLoader(http: HttpClient) {
 // Function to get default language from localStorage or fallback to 'en-US'
 export function getDefaultLanguage(): string {
     return localStorage.getItem('language') || 'en-US';
+}
+
+export function initializeAuth(authService: AuthService) {
+    return () => authService.waitForInitialization();
 }
 
 export const appConfig: ApplicationConfig = {
@@ -69,6 +74,12 @@ export const appConfig: ApplicationConfig = {
         {
             provide: 'FIREBASE_INITIALIZATION_TIMEOUT',
             useValue: 10000 // 10 seconds timeout
+        },
+        {
+            provide: 'APP_INITIALIZER',
+            useFactory: initializeAuth,
+            deps: [AuthService],
+            multi: true
         },
         {
             provide: 'APP_INITIALIZER',

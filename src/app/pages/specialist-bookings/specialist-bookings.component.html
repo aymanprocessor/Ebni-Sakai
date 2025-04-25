@@ -1,0 +1,158 @@
+<!-- src/app/pages/specialist/specialist-bookings/specialist-bookings.component.html -->
+<div class="container mx-auto px-4 py-6">
+    <p-toast></p-toast>
+    <p-confirmDialog></p-confirmDialog>
+
+    <div class="mb-6">
+        <div class="flex flex-col sm:flex-row justify-between gap-4 mb-4">
+            <h1 class="text-2xl font-semibold text-gray-800 dark:text-white">{{ 'pages.specialist.myBookings' | translate }}</h1>
+        </div>
+
+        <div class="bg-indigo-50 dark:bg-indigo-900 p-4 rounded-lg mb-4">
+            <div class="flex items-center text-indigo-800 dark:text-indigo-200">
+                <i class="pi pi-info-circle me-2"></i>
+                <p>{{ 'pages.specialist.bookingsInfo' | translate }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <p-table [value]="bookings" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} bookings" [rowHover]="true" styleClass="p-datatable-striped">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>{{ 'common.labels.date' | translate }}</th>
+                    <th>{{ 'common.labels.time' | translate }}</th>
+                    <th>{{ 'common.labels.client' | translate }}</th>
+                    <th>{{ 'common.labels.email' | translate }}</th>
+                    <th>{{ 'common.labels.status' | translate }}</th>
+                    <th>{{ 'common.labels.notes' | translate }}</th>
+                    <th>{{ 'common.labels.actions' | translate }}</th>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="loadingbody">
+                <tr *ngFor="let _ of [1, 2, 3]">
+                    <td><p-skeleton></p-skeleton></td>
+                    <td><p-skeleton></p-skeleton></td>
+                    <td><p-skeleton></p-skeleton></td>
+                    <td><p-skeleton></p-skeleton></td>
+                    <td><p-skeleton></p-skeleton></td>
+                    <td><p-skeleton></p-skeleton></td>
+                    <td class="text-center">
+                        <p-skeleton width="2rem" height="2rem" shape="circle" styleClass="mr-2"></p-skeleton>
+                        <p-skeleton width="2rem" height="2rem" shape="circle"></p-skeleton>
+                    </td>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-booking>
+                <tr>
+                    <td>
+                        <span *ngIf="booking.timeSlot">
+                            {{ booking.timeSlot.startTime | date: 'shortDate' }}
+                        </span>
+                    </td>
+                    <td>
+                        <span *ngIf="booking.timeSlot">
+                            {{ booking.timeSlot.startTime | date: 'shortTime' }} -
+                            {{ booking.timeSlot.endTime | date: 'shortTime' }}
+                        </span>
+                    </td>
+                    <td>{{ booking.userName }}</td>
+                    <td>{{ booking.userEmail }}</td>
+                    <td>
+                        <p-tag [value]="booking.status" [severity]="getStatusSeverity(booking.status)"></p-tag>
+                    </td>
+                    <td>{{ booking.notes || '-' }}</td>
+                    <td>
+                        <div class="flex gap-2">
+                            <button pButton pRipple icon="pi pi-eye" class="p-button-rounded p-button-text p-button-info" (click)="viewBookingDetails(booking)" pTooltip="View Details" tooltipPosition="top"></button>
+
+                            <button
+                                *ngIf="booking.status === 'panding'"
+                                pButton
+                                pRipple
+                                icon="pi pi-check"
+                                class="p-button-rounded p-button-text p-button-success"
+                                (click)="confirmBooking(booking)"
+                                pTooltip="Confirm Booking"
+                                tooltipPosition="top"
+                            ></button>
+
+                            <button
+                                *ngIf="booking.status === 'confirmed'"
+                                pButton
+                                pRipple
+                                icon="pi pi-check-circle"
+                                class="p-button-rounded p-button-text p-button-primary"
+                                (click)="completeBooking(booking)"
+                                pTooltip="Mark as Completed"
+                                tooltipPosition="top"
+                            ></button>
+
+                            <button
+                                *ngIf="booking.status !== 'cancelled' && booking.status !== 'completed'"
+                                pButton
+                                pRipple
+                                icon="pi pi-times"
+                                class="p-button-rounded p-button-text p-button-danger"
+                                (click)="cancelBooking(booking)"
+                                pTooltip="Cancel Booking"
+                                tooltipPosition="top"
+                            ></button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="7" class="text-center py-4">
+                        <div class="flex flex-col items-center">
+                            <i class="pi pi-calendar-times text-4xl text-gray-400 mb-2"></i>
+                            <p class="text-gray-500">{{ 'pages.specialist.noBookings' | translate }}</p>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+
+    <!-- Booking Details Dialog -->
+    <p-dialog [(visible)]="showDetailsDialog" [style]="{ width: '450px' }" header="{{ 'pages.specialist.bookingDetails' | translate }}" [modal]="true" styleClass="p-fluid" [draggable]="false" [resizable]="false">
+        <ng-template pTemplate="content">
+            <div *ngIf="selectedBooking" class="flex flex-col gap-4">
+                <div>
+                    <label class="font-semibold">{{ 'common.labels.client' | translate }}:</label>
+                    <p>{{ selectedBooking.userName }}</p>
+                </div>
+
+                <div>
+                    <label class="font-semibold">{{ 'common.labels.email' | translate }}:</label>
+                    <p>{{ selectedBooking.userEmail }}</p>
+                </div>
+
+                <div *ngIf="selectedBooking.timeSlot">
+                    <label class="font-semibold">{{ 'common.labels.dateTime' | translate }}:</label>
+                    <p>{{ formatDateTime(selectedBooking.timeSlot.startTime) }}</p>
+                </div>
+
+                <div>
+                    <label class="font-semibold">{{ 'common.labels.status' | translate }}:</label>
+                    <p>
+                        <p-tag [value]="selectedBooking.status" [severity]="getStatusSeverity(selectedBooking.status)"></p-tag>
+                    </p>
+                </div>
+
+                <div>
+                    <label class="font-semibold">{{ 'common.labels.notes' | translate }}:</label>
+                    <p>{{ selectedBooking.notes || 'No notes available' }}</p>
+                </div>
+            </div>
+        </ng-template>
+
+        <ng-template pTemplate="footer">
+            <button pButton pRipple label="{{ 'common.buttons.close' | translate }}" icon="pi pi-times" class="p-button-text" (click)="showDetailsDialog = false"></button>
+        </ng-template>
+    </p-dialog>
+</div>

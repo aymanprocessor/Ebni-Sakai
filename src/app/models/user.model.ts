@@ -6,7 +6,7 @@ export interface UserProfile {
     email: string;
     displayName?: string;
     photoURL?: string;
-    role: 'admin' | 'user' | 'paid';
+    role: 'admin' | 'user' | 'paid' | 'specialist';
     isNewUser: boolean;
     createdAt: Date;
     updatedAt?: Date;

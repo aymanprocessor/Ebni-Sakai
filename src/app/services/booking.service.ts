@@ -187,6 +187,47 @@ export class BookingService {
             shareReplay(1)
         );
     }
+
+    // Add this method to your existing BookingService
+
+    getSpecialistBookings(): Observable<Booking[]> {
+        return this.authService.currentUser$.pipe(
+            switchMap((user) => {
+                if (!user || user.role !== 'specialist') {
+                    return of([]);
+                }
+
+                // Query bookings assigned to this specialist
+                const bookingsRef = collection(this.firestore, this.BOOKINGS_COLLECTION);
+                const q = query(bookingsRef, where('assignedSpecialistId', '==', user.uid));
+
+                return collectionData(q, { idField: 'id' }).pipe(
+                    switchMap(async (bookings) => {
+                        // Get all unique timeSlotIds
+                        const timeSlotIds = [...new Set(bookings.map((booking) => booking['timeSlotId']))];
+
+                        if (timeSlotIds.length === 0) {
+                            return [];
+                        }
+
+                        // Fetch time slots for all bookings
+                        const timeSlotMap = await this.getTimeSlotsBatch(timeSlotIds);
+
+                        // Combine bookings with their timeSlots
+                        return bookings.map(
+                            (booking) =>
+                                ({
+                                    ...booking,
+                                    timeSlot: timeSlotMap.get(booking['timeSlotId'])
+                                }) as Booking
+                        );
+                    })
+                );
+            }),
+            shareReplay(1)
+        );
+    }
+
     // Create single time slot
     async createTimeSlot(timeSlot: Omit<TimeSlot, 'id'>): Promise<string> {
         const currentUser = await this.authService.getCurrentUser();

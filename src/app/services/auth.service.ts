@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Auth, authState, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, User, GoogleAuthProvider, signInWithPopup } from '@angular/fire/auth';
-import { BehaviorSubject, from, map, Observable, of, switchMap, catchError, timeout } from 'rxjs';
+import { BehaviorSubject, from, map, Observable, of, switchMap, catchError, timeout, firstValueFrom, ReplaySubject } from 'rxjs';
 import { UserProfile } from '../models/user.model';
 import { doc, docData, Firestore, getDoc, setDoc } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
@@ -13,7 +13,8 @@ import { RegisterModel } from '../pages/register-parent/register.model';
 })
 export class AuthService {
     currentUser$: BehaviorSubject<UserProfile | null> = new BehaviorSubject<UserProfile | null>(null);
-
+    private initializedSubject = new ReplaySubject<boolean>(1);
+    initialized$ = this.initializedSubject.asObservable();
     constructor(
         private auth: Auth,
         private firestore: Firestore,
@@ -65,7 +66,9 @@ export class AuthService {
                 )
                 .subscribe({
                     next: (user) => {
+                        console.log('Authentication state:', user);
                         this.currentUser$.next(user as UserProfile);
+                        this.initializedSubject.next(true);
                     },
                     error: (err) => {
                         console.error('Subscription error:', err);
@@ -77,6 +80,10 @@ export class AuthService {
             console.error('Failed to initialize auth state:', initError);
             this.sweetalert.showToast('Authentication service initialization failed', 'error');
         }
+    }
+    // Add a method to wait for initialization
+    waitForInitialization(): Promise<boolean> {
+        return firstValueFrom(this.initialized$);
     }
 
     // Sign in with email and password

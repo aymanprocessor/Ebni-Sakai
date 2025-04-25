@@ -1,8 +1,9 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './app/guards/auth.guard';
-import { AuthGuard, redirectLoggedInTo, redirectUnauthorizedTo } from '@angular/fire/auth-guard';
+import { redirectLoggedInTo, redirectUnauthorizedTo } from '@angular/fire/auth-guard';
 import { RedirectLoggedInGuard } from './app/guards/login.guard';
 import { AppLayout } from './app/layout/component/app.layout';
+import { SpecialistGuard } from './app/guards/specialist.guard';
 
 const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['auth/login']);
 const redirectLoggedInToDashboard = () => redirectLoggedInTo(['app/dashboard']);
@@ -51,6 +52,11 @@ export const routes: Routes = [
                 path: 'session',
                 loadComponent: () => import('./app/pages/session/session-booking/session-booking.component').then((m) => m.SessionBookingComponent),
                 canActivate: [authGuard]
+            },
+            {
+                path: 'specialist-bookings',
+                loadComponent: () => import('./app/pages/specialist-bookings/specialist-bookings.component').then((m) => m.SpecialistBookingsComponent),
+                canActivate: [authGuard, SpecialistGuard]
             },
             {
                 path: 'survey',
