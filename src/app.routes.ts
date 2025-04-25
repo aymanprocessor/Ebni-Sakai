@@ -4,6 +4,7 @@ import { redirectLoggedInTo, redirectUnauthorizedTo } from '@angular/fire/auth-g
 import { RedirectLoggedInGuard } from './app/guards/login.guard';
 import { AppLayout } from './app/layout/component/app.layout';
 import { SpecialistGuard } from './app/guards/specialist.guard';
+import { AdminGuard } from './app/guards/admin.guard';
 
 const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['auth/login']);
 const redirectLoggedInToDashboard = () => redirectLoggedInTo(['app/dashboard']);
@@ -57,6 +58,11 @@ export const routes: Routes = [
                 path: 'specialist-bookings',
                 loadComponent: () => import('./app/pages/specialist-bookings/specialist-bookings.component').then((m) => m.SpecialistBookingsComponent),
                 canActivate: [authGuard, SpecialistGuard]
+            },
+            {
+                path: 'user-management',
+                loadComponent: () => import('./app/pages/user-management/user-management.component').then((m) => m.UserManagementComponent),
+                canActivate: [authGuard, AdminGuard]
             },
             {
                 path: 'survey',

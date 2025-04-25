@@ -68,7 +68,11 @@
       "birthdate": "Birthdate",
       "month": "This Month",
       "week": "This Week",
-      "weekdays": "Days"
+      "weekdays": "Days",
+      "role": "Role",
+      "subscription": "Subscription",
+      "mobile": "Mobile",
+      "isSubscribed": "Is Subscribed?"
     },
     "age": {
       "years": {
@@ -123,7 +127,8 @@
   },
   "pages": {
     "users": {
-      "title": "User Management"
+      "title": "User Management",
+      "notSubscribed": "Not Subscribed"
     },
     "login": {
       "welcome": "Welcome To Kid Skills"
@@ -166,6 +171,11 @@
   "dateTime": {
     "formats": {
       "shortDate": "dd-MM-yyyy"
+    }
+  },
+  "pcommon": {
+    "labels": {
+      "subscribed": "Subscribed"
     }
   }
 }

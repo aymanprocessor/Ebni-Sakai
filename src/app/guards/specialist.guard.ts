@@ -20,7 +20,6 @@ export class SpecialistGuard implements CanActivate {
             take(1),
             map((user) => user?.role === 'specialist'),
             tap((isSpecialist) => {
-                console.log('isSpecialist', isSpecialist);
                 if (!isSpecialist) {
                     console.log('Access denied - Specialist role required');
                     this.router.navigate(['app/dashboard']);

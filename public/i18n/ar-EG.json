@@ -74,7 +74,11 @@
       "start_time": "بداية الميعاد",
       "end_time": "نهاية الميعاد",
       "session_time": "مدة الجلسة ",
-      "weekdays": "الايام"
+      "weekdays": "الايام",
+      "role": "الصلاحية",
+      "subscription": "مشترك",
+      "mobile": "الموبايل",
+      "isSubscribed": "مشترك؟"
     },
     "age": {
       "format": "{{years}} سنة، {{months}} شهر"
@@ -113,7 +117,10 @@
   },
   "pages": {
     "users": {
-      "title": "إدارة المستخدمين"
+      "title": "إدارة المستخدمين",
+      "addUser": "اضافة مستخدم",
+      "notSubscribed": "غير مشترك",
+      "noUsers": "لا يوجد المستخدمين"
     },
     "login": {
       "welcome": "مرحبا بكم في كيد سكيلز"
@@ -156,6 +163,11 @@
   "dateTime": {
     "formats": {
       "shortDate": "dd-MM-yyyy"
+    }
+  },
+  "pcommon": {
+    "labels": {
+      "subscribed": "مشترك"
     }
   }
 }
