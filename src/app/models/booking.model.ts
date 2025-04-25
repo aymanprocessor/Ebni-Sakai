@@ -8,6 +8,6 @@ export interface Booking {
     userEmail: string;
     bookingDate: Date;
     notes: string;
-    status: 'confirmed' | 'cancelled' | 'completed';
+    status: 'confirmed' | 'cancelled' | 'completed' | 'panding';
     timeSlot?: TimeSlot;
 }

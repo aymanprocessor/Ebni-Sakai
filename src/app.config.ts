@@ -1,5 +1,5 @@
 import { HttpClient, provideHttpClient, withFetch } from '@angular/common/http';
-import { ApplicationConfig, importProvidersFrom } from '@angular/core';
+import { ApplicationConfig, importProvidersFrom, LOCALE_ID } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter, withEnabledBlockingInitialNavigation, withInMemoryScrolling } from '@angular/router';
 import Aura from '@primeng/themes/aura';
@@ -24,6 +24,10 @@ export function getDefaultLanguage(): string {
 
 export const appConfig: ApplicationConfig = {
     providers: [
+        {
+            provide: LOCALE_ID,
+            useFactory: () => localStorage.getItem('language')?.split('-')[0] || 'ar' // or a language service
+        },
         importProvidersFrom(
             TranslateModule.forRoot({
                 defaultLanguage: getDefaultLanguage(),

@@ -6,6 +6,7 @@ import { DialogModule } from 'primeng/dialog';
 import { CardModule } from 'primeng/card';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { TextareaModule } from 'primeng/textarea';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -17,7 +18,7 @@ import { TimeSlot } from '../../../models/time-slot.model';
 @Component({
     selector: 'app-time-slots-by-date',
     standalone: true,
-    imports: [CommonModule, FormsModule, TranslateModule, SelectButtonModule, ButtonModule, DialogModule, CardModule, ToastModule, ConfirmDialogModule],
+    imports: [CommonModule, FormsModule, TranslateModule, SelectButtonModule, ButtonModule, DialogModule, CardModule, ToastModule, ConfirmDialogModule, TextareaModule],
     providers: [MessageService, ConfirmationService],
     templateUrl: './time-slots-by-date.component.html'
 })
@@ -107,6 +108,18 @@ export class TimeSlotsByDateComponent implements OnInit, OnDestroy {
 
     formatDate(date: string): string {
         return new Date(date).toLocaleDateString();
+    }
+
+    formatDateWithLocale(date: string, locale: 'en' | 'ar'): string {
+        const dateObj = new Date(date);
+        const options: Intl.DateTimeFormatOptions = {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        };
+
+        return dateObj.toLocaleDateString(locale === 'ar' ? 'ar-SA' : 'en-US', options);
     }
 
     closeDialog(): void {

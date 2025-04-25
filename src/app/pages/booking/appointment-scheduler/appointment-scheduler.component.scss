@@ -1,0 +1,17 @@
+:host ::ng-deep .p-multiselect,
+:host ::ng-deep .p-calendar,
+:host ::ng-deep .p-dropdown {
+    width: 100% !important;
+}
+
+::ng-deep .p-togglebutton .p-togglebutton-checked .p-togglebutton-content {
+    background: #9333ea !important;
+    border-color: #9333ea !important;
+    color: #ffffff !important;
+}
+
+.p-togglebutton .p-togglebutton-checked .p-togglebutton-content:hover {
+    background: #7e22ce;
+    border-color: #7e22ce;
+    color: #ffffff;
+}

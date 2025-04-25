@@ -20,6 +20,24 @@
       "register": "تسجيل",
       "loginWithGoogle": "تسجيل الدخول مع جوجل"
     },
+    "weekdays": {
+      "mon": "الاثنين",
+      "tue": "الثلاثاء",
+      "wed": "الأربعاء",
+      "thu": "الخميس",
+      "fri": "الجمعة",
+      "sat": "السبت",
+      "sun": "الأحد"
+    },
+    "intervals": {
+      "15_minutes": "15 دقيقة",
+      "30_minutes": "30 دقيقة",
+      "45_minutes": "45 دقيقة",
+      "60_minutes": "60 دقيقة",
+      "90_minutes": "90 دقيقة",
+      "120_minutes": "120 دقيقة",
+      "180_minutes": "180 دقيقة"
+    },
     "labels": {
       "name": "الاسم",
       "email": "البريد الإلكتروني",
@@ -50,7 +68,13 @@
       "birthdate": "تاريخ الميلاد",
       "day": "اليوم",
       "week": "هذا الاسبوع",
-      "month": "هذا الشهر"
+      "month": "هذا الشهر",
+      "start_date": "بداية التاريخ",
+      "end_date": "نهاية التاريخ",
+      "start_time": "بداية الميعاد",
+      "end_time": "نهاية الميعاد",
+      "session_time": "مدة الجلسة ",
+      "weekdays": "الايام"
     },
     "age": {
       "format": "{{years}} سنة، {{months}} شهر"
@@ -105,6 +129,14 @@
       "bestTimeQuestion": "ما الوقت الأنسب للجلسة",
       "30MinMeeting": "الجلسة 30 دقيقة",
       "selectTimeslot": "اختار الميعاد"
+    },
+    "appointmentScheduler": {
+      "title": "جدولة المواعيد",
+      "generateTimeSlots": "توليد المواعيد",
+      "validation": {
+        "invalidTimeRange": "نطاق الوقت غير صالح",
+        "invalidDateRange": "تاريخ الموعد غير صالح"
+      }
     }
   },
   "navigation": {
@@ -118,7 +150,8 @@
     "profile": "الملف الشخصي",
     "user-profile": "بيانات المستخدم",
     "survey": "استبيان",
-    "children": "الأطفال"
+    "children": "الأطفال",
+    "sessions": "الجلسات"
   },
   "dateTime": {
     "formats": {

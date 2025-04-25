@@ -20,6 +20,24 @@
       "register": "Register",
       "loginWithGoogle": "Login with Google"
     },
+    "weekdays": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
+    "intervals": {
+      "15_minutes": "15 minutes",
+      "30_minutes": "30 minutes",
+      "45_minutes": "45 minutes",
+      "60_minutes": "60 minutes",
+      "90_minutes": "90 minutes",
+      "120_minutes": "120 minutes",
+      "180_minutes": "180 minutes"
+    },
     "labels": {
       "name": "Name",
       "email": "Email",
@@ -49,7 +67,8 @@
       "actions": "Actions",
       "birthdate": "Birthdate",
       "month": "This Month",
-      "week": "This Week"
+      "week": "This Week",
+      "weekdays": "Days"
     },
     "age": {
       "years": {
@@ -120,6 +139,14 @@
       "bestTimeQuestion": "What time works best for a session",
       "30MinMeeting": "30 min meeting",
       "selectTimeslot": "Select a time"
+    },
+    "appointmentScheduler": {
+      "title": "Appointment Scheduler",
+      "generateTimeSlots": "Generate Time Slots",
+      "validation": {
+        "invalidTimeRange": "Invalid time range",
+        "invalidDateRange": "Invalid date range"
+      }
     }
   },
   "navigation": {
@@ -133,7 +160,8 @@
     "profile": "Profile",
     "user-profile": "User Profile",
     "survey": "Survey",
-    "children": "Children"
+    "children": "Children",
+    "sessions": "Sessions"
   },
   "dateTime": {
     "formats": {

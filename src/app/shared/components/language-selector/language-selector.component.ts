@@ -52,8 +52,9 @@ export class LanguageSelectorComponent implements OnInit {
         this.selectedLanguage = lang;
         this.visible = false;
         localStorage.setItem('language', lang.code);
-        this.applyLanguage(lang);
+        //this.applyLanguage(lang);
         this.translateServ.use(lang.code);
+        location.reload(); // Required to re-bootstrap LOCALE_ID
     }
 
     private applyLanguage(lang: Language): void {

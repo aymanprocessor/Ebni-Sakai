@@ -31,15 +31,31 @@
                     <ng-template pTemplate="header">
                         <div class="p-4 bg-indigo-100 dark:bg-indigo-800">
                             <h3 class="text-xl font-medium text-indigo-800 dark:text-indigo-200">
-                                {{ formatDate(dateGroup.date) }}
+                                {{ formatDateWithLocale(dateGroup.date, 'en') }}
+                            </h3>
+                            <h3 class="text-xl font-medium text-indigo-800 dark:text-indigo-200 mt-1" dir="rtl">
+                                {{ formatDateWithLocale(dateGroup.date, 'ar') }}
                             </h3>
                         </div>
                     </ng-template>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-2">
-                        <div *ngFor="let slot of dateGroup.slots" class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors" (click)="selectTimeSlot(slot)">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 p-2">
+                        <div
+                            *ngFor="let slot of dateGroup.slots"
+                            class="rounded-lg p-4 cursor-pointer transition-colors text-center"
+                            [ngClass]="{
+                                'bg-red-500 text-white hover:bg-red-600': slot.isBooked,
+                                'border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700': !slot.isBooked
+                            }"
+                            (click)="!slot.isBooked && selectTimeSlot(slot)"
+                        >
                             <div class="flex flex-col">
-                                <span class="text-lg font-medium text-indigo-600 dark:text-indigo-400"> {{ formatTime(slot.startTime) }} - {{ formatTime(slot.endTime) }} </span>
+                                <span class="text-lg font-medium" [class.text-indigo-600]="!slot.isBooked" [class.dark:text-indigo-400]="!slot.isBooked">
+                                    {{ formatTime(slot.startTime) }}
+                                </span>
+                                <span *ngIf="slot.isBooked" class="text-xs mt-1">
+                                    {{ 'pages.booking.booked' | translate }}
+                                </span>
                             </div>
                         </div>
                     </div>

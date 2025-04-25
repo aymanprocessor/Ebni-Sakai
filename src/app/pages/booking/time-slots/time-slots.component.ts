@@ -30,10 +30,9 @@ export class AdminTimeSlotsComponent implements OnInit, OnDestroy {
     timeSlotDialog: boolean = false;
     isNewTimeSlot: boolean = true;
 
-    timeSlotForm: FormGroup = new FormGroup({});
+    timeSlotForm!: FormGroup;
     isLoading: boolean = false;
 
-    // New repeat functionality
     repeatOptions = [
         { label: 'None', value: 'none' },
         { label: 'Daily', value: 'daily' },
@@ -51,11 +50,8 @@ export class AdminTimeSlotsComponent implements OnInit, OnDestroy {
         { label: 'Sunday', value: 0 }
     ];
 
-    private subscriptions: Subscription = new Subscription();
-    new: Date | null | undefined;
-
-    minDate: Date | undefined;
-    maxDate: Date | undefined;
+    private subscriptions = new Subscription();
+    minDate: Date = new Date();
 
     constructor(
         private fb: FormBuilder,
@@ -68,7 +64,6 @@ export class AdminTimeSlotsComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.loadTimeSlots();
-        this.minDate = new Date();
     }
 
     ngOnDestroy(): void {
@@ -86,7 +81,6 @@ export class AdminTimeSlotsComponent implements OnInit, OnDestroy {
             repeatUntil: [null]
         });
 
-        // Update form based on repeat selection
         this.timeSlotForm.get('repeat')?.valueChanges.subscribe((repeatType) => {
             this.updateRepeatFormControls(repeatType);
         });
@@ -95,15 +89,12 @@ export class AdminTimeSlotsComponent implements OnInit, OnDestroy {
     private updateRepeatFormControls(repeatType: string): void {
         const repeatCountControl = this.timeSlotForm.get('repeatCount');
         const repeatDaysControl = this.timeSlotForm.get('repeatDays');
-        const repeatUntilControl = this.timeSlotForm.get('repeatUntil');
 
-        // Reset validations
+        // Clear validators
         repeatCountControl?.clearValidators();
         repeatDaysControl?.clearValidators();
-        repeatUntilControl?.clearValidators();
 
         if (repeatType !== 'none') {
-            // Apply validations based on repeat type
             repeatCountControl?.setValidators([Validators.required, Validators.min(1), Validators.max(30)]);
 
             if (repeatType === 'weekly') {
@@ -111,17 +102,14 @@ export class AdminTimeSlotsComponent implements OnInit, OnDestroy {
             }
         }
 
-        // Update form controls
         repeatCountControl?.updateValueAndValidity();
         repeatDaysControl?.updateValueAndValidity();
-        repeatUntilControl?.updateValueAndValidity();
     }
 
     loadTimeSlots(): void {
         this.isLoading = true;
         const sub = this.bookingService.getAllTimeSlots().subscribe({
             next: (timeSlots) => {
-                console.log('timeSlots', timeSlots);
                 this.timeSlots = timeSlots;
                 this.isLoading = false;
             },
@@ -177,7 +165,6 @@ export class AdminTimeSlotsComponent implements OnInit, OnDestroy {
                             summary: 'Success',
                             detail: 'Time slot deleted successfully'
                         });
-                        this.loadTimeSlots();
                     })
                     .catch((error) => {
                         console.error('Error deleting time slot:', error);
@@ -186,15 +173,14 @@ export class AdminTimeSlotsComponent implements OnInit, OnDestroy {
                             summary: 'Error',
                             detail: 'Failed to delete time slot'
                         });
-                        this.isLoading = false;
-                    });
+                    })
+                    .finally(() => (this.isLoading = false));
             }
         });
     }
 
-    saveTimeSlot(): void {
+    async saveTimeSlot(): Promise<void> {
         if (this.timeSlotForm.invalid) {
-            // Mark all fields as touched to show validation errors
             Object.keys(this.timeSlotForm.controls).forEach((key) => {
                 this.timeSlotForm.get(key)?.markAsTouched();
             });
@@ -203,7 +189,7 @@ export class AdminTimeSlotsComponent implements OnInit, OnDestroy {
 
         const formValues = this.timeSlotForm.value;
 
-        // Validate end time is after start time
+        // Validate time range
         if (formValues.startTime >= formValues.endTime) {
             this.messageService.add({
                 severity: 'error',
@@ -213,70 +199,71 @@ export class AdminTimeSlotsComponent implements OnInit, OnDestroy {
             return;
         }
 
+        // Check for conflicts
+        try {
+            const hasConflicts = await this.bookingService.checkForConflicts(formValues.startTime, formValues.endTime);
+            if (hasConflicts && this.isNewTimeSlot) {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Time Conflict',
+                    detail: 'This time slot overlaps with an existing slot'
+                });
+                return;
+            }
+        } catch (error) {
+            console.error('Error checking conflicts:', error);
+        }
+
         this.isLoading = true;
 
         if (this.isNewTimeSlot) {
-            // Handle repeat logic
             if (formValues.repeat !== 'none') {
                 this.createRepeatingTimeSlots(formValues);
             } else {
-                // Create a single time slot
                 this.createSingleTimeSlot(formValues);
             }
         } else {
-            // Update existing time slot
             this.updateExistingTimeSlot(formValues);
         }
     }
 
-    private createSingleTimeSlot(formValues: any): void {
-        const newTimeSlot: any = {
+    private async createSingleTimeSlot(formValues: any): Promise<void> {
+        const newTimeSlot: Omit<TimeSlot, 'id'> = {
             startTime: formValues.startTime,
-            endTime: formValues.endTime
+            endTime: formValues.endTime,
+            isBooked: false
         };
 
-        this.bookingService
-            .createTimeSlot(newTimeSlot)
-            .then(() => {
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Success',
-                    detail: 'Time slot created successfully'
-                });
-                this.timeSlotDialog = false;
-                this.loadTimeSlots();
-            })
-            .catch((error) => {
-                console.error('Error creating time slot:', error);
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: 'Failed to create time slot'
-                });
-                this.isLoading = false;
+        try {
+            await this.bookingService.createTimeSlot(newTimeSlot);
+            this.messageService.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Time slot created successfully'
             });
+            this.timeSlotDialog = false;
+        } catch (error) {
+            console.error('Error creating time slot:', error);
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to create time slot'
+            });
+        } finally {
+            this.isLoading = false;
+        }
     }
 
-    private createRepeatingTimeSlots(formValues: any): void {
+    private async createRepeatingTimeSlots(formValues: any): Promise<void> {
         const repeatType = formValues.repeat;
         const repeatCount = formValues.repeatCount || 1;
         const startTime = new Date(formValues.startTime);
         const endTime = new Date(formValues.endTime);
         const duration = endTime.getTime() - startTime.getTime();
 
-        // Create an array to track all creation promises
-        const createPromises: Promise<string>[] = [];
+        const timeSlots: Omit<TimeSlot, 'id'>[] = [];
 
-        // Create the first time slot
-        const firstTimeSlot: any = {
-            startTime: new Date(startTime),
-            endTime: new Date(endTime)
-        };
-
-        createPromises.push(this.bookingService.createTimeSlot(firstTimeSlot));
-
-        // Create additional time slots based on repeat type
-        for (let i = 1; i < repeatCount; i++) {
+        for (let i = 0; i < repeatCount; i++) {
             let nextStartTime = new Date(startTime);
 
             if (repeatType === 'daily') {
@@ -289,62 +276,57 @@ export class AdminTimeSlotsComponent implements OnInit, OnDestroy {
 
             const nextEndTime = new Date(nextStartTime.getTime() + duration);
 
-            const timeSlot: any = {
+            timeSlots.push({
                 startTime: nextStartTime,
-                endTime: nextEndTime
-            };
-
-            createPromises.push(this.bookingService.createTimeSlot(timeSlot));
+                endTime: nextEndTime,
+                isBooked: false
+            });
         }
 
-        // Wait for all time slots to be created
-        Promise.all(createPromises)
-            .then(() => {
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Success',
-                    detail: `${repeatCount} time slots created successfully`
-                });
-                this.timeSlotDialog = false;
-                this.loadTimeSlots();
-            })
-            .catch((error) => {
-                console.error('Error creating repeating time slots:', error);
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: 'Failed to create time slots'
-                });
-                this.isLoading = false;
+        try {
+            await this.bookingService.createMultipleTimeSlots(timeSlots);
+            this.messageService.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: `${repeatCount} time slots created successfully`
             });
+            this.timeSlotDialog = false;
+        } catch (error) {
+            console.error('Error creating repeating time slots:', error);
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to create time slots'
+            });
+        } finally {
+            this.isLoading = false;
+        }
     }
 
-    private updateExistingTimeSlot(formValues: any): void {
+    private async updateExistingTimeSlot(formValues: any): Promise<void> {
         const updatedTimeSlot = {
             startTime: formValues.startTime,
             endTime: formValues.endTime
         };
 
-        this.bookingService
-            .updateTimeSlot(formValues.id, updatedTimeSlot)
-            .then(() => {
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Success',
-                    detail: 'Time slot updated successfully'
-                });
-                this.timeSlotDialog = false;
-                this.loadTimeSlots();
-            })
-            .catch((error) => {
-                console.error('Error updating time slot:', error);
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: 'Failed to update time slot'
-                });
-                this.isLoading = false;
+        try {
+            await this.bookingService.updateTimeSlot(formValues.id, updatedTimeSlot);
+            this.messageService.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Time slot updated successfully'
             });
+            this.timeSlotDialog = false;
+        } catch (error) {
+            console.error('Error updating time slot:', error);
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to update time slot'
+            });
+        } finally {
+            this.isLoading = false;
+        }
     }
 
     hideDialog(): void {

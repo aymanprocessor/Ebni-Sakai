@@ -1,0 +1,107 @@
+<!-- appointment-scheduler.component.html -->
+<div class="p-4 max-w-4xl mx-auto">
+    <p-card header="{{ 'pages.appointmentScheduler.title' | translate }}" class="shadow-lg">
+        <form [formGroup]="appointmentForm" (ngSubmit)="generateTimeSlots()">
+            <div class="grid grid-cols-1 mt-5 md:grid-cols-2 gap-4 md:gap-6">
+                <!-- Weekdays Selection -->
+                <div class="col-span-1 md:col-span-2">
+                    <label class="block mb-2 font-semibold text-sm md:text-base">{{ 'common.labels.weekdays' | translate }}</label>
+                    <p-selectButton
+                        markRequired
+                        [options]="weekdays"
+                        formControlName="selectedWeekdays"
+                        [multiple]="true"
+                        optionLabel="label"
+                        optionValue="value"
+                        [styleClass]="'w-full flex flex-wrap gap-2' + (isFieldInvalid('selectedWeekdays') ? ' ng-invalid ng-dirty' : '')"
+                    >
+                    </p-selectButton>
+                    <small *ngIf="isFieldInvalid('selectedWeekdays')" class="text-red-500 mt-1 block">{{ getErrorMessage() }}</small>
+                </div>
+
+                <!-- Date Range Selection -->
+                <div class="col-span-1">
+                    <label class="block mb-2 font-semibold text-sm md:text-base">{{ 'common.labels.start_date' | translate }}</label>
+                    <p-datepicker markRequired formControlName="startDate" [showIcon]="true" [styleClass]="'w-full' + (isFieldInvalid('startDate') ? ' ng-invalid ng-dirty' : '')" dateFormat="mm/dd/yy" [touchUI]="true" [readonlyInput]="true">
+                    </p-datepicker>
+                    <small *ngIf="isFieldInvalid('startDate')" class="text-red-500 mt-1 block">{{ getErrorMessage() }}</small>
+                </div>
+
+                <div class="col-span-1">
+                    <label class="block mb-2 font-semibold text-sm md:text-base">{{ 'common.labels.end_date' | translate }}</label>
+                    <p-datepicker
+                        markRequired
+                        formControlName="endDate"
+                        [showIcon]="true"
+                        [styleClass]="'w-full' + (isFieldInvalid('endDate') ? ' ng-invalid ng-dirty' : '')"
+                        dateFormat="mm/dd/yy"
+                        [minDate]="appointmentForm.get('startDate')?.value"
+                        [touchUI]="true"
+                        [readonlyInput]="true"
+                    >
+                    </p-datepicker>
+                    <small *ngIf="isFieldInvalid('endDate')" class="text-red-500 mt-1 block">{{ getErrorMessage() }}</small>
+                    <small *ngIf="appointmentForm.errors?.['invalidDateRange'] && submitted" class="text-red-500 mt-1 block">{{ 'pages.appointmentScheduler.validation.invalidDateRange' | translate }}</small>
+                </div>
+
+                <!-- Time Range Selection -->
+                <div class="col-span-1">
+                    <label class="block mb-2 font-semibold text-sm md:text-base">{{ 'common.labels.start_time' | translate }}</label>
+                    <p-datepicker
+                        markRequired
+                        formControlName="startTime"
+                        [timeOnly]="true"
+                        [hourFormat]="'12'"
+                        [showIcon]="true"
+                        [styleClass]="'w-full' + (isFieldInvalid('startTime') ? ' ng-invalid ng-dirty' : '')"
+                        [touchUI]="true"
+                        [readonlyInput]="true"
+                    >
+                    </p-datepicker>
+                    <small *ngIf="isFieldInvalid('startTime')" class="text-red-500 mt-1 block">{{ getErrorMessage() }}</small>
+                </div>
+
+                <div class="col-span-1">
+                    <label class="block mb-2 font-semibold text-sm md:text-base">{{ 'common.labels.end_time' | translate }}</label>
+                    <p-datepicker
+                        markRequired
+                        formControlName="endTime"
+                        [timeOnly]="true"
+                        [hourFormat]="'12'"
+                        [showIcon]="true"
+                        [styleClass]="'w-full' + (isFieldInvalid('endTime') ? ' ng-invalid ng-dirty' : '')"
+                        [touchUI]="true"
+                        [readonlyInput]="true"
+                    >
+                    </p-datepicker>
+                    <small *ngIf="isFieldInvalid('endTime')" class="text-red-500 mt-1 block">{{ getErrorMessage() }}</small>
+                    <small *ngIf="appointmentForm.errors?.['invalidTimeRange'] && submitted" class="text-red-500 mt-1 block">{{ 'pages.appointmentScheduler.validation.invalidTimeRange' | translate }}</small>
+                </div>
+
+                <!-- Time Interval Selection -->
+                <div class="col-span-1 md:col-span-2">
+                    <label class="block mb-2 font-semibold text-sm md:text-base">{{ 'common.labels.session_time' | translate }}</label>
+                    <p-select markRequired [options]="stepOptions" formControlName="selectedStep" optionLabel="label" [styleClass]="'w-full md:w-64' + (isFieldInvalid('selectedStep') ? ' ng-invalid ng-dirty' : '')"> </p-select>
+                    <small *ngIf="isFieldInvalid('selectedStep')" class="text-red-500 mt-1 block">{{ getErrorMessage() }}</small>
+                </div>
+
+                <!-- Generate Button -->
+                <div class="col-span-1 md:col-span-2">
+                    <p-button type="submit" label="{{ 'pages.appointmentScheduler.generateTimeSlots' | translate }}" icon="pi pi-clock" [styleClass]="'w-full md:w-auto'"> </p-button>
+                </div>
+
+                <!-- Time Slots Display -->
+                <div class="col-span-1 md:col-span-2" *ngIf="generatedTimeSlots.length > 0">
+                    <h3 class="text-base md:text-lg font-semibold mb-3 md:mb-4">Generated Time Slots</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3">
+                        <div *ngFor="let slot of generatedTimeSlots" class="border border-gray-200 rounded-lg p-2 md:p-3 hover:border-blue-500 hover:bg-blue-50 transition-colors cursor-pointer">
+                            <div class="font-medium text-sm md:text-base">{{ slot.day }}</div>
+                            <div class="text-xs md:text-sm text-gray-600">{{ formatDate(slot.date) }}</div>
+                            <div class="text-blue-600 font-semibold text-sm md:text-base">{{ slot.time }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </p-card>
+</div>

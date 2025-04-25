@@ -43,6 +43,16 @@ export const routes: Routes = [
                 canActivate: [authGuard]
             },
             {
+                path: 'appointment-scheduler',
+                loadComponent: () => import('./app/pages/booking/appointment-scheduler/appointment-scheduler.component').then((m) => m.AppointmentSchedulerComponent),
+                canActivate: [authGuard]
+            },
+            {
+                path: 'session',
+                loadComponent: () => import('./app/pages/session/session-booking/session-booking.component').then((m) => m.SessionBookingComponent),
+                canActivate: [authGuard]
+            },
+            {
                 path: 'survey',
                 children: [
                     {

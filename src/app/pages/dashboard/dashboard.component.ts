@@ -102,16 +102,16 @@ export class DashboardComponent implements OnInit {
     }
 
     cancelBooking(booking: Booking): void {
-        if (confirm('Are you sure you want to cancel this booking?')) {
-            this.bookingService
-                .cancelBooking(booking.id)
-                .then(() => {
-                    // The subscription will automatically update the view
-                    console.log('Booking cancelled successfully');
-                })
-                .catch((error) => {
-                    console.error('Error cancelling booking:', error);
-                });
-        }
+        // if (confirm('Are you sure you want to cancel this booking?')) {
+        //     this.bookingService
+        //         .cancelBooking(booking.id)
+        //         .then(() => {
+        //             // The subscription will automatically update the view
+        //             console.log('Booking cancelled successfully');
+        //         })
+        //         .catch((error) => {
+        //             console.error('Error cancelling booking:', error);
+        //         });
+        // }
     }
 }

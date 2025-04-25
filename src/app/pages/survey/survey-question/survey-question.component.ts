@@ -45,6 +45,8 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
     currentAgeRange = '';
     assessmentSession: AssessmentSession | null = null;
     isNavigating = false;
+    re = 2 + 5;
+
     // response$ = new BehaviorSubject<{ [key: string]: string[] }>({});
     private subscriptions: Subscription[] = [];
 
