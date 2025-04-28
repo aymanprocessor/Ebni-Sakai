@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Firestore, collection, collectionData, doc, setDoc, updateDoc, deleteDoc, query, where, getDoc, onSnapshot, DocumentReference, Timestamp, runTransaction, writeBatch, getDocs, documentId } from '@angular/fire/firestore';
-import { Observable, from, map, switchMap, of, BehaviorSubject, combineLatest, take, shareReplay, tap } from 'rxjs';
+import { Firestore, collection, collectionData, doc, setDoc, updateDoc, deleteDoc, query, where, getDoc, onSnapshot, DocumentReference, Timestamp, runTransaction, writeBatch, getDocs, documentId, addDoc } from '@angular/fire/firestore';
+import { Observable, from, map, switchMap, of, BehaviorSubject, combineLatest, take, shareReplay, tap, catchError } from 'rxjs';
 import { AuthService } from './auth.service';
 import { Booking } from '../models/booking.model';
 import { TimeSlot } from '../models/time-slot.model';
@@ -127,21 +127,20 @@ export class BookingService {
                             console.log('onSnapshot triggered, documents:', snapshot.size);
 
                             // Filter out cancelled bookings in memory
-                            const bookingsData = snapshot.docs
-                                .map((doc) => {
-                                    const data = doc.data();
-                                    return {
-                                        id: doc.id,
-                                        timeSlotId: data['timeSlotId'],
-                                        userId: data['userId'],
-                                        userName: data['userName'],
-                                        userEmail: data['userEmail'],
-                                        bookingDate: data['bookingDate']?.toDate(),
-                                        notes: data['notes'] || '',
-                                        status: data['status']
-                                    };
-                                })
-                                .filter((booking) => booking.status !== 'cancelled');
+                            const bookingsData = snapshot.docs.map((doc) => {
+                                const data = doc.data();
+                                return {
+                                    id: doc.id,
+                                    timeSlotId: data['timeSlotId'],
+                                    userId: data['userId'],
+                                    userName: data['userName'],
+                                    userEmail: data['userEmail'],
+                                    bookingDate: data['bookingDate']?.toDate(),
+                                    notes: data['notes'] || '',
+                                    status: data['status']
+                                };
+                            });
+                            // .filter((booking) => booking.status !== 'cancelled');
 
                             if (bookingsData.length === 0) {
                                 subscriber.next([]);
@@ -189,45 +188,105 @@ export class BookingService {
     }
 
     // Add this method to your existing BookingService
+    getBookingsBySpecialistId(specialistId: string): Observable<Booking[]> {
+        const bookingsRef = collection(this.firestore, 'bookings');
+        const q = query(bookingsRef, where('assignedSpecialistId', '==', specialistId));
+        return collectionData(q, { idField: 'id' }).pipe() as Observable<Booking[]>;
+    }
+    getSpecialistBookingCount(specialistId: string): Observable<number> {
+        const bookingsRef = collection(this.firestore, this.BOOKINGS_COLLECTION);
+        const q = query(bookingsRef, where('assignedSpecialistId', '==', specialistId), where('status', 'in', ['confirmed', 'panding']));
 
-    getSpecialistBookings(): Observable<Booking[]> {
-        return this.authService.currentUser$.pipe(
-            switchMap((user) => {
-                if (!user || user.role !== 'specialist') {
-                    return of([]);
-                }
-
-                // Query bookings assigned to this specialist
-                const bookingsRef = collection(this.firestore, this.BOOKINGS_COLLECTION);
-                const q = query(bookingsRef, where('assignedSpecialistId', '==', user.uid));
-
-                return collectionData(q, { idField: 'id' }).pipe(
-                    switchMap(async (bookings) => {
-                        // Get all unique timeSlotIds
-                        const timeSlotIds = [...new Set(bookings.map((booking) => booking['timeSlotId']))];
-
-                        if (timeSlotIds.length === 0) {
-                            return [];
-                        }
-
-                        // Fetch time slots for all bookings
-                        const timeSlotMap = await this.getTimeSlotsBatch(timeSlotIds);
-
-                        // Combine bookings with their timeSlots
-                        return bookings.map(
-                            (booking) =>
-                                ({
-                                    ...booking,
-                                    timeSlot: timeSlotMap.get(booking['timeSlotId'])
-                                }) as Booking
-                        );
-                    })
-                );
-            }),
-            shareReplay(1)
+        return collectionData(q).pipe(
+            map((bookings) => bookings.length),
+            catchError(() => of(0))
         );
     }
 
+    /**
+     * Book an appointment with a specialist
+     */
+    bookSpecialist(specialistId: string, startTime: Date, endTime: Date, notes: string = ''): Observable<string> {
+        const currentUser = this.authService.getCurrentUser();
+        if (!currentUser) {
+            throw new Error('User must be authenticated to book a specialist');
+        }
+        return from(Promise.resolve(currentUser)).pipe(
+            map((user) => {
+                if (!user) throw new Error('User must be authenticated to book a specialist');
+                return user;
+            }),
+            switchMap((user) => {
+                // Create a new booking document
+                const bookingsRef = collection(this.firestore, this.BOOKINGS_COLLECTION);
+
+                const bookingData = {
+                    userId: user.uid,
+                    specialistId: specialistId,
+                    userName: user.displayName || '',
+                    userEmail: user.email || '',
+                    startTime: Timestamp.fromDate(startTime),
+                    endTime: Timestamp.fromDate(endTime),
+                    bookingDate: Timestamp.now(),
+                    notes: notes,
+                    status: 'confirmed'
+                };
+
+                return from(addDoc(bookingsRef, bookingData)).pipe(map((docRef) => docRef.id));
+            })
+        );
+    }
+
+    // Also update the bookTimeSlotWithSpecialist method
+    async bookTimeSlotWithSpecialist(timeSlotId: string, notes: string = '', specialistId: string): Promise<string> {
+        const currentUser = await this.authService.getCurrentUser();
+
+        if (!currentUser) {
+            throw new Error('المستخدم يجب أن يكون مسجل الدخول لحجز موعد');
+        }
+
+        if (!specialistId) {
+            throw new Error('لم يتم تحديد المتخصص');
+        }
+
+        return runTransaction(this.firestore, async (transaction) => {
+            const timeSlotRef = doc(this.firestore, `${this.TIME_SLOTS_COLLECTION}/${timeSlotId}`);
+            const timeSlotDoc = await transaction.get(timeSlotRef);
+
+            if (!timeSlotDoc.exists()) {
+                throw new Error('الفترة الزمنية غير موجودة');
+            }
+
+            const timeSlotData = timeSlotDoc.data();
+            if (timeSlotData['isBooked']) {
+                throw new Error('الفترة الزمنية محجوزة بالفعل');
+            }
+
+            // Create booking with assigned specialist
+            const bookingRef = doc(collection(this.firestore, this.BOOKINGS_COLLECTION));
+            const bookingData = {
+                timeSlotId: timeSlotId,
+                userId: currentUser.uid,
+                userName: currentUser.displayName || '',
+                userEmail: currentUser.email || '',
+                bookingDate: Timestamp.now(),
+                notes: notes,
+                status: 'panding',
+                assignedSpecialistId: specialistId
+            };
+
+            transaction.set(bookingRef, bookingData);
+
+            // Update time slot
+            transaction.update(timeSlotRef, {
+                isBooked: true,
+                bookedBy: currentUser.uid,
+                updatedAt: Timestamp.now()
+            });
+
+            return bookingRef.id;
+        });
+    }
     // Create single time slot
     async createTimeSlot(timeSlot: Omit<TimeSlot, 'id'>): Promise<string> {
         const currentUser = await this.authService.getCurrentUser();
@@ -421,9 +480,95 @@ export class BookingService {
         );
     }
 
+    /**
+     * Get bookings in a specific time range (for checking specialist availability)
+     */
+    getBookingsInTimeRange(startTime: Date, endTime: Date): Observable<Booking[]> {
+        const bookingsRef = collection(this.firestore, this.BOOKINGS_COLLECTION);
+
+        // Query bookings that overlap with the specified time range
+        // A booking overlaps if:
+        // 1. It starts during our time range, OR
+        // 2. It ends during our time range, OR
+        // 3. It completely encompasses our time range
+        return from(getDocs(query(bookingsRef, where('status', '!=', 'cancelled'), where('startTime', '<=', Timestamp.fromDate(endTime)), where('endTime', '>=', Timestamp.fromDate(startTime))))).pipe(
+            map((snapshot) => {
+                return snapshot.docs.map(
+                    (doc) =>
+                        ({
+                            id: doc.id,
+                            ...doc.data(),
+                            startTime: doc.data()['startTime']?.toDate(),
+                            endTime: doc.data()['endTime']?.toDate(),
+                            bookingDate: doc.data()['bookingDate']?.toDate()
+                        }) as Booking
+                );
+            })
+        );
+    }
+
+    /**
+     * Get all bookings for a specific specialist
+     */
+    getSpecialistBookings(specialistId: string): Observable<Booking[]> {
+        const bookingsRef = collection(this.firestore, this.BOOKINGS_COLLECTION);
+
+        return from(getDocs(query(bookingsRef, where('specialistId', '==', specialistId), where('status', '!=', 'cancelled')))).pipe(
+            map((snapshot) => {
+                return snapshot.docs.map(
+                    (doc) =>
+                        ({
+                            id: doc.id,
+                            ...doc.data(),
+                            startTime: doc.data()['startTime']?.toDate(),
+                            endTime: doc.data()['endTime']?.toDate(),
+                            bookingDate: doc.data()['bookingDate']?.toDate()
+                        }) as Booking
+                );
+            })
+        );
+    }
+
     // Clear cache
     clearCache(): void {
         this.timeSlotsCache.clear();
         this.timeSlotsSubject.next([]);
+    }
+
+    // Update booking status
+    async updateBookingStatus(bookingId: string, status: 'confirmed' | 'cancelled' | 'completed'): Promise<void> {
+        try {
+            const bookingRef = doc(this.firestore, `${this.BOOKINGS_COLLECTION}/${bookingId}`);
+
+            // First, get the current booking to check if it exists
+            const bookingSnapshot = await getDoc(bookingRef);
+
+            if (!bookingSnapshot.exists()) {
+                throw new Error('Booking not found');
+            }
+
+            // Update the booking status
+            await updateDoc(bookingRef, {
+                status: status,
+                updatedAt: Timestamp.now()
+            });
+
+            // If booking is cancelled, also update the time slot
+            if (status === 'cancelled') {
+                const bookingData = bookingSnapshot.data();
+                const timeSlotId = bookingData['timeSlotId'];
+
+                if (timeSlotId) {
+                    const timeSlotRef = doc(this.firestore, `${this.TIME_SLOTS_COLLECTION}/${timeSlotId}`);
+                    await updateDoc(timeSlotRef, {
+                        isBooked: false,
+                        updatedAt: Timestamp.now()
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Error updating booking status:', error);
+            throw error;
+        }
     }
 }

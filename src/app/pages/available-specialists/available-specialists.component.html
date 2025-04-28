@@ -1,0 +1,139 @@
+<!-- src/app/booking/components/available-specialists/available-specialists.component.html -->
+<div class="p-4 max-w-4xl mx-auto">
+    <p-toast></p-toast>
+
+    <div class="card bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
+        <div class="p-4 bg-indigo-50 dark:bg-indigo-900">
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-1">
+                {{ 'pages.booking.findSpecialist' | translate }}
+            </h2>
+            <p class="text-gray-600 dark:text-gray-300">
+                {{ 'pages.booking.selectDateTimeSpecialist' | translate }}
+            </p>
+        </div>
+
+        <div class="p-4">
+            <!-- Date and Time Selection -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ 'common.labels.selectDate' | translate }}
+                    </label>
+                    <p-datepicker [(ngModel)]="selectedDate" [showIcon]="true" [minDate]="today" dateFormat="dd/mm/yy" (onSelect)="onDateSelect()" styleClass="w-full"></p-datepicker>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ 'common.labels.selectTime' | translate }}
+                    </label>
+                    <p-select [options]="timeSlots" [(ngModel)]="selectedTime" placeholder="{{ 'common.placeholders.selectTime' | translate }}" (onChange)="onTimeSelect()" styleClass="w-full"></p-select>
+                </div>
+            </div>
+
+            <!-- Check Availability Button -->
+            <div class="flex justify-center mb-6" *ngIf="selectedDate && selectedTime && availableSpecialists.length === 0">
+                <button pButton label="{{ 'pages.booking.checkAvailability' | translate }}" icon="pi pi-search" (click)="checkAvailableSpecialists()" [loading]="loading"></button>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div *ngIf="loading" class="flex justify-center my-6">
+                <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+            </div>
+
+            <!-- No Available Specialists Message -->
+            <div *ngIf="!loading && selectedDate && selectedTime && availableSpecialists.length === 0" class="text-center p-6">
+                <i class="pi pi-calendar-times text-5xl text-gray-400 mb-3"></i>
+                <p class="text-gray-600 dark:text-gray-400">
+                    {{ 'pages.booking.noSpecialistsAvailable' | translate }}
+                </p>
+                <p class="text-gray-500 dark:text-gray-500 text-sm mt-2">
+                    {{ 'pages.booking.tryDifferentDateTime' | translate }}
+                </p>
+            </div>
+
+            <!-- Available Specialists List -->
+            <div *ngIf="!loading && availableSpecialists.length > 0" class="mt-4">
+                <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200 mb-4">{{ 'pages.booking.availableSpecialists' | translate }} ({{ availableSpecialists.length }})</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div *ngFor="let specialist of availableSpecialists" class="border border-gray-200 dark:border-gray-700 rounded-lg hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors">
+                        <div class="p-4">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-900 overflow-hidden mr-3">
+                                    <img [src]="getSpecialistAvatarUrl(specialist)" alt="Specialist" class="w-full h-full object-cover" />
+                                </div>
+                                <div>
+                                    <h4 class="text-md font-medium text-gray-800 dark:text-gray-200">{{ specialist.firstName }} {{ specialist.lastName }}</h4>
+                                    <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                        <span *ngIf="specialist.rating" class="flex items-center">
+                                            <i class="pi pi-star-fill text-yellow-500 mr-1"></i>
+                                            {{ specialist.rating }}
+                                            <span class="mx-1 text-gray-400">•</span>
+                                        </span>
+                                        <span *ngIf="specialist.totalReviews"> {{ specialist.totalReviews }} {{ 'pages.booking.reviews' | translate }} </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div *ngIf="specialist.specialties && specialist.specialties.length > 0" class="mt-3">
+                                <div class="flex flex-wrap gap-1">
+                                    <span *ngFor="let specialty of specialist.specialties" class="px-2 py-1 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
+                                        {{ specialty }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div *ngIf="specialist.bio" class="mt-3 text-sm text-gray-600 dark:text-gray-400">{{ specialist.bio | slice: 0 : 120 }}{{ specialist.bio.length > 120 ? '...' : '' }}</div>
+
+                            <div class="mt-4 flex justify-end">
+                                <button pButton icon="pi pi-calendar-plus" label="{{ 'pages.booking.bookAppointment' | translate }}" class="p-button-sm" (click)="selectSpecialist(specialist)"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Confirmation Dialog -->
+    <p-dialog [(visible)]="bookingConfirmDialog" [style]="{ width: '450px' }" header="{{ 'pages.booking.confirmBooking' | translate }}" [modal]="true" [closeOnEscape]="true" [dismissableMask]="true">
+        <div *ngIf="selectedSpecialist" class="p-fluid">
+            <div class="mb-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                <div class="flex items-center mb-4">
+                    <div class="w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-900 overflow-hidden mr-3">
+                        <img [src]="getSpecialistAvatarUrl(selectedSpecialist)" alt="Specialist" class="w-full h-full object-cover" />
+                    </div>
+                    <div>
+                        <h4 class="text-md font-medium text-gray-800 dark:text-gray-200">{{ selectedSpecialist.firstName }} {{ selectedSpecialist.lastName }}</h4>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 text-sm">
+                    <div class="text-gray-500 dark:text-gray-400">{{ 'common.labels.date' | translate }}:</div>
+                    <div class="text-gray-800 dark:text-gray-200 font-medium">{{ selectedDate | date: 'fullDate' }}</div>
+
+                    <div class="text-gray-500 dark:text-gray-400">{{ 'common.labels.time' | translate }}:</div>
+                    <div class="text-gray-800 dark:text-gray-200 font-medium">
+                        {{ selectedTime ? timeSlots.find(t => t.value === selectedTime)?.label : '' }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"> {{ 'common.labels.notes' | translate }} ({{ 'common.labels.optional' | translate }}) </label>
+                <textarea
+                    id="notes"
+                    rows="3"
+                    class="w-full p-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200"
+                    [(ngModel)]="bookingNotes"
+                    placeholder="{{ 'pages.booking.notesPlaceholder' | translate }}"
+                ></textarea>
+            </div>
+        </div>
+
+        <ng-template pTemplate="footer">
+            <button pButton icon="pi pi-times" label="{{ 'common.buttons.cancel' | translate }}" class="p-button-text" (click)="cancelBooking()"></button>
+            <button pButton icon="pi pi-check" label="{{ 'common.buttons.confirm' | translate }}" (click)="confirmBooking()" [loading]="loading"></button>
+        </ng-template>
+    </p-dialog>
+</div>
