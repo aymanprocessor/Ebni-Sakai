@@ -18,15 +18,7 @@ export class SpecialistGuard implements CanActivate {
         return from(this.authService.waitForInitialization()).pipe(
             switchMap(() => this.authService.currentUser$),
             take(1),
-            map((user) => {
-                // Apply case-insensitive role comparison
-                const userRole = user
-                    ? String(user.role || '')
-                          .trim()
-                          .toLowerCase()
-                    : '';
-                return userRole === 'specialist';
-            }),
+            map((user) => user?.role === 'specialist'),
             tap((isSpecialist) => {
                 if (!isSpecialist) {
                     console.log('Access denied - Specialist role required');

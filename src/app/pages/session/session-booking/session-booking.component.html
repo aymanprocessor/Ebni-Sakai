@@ -74,25 +74,16 @@
     </p-table>
 
     <!-- Booking Dialog -->
-    <p-dialog
-        [contentStyle]="{ overflow: 'visible' }"
-        [(visible)]="showBookingDialog"
-        [header]="editingSession ? 'Update Session' : 'Book New Session'"
-        [modal]="true"
-        [style]="{ width: '450px' }"
-        [draggable]="false"
-        [resizable]="false"
-        (onHide)="resetForm()"
-    >
+    <p-dialog [(visible)]="showBookingDialog" [header]="editingSession ? 'Update Session' : 'Book New Session'" [modal]="true" [style]="{ width: '450px' }" [draggable]="false" [resizable]="false" (onHide)="resetForm()">
         <div class="flex flex-col gap-4">
             <div class="flex flex-col gap-2">
-                <label for="availableDate" class="font-medium">Select Date</label>
-                <p-select id="availableDate" [(ngModel)]="selectedDate" [options]="availableDateOptions" optionLabel="label" optionValue="value" placeholder="Select a date" styleClass="w-full" (onChange)="onDateSelect()"> </p-select>
+                <label for="selectedDate" class="font-medium">Select Date</label>
+                <p-calendar id="selectedDate" [(ngModel)]="selectedDate" [minDate]="minDate" [showIcon]="true" [showTime]="false" dateFormat="yy-mm-dd" appendTo="body" (onSelect)="onDateSelect()"> </p-calendar>
             </div>
 
             <div class="flex flex-col gap-2" *ngIf="availableTimeSlots.length > 0">
                 <label for="timeSlot" class="font-medium">Available Time Slots</label>
-                <p-select id="timeSlot" [(ngModel)]="selectedTimeSlot" [options]="availableTimeSlots" optionLabel="displayLabel" placeholder="Select Time Slot" styleClass="w-full"> </p-select>
+                <p-dropdown id="timeSlot" [(ngModel)]="selectedTimeSlot" [options]="availableTimeSlots" optionLabel="displayLabel" placeholder="Select Time Slot" styleClass="w-full"> </p-dropdown>
             </div>
 
             <div *ngIf="selectedDate && availableTimeSlots.length === 0" class="text-orange-600">No available time slots for the selected date.</div>
@@ -108,6 +99,7 @@
             <p-button label="{{ editingSession ? 'Update' : 'Book Session' }}" icon="pi pi-check" (click)="submitBooking()" [disabled]="!selectedTimeSlot"> </p-button>
         </ng-template>
     </p-dialog>
+
     <!-- Cancel Confirmation Dialog -->
     <p-dialog [(visible)]="showCancelDialog" header="Cancel Session" [modal]="true" [style]="{ width: '400px' }" [draggable]="false" [resizable]="false">
         <p *ngIf="sessionToCancel">

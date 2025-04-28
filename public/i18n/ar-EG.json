@@ -78,8 +78,7 @@
       "role": "الصلاحية",
       "subscription": "مشترك",
       "mobile": "الموبايل",
-      "isSubscribed": "مشترك؟",
-      "notes": "ملاحظات"
+      "isSubscribed": "مشترك؟"
     },
     "age": {
       "format": "{{years}} سنة، {{months}} شهر"

@@ -22,7 +22,7 @@ export class UserManagementService {
     // Get all users
     getAllUsers(): Observable<UserProfile[]> {
         const usersRef = collection(this.firestore, this.usersCollection);
-        return collectionData(usersRef, { idField: 'uid' }).pipe() as Observable<UserProfile[]>;
+        return collectionData(usersRef, { idField: 'uid' }) as Observable<UserProfile[]>;
     }
 
     // Get user by ID

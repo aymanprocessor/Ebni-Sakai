@@ -72,8 +72,7 @@
       "role": "Role",
       "subscription": "Subscription",
       "mobile": "Mobile",
-      "isSubscribed": "Is Subscribed?",
-      "notes": "Notes"
+      "isSubscribed": "Is Subscribed?"
     },
     "age": {
       "years": {

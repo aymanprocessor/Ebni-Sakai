@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
+import { CalendarModule } from 'primeng/calendar';
 import { DialogModule } from 'primeng/dialog';
 import { ToastModule } from 'primeng/toast';
 import { DropdownModule } from 'primeng/dropdown';
@@ -11,24 +12,16 @@ import { TextareaModule } from 'primeng/textarea';
 import { TooltipModule } from 'primeng/tooltip';
 import { SkeletonModule } from 'primeng/skeleton';
 import { MessageService } from 'primeng/api';
-import { Subject, take, takeUntil } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { TimeSlot } from '../../../models/time-slot.model';
 import { BookingService } from '../../../services/booking.service';
 import { SharedModule } from '../../../shared/shared.module';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { DatePickerModule } from 'primeng/datepicker';
-import { UserManagementService } from '../../../services/user-management.service';
-import { SelectModule } from 'primeng/select';
-
-interface DateOption {
-    label: string;
-    value: Date;
-}
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-session-booking',
     standalone: true,
-    imports: [SharedModule, CommonModule, FormsModule, SelectModule, TableModule, ButtonModule, DatePickerModule, DialogModule, ToastModule, DropdownModule, TextareaModule, TranslateModule, TooltipModule, SkeletonModule],
+    imports: [SharedModule, CommonModule, FormsModule, TableModule, ButtonModule, CalendarModule, DialogModule, ToastModule, DropdownModule, TextareaModule, TranslateModule, TooltipModule, SkeletonModule],
     providers: [MessageService],
     templateUrl: './session-booking.component.html',
     styleUrls: ['./session-booking.component.scss']
@@ -46,20 +39,15 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
     minDate: Date = new Date();
     loading: boolean = true;
     private destroy$ = new Subject<void>();
-    availableDateOptions: DateOption[] = [];
-    disabledDates: Date[] = [];
 
     constructor(
         private bookingService: BookingService,
         private messageService: MessageService,
-        private userManagementService: UserManagementService,
-        private translate: TranslateService,
         private cdr: ChangeDetectorRef
     ) {}
 
     ngOnInit(): void {
         this.loadUserSessions();
-        this.loadAvailableDates();
     }
 
     ngOnDestroy(): void {
@@ -96,53 +84,6 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
             });
     }
 
-    loadAvailableDates(): void {
-        this.bookingService
-            .getAvailableTimeSlots()
-            .pipe(takeUntil(this.destroy$))
-            .subscribe({
-                next: (slots) => {
-                    // Extract unique dates from available slots
-                    const dateMap = new Map<string, Date>();
-
-                    slots.forEach((slot) => {
-                        const date = new Date(slot.startTime);
-                        date.setHours(0, 0, 0, 0);
-                        const dateKey = date.toDateString();
-                        if (!dateMap.has(dateKey)) {
-                            dateMap.set(dateKey, date);
-                        }
-                    });
-
-                    // Convert to options array and sort
-                    this.availableDateOptions = Array.from(dateMap.values())
-                        .sort((a, b) => a.getTime() - b.getTime())
-                        .map((date) => ({
-                            label: this.formatDateForDisplay(date),
-                            value: date
-                        }));
-                },
-                error: (error) => {
-                    console.error('Error loading available dates:', error);
-                }
-            });
-    }
-
-    formatDateForDisplay(date: Date): string {
-        const options: Intl.DateTimeFormatOptions = {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        };
-        return date.toLocaleDateString(localStorage.getItem('language')?.toString().split('-')[0], options);
-    }
-
-    // // Function to disable dates without available slots
-    // disabledDates(date: Date): boolean {
-    //     return !this.availableDates.some((availableDate) => availableDate.getFullYear() === date.getFullYear() && availableDate.getMonth() === date.getMonth() && availableDate.getDate() === date.getDate());
-    // }
-
     onDateSelect(): void {
         if (!this.selectedDate) return;
 
@@ -157,7 +98,13 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
             .subscribe({
                 next: (slots) => {
                     this.availableTimeSlots = slots
-                        .filter((slot) => !slot.isBooked)
+                        .filter((slot) => {
+                            // If editing, include the current session's time slot
+                            if (this.editingSession && this.editingSession.timeSlotId === slot.id) {
+                                return true;
+                            }
+                            return !slot.isBooked;
+                        })
                         .map((slot) => ({
                             ...slot,
                             displayLabel: `${slot.startTime.toLocaleTimeString([], {
@@ -168,6 +115,11 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
                                 minute: '2-digit'
                             })}`
                         }));
+
+                    // If editing, pre-select the current time slot
+                    if (this.editingSession && this.editingSession.timeSlot) {
+                        this.selectedTimeSlot = this.availableTimeSlots.find((slot) => slot.id === this.editingSession!.timeSlotId) || null;
+                    }
                 },
                 error: (error) => {
                     this.messageService.add({
@@ -180,115 +132,6 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
             });
     }
 
-    async submitBooking(): Promise<void> {
-        if (!this.selectedTimeSlot) {
-            this.messageService.add({
-                severity: 'warn',
-                summary: 'Validation Error',
-                detail: 'Please select a time slot'
-            });
-            return;
-        }
-
-        try {
-            // Find the least busy specialist
-            const leastBusySpecialist = await this.findLeastBusySpecialist();
-
-            if (!leastBusySpecialist) {
-                // If no specialist found, book without assignment or show error
-                const response = confirm('No specialists available. Would you like to book anyway?');
-                if (!response) {
-                    return;
-                }
-
-                // Book without specialist assignment
-                await this.bookingService.bookTimeSlot(this.selectedTimeSlot.id!, this.bookingNotes);
-            } else {
-                // Book with specialist assignment
-                await this.bookingService.bookTimeSlotWithSpecialist(this.selectedTimeSlot.id!, this.bookingNotes, leastBusySpecialist.uid);
-            }
-
-            this.messageService.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Session booked successfully'
-            });
-
-            this.loadUserSessions();
-            this.resetForm();
-        } catch (error: any) {
-            this.messageService.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: error.message || 'Failed to book session'
-            });
-            console.error('Error submitting booking:', error);
-        }
-    }
-    private async findLeastBusySpecialist(): Promise<any> {
-        try {
-            // Get all users first to see what we're getting
-            const users = await new Promise<any[]>((resolve, reject) => {
-                this.userManagementService.getAllUsers().subscribe({
-                    next: (users) => {
-                        console.log('All users (raw):', JSON.stringify(users, null, 2));
-                        console.log('Total users count:', users.length);
-                        resolve(users);
-                    },
-                    error: (error) => {
-                        console.error('Error fetching users:', error);
-                        reject(error);
-                    }
-                });
-            });
-
-            // More robust specialist filtering with case-insensitivity
-            const specialists = users.filter((user) => {
-                const isSpecialist = user.role === 'specialist';
-
-                return isSpecialist;
-            });
-
-            console.log('Found specialists:', JSON.stringify(specialists, null, 2));
-            console.log('Specialists count:', specialists.length);
-
-            if (specialists.length === 0) {
-                console.error('No specialists found');
-                return null;
-            }
-
-            // Get booking counts for each specialist
-            const specialistWithCounts = await Promise.all(
-                specialists.map(async (specialist) => {
-                    const count = await new Promise<number>((resolve) => {
-                        this.bookingService
-                            .getSpecialistBookingCount(specialist.uid)
-                            .pipe(take(1))
-                            .subscribe({
-                                next: (count) => {
-                                    console.log(`Booking count for ${specialist.email}:`, count);
-                                    resolve(count);
-                                },
-                                error: (error) => {
-                                    console.error(`Error getting booking count for ${specialist.email}:`, error);
-                                    resolve(0);
-                                }
-                            });
-                    });
-                    return { specialist, bookingCount: count };
-                })
-            );
-
-            // Find specialist with least bookings
-            const leastBusy = specialistWithCounts.reduce((prev, current) => (prev.bookingCount <= current.bookingCount ? prev : current));
-
-            console.log('Selected specialist:', JSON.stringify(leastBusy.specialist, null, 2));
-            return leastBusy.specialist;
-        } catch (error) {
-            console.error('Comprehensive error finding least busy specialist:', error);
-            return null;
-        }
-    }
     canModifySession(session: Booking): boolean {
         if (!session.timeSlot || session.status === 'cancelled') return false;
 
@@ -359,6 +202,51 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
         } finally {
             this.showCancelDialog = false;
             this.sessionToCancel = null;
+        }
+    }
+
+    async submitBooking(): Promise<void> {
+        if (!this.selectedTimeSlot) {
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Validation Error',
+                detail: 'Please select a time slot'
+            });
+            return;
+        }
+
+        try {
+            if (this.editingSession) {
+                // For updating, cancel the existing booking and create a new one
+                await this.bookingService.cancelBooking(this.editingSession.id!, this.editingSession.timeSlotId);
+
+                await this.bookingService.bookTimeSlot(this.selectedTimeSlot.id!, this.bookingNotes);
+
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: 'Session updated successfully'
+                });
+            } else {
+                // Create new session
+                await this.bookingService.bookTimeSlot(this.selectedTimeSlot.id!, this.bookingNotes);
+
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: 'Session booked successfully'
+                });
+            }
+
+            this.loadUserSessions();
+            this.resetForm();
+        } catch (error) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: this.editingSession ? 'Failed to update session' : 'Failed to book session'
+            });
+            console.error('Error submitting booking:', error);
         }
     }
 
