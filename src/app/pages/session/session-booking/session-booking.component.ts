@@ -1,3 +1,4 @@
+// src/app/pages/session/session-booking/session-booking.component.ts
 import { Booking } from './../../../models/booking.model';
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -17,11 +18,12 @@ import { TimeSlot } from '../../../models/time-slot.model';
 import { BookingService } from '../../../services/booking.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { TranslateModule } from '@ngx-translate/core';
+import { DatePickerModule } from 'primeng/datepicker';
 
 @Component({
     selector: 'app-session-booking',
     standalone: true,
-    imports: [SharedModule, CommonModule, FormsModule, TableModule, ButtonModule, CalendarModule, DialogModule, ToastModule, DropdownModule, TextareaModule, TranslateModule, TooltipModule, SkeletonModule],
+    imports: [SharedModule, DatePickerModule, CommonModule, FormsModule, TableModule, ButtonModule, CalendarModule, DialogModule, ToastModule, DropdownModule, TextareaModule, TranslateModule, TooltipModule, SkeletonModule],
     providers: [MessageService],
     templateUrl: './session-booking.component.html',
     styleUrls: ['./session-booking.component.scss']
@@ -29,6 +31,8 @@ import { TranslateModule } from '@ngx-translate/core';
 export class SessionBookingComponent implements OnInit, OnDestroy {
     sessions: Booking[] = [];
     availableTimeSlots: any[] = [];
+    availableDates: Date[] = [];
+    disabledDates: Date[] = [];
     selectedDate: Date | null = null;
     selectedTimeSlot: TimeSlot | null = null;
     bookingNotes: string = '';
@@ -38,6 +42,7 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
     sessionToCancel: Booking | null = null;
     minDate: Date = new Date();
     loading: boolean = true;
+    loadingTimeSlots: boolean = false;
     private destroy$ = new Subject<void>();
 
     constructor(
@@ -48,6 +53,7 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.loadUserSessions();
+        this.loadAvailableDates();
     }
 
     ngOnDestroy(): void {
@@ -84,8 +90,32 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
             });
     }
 
+    loadAvailableDates(): void {
+        const today = new Date();
+        this.bookingService
+            .getAvailableDates(today, 60)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: (dates) => {
+                    this.availableDates = dates;
+                    this.cdr.detectChanges();
+                },
+                error: (error) => {
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Failed to load available dates'
+                    });
+                    console.error('Error loading available dates:', error);
+                }
+            });
+    }
+
     onDateSelect(): void {
         if (!this.selectedDate) return;
+
+        this.loadingTimeSlots = true;
+        this.selectedTimeSlot = null;
 
         const startOfDay = new Date(this.selectedDate);
         startOfDay.setHours(0, 0, 0, 0);
@@ -97,6 +127,9 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this.destroy$))
             .subscribe({
                 next: (slots) => {
+                    this.loadingTimeSlots = false;
+
+                    // Filter out booked slots if not editing
                     this.availableTimeSlots = slots
                         .filter((slot) => {
                             // If editing, include the current session's time slot
@@ -120,8 +153,11 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
                     if (this.editingSession && this.editingSession.timeSlot) {
                         this.selectedTimeSlot = this.availableTimeSlots.find((slot) => slot.id === this.editingSession!.timeSlotId) || null;
                     }
+
+                    this.cdr.detectChanges();
                 },
                 error: (error) => {
+                    this.loadingTimeSlots = false;
                     this.messageService.add({
                         severity: 'error',
                         summary: 'Error',
@@ -131,6 +167,10 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
                 }
             });
     }
+
+    isDateAvailable = (date: Date): boolean => {
+        return this.availableDates.some((availableDate) => availableDate.toDateString() === date.toDateString());
+    };
 
     canModifySession(session: Booking): boolean {
         if (!session.timeSlot || session.status === 'cancelled') return false;
@@ -220,7 +260,8 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
                 // For updating, cancel the existing booking and create a new one
                 await this.bookingService.cancelBooking(this.editingSession.id!, this.editingSession.timeSlotId);
 
-                await this.bookingService.bookTimeSlot(this.selectedTimeSlot.id!, this.bookingNotes);
+                // Use auto-assign method for booking with the least busy specialist
+                await this.bookingService.bookTimeSlotWithAutoAssign(this.selectedTimeSlot.id!, this.bookingNotes);
 
                 this.messageService.add({
                     severity: 'success',
@@ -228,8 +269,8 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
                     detail: 'Session updated successfully'
                 });
             } else {
-                // Create new session
-                await this.bookingService.bookTimeSlot(this.selectedTimeSlot.id!, this.bookingNotes);
+                // Create new session with auto-assignment
+                await this.bookingService.bookTimeSlotWithAutoAssign(this.selectedTimeSlot.id!, this.bookingNotes);
 
                 this.messageService.add({
                     severity: 'success',

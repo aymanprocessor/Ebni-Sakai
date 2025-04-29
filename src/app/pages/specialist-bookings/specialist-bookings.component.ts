@@ -1,4 +1,4 @@
-// src/app/pages/specialist/specialist-bookings/specialist-bookings.component.ts
+// src/app/pages/specialist-bookings/specialist-bookings.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
@@ -44,14 +44,15 @@ export class SpecialistBookingsComponent implements OnInit, OnDestroy {
     loadSpecialistBookings(): void {
         this.loading = true;
 
-        // Get current specialist user bookings
+        // Get bookings assigned to the current specialist
         const sub = this.authService.currentUser$.subscribe((user) => {
             if (user?.role === 'specialist') {
-                // Using existing booking service method to get bookings for specialist
+                // Using the specialist bookings method to get bookings for this specialist
                 this.subscriptions.add(
-                    this.bookingService.getUserBookings().subscribe({
+                    this.bookingService.getSpecialistBookings().subscribe({
                         next: (bookings) => {
                             this.bookings = bookings.sort((a, b) => {
+                                // Sort by start time
                                 if (a.timeSlot && b.timeSlot) {
                                     return a.timeSlot.startTime.getTime() - b.timeSlot.startTime.getTime();
                                 }
@@ -87,7 +88,7 @@ export class SpecialistBookingsComponent implements OnInit, OnDestroy {
             header: 'Confirm',
             icon: 'pi pi-check-circle',
             accept: () => {
-                this.updateBookingStatus(booking.id, 'confirmed');
+                this.updateBookingStatus(booking.id!, 'confirmed');
             }
         });
     }
@@ -107,6 +108,7 @@ export class SpecialistBookingsComponent implements OnInit, OnDestroy {
                                 summary: 'Success',
                                 detail: 'Booking cancelled successfully.'
                             });
+                            this.loadSpecialistBookings();
                         })
                         .catch((error) => {
                             console.error('Error cancelling booking:', error);
@@ -127,19 +129,23 @@ export class SpecialistBookingsComponent implements OnInit, OnDestroy {
             header: 'Complete Booking',
             icon: 'pi pi-check',
             accept: () => {
-                this.updateBookingStatus(booking.id, 'completed');
+                this.updateBookingStatus(booking.id!, 'completed');
             }
         });
     }
 
     updateBookingStatus(bookingId: string, status: 'confirmed' | 'cancelled' | 'completed'): void {
-        // Add specific specialist booking update logic here
-        // For now, using a basic message
+        // Implement booking status update logic
+        // This would typically call a method in the booking service
+
+        // For now, show success message and refresh bookings
         this.messageService.add({
             severity: 'success',
             summary: 'Success',
             detail: `Booking ${status} successfully.`
         });
+
+        this.loadSpecialistBookings();
     }
 
     getStatusSeverity(status: string): 'success' | 'warn' | 'danger' | 'info' {

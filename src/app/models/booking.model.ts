@@ -6,6 +6,8 @@ export interface Booking {
     userId: string;
     userName: string;
     userEmail: string;
+    assignedSpecialistId?: string;
+    assignedSpecialistName?: string;
     bookingDate: Date;
     notes: string;
     status: 'confirmed' | 'cancelled' | 'completed' | 'panding';

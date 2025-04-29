@@ -4,6 +4,7 @@ import { Observable, from, map, switchMap, of, BehaviorSubject, combineLatest, t
 import { AuthService } from './auth.service';
 import { Booking } from '../models/booking.model';
 import { TimeSlot } from '../models/time-slot.model';
+import { UserProfile } from '../models/user.model';
 
 @Injectable({
     providedIn: 'root'
@@ -14,7 +15,7 @@ export class BookingService {
 
     private readonly TIME_SLOTS_COLLECTION = 'timeSlots';
     private readonly BOOKINGS_COLLECTION = 'bookings';
-
+    private readonly USERS_COLLECTION = 'users';
     private timeSlotsCache = new Map<string, TimeSlot>();
 
     constructor(
@@ -420,7 +421,272 @@ export class BookingService {
             })
         );
     }
+    /**
+     * Get available dates where at least one specialist is available
+     */
+    getAvailableDates(startDate: Date, daysToFetch = 30): Observable<Date[]> {
+        const endDate = new Date(startDate);
+        endDate.setDate(endDate.getDate() + daysToFetch);
 
+        return this.getAllSpecialists().pipe(
+            switchMap((specialists) => {
+                const specialistIds = specialists.map((s) => s.uid);
+
+                if (specialistIds.length === 0) {
+                    return of([]);
+                }
+
+                return this.getTimeSlotsInRange(startDate, endDate).pipe(
+                    map((slots) => {
+                        // Group time slots by date
+                        const dateMap = new Map<string, Date>();
+
+                        slots.forEach((slot) => {
+                            if (!slot.isBooked) {
+                                const dateKey = slot.startTime.toDateString();
+                                dateMap.set(dateKey, new Date(slot.startTime));
+                            }
+                        });
+
+                        // Convert map to array of dates
+                        return Array.from(dateMap.values()).sort((a, b) => a.getTime() - b.getTime());
+                    })
+                );
+            })
+        );
+    }
+
+    /**
+     * Get all specialists from the database
+     */
+    getAllSpecialists(): Observable<UserProfile[]> {
+        const usersRef = collection(this.firestore, this.USERS_COLLECTION);
+        const specialistsQuery = query(usersRef, where('role', '==', 'specialist'));
+
+        return collectionData(specialistsQuery, { idField: 'uid' }) as Observable<UserProfile[]>;
+    }
+
+    /**
+     * Book a time slot and assign to the least busy available specialist
+     */
+    async bookTimeSlotWithAutoAssign(timeSlotId: string, notes: string = ''): Promise<string> {
+        const currentUser = await this.authService.getCurrentUser();
+
+        if (!currentUser) {
+            throw new Error('User must be authenticated to book a time slot');
+        }
+
+        return runTransaction(this.firestore, async (transaction) => {
+            const timeSlotRef = doc(this.firestore, `${this.TIME_SLOTS_COLLECTION}/${timeSlotId}`);
+            const timeSlotDoc = await transaction.get(timeSlotRef);
+
+            if (!timeSlotDoc.exists()) {
+                throw new Error('Time slot not found');
+            }
+
+            const timeSlotData = timeSlotDoc.data();
+            if (timeSlotData['isBooked']) {
+                throw new Error('Time slot is already booked');
+            }
+
+            // Get the time slot's start and end times
+            const startTime = timeSlotData['startTime'].toDate();
+            const endTime = timeSlotData['endTime'].toDate();
+
+            // Find available specialists for this time slot
+            const specialists = await this.getAvailableSpecialistsForTimeSlot(startTime, endTime);
+
+            if (specialists.length === 0) {
+                throw new Error('No specialists available for this time slot');
+            }
+
+            // Find the least busy specialist
+            const leastBusySpecialist = await this.findLeastBusySpecialist(specialists);
+
+            // Create booking
+            const bookingRef = doc(collection(this.firestore, this.BOOKINGS_COLLECTION));
+            const bookingData = {
+                timeSlotId: timeSlotId,
+                userId: currentUser.uid,
+                userName: currentUser.displayName || '',
+                userEmail: currentUser.email || '',
+                assignedSpecialistId: leastBusySpecialist.uid,
+                assignedSpecialistName: `${leastBusySpecialist.firstName} ${leastBusySpecialist.lastName}`,
+                bookingDate: Timestamp.now(),
+                notes: notes,
+                status: 'panding'
+            };
+
+            transaction.set(bookingRef, bookingData);
+
+            // Update time slot
+            transaction.update(timeSlotRef, {
+                isBooked: true,
+                bookedBy: currentUser.uid,
+                assignedSpecialistId: leastBusySpecialist.uid,
+                updatedAt: Timestamp.now()
+            });
+
+            return bookingRef.id;
+        });
+    }
+
+    /**
+     * Get all specialists available for a specific time slot
+     */
+    private async getAvailableSpecialistsForTimeSlot(startTime: Date, endTime: Date): Promise<UserProfile[]> {
+        // Get all specialists
+        const usersRef = collection(this.firestore, this.USERS_COLLECTION);
+        const specialistsQuery = query(usersRef, where('role', '==', 'specialist'));
+        const specialistsSnapshot = await getDocs(specialistsQuery);
+
+        const specialists: UserProfile[] = [];
+        specialistsSnapshot.forEach((doc) => {
+            specialists.push({ uid: doc.id, ...doc.data() } as UserProfile);
+        });
+
+        // If no specialists, return empty array
+        if (specialists.length === 0) {
+            return [];
+        }
+
+        // Get all bookings for this time slot
+        const bookingsRef = collection(this.firestore, this.BOOKINGS_COLLECTION);
+        const bookingsQuery = query(bookingsRef, where('status', 'in', ['confirmed', 'panding']));
+
+        const bookingsSnapshot = await getDocs(bookingsQuery);
+        const bookings: Booking[] = [];
+        bookingsSnapshot.forEach((doc) => {
+            bookings.push({ id: doc.id, ...doc.data() } as Booking);
+        });
+
+        // Get all time slots for these bookings
+        const timeSlotIds = bookings.map((booking) => booking.timeSlotId);
+        const timeSlots = await this.getTimeSlotsBatchSync(timeSlotIds);
+
+        // Find all specialists that have a booking during this time slot
+        const busySpecialistIds = new Set<string>();
+
+        bookings.forEach((booking) => {
+            const timeSlot = timeSlots.get(booking.timeSlotId);
+            if (timeSlot) {
+                const bookingStartTime = timeSlot.startTime;
+                const bookingEndTime = timeSlot.endTime;
+
+                // Check if this booking overlaps with the requested time slot
+                if ((startTime <= bookingStartTime && endTime > bookingStartTime) || (startTime >= bookingStartTime && startTime < bookingEndTime)) {
+                    if (booking.assignedSpecialistId) {
+                        busySpecialistIds.add(booking.assignedSpecialistId);
+                    }
+                }
+            }
+        });
+
+        // Return all specialists that are not busy during this time slot
+        return specialists.filter((specialist) => !busySpecialistIds.has(specialist.uid));
+    }
+
+    /**
+     * Find the specialist with the fewest bookings
+     */
+    private async findLeastBusySpecialist(specialists: UserProfile[]): Promise<UserProfile> {
+        if (specialists.length === 0) {
+            throw new Error('No specialists available');
+        }
+
+        if (specialists.length === 1) {
+            return specialists[0];
+        }
+
+        // Count bookings for each specialist
+        const specialistBookingCounts = new Map<string, number>();
+
+        for (const specialist of specialists) {
+            const bookingsRef = collection(this.firestore, this.BOOKINGS_COLLECTION);
+            const bookingsQuery = query(bookingsRef, where('assignedSpecialistId', '==', specialist.uid), where('status', 'in', ['confirmed', 'panding']));
+
+            const bookingsSnapshot = await getDocs(bookingsQuery);
+            specialistBookingCounts.set(specialist.uid, bookingsSnapshot.size);
+        }
+
+        // Find the specialist with the fewest bookings
+        let leastBusySpecialist = specialists[0];
+        let minBookings = specialistBookingCounts.get(leastBusySpecialist.uid) || 0;
+
+        for (const specialist of specialists) {
+            const bookingCount = specialistBookingCounts.get(specialist.uid) || 0;
+            if (bookingCount < minBookings) {
+                minBookings = bookingCount;
+                leastBusySpecialist = specialist;
+            }
+        }
+
+        return leastBusySpecialist;
+    }
+
+    /**
+     * Synchronous version of getTimeSlotsBatch for use in transactions
+     */
+    private async getTimeSlotsBatchSync(timeSlotIds: string[]): Promise<Map<string, TimeSlot>> {
+        const timeSlotMap = new Map<string, TimeSlot>();
+
+        if (timeSlotIds.length === 0) {
+            return timeSlotMap;
+        }
+
+        const chunks = [];
+        for (let i = 0; i < timeSlotIds.length; i += 10) {
+            chunks.push(timeSlotIds.slice(i, i + 10));
+        }
+
+        for (const chunk of chunks) {
+            const q = query(collection(this.firestore, this.TIME_SLOTS_COLLECTION), where(documentId(), 'in', chunk));
+
+            const snapshot = await getDocs(q);
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const timeSlot = {
+                    id: doc.id,
+                    startTime: data['startTime']?.toDate(),
+                    endTime: data['endTime']?.toDate(),
+                    isBooked: data['isBooked'] || false,
+                    createdBy: data['createdBy'],
+                    updatedAt: data['updatedAt']?.toDate()
+                } as TimeSlot;
+
+                timeSlotMap.set(doc.id, timeSlot);
+            });
+        }
+
+        return timeSlotMap;
+    }
+
+    /**
+     * Get dates in range that should be disabled (no available specialists)
+     */
+    getDisabledDates(startDate: Date, daysToFetch = 30): Observable<Date[]> {
+        return this.getAvailableDates(startDate, daysToFetch).pipe(
+            map((availableDates) => {
+                const disabledDates: Date[] = [];
+                const availableDateStrings = new Set(availableDates.map((date) => date.toDateString()));
+
+                // Create array of all dates in range
+                const currentDate = new Date(startDate);
+                const endDate = new Date(startDate);
+                endDate.setDate(endDate.getDate() + daysToFetch);
+
+                // For each date in range, if not available, add to disabled
+                while (currentDate <= endDate) {
+                    if (!availableDateStrings.has(currentDate.toDateString())) {
+                        disabledDates.push(new Date(currentDate));
+                    }
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+
+                return disabledDates;
+            })
+        );
+    }
     // Clear cache
     clearCache(): void {
         this.timeSlotsCache.clear();

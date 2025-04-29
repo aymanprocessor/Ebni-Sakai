@@ -3,8 +3,8 @@
 
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">Session Booking</h1>
-        <p-button icon="pi pi-plus" label="Book New Session" (click)="showBookingDialog = true" styleClass="p-button-success"> </p-button>
+        <h1 class="text-2xl font-bold text-gray-800">{{ 'Session Booking' | translate }}</h1>
+        <p-button icon="pi pi-plus" label="{{ 'Book New Session' | translate }}" (click)="showBookingDialog = true" styleClass="p-button-success"></p-button>
     </div>
 
     <!-- Session History Table -->
@@ -13,6 +13,7 @@
             <tr>
                 <th class="text-left">{{ 'common.labels.date' | translate }}</th>
                 <th class="text-left">{{ 'common.labels.time' | translate }}</th>
+                <th class="text-left">{{ 'common.labels.specialist' | translate }}</th>
                 <th class="text-left">{{ 'common.labels.status' | translate }}</th>
                 <th class="text-left">{{ 'common.labels.notes' | translate }}</th>
                 <th class="text-center">{{ 'common.labels.actions' | translate }}</th>
@@ -21,6 +22,7 @@
 
         <ng-template pTemplate="loadingbody">
             <tr *ngFor="let _ of [1, 2, 3, 4, 5]">
+                <td><p-skeleton></p-skeleton></td>
                 <td><p-skeleton></p-skeleton></td>
                 <td><p-skeleton></p-skeleton></td>
                 <td><p-skeleton></p-skeleton></td>
@@ -48,11 +50,18 @@
                     <span *ngIf="!session.timeSlot">No time slot data</span>
                 </td>
                 <td>
+                    <span *ngIf="session.assignedSpecialistName">
+                        {{ session.assignedSpecialistName }}
+                    </span>
+                    <span *ngIf="!session.assignedSpecialistName">Auto-assigned</span>
+                </td>
+                <td>
                     <span
                         [ngClass]="{
                             'text-green-600': session.status === 'confirmed',
                             'text-red-600': session.status === 'cancelled',
-                            'text-yellow-600': session.status === 'pending'
+                            'text-yellow-600': session.status === 'panding',
+                            'text-blue-600': session.status === 'completed'
                         }"
                     >
                         {{ session.status | titlecase }}
@@ -68,7 +77,7 @@
 
         <ng-template pTemplate="emptymessage">
             <tr>
-                <td colspan="5" class="text-center py-4">No sessions found</td>
+                <td colspan="6" class="text-center py-4">No sessions found</td>
             </tr>
         </ng-template>
     </p-table>
@@ -77,40 +86,53 @@
     <p-dialog [(visible)]="showBookingDialog" [header]="editingSession ? 'Update Session' : 'Book New Session'" [modal]="true" [style]="{ width: '450px' }" [draggable]="false" [resizable]="false" (onHide)="resetForm()">
         <div class="flex flex-col gap-4">
             <div class="flex flex-col gap-2">
-                <label for="selectedDate" class="font-medium">Select Date</label>
-                <p-calendar id="selectedDate" [(ngModel)]="selectedDate" [minDate]="minDate" [showIcon]="true" [showTime]="false" dateFormat="yy-mm-dd" appendTo="body" (onSelect)="onDateSelect()"> </p-calendar>
+                <label for="selectedDate" class="font-medium">{{ 'Select Date' | translate }}</label>
+                <p-datepicker id="selectedDate" [(ngModel)]="selectedDate" [minDate]="minDate" [showIcon]="true" [showTime]="false" [disabledDates]="disabledDates" dateFormat="yy-mm-dd" appendTo="body" (onSelect)="onDateSelect()"> </p-datepicker>
+
+                <div *ngIf="loadingTimeSlots" class="text-center mt-2">
+                    <p-skeleton width="100%" height="40px"></p-skeleton>
+                </div>
             </div>
 
-            <div class="flex flex-col gap-2" *ngIf="availableTimeSlots.length > 0">
-                <label for="timeSlot" class="font-medium">Available Time Slots</label>
-                <p-dropdown id="timeSlot" [(ngModel)]="selectedTimeSlot" [options]="availableTimeSlots" optionLabel="displayLabel" placeholder="Select Time Slot" styleClass="w-full"> </p-dropdown>
+            <div class="flex flex-col gap-2" *ngIf="!loadingTimeSlots && availableTimeSlots.length > 0">
+                <label for="timeSlot" class="font-medium">{{ 'Available Time Slots' | translate }}</label>
+                <p-dropdown id="timeSlot" [(ngModel)]="selectedTimeSlot" [options]="availableTimeSlots" optionLabel="displayLabel" placeholder="{{ 'Select Time Slot' | translate }}" styleClass="w-full"> </p-dropdown>
             </div>
 
-            <div *ngIf="selectedDate && availableTimeSlots.length === 0" class="text-orange-600">No available time slots for the selected date.</div>
+            <div *ngIf="selectedDate && !loadingTimeSlots && availableTimeSlots.length === 0" class="bg-yellow-100 text-yellow-700 p-3 rounded">
+                {{ 'No available time slots for the selected date' | translate }}
+            </div>
 
             <div class="flex flex-col gap-2">
-                <label for="notes" class="font-medium">Notes (Optional)</label>
+                <label for="notes" class="font-medium">{{ 'Notes (Optional)' | translate }}</label>
                 <textarea pInputTextarea id="notes" [(ngModel)]="bookingNotes" rows="3" class="w-full"> </textarea>
+            </div>
+
+            <div class="bg-blue-50 p-3 rounded text-blue-700 text-sm">
+                <i class="pi pi-info-circle mr-2"></i>
+                {{ 'You will be assigned to the most available specialist' | translate }}
             </div>
         </div>
 
         <ng-template pTemplate="footer">
-            <p-button label="Cancel" icon="pi pi-times" (click)="showBookingDialog = false" styleClass="p-button-text"> </p-button>
-            <p-button label="{{ editingSession ? 'Update' : 'Book Session' }}" icon="pi pi-check" (click)="submitBooking()" [disabled]="!selectedTimeSlot"> </p-button>
+            <p-button label="{{ 'Cancel' | translate }}" icon="pi pi-times" (click)="showBookingDialog = false" styleClass="p-button-text"> </p-button>
+            <p-button label="{{ editingSession ? 'Update' : ('Book Session' | translate) }}" icon="pi pi-check" (click)="submitBooking()" [disabled]="!selectedTimeSlot"> </p-button>
         </ng-template>
     </p-dialog>
 
     <!-- Cancel Confirmation Dialog -->
-    <p-dialog [(visible)]="showCancelDialog" header="Cancel Session" [modal]="true" [style]="{ width: '400px' }" [draggable]="false" [resizable]="false">
+    <p-dialog [(visible)]="showCancelDialog" header="{{ 'Cancel Session' | translate }}" [modal]="true" [style]="{ width: '400px' }" [draggable]="false" [resizable]="false">
         <p *ngIf="sessionToCancel">
-            Are you sure you want to cancel this session on
-            <strong>{{ sessionToCancel.timeSlot?.startTime | date: 'MMMM d, y' }}</strong> at <strong>{{ sessionToCancel.timeSlot?.startTime | date: 'shortTime' }}</strong
+            {{ 'Are you sure you want to cancel this session on' | translate }}
+            <strong>{{ sessionToCancel.timeSlot?.startTime | date: 'MMMM d, y' }}</strong>
+            {{ 'at' | translate }}
+            <strong>{{ sessionToCancel.timeSlot?.startTime | date: 'shortTime' }}</strong
             >?
         </p>
 
         <ng-template pTemplate="footer">
-            <p-button label="No" icon="pi pi-times" (click)="showCancelDialog = false" styleClass="p-button-text"> </p-button>
-            <p-button label="Yes" icon="pi pi-check" (click)="cancelSession()" styleClass="p-button-danger"> </p-button>
+            <p-button label="{{ 'No' | translate }}" icon="pi pi-times" (click)="showCancelDialog = false" styleClass="p-button-text"> </p-button>
+            <p-button label="{{ 'Yes' | translate }}" icon="pi pi-check" (click)="cancelSession()" styleClass="p-button-danger"> </p-button>
         </ng-template>
     </p-dialog>
 </div>
