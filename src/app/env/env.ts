@@ -9,8 +9,8 @@ interface FirebaseConfig {
 }
 
 interface ZoomConfig {
-    apiKey: string;
-    apiSecret: string;
+    clientId: string;
+    clientSecret: string;
 }
 interface Environment {
     zoomApiUrl: any;
@@ -27,8 +27,8 @@ export const environment: Environment = {
     zoomApiUrl: 'https://api.zoom.us/v2',
     apiUrl: '',
     zoom: {
-        apiKey: 'A8LPvrl8RuiacV4ChXmaA',
-        apiSecret: 'mG4vF2yeSkVg54dJv0DzO4Qbrv4zqL4D'
+        clientId: 'A8LPvrl8RuiacV4ChXmaA',
+        clientSecret: 'mG4vF2yeSkVg54dJv0DzO4Qbrv4zqL4D'
     },
     firebase: {
         apiKey: 'AIzaSyADNdy8cCZmAx3MkZNtFukpETTXXd18UU0',

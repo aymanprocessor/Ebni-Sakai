@@ -36,6 +36,16 @@
                     },
                     "configurations": {
                         "production": {
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/env.dev.ts",
+                                    "with": "src/environments/env.prod.ts"
+                                }
+                            ],
+                            "optimization": true,
+                            "sourceMap": false,
+                            "namedChunks": false,
+                            "extractLicenses": true,
                             "budgets": [
                                 {
                                     "type": "initial",
@@ -51,6 +61,12 @@
                             "outputHashing": "all"
                         },
                         "development": {
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/env.prod.ts",
+                                    "with": "src/environments/env.dev.ts"
+                                }
+                            ],
                             "optimization": false,
                             "extractLicenses": false,
                             "sourceMap": true,

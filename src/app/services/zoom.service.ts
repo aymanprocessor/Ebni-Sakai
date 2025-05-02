@@ -1,75 +1,172 @@
 // src/app/services/zoom.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, from, throwError } from 'rxjs';
-import { environment } from '../../app/env/env';
-import { catchError, map } from 'rxjs/operators';
+import { Observable, from, throwError, of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
+import { EnvironmentService } from './environment.service';
 import { SweetalertService } from './sweetalert.service';
+import { TokenStorageService } from './token-storage.service';
+
+interface MeetingConfig {
+    topic: string;
+    startTime: string;
+    duration: number;
+}
 
 @Injectable({
     providedIn: 'root'
 })
 export class ZoomService {
     private readonly API_URL = 'https://api.zoom.us/v2';
-    private token: string = '';
 
     constructor(
         private http: HttpClient,
-        private sweetalertService: SweetalertService
+        private sweetalertService: SweetalertService,
+        private envService: EnvironmentService,
+        private tokenStorage: TokenStorageService
     ) {
-        // Initialize the Zoom SDK
         this.initializeZoomSDK();
     }
 
     /**
-     * Initialize the Zoom Meeting SDK
+     * Initialize the Zoom Meeting SDK by loading required scripts
      */
     private async initializeZoomSDK(): Promise<void> {
         try {
-            // Load the Zoom Meeting SDK script dynamically
-            const script = document.createElement('script');
-            script.src = 'https://source.zoom.us/2.18.0/lib/vendor/react.min.js';
-            document.head.appendChild(script);
+            const scripts = [
+                'https://source.zoom.us/2.18.0/lib/vendor/react.min.js',
+                'https://source.zoom.us/2.18.0/lib/vendor/react-dom.min.js',
+                'https://source.zoom.us/2.18.0/lib/vendor/redux.min.js',
+                'https://source.zoom.us/2.18.0/lib/vendor/redux-thunk.min.js',
+                'https://source.zoom.us/zoom-meeting-2.18.0.min.js'
+            ];
 
-            const script2 = document.createElement('script');
-            script2.src = 'https://source.zoom.us/2.18.0/lib/vendor/react-dom.min.js';
-            document.head.appendChild(script2);
+            // Load scripts sequentially to ensure correct order
+            for (const src of scripts) {
+                await this.loadScript(src);
+            }
 
-            const script3 = document.createElement('script');
-            script3.src = 'https://source.zoom.us/2.18.0/lib/vendor/redux.min.js';
-            document.head.appendChild(script3);
-
-            const script4 = document.createElement('script');
-            script4.src = 'https://source.zoom.us/2.18.0/lib/vendor/redux-thunk.min.js';
-            document.head.appendChild(script4);
-
-            const script5 = document.createElement('script');
-            script5.src = 'https://source.zoom.us/zoom-meeting-2.18.0.min.js';
-            document.head.appendChild(script5);
-
-            // Wait for the script to load
-            await new Promise<void>((resolve) => {
-                script5.onload = () => resolve();
-            });
-
-            console.log('Zoom Meeting SDK loaded successfully');
+            this.envService.logDev('Zoom Meeting SDK loaded successfully');
         } catch (error) {
-            console.error('Failed to initialize Zoom Meeting SDK:', error);
+            this.envService.logError('Failed to initialize Zoom Meeting SDK:', error);
             this.sweetalertService.showError('Failed to initialize Zoom Meeting SDK', 'Zoom Error');
         }
+    }
+
+    /**
+     * Helper method to load a script and wait for it to load
+     */
+    private loadScript(src: string): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = () => resolve();
+            script.onerror = (e) => reject(e);
+            document.head.appendChild(script);
+        });
+    }
+
+    /**
+     * Set Zoom tokens in the service
+     * @param tokenResponse The OAuth token response
+     */
+    setTokens(tokenResponse: any): void {
+        if (tokenResponse) {
+            // Store tokens securely
+            this.tokenStorage.storeSecurely('zoom_access_token', tokenResponse.access_token);
+            this.tokenStorage.storeSecurely('zoom_refresh_token', tokenResponse.refresh_token);
+            this.tokenStorage.storeSecurely('zoom_token_expiry', (Date.now() + tokenResponse.expires_in * 1000).toString());
+
+            if (tokenResponse.user_id) {
+                this.tokenStorage.storeSecurely('zoom_user_id', tokenResponse.user_id);
+            }
+        }
+    }
+
+    /**
+     * Get the current access token, refreshing if needed
+     * @returns Observable with the access token
+     */
+    getAccessToken(): Observable<string> {
+        const token = this.tokenStorage.retrieveSecurely('zoom_access_token');
+        const expiryStr = this.tokenStorage.retrieveSecurely('zoom_token_expiry');
+        const expiry = expiryStr ? parseInt(expiryStr) : 0;
+
+        // Check if token exists and is valid
+        if (token && expiry && expiry > Date.now()) {
+            return of(token);
+        }
+
+        // If we have a refresh token, try to refresh
+        const refreshToken = this.tokenStorage.retrieveSecurely('zoom_refresh_token');
+
+        if (refreshToken) {
+            return this.refreshAccessToken(refreshToken);
+        }
+
+        // If we don't have a refresh token, we need to reauthenticate
+        return throwError(() => new Error('No valid access token or refresh token available'));
+    }
+
+    /**
+     * Refresh the access token using a refresh token
+     * @param refreshToken The refresh token
+     * @returns Observable with the new access token
+     */
+    private refreshAccessToken(refreshToken: string): Observable<string> {
+        const zoomConfig = this.envService.getZoomConfig();
+
+        // Create Basic Auth header
+        const basicAuth = btoa(`${zoomConfig.clientId}:${zoomConfig.clientSecret}`);
+
+        // Set headers
+        const headers = new HttpHeaders({
+            Authorization: `Basic ${basicAuth}`,
+            'Content-Type': 'application/json'
+        });
+
+        const body = {
+            grant_type: 'refresh_token',
+            refresh_token: refreshToken
+        };
+
+        return this.http.post<any>('https://zoom.us/oauth/token', body, { headers }).pipe(
+            map((response) => {
+                // Store the new tokens
+                this.setTokens(response);
+                return response.access_token;
+            }),
+            catchError((error) => {
+                this.envService.logError('Error refreshing Zoom token:', error);
+                this.sweetalertService.showError('Failed to refresh authentication token', 'Zoom Error');
+                return throwError(() => error);
+            })
+        );
     }
 
     /**
      * Generate a signature for joining a Zoom meeting
      * @param meetingNumber The meeting number
      * @param role The role (0 for attendee, 1 for host)
-     * @returns Signature string
+     * @returns Observable with signature
      */
-    private generateSignature(meetingNumber: string, role: number): Observable<{ signature: string }> {
-        return this.http.get<{ signature: string }>(`https://generatezoomsignature-bxkjtqi7iq-uc.a.run.app`, {
-            params: { meetingNumber, role: role.toString() }
-        });
+    private generateSignature(meetingNumber: string, role: number): Observable<string> {
+        const url = this.envService.getZoomProxyUrl() + '/signature';
+
+        return this.http
+            .get<{ signature: string }>(url, {
+                params: { meetingNumber, role: role.toString() }
+            })
+            .pipe(
+                map((response) => response.signature),
+                catchError((error) => {
+                    this.envService.logError('Error generating signature:', error);
+                    this.sweetalertService.showError('Failed to generate meeting signature', 'Zoom Error');
+                    return throwError(() => error);
+                })
+            );
     }
+
     /**
      * Create a new Zoom meeting
      * @param topic Meeting topic
@@ -78,67 +175,47 @@ export class ZoomService {
      * @returns Observable with meeting details
      */
     createMeeting(topic: string, startTime: string, duration: number): Observable<any> {
-        const url = `https://petal-tidal-kicker.glitch.me/zoom/meetings`;
+        return this.getAccessToken().pipe(
+            switchMap((token) => {
+                const url = this.envService.getZoomProxyUrl() + '/meetings';
 
-        const meetingConfig = {
-            topic: topic,
-            type: 2, // Scheduled meeting
-            start_time: startTime,
-            duration: duration,
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            settings: {
-                host_video: true,
-                participant_video: true,
-                join_before_host: false,
-                mute_upon_entry: true,
-                auto_recording: 'none'
-            }
-        };
+                const meetingConfig = {
+                    topic,
+                    type: 2, // Scheduled meeting
+                    start_time: startTime,
+                    duration,
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                    settings: {
+                        host_video: true,
+                        participant_video: true,
+                        join_before_host: false,
+                        mute_upon_entry: true,
+                        auto_recording: 'none'
+                    }
+                };
 
-        // In a real application, you'd use your backend to create meetings
-        // This is just a placeholder for the API call structure
-        const headers = new HttpHeaders({
-            Authorization:
-                'Bearer eyJzdiI6IjAwMDAwMiIsImFsZyI6IkhTNTEyIiwidiI6IjIuMCIsImtpZCI6IjM3Nzg4NzdmLTljNGEtNDM0Yi1iYjUwLWMyNDZkNTg5ZDRhNCJ9.eyJhdWQiOiJodHRwczovL29hdXRoLnpvb20udXMiLCJ1aWQiOiJEbG91SS1zU1NGcUtJMWV2d0NZT3h3IiwidmVyIjoxMCwiYXVpZCI6Ijg4YmMxM2I1YTc1ZWM1MWRmYzIzZmE5MTNhYjA0NDVlNGI2M2FjZTk0Mzk0Y2RlZTRhYjJkNWNiMGJjYjhjM2UiLCJuYmYiOjE3NDYxNDU4MTEsImNvZGUiOiJYOWVaRGI1YTRWRzJsclhCRnZVVEo2bHUzMEhmX3NMdXciLCJpc3MiOiJ6bTpjaWQ6QThMUHZybDhSdWlhY1Y0Q2hYbWFBIiwiZ25vIjowLCJleHAiOjE3NDYxNDk0MTEsInR5cGUiOjAsImlhdCI6MTc0NjE0NTgxMSwiYWlkIjoibGhSZUZnRnhURGlVTENwNzg3OG9BdyJ9.F0g9U-PR3doj6u8PSXQLoTIIcBTKo7xBjOUldTzxe0s6c6DvzvJvGuHcfNjyqea1KvEg4ozW1PQ_s-XjNd0nvg',
-            'Content-Type': 'application/json'
-        });
+                const headers = new HttpHeaders({
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                });
 
-        return this.http.post(url, meetingConfig, { headers }).pipe(
+                return this.http.post(url, meetingConfig, { headers });
+            }),
             catchError((error) => {
-                console.error('Error creating Zoom meeting:', error);
+                this.envService.logError('Error creating Zoom meeting:', error);
                 this.sweetalertService.showError('Failed to create Zoom meeting', 'Zoom Error');
                 return throwError(() => error);
             })
         );
-
-        // return this.getAuthToken().pipe(
-        //     map((token) => {
-        //         console.log('Zoom token:', token);
-        //         const headers = new HttpHeaders({
-        //             Authorization: `Bearer eyJzdiI6IjAwMDAwMiIsImFsZyI6IkhTNTEyIiwidiI6IjIuMCIsImtpZCI6IjM3Nzg4NzdmLTljNGEtNDM0Yi1iYjUwLWMyNDZkNTg5ZDRhNCJ9.eyJhdWQiOiJodHRwczovL29hdXRoLnpvb20udXMiLCJ1aWQiOiJEbG91SS1zU1NGcUtJMWV2d0NZT3h3IiwidmVyIjoxMCwiYXVpZCI6Ijg4YmMxM2I1YTc1ZWM1MWRmYzIzZmE5MTNhYjA0NDVlNGI2M2FjZTk0Mzk0Y2RlZTRhYjJkNWNiMGJjYjhjM2UiLCJuYmYiOjE3NDYxNDU4MTEsImNvZGUiOiJYOWVaRGI1YTRWRzJsclhCRnZVVEo2bHUzMEhmX3NMdXciLCJpc3MiOiJ6bTpjaWQ6QThMUHZybDhSdWlhY1Y0Q2hYbWFBIiwiZ25vIjowLCJleHAiOjE3NDYxNDk0MTEsInR5cGUiOjAsImlhdCI6MTc0NjE0NTgxMSwiYWlkIjoibGhSZUZnRnhURGlVTENwNzg3OG9BdyJ9.F0g9U-PR3doj6u8PSXQLoTIIcBTKo7xBjOUldTzxe0s6c6DvzvJvGuHcfNjyqea1KvEg4ozW1PQ_s-XjNd0nvg`,
-        //             'Content-Type': 'application/json'
-        //         });
-
-        //         return this.http.post(url, meetingConfig, { headers }).pipe(
-        //             catchError((error) => {
-        //                 console.error('Error creating Zoom meeting:', error);
-        //                 this.sweetalertService.showError('Failed to create Zoom meeting', 'Zoom Error');
-        //                 return throwError(() => error);
-        //             })
-        //         );
-        //     })
-        // );
     }
 
     /**
      * Create multiple Zoom meetings at once
      * @param meetings Array of meeting configs
      */
-    createMultipleMeetings(meetings: Array<{ topic: string; startTime: string; duration: number }>): Observable<any[]> {
-        // Create an array of observables for each meeting creation
+    createMultipleMeetings(meetings: MeetingConfig[]): Observable<any[]> {
         const meetingCreations = meetings.map((meeting) => this.createMeeting(meeting.topic, meeting.startTime, meeting.duration));
 
-        // Convert array of observables to a single observable
         return from(Promise.all(meetingCreations));
     }
 
@@ -149,7 +226,7 @@ export class ZoomService {
      * @param displayName User's display name
      * @param elementId DOM element ID where to render the meeting
      */
-    joinMeeting(meetingNumber: string, meetingPassword: string, displayName: string, elementId: string): void {
+    async joinMeeting(meetingNumber: string, meetingPassword: string, displayName: string, elementId: string): Promise<void> {
         try {
             // Ensure Zoom SDK is loaded
             if (!(window as any).ZoomMtg) {
@@ -158,83 +235,90 @@ export class ZoomService {
             }
 
             const ZoomMtg = (window as any).ZoomMtg;
+            const zoomConfig = this.envService.getZoomConfig();
 
             // Initialize the Zoom Meeting
             ZoomMtg.init({
                 leaveUrl: window.location.origin + '/app/session',
-                success: () => {
-                    // Generate signature
-                    const signature = this.generateSignature(meetingNumber, 0);
+                success: async () => {
+                    try {
+                        // Generate signature - need to await the result
+                        const signature = await this.generateSignature(meetingNumber, 0).toPromise();
 
-                    // Join the meeting
-                    ZoomMtg.join({
-                        meetingNumber: meetingNumber,
-                        userName: displayName,
-                        signature: signature,
-                        apiKey: environment.zoom.apiKey,
-                        userEmail: '',
-                        passWord: meetingPassword,
-                        success: () => {
-                            console.log('Joined Zoom meeting successfully');
-                        },
-                        error: (error: any) => {
-                            console.error('Failed to join Zoom meeting:', error);
-                            this.sweetalertService.showError('Failed to join Zoom meeting', 'Zoom Error');
-                        }
-                    });
+                        // Join the meeting
+                        ZoomMtg.join({
+                            meetingNumber: meetingNumber,
+                            userName: displayName,
+                            signature: signature,
+                            apiKey: zoomConfig.apiKey,
+                            userEmail: '',
+                            passWord: meetingPassword,
+                            success: () => {
+                                this.envService.logDev('Joined Zoom meeting successfully');
+                            },
+                            error: (error: any) => {
+                                this.envService.logError('Failed to join Zoom meeting:', error);
+                                this.sweetalertService.showError('Failed to join Zoom meeting', 'Zoom Error');
+                            }
+                        });
+                    } catch (error) {
+                        this.envService.logError('Error generating signature:', error);
+                        this.sweetalertService.showError('Failed to generate meeting signature', 'Zoom Error');
+                    }
                 },
                 error: (error: any) => {
-                    console.error('Failed to initialize Zoom meeting:', error);
+                    this.envService.logError('Failed to initialize Zoom meeting:', error);
                     this.sweetalertService.showError('Failed to initialize Zoom meeting', 'Zoom Error');
                 }
             });
         } catch (error) {
-            console.error('Error joining Zoom meeting:', error);
+            this.envService.logError('Error joining Zoom meeting:', error);
             this.sweetalertService.showError('Error joining Zoom meeting', 'Zoom Error');
         }
     }
 
     /**
-     * Get authentication token for Zoom API
-     * In production, this should be handled by your backend
-     */
-    private getAuthToken(): Observable<string> {
-        const url = 'https://getzoomaccesstoken-bxkjtqi7iq-uc.a.run.app'; // Your deployed function URL
-
-        const body = {
-            // Replace with actual values expected by your backend
-            code: 'X9eZDb5a4VG2lrXBFvUTJ6lu30Hf_sLuw'
-        };
-
-        return this.http.post<{ access_token: string }>(url, body).pipe(
-            map((response) => {
-                this.token = response.access_token;
-                return this.token;
-            })
-        );
-    }
-    /**
      * End a Zoom meeting
      * @param meetingId The meeting ID to end
      */
     endMeeting(meetingId: string): Observable<any> {
-        const url = `${this.API_URL}/meetings/${meetingId}/status`;
+        return this.getAccessToken().pipe(
+            switchMap((token) => {
+                const url = `${this.API_URL}/meetings/${meetingId}/status`;
 
-        return this.getAuthToken().pipe(
-            map((token) => {
                 const headers = new HttpHeaders({
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 });
 
-                return this.http.put(url, { action: 'end' }, { headers }).pipe(
-                    catchError((error) => {
-                        console.error('Error ending Zoom meeting:', error);
-                        this.sweetalertService.showError('Failed to end Zoom meeting', 'Zoom Error');
-                        return throwError(() => error);
-                    })
-                );
+                return this.http.put(url, { action: 'end' }, { headers });
+            }),
+            catchError((error) => {
+                this.envService.logError('Error ending Zoom meeting:', error);
+                this.sweetalertService.showError('Failed to end Zoom meeting', 'Zoom Error');
+                return throwError(() => error);
             })
         );
+    }
+
+    /**
+     * Check if user is authenticated with Zoom
+     */
+    isAuthenticated(): boolean {
+        const token = this.tokenStorage.retrieveSecurely('zoom_access_token');
+        const expiryStr = this.tokenStorage.retrieveSecurely('zoom_token_expiry');
+        const expiry = expiryStr ? parseInt(expiryStr) : 0;
+
+        return !!token && expiry > Date.now();
+    }
+
+    /**
+     * Clear Zoom authentication data
+     */
+    logout(): void {
+        this.tokenStorage.removeSecurely('zoom_access_token');
+        this.tokenStorage.removeSecurely('zoom_refresh_token');
+        this.tokenStorage.removeSecurely('zoom_token_expiry');
+        this.tokenStorage.removeSecurely('zoom_user_id');
     }
 }
