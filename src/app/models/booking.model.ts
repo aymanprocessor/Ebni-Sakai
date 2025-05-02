@@ -1,5 +1,5 @@
 import { TimeSlot } from './time-slot.model';
-
+import { ZoomMeeting } from './zoom-meeting.model';
 export interface Booking {
     id: string;
     timeSlotId: string;
@@ -10,6 +10,7 @@ export interface Booking {
     assignedSpecialistName?: string;
     bookingDate: Date;
     notes: string;
-    status: 'confirmed' | 'cancelled' | 'completed' | 'panding';
+    status: 'confirmed' | 'cancelled' | 'completed' | 'pending';
     timeSlot?: TimeSlot;
+    zoomMeeting?: ZoomMeeting;
 }

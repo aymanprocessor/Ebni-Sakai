@@ -1,3 +1,4 @@
+<!-- src/app/pages/session/session-booking/session-booking.component.html -->
 <div class="container mx-auto px-4 py-8">
     <p-toast></p-toast>
 
@@ -60,7 +61,7 @@
                         [ngClass]="{
                             'text-green-600': session.status === 'confirmed',
                             'text-red-600': session.status === 'cancelled',
-                            'text-yellow-600': session.status === 'panding',
+                            'text-yellow-600': session.status === 'pending',
                             'text-blue-600': session.status === 'completed'
                         }"
                     >
@@ -69,21 +70,49 @@
                 </td>
                 <td>{{ session.notes || '-' }}</td>
                 <td class="text-center">
-                    <p-button icon="pi pi-pencil" styleClass="p-button-text p-button-warning mr-2" [disabled]="!canModifySession(session)" (click)="editSession(session)" pTooltip="Edit session" tooltipPosition="top"> </p-button>
-                    <p-button icon="pi pi-trash" styleClass="p-button-text p-button-danger" [disabled]="!canModifySession(session)" (click)="confirmCancelSession(session)" pTooltip="Cancel session" tooltipPosition="top"> </p-button>
+                    <div class="flex justify-center gap-2">
+                        <button pButton pRipple icon="pi pi-eye" class="p-button-rounded p-button-text p-button-info" (click)="viewSessionDetails(session)" pTooltip="View Details" tooltipPosition="top"></button>
+
+                        <button
+                            *ngIf="session.zoomMeeting && (isSessionUpcoming(session) || isSessionInProgress(session))"
+                            pButton
+                            pRipple
+                            icon="pi pi-video"
+                            class="p-button-rounded p-button-text p-button-success"
+                            (click)="joinZoomMeeting(session)"
+                            pTooltip="Join Zoom Meeting"
+                            tooltipPosition="top"
+                        ></button>
+
+                        <button
+                            *ngIf="canModifySession(session)"
+                            pButton
+                            pRipple
+                            icon="pi pi-times"
+                            class="p-button-rounded p-button-text p-button-danger"
+                            (click)="confirmCancelSession(session)"
+                            pTooltip="Cancel Session"
+                            tooltipPosition="top"
+                        ></button>
+                    </div>
                 </td>
             </tr>
         </ng-template>
 
         <ng-template pTemplate="emptymessage">
             <tr>
-                <td colspan="6" class="text-center py-4">No sessions found</td>
+                <td colspan="6" class="text-center py-4">
+                    <div class="flex flex-col items-center">
+                        <i class="pi pi-calendar-times text-4xl text-gray-400 mb-2"></i>
+                        <p class="text-gray-500">{{ 'pages.specialist.noBookings' | translate }}</p>
+                    </div>
+                </td>
             </tr>
         </ng-template>
     </p-table>
 
     <!-- Booking Dialog -->
-    <p-dialog [(visible)]="showBookingDialog" [header]="editingSession ? 'Update Session' : 'Book New Session'" [modal]="true" [style]="{ width: '450px' }" [draggable]="false" [resizable]="false" (onHide)="resetForm()">
+    <p-dialog [(visible)]="showBookingDialog" [style]="{ width: '450px' }" header="{{ 'Book New Session' | translate }}" [modal]="true" styleClass="p-fluid" [draggable]="false" [resizable]="false">
         <div class="flex flex-col gap-4">
             <div class="flex flex-col gap-2">
                 <label for="selectedDate" class="font-medium">{{ 'Select Date' | translate }}</label>
@@ -110,13 +139,96 @@
 
             <div class="bg-blue-50 p-3 rounded text-blue-700 text-sm">
                 <i class="pi pi-info-circle mr-2"></i>
-                {{ 'You will be assigned to the most available specialist' | translate }}
+                {{ 'This will create a Zoom meeting for your session' | translate }}
             </div>
         </div>
 
         <ng-template pTemplate="footer">
             <p-button label="{{ 'Cancel' | translate }}" icon="pi pi-times" (click)="showBookingDialog = false" styleClass="p-button-text"> </p-button>
-            <p-button label="{{ editingSession ? 'Update' : ('Book Session' | translate) }}" icon="pi pi-check" (click)="submitBooking()" [disabled]="!selectedTimeSlot"> </p-button>
+            <p-button label="{{ 'Book Session with Zoom' | translate }}" icon="pi pi-check" (click)="submitBookingWithZoom()" [disabled]="!selectedTimeSlot"> </p-button>
+        </ng-template>
+    </p-dialog>
+
+    <!-- Session Details + Zoom Meeting Dialog -->
+    <p-dialog [(visible)]="showZoomMeetingDialog" [style]="{ width: '700px' }" [header]="'Session Details' | translate" [modal]="true" styleClass="p-fluid" [draggable]="false" [resizable]="false">
+        <p-tabView [(activeIndex)]="activeSessionTab">
+            <p-tabPanel [header]="'Details' | translate">
+                <div *ngIf="selectedSession" class="p-4">
+                    <div class="grid">
+                        <div class="col-12 md:col-6">
+                            <h3 class="text-xl font-semibold mb-4">{{ 'Session Information' | translate }}</h3>
+
+                            <div class="flex flex-col gap-3">
+                                <div>
+                                    <span class="font-semibold block">{{ 'Date' | translate }}:</span>
+                                    <span>{{ selectedSession.timeSlot?.startTime | date: 'fullDate' }}</span>
+                                </div>
+
+                                <div>
+                                    <span class="font-semibold block">{{ 'Time' | translate }}:</span>
+                                    <span>{{ selectedSession.timeSlot?.startTime | date: 'shortTime' }} - {{ selectedSession.timeSlot?.endTime | date: 'shortTime' }}</span>
+                                </div>
+
+                                <div>
+                                    <span class="font-semibold block">{{ 'Specialist' | translate }}:</span>
+                                    <span>{{ selectedSession.assignedSpecialistName || 'Not assigned yet' }}</span>
+                                </div>
+
+                                <div>
+                                    <span class="font-semibold block">{{ 'Status' | translate }}:</span>
+                                    <span
+                                        [ngClass]="{
+                                            'text-green-600': selectedSession.status === 'confirmed',
+                                            'text-red-600': selectedSession.status === 'cancelled',
+                                            'text-yellow-600': selectedSession.status === 'pending',
+                                            'text-blue-600': selectedSession.status === 'completed'
+                                        }"
+                                        >{{ selectedSession.status | titlecase }}</span
+                                    >
+                                </div>
+
+                                <div *ngIf="selectedSession.notes">
+                                    <span class="font-semibold block">{{ 'Notes' | translate }}:</span>
+                                    <p class="mt-1 text-gray-600">{{ selectedSession.notes }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 md:col-6" *ngIf="selectedSession.zoomMeeting">
+                            <h3 class="text-xl font-semibold mb-4">{{ 'Zoom Meeting' | translate }}</h3>
+
+                            <div class="flex flex-col gap-3">
+                                <div>
+                                    <span class="font-semibold block">{{ 'Meeting ID' | translate }}:</span>
+                                    <span>{{ selectedSession.zoomMeeting.meetingNumber }}</span>
+                                </div>
+
+                                <div>
+                                    <span class="font-semibold block">{{ 'Password' | translate }}:</span>
+                                    <span>{{ selectedSession.zoomMeeting.password }}</span>
+                                </div>
+
+                                <div>
+                                    <span class="font-semibold block">{{ 'Duration' | translate }}:</span>
+                                    <span>{{ selectedSession.zoomMeeting.duration }} minutes</span>
+                                </div>
+
+                                <div class="mt-3">
+                                    <p-button *ngIf="isSessionUpcoming(selectedSession) || isSessionInProgress(selectedSession)" icon="pi pi-video" label="Join Meeting" styleClass="p-button-success" (onClick)="activeSessionTab = 1"> </p-button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </p-tabPanel>
+
+            <p-tabPanel [header]="'Zoom Meeting' | translate" *ngIf="selectedSession?.zoomMeeting">
+                <app-zoom-meeting [meeting]="selectedSession?.zoomMeeting" [isHost]="false" (meetingJoined)="onZoomMeetingJoined()" (meetingEnded)="onZoomMeetingEnded()"> </app-zoom-meeting>
+            </p-tabPanel>
+        </p-tabView>
+
+        <ng-template pTemplate="footer">
+            <p-button label="{{ 'Close' | translate }}" icon="pi pi-times" (click)="showZoomMeetingDialog = false" styleClass="p-button-secondary"></p-button>
         </ng-template>
     </p-dialog>
 
@@ -129,6 +241,11 @@
             <strong>{{ sessionToCancel.timeSlot?.startTime | date: 'shortTime' }}</strong
             >?
         </p>
+
+        <div *ngIf="sessionToCancel?.zoomMeeting" class="mt-3 p-3 bg-yellow-50 text-yellow-700 rounded">
+            <i class="pi pi-exclamation-triangle mr-2"></i>
+            {{ 'This will also cancel the associated Zoom meeting' | translate }}
+        </div>
 
         <ng-template pTemplate="footer">
             <p-button label="{{ 'No' | translate }}" icon="pi pi-times" (click)="showCancelDialog = false" styleClass="p-button-text"> </p-button>

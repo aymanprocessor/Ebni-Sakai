@@ -8,15 +8,28 @@ interface FirebaseConfig {
     measurementId?: string;
 }
 
+interface ZoomConfig {
+    apiKey: string;
+    apiSecret: string;
+}
 interface Environment {
+    zoomApiUrl: any;
+    apiUrl: any;
     production: boolean;
     useEmulators: boolean;
+    zoom: ZoomConfig;
     firebase: FirebaseConfig;
 }
 
 export const environment: Environment = {
     production: false,
     useEmulators: false, // Set to true for local development
+    zoomApiUrl: 'https://api.zoom.us/v2',
+    apiUrl: '',
+    zoom: {
+        apiKey: 'A8LPvrl8RuiacV4ChXmaA',
+        apiSecret: 'mG4vF2yeSkVg54dJv0DzO4Qbrv4zqL4D'
+    },
     firebase: {
         apiKey: 'AIzaSyADNdy8cCZmAx3MkZNtFukpETTXXd18UU0',
         authDomain: 'ebni-81db7.firebaseapp.com',

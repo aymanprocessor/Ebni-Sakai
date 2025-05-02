@@ -8,6 +8,7 @@ import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DialogModule } from 'primeng/dialog';
+import { TabViewModule } from 'primeng/tabview';
 import { TranslateModule } from '@ngx-translate/core';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { Subscription } from 'rxjs';
@@ -15,11 +16,12 @@ import { Booking } from '../../models/booking.model';
 import { AuthService } from '../../services/auth.service';
 import { BookingService } from '../../services/booking.service';
 import { SkeletonModule } from 'primeng/skeleton';
+import { ZoomMeetingComponent } from '../zoom-meetings/zoom-meetings.component';
 
 @Component({
     selector: 'app-specialist-bookings',
     standalone: true,
-    imports: [CommonModule, SkeletonModule, TableModule, CardModule, ButtonModule, TagModule, ToastModule, ConfirmDialogModule, DialogModule, TranslateModule],
+    imports: [CommonModule, SkeletonModule, TableModule, CardModule, ButtonModule, TagModule, ToastModule, ConfirmDialogModule, DialogModule, TranslateModule, TabViewModule, ZoomMeetingComponent],
     providers: [MessageService, ConfirmationService],
     templateUrl: './specialist-bookings.component.html'
 })
@@ -28,6 +30,8 @@ export class SpecialistBookingsComponent implements OnInit, OnDestroy {
     loading: boolean = true;
     selectedBooking: Booking | null = null;
     showDetailsDialog: boolean = false;
+    showZoomMeetingDialog: boolean = false;
+    activeBookingTab: number = 0;
     subscriptions: Subscription = new Subscription();
 
     constructor(
@@ -39,6 +43,10 @@ export class SpecialistBookingsComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.loadSpecialistBookings();
+    }
+
+    ngOnDestroy(): void {
+        this.subscriptions.unsubscribe();
     }
 
     loadSpecialistBookings(): void {
@@ -79,6 +87,13 @@ export class SpecialistBookingsComponent implements OnInit, OnDestroy {
 
     viewBookingDetails(booking: Booking): void {
         this.selectedBooking = booking;
+        this.activeBookingTab = 0; // Set to details tab
+        this.showDetailsDialog = true;
+    }
+
+    viewZoomMeeting(booking: Booking): void {
+        this.selectedBooking = booking;
+        this.activeBookingTab = 1; // Set to Zoom tab
         this.showDetailsDialog = true;
     }
 
@@ -88,7 +103,24 @@ export class SpecialistBookingsComponent implements OnInit, OnDestroy {
             header: 'Confirm',
             icon: 'pi pi-check-circle',
             accept: () => {
-                this.updateBookingStatus(booking.id!, 'confirmed');
+                this.bookingService
+                    .confirmBooking(booking.id!)
+                    .then(() => {
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Success',
+                            detail: 'Booking confirmed successfully.'
+                        });
+                        this.loadSpecialistBookings();
+                    })
+                    .catch((error) => {
+                        console.error('Error confirming booking:', error);
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: 'Failed to confirm booking.'
+                        });
+                    });
             }
         });
     }
@@ -101,7 +133,7 @@ export class SpecialistBookingsComponent implements OnInit, OnDestroy {
             accept: () => {
                 if (booking.timeSlotId) {
                     this.bookingService
-                        .cancelBooking(booking.id!, booking.timeSlotId)
+                        .cancelBookingWithZoom(booking.id!, booking.timeSlotId)
                         .then(() => {
                             this.messageService.add({
                                 severity: 'success',
@@ -129,30 +161,33 @@ export class SpecialistBookingsComponent implements OnInit, OnDestroy {
             header: 'Complete Booking',
             icon: 'pi pi-check',
             accept: () => {
-                this.updateBookingStatus(booking.id!, 'completed');
+                this.bookingService
+                    .completeBooking(booking.id!)
+                    .then(() => {
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Success',
+                            detail: 'Booking completed successfully.'
+                        });
+                        this.loadSpecialistBookings();
+                    })
+                    .catch((error) => {
+                        console.error('Error completing booking:', error);
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: 'Failed to complete booking.'
+                        });
+                    });
             }
         });
-    }
-
-    updateBookingStatus(bookingId: string, status: 'confirmed' | 'cancelled' | 'completed'): void {
-        // Implement booking status update logic
-        // This would typically call a method in the booking service
-
-        // For now, show success message and refresh bookings
-        this.messageService.add({
-            severity: 'success',
-            summary: 'Success',
-            detail: `Booking ${status} successfully.`
-        });
-
-        this.loadSpecialistBookings();
     }
 
     getStatusSeverity(status: string): 'success' | 'warn' | 'danger' | 'info' {
         switch (status) {
             case 'confirmed':
                 return 'success';
-            case 'panding':
+            case 'pending':
                 return 'warn';
             case 'cancelled':
                 return 'danger';
@@ -173,7 +208,26 @@ export class SpecialistBookingsComponent implements OnInit, OnDestroy {
         });
     }
 
-    ngOnDestroy(): void {
-        this.subscriptions.unsubscribe();
+    isSessionUpcoming(booking: Booking): boolean {
+        if (!booking.timeSlot) return false;
+
+        const now = new Date();
+        return booking.timeSlot.startTime > now && booking.status !== 'cancelled';
+    }
+
+    isSessionInProgress(booking: Booking): boolean {
+        if (!booking.timeSlot) return false;
+
+        const now = new Date();
+        return booking.timeSlot.startTime <= now && booking.timeSlot.endTime >= now && booking.status !== 'cancelled';
+    }
+
+    onZoomMeetingJoined(): void {
+        console.log('Zoom meeting joined');
+    }
+
+    onZoomMeetingEnded(): void {
+        console.log('Zoom meeting ended');
+        this.showDetailsDialog = false;
     }
 }

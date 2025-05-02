@@ -64,6 +64,11 @@ export const routes: Routes = [
                 loadComponent: () => import('./app/pages/user-management/user-management.component').then((m) => m.UserManagementComponent),
                 canActivate: [authGuard, AdminGuard]
             },
+
+            {
+                path: 'zoom-meeting/:id',
+                loadComponent: () => import('./app/pages/zoom-meetings/zoom-meetings.component').then((m) => m.ZoomMeetingComponent)
+            },
             {
                 path: 'survey',
                 children: [

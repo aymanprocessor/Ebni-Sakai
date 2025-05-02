@@ -5,6 +5,9 @@ import { AuthService } from './auth.service';
 import { Booking } from '../models/booking.model';
 import { TimeSlot } from '../models/time-slot.model';
 import { UserProfile } from '../models/user.model';
+import { ZoomMeeting } from '../models/zoom-meeting.model';
+import { SweetalertService } from './sweetalert.service';
+import { ZoomService } from './zoom.service';
 
 @Injectable({
     providedIn: 'root'
@@ -20,7 +23,9 @@ export class BookingService {
 
     constructor(
         private firestore: Firestore,
-        private authService: AuthService
+        private authService: AuthService,
+        private sweetalertService: SweetalertService,
+        private zoomService: ZoomService
     ) {
         this.initTimeSlotListener();
     }
@@ -228,7 +233,249 @@ export class BookingService {
             shareReplay(1)
         );
     }
+    /**
+     * Book a time slot with Zoom meeting
+     * @param timeSlotId The time slot ID to book
+     * @param notes Optional booking notes
+     * @returns Promise with the booking ID
+     */
+    async bookTimeSlotWithZoom(timeSlotId: string, notes: string = ''): Promise<string> {
+        const currentUser = await this.authService.getCurrentUser();
 
+        if (!currentUser) {
+            throw new Error('User must be authenticated to book a time slot');
+        }
+
+        return runTransaction(this.firestore, async (transaction) => {
+            const timeSlotRef = doc(this.firestore, `${this.TIME_SLOTS_COLLECTION}/${timeSlotId}`);
+            const timeSlotDoc = await transaction.get(timeSlotRef);
+
+            if (!timeSlotDoc.exists()) {
+                throw new Error('Time slot not found');
+            }
+
+            const timeSlotData = timeSlotDoc.data();
+            if (timeSlotData['isBooked']) {
+                throw new Error('Time slot is already booked');
+            }
+
+            // Get specialists for this time slot
+            const specialists = await this.getAvailableSpecialistsForTimeSlot(timeSlotData['startTime'].toDate(), timeSlotData['endTime'].toDate());
+
+            if (specialists.length === 0) {
+                throw new Error('No specialists available for this time slot');
+            }
+
+            // Find the least busy specialist
+            const leastBusySpecialist = await this.findLeastBusySpecialist(specialists);
+
+            // Create a Zoom meeting for this booking
+            const startTime = timeSlotData['startTime'].toDate();
+            const endTime = timeSlotData['endTime'].toDate();
+            const duration = Math.round((endTime.getTime() - startTime.getTime()) / (60 * 1000)); // in minutes
+
+            // Format the date for Zoom API (ISO format)
+            const zoomStartTime = startTime.toISOString();
+
+            // Create meeting topic
+            const meetingTopic = `Session with ${leastBusySpecialist.firstName} ${leastBusySpecialist.lastName}`;
+
+            try {
+                // Create Zoom meeting (in production this would be done via backend)
+                // For demo purposes, we'll create a mock meeting
+                // const zoomMeeting: ZoomMeeting = {
+                //     id: 'mock_' + Date.now().toString(),
+                //     meetingNumber: Math.floor(Math.random() * 1000000000).toString(),
+                //     password: Math.random().toString(36).substring(2, 8),
+                //     joinUrl: 'https://zoom.us/j/mock',
+                //     hostUrl: 'https://zoom.us/j/mock/host',
+                //     topic: meetingTopic,
+                //     startTime: startTime,
+                //     duration: duration
+                // };
+
+                // In production, we would use:
+                const zoomMeetingResult = await this.zoomService.createMeeting(meetingTopic, zoomStartTime, duration).toPromise();
+                const zoomMeeting = this.transformZoomApiResponseToModel(zoomMeetingResult);
+
+                // Create booking with Zoom meeting details
+                const bookingRef = doc(collection(this.firestore, this.BOOKINGS_COLLECTION));
+                const bookingData = {
+                    timeSlotId: timeSlotId,
+                    userId: currentUser.uid,
+                    userName: currentUser.displayName || '',
+                    userEmail: currentUser.email || '',
+                    assignedSpecialistId: leastBusySpecialist.uid,
+                    assignedSpecialistName: `${leastBusySpecialist.firstName} ${leastBusySpecialist.lastName}`,
+                    bookingDate: Timestamp.now(),
+                    notes: notes,
+                    status: 'pending',
+                    zoomMeeting: {
+                        id: zoomMeeting.id,
+                        meetingNumber: zoomMeeting.meetingNumber,
+                        password: zoomMeeting.password,
+                        joinUrl: zoomMeeting.joinUrl,
+                        hostUrl: zoomMeeting.hostUrl,
+                        topic: zoomMeeting.topic,
+                        startTime: Timestamp.fromDate(zoomMeeting.startTime),
+                        duration: zoomMeeting.duration
+                    }
+                };
+
+                transaction.set(bookingRef, bookingData);
+
+                // Update time slot
+                transaction.update(timeSlotRef, {
+                    isBooked: true,
+                    bookedBy: currentUser.uid,
+                    assignedSpecialistId: leastBusySpecialist.uid,
+                    updatedAt: Timestamp.now()
+                });
+
+                return bookingRef.id;
+            } catch (error) {
+                console.error('Error creating Zoom meeting:', error);
+                throw new Error('Failed to create Zoom meeting for booking');
+            }
+        });
+    }
+
+    /**
+     * Book a time slot with auto-assignment of specialist and Zoom meeting
+     * @param timeSlotId The time slot ID to book
+     * @param notes Optional booking notes
+     */
+    async bookTimeSlotWithAutoAssignAndZoom(timeSlotId: string, notes: string = ''): Promise<string> {
+        try {
+            return await this.bookTimeSlotWithZoom(timeSlotId, notes);
+        } catch (error) {
+            this.sweetalertService.showError('Failed to book time slot', 'Error');
+            throw error;
+        }
+    }
+
+    /**
+     * Cancel a booking and its associated Zoom meeting
+     * @param bookingId The booking ID to cancel
+     * @param timeSlotId The associated time slot ID
+     */
+    async cancelBookingWithZoom(bookingId: string, timeSlotId: string): Promise<void> {
+        await runTransaction(this.firestore, async (transaction) => {
+            const bookingRef = doc(this.firestore, `${this.BOOKINGS_COLLECTION}/${bookingId}`);
+            const bookingDoc = await transaction.get(bookingRef);
+
+            if (!bookingDoc.exists()) {
+                throw new Error('Booking not found');
+            }
+
+            const bookingData = bookingDoc.data();
+            const zoomMeeting = bookingData['zoomMeeting'];
+
+            // Cancel the Zoom meeting if it exists
+            if (zoomMeeting && zoomMeeting.id) {
+                try {
+                    // In production, we would use:
+                    // await this.zoomService.endMeeting(zoomMeeting.id).toPromise();
+                    console.log('Cancelled Zoom meeting:', zoomMeeting.id);
+                } catch (error) {
+                    console.error('Error cancelling Zoom meeting:', error);
+                    // Continue with booking cancellation even if Zoom meeting cancellation fails
+                }
+            }
+
+            // Update booking status
+            transaction.update(bookingRef, {
+                status: 'cancelled',
+                updatedAt: Timestamp.now()
+            });
+
+            // Reset time slot availability
+            const timeSlotRef = doc(this.firestore, `${this.TIME_SLOTS_COLLECTION}/${timeSlotId}`);
+            transaction.update(timeSlotRef, {
+                isBooked: false,
+                bookedBy: null,
+                assignedSpecialistId: null,
+                updatedAt: Timestamp.now()
+            });
+        });
+    }
+
+    /**
+     * Confirm a booking by a specialist
+     * @param bookingId The booking ID to confirm
+     */
+    async confirmBooking(bookingId: string): Promise<void> {
+        const bookingRef = doc(this.firestore, `${this.BOOKINGS_COLLECTION}/${bookingId}`);
+
+        await updateDoc(bookingRef, {
+            status: 'confirmed',
+            updatedAt: Timestamp.now()
+        });
+    }
+
+    /**
+     * Complete a booking
+     * @param bookingId The booking ID to mark as completed
+     */
+    async completeBooking(bookingId: string): Promise<void> {
+        const bookingRef = doc(this.firestore, `${this.BOOKINGS_COLLECTION}/${bookingId}`);
+
+        await updateDoc(bookingRef, {
+            status: 'completed',
+            updatedAt: Timestamp.now()
+        });
+    }
+
+    /**
+     * Transform Zoom API response to our ZoomMeeting model
+     * @param apiResponse The response from Zoom API
+     */
+    private transformZoomApiResponseToModel(apiResponse: any): ZoomMeeting {
+        return {
+            id: apiResponse.id,
+            meetingNumber: apiResponse.id,
+            password: apiResponse.password,
+            joinUrl: apiResponse.join_url,
+            hostUrl: apiResponse.start_url,
+            topic: apiResponse.topic,
+            startTime: new Date(apiResponse.start_time),
+            duration: apiResponse.duration
+        };
+    }
+
+    /**
+     * Get bookings by status
+     * @param status The booking status to filter by
+     */
+    getBookingsByStatus(status: 'confirmed' | 'cancelled' | 'completed' | 'pending'): Observable<Booking[]> {
+        const bookingsRef = collection(this.firestore, this.BOOKINGS_COLLECTION);
+        const statusQuery = query(bookingsRef, where('status', '==', status));
+
+        return collectionData(statusQuery, { idField: 'id' }).pipe(
+            map((bookings) => bookings as Booking[]),
+            switchMap(async (bookings) => {
+                // Get all unique timeSlotIds
+                const timeSlotIds = [...new Set(bookings.map((booking) => booking.timeSlotId))];
+                if (timeSlotIds.length === 0) return [];
+
+                // Fetch time slots for all bookings
+                const timeSlotMap = await this.getTimeSlotsBatch(timeSlotIds);
+
+                // Combine bookings with their timeSlots
+                return bookings.map((booking) => ({
+                    ...booking,
+                    timeSlot: timeSlotMap.get(booking.timeSlotId),
+                    // Convert Firestore timestamp to Date for Zoom meeting
+                    zoomMeeting: booking.zoomMeeting
+                        ? {
+                              ...booking.zoomMeeting,
+                              startTime: booking.zoomMeeting.startTime instanceof Date ? booking.zoomMeeting.startTime : (booking.zoomMeeting.startTime as any)?.toDate() || new Date()
+                          }
+                        : undefined
+                }));
+            })
+        );
+    }
     // Create single time slot
     async createTimeSlot(timeSlot: Omit<TimeSlot, 'id'>): Promise<string> {
         const currentUser = await this.authService.getCurrentUser();

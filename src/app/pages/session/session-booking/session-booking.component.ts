@@ -1,5 +1,4 @@
 // src/app/pages/session/session-booking/session-booking.component.ts
-import { Booking } from './../../../models/booking.model';
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -19,14 +18,34 @@ import { BookingService } from '../../../services/booking.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { TranslateModule } from '@ngx-translate/core';
 import { DatePickerModule } from 'primeng/datepicker';
+import { TabViewModule } from 'primeng/tabview';
+import { ZoomMeetingComponent } from '../../zoom-meetings/zoom-meetings.component';
+import { Booking } from '../../../models/booking.model';
+import { ZoomMeeting } from '../../../models/zoom-meeting.model';
 
 @Component({
     selector: 'app-session-booking',
     standalone: true,
-    imports: [SharedModule, DatePickerModule, CommonModule, FormsModule, TableModule, ButtonModule, CalendarModule, DialogModule, ToastModule, DropdownModule, TextareaModule, TranslateModule, TooltipModule, SkeletonModule],
+    imports: [
+        SharedModule,
+        DatePickerModule,
+        CommonModule,
+        FormsModule,
+        TableModule,
+        ButtonModule,
+        CalendarModule,
+        DialogModule,
+        ToastModule,
+        DropdownModule,
+        TextareaModule,
+        TranslateModule,
+        TooltipModule,
+        SkeletonModule,
+        ZoomMeetingComponent,
+        TabViewModule
+    ],
     providers: [MessageService],
-    templateUrl: './session-booking.component.html',
-    styleUrls: ['./session-booking.component.scss']
+    templateUrl: './session-booking.component.html'
 })
 export class SessionBookingComponent implements OnInit, OnDestroy {
     sessions: Booking[] = [];
@@ -38,12 +57,17 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
     bookingNotes: string = '';
     showBookingDialog: boolean = false;
     showCancelDialog: boolean = false;
-    editingSession: Booking | null = null;
+    selectedSession: Booking | null = null;
     sessionToCancel: Booking | null = null;
     minDate: Date = new Date();
     loading: boolean = true;
     loadingTimeSlots: boolean = false;
     private destroy$ = new Subject<void>();
+
+    // Zoom meeting related properties
+    showZoomMeetingDialog: boolean = false;
+    selectedZoomMeeting: ZoomMeeting | null = null;
+    activeSessionTab: number = 0;
 
     constructor(
         private bookingService: BookingService,
@@ -129,15 +153,9 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
                 next: (slots) => {
                     this.loadingTimeSlots = false;
 
-                    // Filter out booked slots if not editing
+                    // Filter out booked slots
                     this.availableTimeSlots = slots
-                        .filter((slot) => {
-                            // If editing, include the current session's time slot
-                            if (this.editingSession && this.editingSession.timeSlotId === slot.id) {
-                                return true;
-                            }
-                            return !slot.isBooked;
-                        })
+                        .filter((slot) => !slot.isBooked)
                         .map((slot) => ({
                             ...slot,
                             displayLabel: `${slot.startTime.toLocaleTimeString([], {
@@ -148,11 +166,6 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
                                 minute: '2-digit'
                             })}`
                         }));
-
-                    // If editing, pre-select the current time slot
-                    if (this.editingSession && this.editingSession.timeSlot) {
-                        this.selectedTimeSlot = this.availableTimeSlots.find((slot) => slot.id === this.editingSession!.timeSlotId) || null;
-                    }
 
                     this.cdr.detectChanges();
                 },
@@ -172,49 +185,92 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
         return this.availableDates.some((availableDate) => availableDate.toDateString() === date.toDateString());
     };
 
-    canModifySession(session: Booking): boolean {
-        if (!session.timeSlot || session.status === 'cancelled') return false;
-
-        const now = new Date();
-        const sessionStart = session.timeSlot.startTime;
-        const timeDiff = sessionStart.getTime() - now.getTime();
-        const hoursDiff = timeDiff / (1000 * 60 * 60);
-
-        // Allow modification only if session is at least 24 hours away
-        return hoursDiff >= 24;
+    formatTime(date: Date): string {
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
 
-    editSession(session: Booking): void {
-        if (!this.canModifySession(session)) {
+    formatDate(date: Date): string {
+        return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    }
+
+    selectTimeSlot(timeSlot: TimeSlot): void {
+        this.selectedTimeSlot = timeSlot;
+        this.bookingNotes = '';
+        this.showBookingDialog = true;
+    }
+
+    /**
+     * Submit a booking with Zoom meeting
+     */
+    async submitBookingWithZoom(): Promise<void> {
+        if (!this.selectedTimeSlot) {
             this.messageService.add({
                 severity: 'warn',
-                summary: 'Cannot Edit',
-                detail: 'Sessions can only be edited at least 24 hours before the scheduled time.'
+                summary: 'Validation Error',
+                detail: 'Please select a time slot'
             });
             return;
         }
 
-        this.editingSession = session;
-        this.selectedDate = session.timeSlot ? new Date(session.timeSlot.startTime) : null;
-        this.bookingNotes = session.notes || '';
-        this.showBookingDialog = true;
+        try {
+            // Book the time slot with Zoom meeting
+            await this.bookingService.bookTimeSlotWithAutoAssignAndZoom(this.selectedTimeSlot.id!, this.bookingNotes);
 
-        // Load available time slots for the selected date
-        if (this.selectedDate) {
-            this.onDateSelect();
+            this.messageService.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Session booked successfully with Zoom meeting'
+            });
+
+            this.showBookingDialog = false;
+            this.loadUserSessions();
+            this.resetForm();
+        } catch (error) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to book session'
+            });
+            console.error('Error submitting booking:', error);
         }
+    }
+
+    resetForm(): void {
+        this.showBookingDialog = false;
+        this.selectedDate = null;
+        this.selectedTimeSlot = null;
+        this.bookingNotes = '';
+        this.availableTimeSlots = [];
+    }
+
+    navigateHome(): void {
+        // Store current responses before navigating away
+        // this.storeCurrentResponses();
+        // this.router.navigate(['/app/survey/list']);
+    }
+
+    viewSessionDetails(session: Booking): void {
+        this.selectedSession = session;
+        this.activeSessionTab = 0; // Set to details tab
+        this.showZoomMeetingDialog = true;
+    }
+
+    joinZoomMeeting(session: Booking): void {
+        if (!session.zoomMeeting) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'No Zoom meeting available for this session'
+            });
+            return;
+        }
+
+        this.selectedZoomMeeting = session.zoomMeeting;
+        this.activeSessionTab = 1; // Set to Zoom tab
+        this.showZoomMeetingDialog = true;
     }
 
     confirmCancelSession(session: Booking): void {
-        if (!this.canModifySession(session)) {
-            this.messageService.add({
-                severity: 'warn',
-                summary: 'Cannot Cancel',
-                detail: 'Sessions can only be cancelled at least 24 hours before the scheduled time.'
-            });
-            return;
-        }
-
         this.sessionToCancel = session;
         this.showCancelDialog = true;
     }
@@ -223,7 +279,7 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
         if (!this.sessionToCancel || !this.sessionToCancel.timeSlotId) return;
 
         try {
-            await this.bookingService.cancelBooking(this.sessionToCancel.id!, this.sessionToCancel.timeSlotId);
+            await this.bookingService.cancelBookingWithZoom(this.sessionToCancel.id!, this.sessionToCancel.timeSlotId);
 
             this.messageService.add({
                 severity: 'success',
@@ -245,58 +301,38 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
         }
     }
 
-    async submitBooking(): Promise<void> {
-        if (!this.selectedTimeSlot) {
-            this.messageService.add({
-                severity: 'warn',
-                summary: 'Validation Error',
-                detail: 'Please select a time slot'
-            });
-            return;
-        }
+    canModifySession(session: Booking): boolean {
+        if (!session.timeSlot || session.status === 'cancelled') return false;
 
-        try {
-            if (this.editingSession) {
-                // For updating, cancel the existing booking and create a new one
-                await this.bookingService.cancelBooking(this.editingSession.id!, this.editingSession.timeSlotId);
+        const now = new Date();
+        const sessionStart = session.timeSlot.startTime;
+        const timeDiff = sessionStart.getTime() - now.getTime();
+        const hoursDiff = timeDiff / (1000 * 60 * 60);
 
-                // Use auto-assign method for booking with the least busy specialist
-                await this.bookingService.bookTimeSlotWithAutoAssign(this.selectedTimeSlot.id!, this.bookingNotes);
-
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Success',
-                    detail: 'Session updated successfully'
-                });
-            } else {
-                // Create new session with auto-assignment
-                await this.bookingService.bookTimeSlotWithAutoAssign(this.selectedTimeSlot.id!, this.bookingNotes);
-
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Success',
-                    detail: 'Session booked successfully'
-                });
-            }
-
-            this.loadUserSessions();
-            this.resetForm();
-        } catch (error) {
-            this.messageService.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: this.editingSession ? 'Failed to update session' : 'Failed to book session'
-            });
-            console.error('Error submitting booking:', error);
-        }
+        // Allow modification only if session is at least 24 hours away
+        return hoursDiff >= 24;
     }
 
-    resetForm(): void {
-        this.showBookingDialog = false;
-        this.selectedDate = null;
-        this.selectedTimeSlot = null;
-        this.bookingNotes = '';
-        this.editingSession = null;
-        this.availableTimeSlots = [];
+    isSessionUpcoming(session: Booking): boolean {
+        if (!session.timeSlot) return false;
+
+        const now = new Date();
+        return session.timeSlot.startTime > now && session.status !== 'cancelled';
+    }
+
+    isSessionInProgress(session: Booking): boolean {
+        if (!session.timeSlot) return false;
+
+        const now = new Date();
+        return session.timeSlot.startTime <= now && session.timeSlot.endTime >= now && session.status !== 'cancelled';
+    }
+
+    onZoomMeetingJoined(): void {
+        console.log('Zoom meeting joined');
+    }
+
+    onZoomMeetingEnded(): void {
+        console.log('Zoom meeting ended');
+        this.showZoomMeetingDialog = false;
     }
 }

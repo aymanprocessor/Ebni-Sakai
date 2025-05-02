@@ -1,0 +1,13 @@
+<div class="container p-4" *ngIf="!meetingJoined">
+    <div class="card p-4 shadow-md rounded">
+        <h2 class="text-xl font-bold mb-4">Zoom Meeting</h2>
+        <p class="mb-4">Meeting ID: {{ meetingId }}</p>
+
+        <div class="flex justify-center">
+            <button pButton label="Join Meeting" icon="pi pi-video" (click)="joinMeeting()" class="p-button-primary"></button>
+        </div>
+    </div>
+</div>
+
+<!-- Zoom will mount its interface here -->
+<div id="zmmtg-root"></div>
