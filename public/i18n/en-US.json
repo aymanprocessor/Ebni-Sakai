@@ -18,16 +18,19 @@
             "logout": "Logout",
             "login": "Login",
             "register": "Register",
-            "loginWithGoogle": "Login with Google"
+            "loginWithGoogle": "Login with Google",
+            "view": "View",
+            "yes": "Yes",
+            "no": "No"
         },
         "weekdays": {
-            "mon": "Mon",
-            "tue": "Tue",
-            "wed": "Wed",
-            "thu": "Thu",
-            "fri": "Fri",
-            "sat": "Sat",
-            "sun": "Sun"
+            "mon": "Monday",
+            "tue": "Tuesday",
+            "wed": "Wednesday",
+            "thu": "Thursday",
+            "fri": "Friday",
+            "sat": "Saturday",
+            "sun": "Sunday"
         },
         "intervals": {
             "15_minutes": "15 minutes",
@@ -53,11 +56,11 @@
             "language": "Language",
             "rememberMe": "Remember Me",
             "forgotPassword": "Forgot Password",
-            "or": "OR",
-            "alreadyHaveAccount": "Already Have an Account?",
+            "or": "Or",
+            "alreadyHaveAccount": "Already have an account?",
             "firstName": "First Name",
             "lastName": "Last Name",
-            "createAnAccount": "Create an Account?",
+            "createAnAccount": "Create a new account?",
             "gender": "Gender",
             "selectGender": "Select Gender",
             "years": "years",
@@ -65,33 +68,25 @@
             "male": "Male",
             "age": "Age",
             "actions": "Actions",
-            "birthdate": "Birthdate",
-            "month": "This Month",
+            "birthdate": "Birth Date",
+            "day": "Day",
             "week": "This Week",
-            "weekdays": "Days",
+            "month": "This Month",
+            "start_date": "Start Date",
+            "end_date": "End Date",
+            "start_time": "Start Time",
+            "end_time": "End Time",
+            "session_time": "Session Duration",
+            "weekdays": "Weekdays",
             "role": "Role",
             "subscription": "Subscription",
             "mobile": "Mobile",
-            "isSubscribed": "Is Subscribed?"
+            "isSubscribed": "Subscribed?",
+            "at": "at",
+            "details": "Details"
         },
         "age": {
-            "years": {
-                "zero": "0 years",
-                "one": "1 year",
-                "two": "2 years",
-                "few": "{{years}} years",
-                "many": "{{years}} years",
-                "other": "{{years}} years"
-            },
-            "months": {
-                "zero": "0 months",
-                "one": "1 month",
-                "two": "2 months",
-                "few": "{{months}} months",
-                "many": "{{months}} months",
-                "other": "{{months}} months"
-            },
-            "format": "{{yearsText}}, {{monthsText}}"
+            "format": "{{years}} years, {{months}} months"
         },
         "messages": {
             "loading": "Loading...",
@@ -100,14 +95,14 @@
             "itemSaved": "Item saved successfully",
             "itemDeleted": "Item deleted successfully",
             "unauthorized": "You are not authorized to access this resource",
-            "sessionExpired": "Your session has expired, please login again",
+            "sessionExpired": "Your session has expired, please log in again",
             "error": "An error occurred",
             "welcome": "Welcome, {{name}}!",
-            "birthdayHelp": "Select the child's date of birth",
+            "birthdayHelp": "Select the child's birth date",
             "paginatorTemplate": "Showing {first} to {last} of {totalRecords} entries",
-            "loadingFailed": "Failed to load data. Please try again.",
-            "deleteFailed": "Failed to delete the item. Please try again.",
-            "saveFailed": "Failed to save the item. Please try again."
+            "loadingFailed": "Failed to load data",
+            "deleteFailed": "Failed to delete item",
+            "saveFailed": "Failed to save item"
         },
         "validation": {
             "required": "This field is required",
@@ -122,28 +117,31 @@
             "inactive": "Inactive",
             "pending": "Pending",
             "completed": "Completed",
-            "cancelled": "Cancelled"
+            "cancelled": "Cancelled",
+            "confirmed": "Confirmed"
         }
     },
     "pages": {
         "users": {
             "title": "User Management",
-            "notSubscribed": "Not Subscribed"
+            "addUser": "Add User",
+            "notSubscribed": "Not Subscribed",
+            "noUsers": "No Users"
         },
         "login": {
-            "welcome": "Welcome To Kid Skills"
+            "welcome": "Welcome to Kid Skills"
         },
         "register": {
             "welcome": "Welcome to Kid Skills"
         },
         "booking": {
-            "selectTimeSlotMessage": "Select a time slot to book an appointment. Available slots are shown below.",
-            "bookApppointment": "Book an Appointment",
+            "selectTimeSlotMessage": "Select a time to book an appointment. Available times are shown below.",
+            "bookApppointment": "Book New Appointment",
             "availableSlotFor": "Available slots for ",
             "noTimeSlotAvailable": "No time slots available",
-            "bestTimeQuestion": "What time works best for a session",
-            "30MinMeeting": "30 min meeting",
-            "selectTimeslot": "Select a time"
+            "bestTimeQuestion": "What is the best time for the session",
+            "30MinMeeting": "Session is 30 minutes",
+            "selectTimeslot": "Select Time Slot"
         },
         "session": {
             "title": "Session Management",
@@ -158,21 +156,21 @@
             "duration": "Duration",
             "minutes": "minutes",
             "status": "Status",
-            "noSessionsAvailable": "You don't have any upcoming sessions.",
+            "noSessionsAvailable": "You have no upcoming sessions.",
             "bookNow": "Book Now",
             "joinMeeting": "Join Meeting",
             "leaveMeeting": "Leave Meeting",
-            "noMeetingAvailable": "No Meeting Available",
+            "noMeetingAvailable": "No meeting available",
             "noMeetingMessage": "There is no Zoom meeting associated with this session.",
             "selectDate": "Select Date",
             "availableTimeSlots": "Available Time Slots",
             "notes": "Notes",
             "notesOptional": "Notes (Optional)",
             "confirmBooking": "Are you sure you want to book this session?",
-            "meetingJoined": "Joined Zoom meeting successfully",
+            "meetingJoined": "Successfully joined Zoom meeting",
             "meetingEnded": "Zoom meeting ended",
-            "bookingConfirmed": "Session booked successfully with Zoom meeting",
-            "bookingCancelled": "Session cancelled successfully",
+            "bookingConfirmed": "Session successfully booked with Zoom meeting",
+            "bookingCancelled": "Session successfully cancelled",
             "bookingFailed": "Failed to book session",
             "sessionInfo": "Session Information",
             "clientInfo": "Client Information",
@@ -180,7 +178,7 @@
             "confirmCancelSession": "Are you sure you want to cancel this session?",
             "cancelSession": "Cancel Session",
             "markAsCompleted": "Mark as Completed",
-            "zoomMeetingMessage": "This will create a Zoom meeting for your session"
+            "zoomMeetingMessage": "A Zoom meeting will be created for your session"
         },
         "appointmentScheduler": {
             "title": "Appointment Scheduler",

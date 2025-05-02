@@ -18,7 +18,10 @@
             "logout": "تسجيل الخروج",
             "login": "تسجيل الدخول",
             "register": "تسجيل",
-            "loginWithGoogle": "تسجيل الدخول مع جوجل"
+            "loginWithGoogle": "تسجيل الدخول مع جوجل",
+            "view": "عرض",
+            "yes": "نعم",
+            "no": "لا"
         },
         "weekdays": {
             "mon": "الاثنين",
@@ -78,7 +81,9 @@
             "role": "الصلاحية",
             "subscription": "مشترك",
             "mobile": "الموبايل",
-            "isSubscribed": "مشترك؟"
+            "isSubscribed": "مشترك؟",
+            "at": "في",
+            "details": "التفاصيل"
         },
         "age": {
             "format": "{{years}} سنة، {{months}} شهر"
@@ -112,7 +117,8 @@
             "inactive": "غير نشط",
             "pending": "قيد الانتظار",
             "completed": "مكتمل",
-            "cancelled": "ملغي"
+            "cancelled": "ملغي",
+            "confirmed": "مؤكد"
         }
     },
     "pages": {

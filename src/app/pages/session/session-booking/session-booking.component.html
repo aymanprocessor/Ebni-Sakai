@@ -1,22 +1,22 @@
 <div class="container mx-auto px-4 py-6">
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">{{ 'Session Booking' | translate }}</h1>
-        <p-button icon="pi pi-plus" label="{{ 'Book New Session' | translate }}" (click)="showBookingDialog = true" styleClass="p-button-success"></p-button>
+        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">{{ 'pages.session.title' | translate }}</h1>
+        <p-button icon="pi pi-plus" label="{{ 'pages.session.bookSession' | translate }}" (click)="showBookingDialog = true" styleClass="p-button-success"></p-button>
     </div>
 
     <!-- Session Tabs -->
     <p-tabView>
-        <p-tabPanel header="{{ 'Upcoming Sessions' | translate }}">
+        <p-tabPanel header="{{ 'pages.session.upcomingSessions' | translate }}">
             <div *ngIf="loading" class="flex justify-center my-8">
                 <p-progressSpinner strokeWidth="4"></p-progressSpinner>
             </div>
 
             <div *ngIf="!loading && upcomingSessions.length === 0" class="text-center py-8">
                 <i class="pi pi-calendar-times text-6xl text-gray-300 mb-4"></i>
-                <h3 class="text-xl font-medium text-gray-700 mb-2">{{ 'No Upcoming Sessions' | translate }}</h3>
-                <p class="text-gray-500 mb-4">{{ 'You have no upcoming sessions scheduled' | translate }}</p>
-                <p-button label="{{ 'Book Now' | translate }}" icon="pi pi-calendar-plus" (click)="showBookingDialog = true"></p-button>
+                <h3 class="text-xl font-medium text-gray-700 mb-2">{{ 'pages.session.noSessionsAvailable' | translate }}</h3>
+                <p class="text-gray-500 mb-4">{{ 'common.messages.noData' | translate }}</p>
+                <p-button label="{{ 'pages.session.bookNow' | translate }}" icon="pi pi-calendar-plus" (click)="showBookingDialog = true"></p-button>
             </div>
 
             <div *ngIf="!loading && upcomingSessions.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -27,7 +27,7 @@
                                 <h3 class="text-lg font-medium text-blue-800 dark:text-blue-200">
                                     {{ session.timeSlot?.startTime | date: 'fullDate' }}
                                 </h3>
-                                <p-badge *ngIf="isSessionSoon(session)" value="Soon" severity="warn"></p-badge>
+                                <p-badge *ngIf="isSessionSoon(session)" value="{{ 'common.statuses.pending' | translate }}" severity="warn"></p-badge>
                             </div>
                             <p class="text-blue-600 dark:text-blue-300 mt-1">{{ session.timeSlot?.startTime | date: 'shortTime' }} - {{ session.timeSlot?.endTime | date: 'shortTime' }}</p>
                         </div>
@@ -35,12 +35,12 @@
 
                     <div class="p-4">
                         <div *ngIf="session.notes" class="mb-4">
-                            <span class="font-semibold block mb-1">{{ 'Notes' | translate }}:</span>
+                            <span class="font-semibold block mb-1">{{ 'pages.session.notes' | translate }}:</span>
                             <p class="text-gray-600 dark:text-gray-300">{{ session.notes }}</p>
                         </div>
 
                         <div class="flex justify-between items-center mt-4">
-                            <p-tag [value]="session.status" [severity]="getStatusSeverity(session.status)"></p-tag>
+                            <p-tag [value]="session.status | translate" [severity]="getStatusSeverity(session.status)"></p-tag>
 
                             <div class="flex gap-2">
                                 <!-- Only show Zoom button for confirmed sessions -->
@@ -48,7 +48,7 @@
                                     *ngIf="session.zoomMeeting && session.status === 'confirmed'"
                                     icon="pi pi-video"
                                     styleClass="p-button-success p-button-sm"
-                                    pTooltip="{{ 'Join Zoom Meeting' | translate }}"
+                                    pTooltip="{{ 'pages.session.joinMeeting' | translate }}"
                                     (onClick)="joinZoomMeeting(session)"
                                 >
                                 </p-button>
@@ -57,7 +57,7 @@
                                     *ngIf="canModifySession(session) && session.status !== 'completed'"
                                     icon="pi pi-times"
                                     styleClass="p-button-danger p-button-sm"
-                                    pTooltip="{{ 'Cancel Session' | translate }}"
+                                    pTooltip="{{ 'pages.session.cancelSession' | translate }}"
                                     (onClick)="confirmCancelSession(session)"
                                 >
                                 </p-button>
@@ -69,15 +69,15 @@
         </p-tabPanel>
 
         <!-- Completed Sessions Tab -->
-        <p-tabPanel header="{{ 'Completed Sessions' | translate }}">
+        <p-tabPanel header="{{ 'pages.session.completedSessions' | translate }}">
             <div *ngIf="loading" class="flex justify-center my-8">
                 <p-progressSpinner strokeWidth="4"></p-progressSpinner>
             </div>
 
             <div *ngIf="!loading && completedSessions.length === 0" class="text-center py-8">
                 <i class="pi pi-check-circle text-6xl text-gray-300 mb-4"></i>
-                <h3 class="text-xl font-medium text-gray-700 mb-2">{{ 'No Completed Sessions' | translate }}</h3>
-                <p class="text-gray-500">{{ 'You have no completed session history' | translate }}</p>
+                <h3 class="text-xl font-medium text-gray-700 mb-2">{{ 'common.messages.noData' | translate }}</h3>
+                <p class="text-gray-500">{{ 'common.messages.noData' | translate }}</p>
             </div>
 
             <div *ngIf="!loading && completedSessions.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -88,7 +88,7 @@
                                 <h3 class="text-lg font-medium text-green-800 dark:text-green-200">
                                     {{ formatDate(session.timeSlot?.startTime) }}
                                 </h3>
-                                <p-tag value="Completed" severity="success"></p-tag>
+                                <p-tag value="{{ 'common.statuses.completed' | translate }}" severity="success"></p-tag>
                             </div>
                             <p class="text-green-600 dark:text-green-300 mt-1">{{ formatTime(session.timeSlot?.startTime) }} - {{ formatTime(session.timeSlot?.endTime) }}</p>
                         </div>
@@ -96,57 +96,57 @@
 
                     <div class="p-4">
                         <div *ngIf="session.notes" class="mb-4">
-                            <span class="font-semibold block mb-1">{{ 'Notes' | translate }}:</span>
+                            <span class="font-semibold block mb-1">{{ 'pages.session.notes' | translate }}:</span>
                             <p class="text-gray-600 dark:text-gray-300">{{ session.notes }}</p>
                         </div>
 
                         <div class="flex justify-end mt-4">
-                            <p-button icon="pi pi-eye" styleClass="p-button-outlined p-button-sm" pTooltip="{{ 'View Details' | translate }}" (onClick)="viewSessionDetails(session)"></p-button>
+                            <p-button icon="pi pi-eye" styleClass="p-button-outlined p-button-sm" pTooltip="{{ 'common.buttons.view' | translate }}" (onClick)="viewSessionDetails(session)"></p-button>
                         </div>
                     </div>
                 </p-card>
             </div>
         </p-tabPanel>
 
-        <p-tabPanel header="{{ 'Past Sessions' | translate }}">
+        <p-tabPanel header="{{ 'pages.session.pastSessions' | translate }}">
             <div *ngIf="loading" class="flex justify-center my-8">
                 <p-progressSpinner strokeWidth="4"></p-progressSpinner>
             </div>
 
             <div *ngIf="!loading && pastSessions.length === 0" class="text-center py-8">
                 <i class="pi pi-history text-6xl text-gray-300 mb-4"></i>
-                <h3 class="text-xl font-medium text-gray-700 mb-2">{{ 'No Past Sessions' | translate }}</h3>
-                <p class="text-gray-500">{{ 'You have no past session history' | translate }}</p>
+                <h3 class="text-xl font-medium text-gray-700 mb-2">{{ 'common.messages.noData' | translate }}</h3>
+                <p class="text-gray-500">{{ 'common.messages.noData' | translate }}</p>
             </div>
 
             <p-table *ngIf="!loading && pastSessions.length > 0" [value]="pastSessions" [paginator]="true" [rows]="5" [rowHover]="true" styleClass="p-datatable-responsive p-datatable-gridlines">
                 <ng-template pTemplate="header">
                     <tr>
-                        <th>{{ 'Date' | translate }}</th>
-                        <th>{{ 'Time' | translate }}</th>
-                        <th>{{ 'Status' | translate }}</th>
-                        <th style="width: 8rem">{{ 'Actions' | translate }}</th>
+                        <th>{{ 'common.labels.date' | translate }}</th>
+                        <th>{{ 'common.labels.time' | translate }}</th>
+                        <th>{{ 'common.labels.status' | translate }}</th>
+                        <th style="width: 8rem">{{ 'common.labels.actions' | translate }}</th>
                     </tr>
                 </ng-template>
 
                 <ng-template pTemplate="body" let-session>
                     <tr>
                         <td>
-                            <span class="p-column-title">{{ 'Date' | translate }}</span>
+                            <span class="p-column-title">{{ 'common.labels.date' | translate }}</span>
                             {{ formatDate(session.timeSlot?.startTime) }}
                         </td>
                         <td>
-                            <span class="p-column-title">{{ 'Time' | translate }}</span>
+                            <span class="p-column-title">{{ 'common.labels.time' | translate }}</span>
                             {{ formatTime(session.timeSlot?.startTime) }} - {{ formatTime(session.timeSlot?.endTime) }}
                         </td>
                         <td>
-                            <span class="p-column-title">{{ 'Status' | translate }}</span>
-                            <p-tag [value]="session.status" [severity]="getStatusSeverity(session.status)"></p-tag>
+                            <span class="p-column-title">{{ 'common.labels.status' | translate }}</span>
+                            <p-tag [value]="session.status | translate" [severity]="getStatusSeverity(session.status)"></p-tag>
                         </td>
                         <td>
-                            <span class="p-column-title">{{ 'Actions' | translate }}</span>
+                            <span class="p-column-title">{{ 'common.labels.actions' | translate }}</span>
                             <div class="flex justify-center gap-2">
-                                <p-button icon="pi pi-eye" styleClass="p-button-text p-button-info p-button-sm" pTooltip="{{ 'View Details' | translate }}" (onClick)="viewSessionDetails(session)"> </p-button>
+                                <p-button icon="pi pi-eye" styleClass="p-button-text p-button-info p-button-sm" pTooltip="{{ 'common.buttons.view' | translate }}" (onClick)="viewSessionDetails(session)"> </p-button>
                             </div>
                         </td>
                     </tr>
@@ -156,10 +156,10 @@
     </p-tabView>
 
     <!-- Booking Dialog -->
-    <p-dialog [(visible)]="showBookingDialog" [style]="{ width: '450px' }" header="{{ 'Book New Session' | translate }}" [modal]="true" styleClass="p-fluid" [draggable]="false" [resizable]="false">
+    <p-dialog [(visible)]="showBookingDialog" [style]="{ width: '450px' }" header="{{ 'pages.session.bookSession' | translate }}" [modal]="true" styleClass="p-fluid" [draggable]="false" [resizable]="false">
         <div class="flex flex-col gap-4">
             <div class="flex flex-col gap-2">
-                <label for="selectedDate" class="font-medium">{{ 'Select Date' | translate }}</label>
+                <label for="selectedDate" class="font-medium">{{ 'pages.session.selectDate' | translate }}</label>
                 <p-datepicker id="selectedDate" [(ngModel)]="selectedDate" [minDate]="minDate" [showIcon]="true" [showTime]="false" [disabledDates]="disabledDates" dateFormat="yy-mm-dd" appendTo="body" (onSelect)="onDateSelect()"> </p-datepicker>
 
                 <div *ngIf="loadingTimeSlots" class="text-center mt-2">
@@ -168,84 +168,84 @@
             </div>
 
             <div class="flex flex-col gap-2" *ngIf="!loadingTimeSlots && availableTimeSlots.length > 0">
-                <label for="timeSlot" class="font-medium">{{ 'Available Time Slots' | translate }}</label>
-                <p-dropdown id="timeSlot" [(ngModel)]="selectedTimeSlot" [options]="availableTimeSlots" optionLabel="displayLabel" placeholder="{{ 'Select Time Slot' | translate }}" styleClass="w-full"> </p-dropdown>
+                <label for="timeSlot" class="font-medium">{{ 'pages.session.availableTimeSlots' | translate }}</label>
+                <p-dropdown id="timeSlot" [(ngModel)]="selectedTimeSlot" [options]="availableTimeSlots" optionLabel="displayLabel" placeholder="{{ 'pages.booking.selectTimeslot' | translate }}" styleClass="w-full"> </p-dropdown>
             </div>
 
             <div *ngIf="selectedDate && !loadingTimeSlots && availableTimeSlots.length === 0" class="bg-yellow-100 text-yellow-700 p-3 rounded">
-                {{ 'No available time slots for the selected date' | translate }}
+                {{ 'pages.booking.noTimeSlotAvailable' | translate }}
             </div>
 
             <div class="flex flex-col gap-2">
-                <label for="notes" class="font-medium">{{ 'Notes (Optional)' | translate }}</label>
+                <label for="notes" class="font-medium">{{ 'pages.session.notesOptional' | translate }}</label>
                 <textarea pInputTextarea id="notes" [(ngModel)]="bookingNotes" rows="3" class="w-full"> </textarea>
             </div>
 
             <div class="bg-blue-50 p-3 rounded text-blue-700 text-sm">
                 <i class="pi pi-info-circle mr-2"></i>
-                {{ 'This will create a Zoom meeting for your session' | translate }}
+                {{ 'pages.session.zoomMeetingMessage' | translate }}
             </div>
         </div>
 
         <ng-template pTemplate="footer">
-            <p-button label="{{ 'Cancel' | translate }}" icon="pi pi-times" (click)="showBookingDialog = false" styleClass="p-button-text"> </p-button>
-            <p-button label="{{ 'Book Session with Zoom' | translate }}" icon="pi pi-check" (click)="submitBookingWithZoom()" [disabled]="!selectedTimeSlot" [loading]="isSubmitting"> </p-button>
+            <p-button label="{{ 'common.buttons.cancel' | translate }}" icon="pi pi-times" (click)="showBookingDialog = false" styleClass="p-button-text"> </p-button>
+            <p-button label="{{ 'pages.session.createZoomMeeting' | translate }}" icon="pi pi-check" (click)="submitBookingWithZoom()" [disabled]="!selectedTimeSlot" [loading]="isSubmitting"> </p-button>
         </ng-template>
     </p-dialog>
 
     <!-- Session Details + Zoom Meeting Dialog -->
-    <p-dialog [(visible)]="showZoomMeetingDialog" [style]="{ width: '700px' }" [header]="'Session Details' | translate" [modal]="true" styleClass="p-fluid" [draggable]="false" [resizable]="false">
+    <p-dialog [(visible)]="showZoomMeetingDialog" [style]="{ width: '700px' }" [header]="'pages.session.sessionInfo' | translate" [modal]="true" styleClass="p-fluid" [draggable]="false" [resizable]="false">
         <p-tabView [(activeIndex)]="activeSessionTab">
-            <p-tabPanel [header]="'Details' | translate">
+            <p-tabPanel [header]="'common.labels.details' | translate">
                 <div *ngIf="selectedSession" class="p-4">
                     <div class="grid">
                         <div class="col-12 md:col-6">
-                            <h3 class="text-xl font-semibold mb-4">{{ 'Session Information' | translate }}</h3>
+                            <h3 class="text-xl font-semibold mb-4">{{ 'pages.session.sessionInfo' | translate }}</h3>
 
                             <div class="flex flex-col gap-3">
                                 <div>
-                                    <span class="font-semibold block">{{ 'Date' | translate }}:</span>
+                                    <span class="font-semibold block">{{ 'common.labels.date' | translate }}:</span>
                                     <span>{{ selectedSession.timeSlot?.startTime | date: 'fullDate' }}</span>
                                 </div>
 
                                 <div>
-                                    <span class="font-semibold block">{{ 'Time' | translate }}:</span>
+                                    <span class="font-semibold block">{{ 'common.labels.time' | translate }}:</span>
                                     <span>{{ formatTime(selectedSession.timeSlot?.startTime) }} - {{ formatTime(selectedSession.timeSlot?.endTime) }}</span>
                                 </div>
 
                                 <div>
-                                    <span class="font-semibold block">{{ 'Status' | translate }}:</span>
-                                    <p-tag [value]="selectedSession.status" [severity]="getStatusSeverity(selectedSession.status)"></p-tag>
+                                    <span class="font-semibold block">{{ 'common.labels.status' | translate }}:</span>
+                                    <p-tag [value]="selectedSession.status | translate" [severity]="getStatusSeverity(selectedSession.status)"></p-tag>
                                 </div>
 
                                 <div *ngIf="selectedSession.notes">
-                                    <span class="font-semibold block">{{ 'Notes' | translate }}:</span>
+                                    <span class="font-semibold block">{{ 'pages.session.notes' | translate }}:</span>
                                     <p class="mt-1 text-gray-600">{{ selectedSession.notes }}</p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="col-12 md:col-6" *ngIf="selectedSession.zoomMeeting && selectedSession.status === 'confirmed'">
-                            <h3 class="text-xl font-semibold mb-4">{{ 'Zoom Meeting' | translate }}</h3>
+                            <h3 class="text-xl font-semibold mb-4">{{ 'pages.session.zoomMeeting' | translate }}</h3>
 
                             <div class="flex flex-col gap-3">
                                 <div>
-                                    <span class="font-semibold block">{{ 'Meeting ID' | translate }}:</span>
+                                    <span class="font-semibold block">{{ 'pages.session.meetingId' | translate }}:</span>
                                     <span>{{ selectedSession.zoomMeeting.meetingNumber }}</span>
                                 </div>
 
                                 <div>
-                                    <span class="font-semibold block">{{ 'Password' | translate }}:</span>
+                                    <span class="font-semibold block">{{ 'pages.session.password' | translate }}:</span>
                                     <span>{{ selectedSession.zoomMeeting.password }}</span>
                                 </div>
 
                                 <div>
-                                    <span class="font-semibold block">{{ 'Duration' | translate }}:</span>
-                                    <span>{{ selectedSession.zoomMeeting.duration }} minutes</span>
+                                    <span class="font-semibold block">{{ 'pages.session.duration' | translate }}:</span>
+                                    <span>{{ selectedSession.zoomMeeting.duration }} {{ 'pages.session.minutes' | translate }}</span>
                                 </div>
 
                                 <div class="mt-3">
-                                    <p-button *ngIf="selectedSession.status === 'confirmed'" icon="pi pi-video" label="Join Meeting" styleClass="p-button-success" (onClick)="activeSessionTab = 1"> </p-button>
+                                    <p-button *ngIf="selectedSession.status === 'confirmed'" icon="pi pi-video" label="{{ 'pages.session.joinMeeting' | translate }}" styleClass="p-button-success" (onClick)="activeSessionTab = 1"> </p-button>
                                 </div>
                             </div>
                         </div>
@@ -253,34 +253,34 @@
                 </div>
             </p-tabPanel>
 
-            <p-tabPanel [header]="'Zoom Meeting' | translate" *ngIf="selectedSession?.zoomMeeting && selectedSession?.status === 'confirmed'">
+            <p-tabPanel [header]="'pages.session.zoomMeeting' | translate" *ngIf="selectedSession?.zoomMeeting && selectedSession?.status === 'confirmed'">
                 <app-zoom-meeting [meeting]="selectedSession?.zoomMeeting" [isHost]="false" (meetingJoined)="onZoomMeetingJoined()" (meetingEnded)="onZoomMeetingEnded()"> </app-zoom-meeting>
             </p-tabPanel>
         </p-tabView>
 
         <ng-template pTemplate="footer">
-            <p-button label="{{ 'Close' | translate }}" icon="pi pi-times" (click)="showZoomMeetingDialog = false" styleClass="p-button-secondary"></p-button>
+            <p-button label="{{ 'common.buttons.close' | translate }}" icon="pi pi-times" (click)="showZoomMeetingDialog = false" styleClass="p-button-secondary"></p-button>
         </ng-template>
     </p-dialog>
 
     <!-- Cancel Confirmation Dialog -->
-    <p-dialog [(visible)]="showCancelDialog" header="{{ 'Cancel Session' | translate }}" [modal]="true" [style]="{ width: '400px' }" [draggable]="false" [resizable]="false">
+    <p-dialog [(visible)]="showCancelDialog" header="{{ 'pages.session.cancelSession' | translate }}" [modal]="true" [style]="{ width: '400px' }" [draggable]="false" [resizable]="false">
         <p *ngIf="sessionToCancel">
-            {{ 'Are you sure you want to cancel this session on' | translate }}
+            {{ 'pages.session.confirmCancelSession' | translate }}
             <strong>{{ sessionToCancel.timeSlot?.startTime | date: 'MMMM d, y' }}</strong>
-            {{ 'at' | translate }}
+            {{ 'common.labels.at' | translate }}
             <strong>{{ sessionToCancel.timeSlot?.startTime | date: 'shortTime' }}</strong
             >?
         </p>
 
         <div *ngIf="sessionToCancel?.zoomMeeting" class="mt-3 p-3 bg-yellow-50 text-yellow-700 rounded">
             <i class="pi pi-exclamation-triangle mr-2"></i>
-            {{ 'This will also cancel the associated Zoom meeting' | translate }}
+            {{ 'pages.session.confirmCancelSession' | translate }}
         </div>
 
         <ng-template pTemplate="footer">
-            <p-button label="{{ 'No' | translate }}" icon="pi pi-times" (click)="showCancelDialog = false" styleClass="p-button-text"> </p-button>
-            <p-button label="{{ 'Yes' | translate }}" icon="pi pi-check" (click)="cancelSession()" styleClass="p-button-danger" [loading]="isCancelling"> </p-button>
+            <p-button label="{{ 'common.buttons.no' | translate }}" icon="pi pi-times" (click)="showCancelDialog = false" styleClass="p-button-text"> </p-button>
+            <p-button label="{{ 'common.buttons.yes' | translate }}" icon="pi pi-check" (click)="cancelSession()" styleClass="p-button-danger" [loading]="isCancelling"> </p-button>
         </ng-template>
     </p-dialog>
 </div>
