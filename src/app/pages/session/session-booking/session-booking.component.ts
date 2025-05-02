@@ -22,6 +22,8 @@ import { TabViewModule } from 'primeng/tabview';
 import { ZoomMeetingComponent } from '../../zoom-meetings/zoom-meetings.component';
 import { Booking } from '../../../models/booking.model';
 import { ZoomMeeting } from '../../../models/zoom-meeting.model';
+import { EnvironmentService } from '../../../services/environment.service';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
     selector: 'app-session-booking',
@@ -72,7 +74,10 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
     constructor(
         private bookingService: BookingService,
         private messageService: MessageService,
-        private cdr: ChangeDetectorRef
+        private envService: EnvironmentService,
+        private cdr: ChangeDetectorRef,
+
+        private router: Router
     ) {}
 
     ngOnInit(): void {
@@ -101,6 +106,7 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
                     });
                     this.loading = false;
                     this.cdr.detectChanges();
+                    this.envService.logDev('User sessions loaded:', this.sessions);
                 },
                 error: (error) => {
                     this.loading = false;
@@ -265,9 +271,10 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
             return;
         }
 
-        this.selectedZoomMeeting = session.zoomMeeting;
-        this.activeSessionTab = 1; // Set to Zoom tab
-        this.showZoomMeetingDialog = true;
+        this.router.navigate(['app/zoom-meeting', session.id]);
+        // this.selectedZoomMeeting = session.zoomMeeting;
+        // this.activeSessionTab = 1; // Set to Zoom tab
+        // this.showZoomMeetingDialog = true;
     }
 
     confirmCancelSession(session: Booking): void {
@@ -314,6 +321,7 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
     }
 
     isSessionUpcoming(session: Booking): boolean {
+        this.envService.logDev('isSessionUpcoming called', session);
         if (!session.timeSlot) return false;
 
         const now = new Date();
@@ -321,6 +329,8 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
     }
 
     isSessionInProgress(session: Booking): boolean {
+        this.envService.logDev('isSessionInProgress called', session);
+
         if (!session.timeSlot) return false;
 
         const now = new Date();

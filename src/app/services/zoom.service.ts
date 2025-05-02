@@ -6,6 +6,8 @@ import { catchError, map, switchMap } from 'rxjs/operators';
 import { EnvironmentService } from './environment.service';
 import { SweetalertService } from './sweetalert.service';
 import { TokenStorageService } from './token-storage.service';
+import { Booking } from '../models/booking.model';
+import { AuthService } from './auth.service';
 
 interface MeetingConfig {
     topic: string;
@@ -23,6 +25,7 @@ export class ZoomService {
         private http: HttpClient,
         private sweetalertService: SweetalertService,
         private envService: EnvironmentService,
+        private authService: AuthService,
         private tokenStorage: TokenStorageService
     ) {
         this.initializeZoomSDK();
@@ -150,7 +153,7 @@ export class ZoomService {
      * @param role The role (0 for attendee, 1 for host)
      * @returns Observable with signature
      */
-    private generateSignature(meetingNumber: string, role: number): Observable<string> {
+    generateSignature(meetingNumber: string, role: number): Observable<string> {
         const url = this.envService.getZoomProxyUrl() + '/signature';
 
         return this.http
@@ -177,7 +180,7 @@ export class ZoomService {
     createMeeting(topic: string, startTime: string, duration: number): Observable<any> {
         return this.getAccessToken().pipe(
             switchMap((token) => {
-                const url = this.envService.getZoomProxyUrl() + '/meetings';
+                const url = this.envService.getZoomProxyUrl() + '/createMeeting';
 
                 const meetingConfig = {
                     topic,
@@ -311,7 +314,10 @@ export class ZoomService {
 
         return !!token && expiry > Date.now();
     }
-
+    isCurrentUserHost(booking: Booking): boolean {
+        const currentUser = this.authService.getCurrentUser();
+        return booking.assignedSpecialistId === currentUser?.uid;
+    }
     /**
      * Clear Zoom authentication data
      */

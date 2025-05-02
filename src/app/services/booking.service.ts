@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Firestore, collection, collectionData, doc, setDoc, updateDoc, deleteDoc, query, where, getDoc, onSnapshot, DocumentReference, Timestamp, runTransaction, writeBatch, getDocs, documentId } from '@angular/fire/firestore';
-import { Observable, from, map, switchMap, of, BehaviorSubject, combineLatest, take, shareReplay, tap } from 'rxjs';
+import { Firestore, collection, collectionData, doc, setDoc, updateDoc, deleteDoc, query, where, getDoc, onSnapshot, DocumentReference, Timestamp, runTransaction, writeBatch, getDocs, documentId, docData } from '@angular/fire/firestore';
+import { Observable, from, map, switchMap, of, BehaviorSubject, combineLatest, take, shareReplay, tap, catchError } from 'rxjs';
 import { AuthService } from './auth.service';
 import { Booking } from '../models/booking.model';
 import { TimeSlot } from '../models/time-slot.model';
@@ -111,6 +111,47 @@ export class BookingService {
         return timeSlotMap;
     }
 
+    getBookingById(bookingId: string): Observable<Booking | null> {
+        const bookingRef = doc(this.firestore, `${this.BOOKINGS_COLLECTION}/${bookingId}`);
+
+        return docData(bookingRef, { idField: 'id' }).pipe(
+            switchMap(async (booking: any) => {
+                if (!booking) return null;
+
+                // Get time slot data
+                if (booking.timeSlotId) {
+                    const timeSlotRef = doc(this.firestore, `${this.TIME_SLOTS_COLLECTION}/${booking.timeSlotId}`);
+                    const timeSlotDoc = await getDoc(timeSlotRef);
+
+                    if (timeSlotDoc.exists()) {
+                        const timeSlotData = timeSlotDoc.data();
+                        booking.timeSlot = {
+                            id: timeSlotDoc.id,
+                            startTime: timeSlotData['startTime']?.toDate(),
+                            endTime: timeSlotData['endTime']?.toDate(),
+                            isBooked: timeSlotData['isBooked'] || false
+                        };
+                    }
+                }
+
+                // Convert timestamps to dates
+                if (booking.bookingDate) {
+                    booking.bookingDate = booking.bookingDate.toDate();
+                }
+
+                if (booking.zoomMeeting && booking.zoomMeeting.startTime) {
+                    booking.zoomMeeting.startTime = booking.zoomMeeting.startTime.toDate();
+                }
+
+                return booking as Booking;
+            }),
+            catchError((error) => {
+                console.error('Error fetching booking:', error);
+                return of(null);
+            })
+        );
+    }
+
     getUserBookings(): Observable<Booking[]> {
         return this.authService.currentUser$.pipe(
             switchMap((user) => {
@@ -144,7 +185,8 @@ export class BookingService {
                                         userEmail: data['userEmail'],
                                         bookingDate: data['bookingDate']?.toDate(),
                                         notes: data['notes'] || '',
-                                        status: data['status']
+                                        status: data['status'],
+                                        zoomMeeting: data['zoomMeeting'] || undefined
                                     };
                                 })
                                 .filter((booking) => booking.status !== 'cancelled');

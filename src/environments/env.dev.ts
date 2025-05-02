@@ -7,8 +7,8 @@ export const environment = {
     // Zoom Configuration
     zoom: {
         apiKey: 'YOUR_DEV_ZOOM_API_KEY',
-        clientId: 'YOUR_DEV_ZOOM_CLIENT_ID',
-        clientSecret: 'YOUR_DEV_ZOOM_CLIENT_SECRET',
+        clientId: 'A8LPvrl8RuiacV4ChXmaA',
+        clientSecret: 'mG4vF2yeSkVg54dJv0DzO4Qbrv4zqL4D',
         authCode: 'YOUR_DEV_ZOOM_AUTH_CODE',
         redirectUri: 'http://localhost:4200/oauth/zoom/callback'
     },
@@ -18,7 +18,7 @@ export const environment = {
 
     // API URLs
     apiUrl: 'http://localhost:3000/api',
-    zoomProxyUrl: 'http://localhost:3000/zoom',
+    zoomProxyUrl: 'https://petal-tidal-kicker.glitch.me/zoom',
 
     // Logging
     enableDebugLogs: true,
