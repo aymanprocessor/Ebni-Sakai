@@ -3,8 +3,8 @@ export interface Environment {
 
     zoom: {
         apiKey: string;
-        clientId: string;
-        clientSecret: string;
+        sdkKey: string;
+        sdkSecret: string;
         authCode: string;
         redirectUri: string;
     };

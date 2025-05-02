@@ -53,13 +53,13 @@
                 <tr>
                     <td>
                         <span *ngIf="booking.timeSlot">
-                            {{ booking.timeSlot.startTime | date: 'shortDate' }}
+                            {{ booking.timeSlot.startTime }}
                         </span>
                     </td>
                     <td>
                         <span *ngIf="booking.timeSlot">
-                            {{ booking.timeSlot.startTime | date: 'shortTime' }} -
-                            {{ booking.timeSlot.endTime | date: 'shortTime' }}
+                            {{ booking.timeSlot.startTime }} -
+                            {{ booking.timeSlot.endTime }}
                         </span>
                     </td>
                     <td>{{ booking.userName }}</td>
@@ -160,7 +160,7 @@
 
                                 <div>
                                     <span class="font-semibold block">{{ 'Booking Date' | translate }}:</span>
-                                    <span>{{ selectedBooking.bookingDate | date: 'medium' }}</span>
+                                    <span>{{ selectedBooking.bookingDate }}</span>
                                 </div>
 
                                 <div>
@@ -176,12 +176,12 @@
                             <div class="flex flex-col gap-3">
                                 <div>
                                     <span class="font-semibold block">{{ 'Date' | translate }}:</span>
-                                    <span>{{ selectedBooking.timeSlot?.startTime | date: 'fullDate' }}</span>
+                                    <span>{{ selectedBooking.timeSlot?.startTime }}</span>
                                 </div>
 
                                 <div>
                                     <span class="font-semibold block">{{ 'Time' | translate }}:</span>
-                                    <span>{{ selectedBooking.timeSlot?.startTime | date: 'shortTime' }} - {{ selectedBooking.timeSlot?.endTime | date: 'shortTime' }}</span>
+                                    <span>{{ selectedBooking.timeSlot?.startTime }} - {{ selectedBooking.timeSlot?.endTime }}</span>
                                 </div>
 
                                 <div *ngIf="selectedBooking.notes">
@@ -217,7 +217,7 @@
                                 <div class="col-12 md:col-6">
                                     <div>
                                         <span class="font-semibold block">{{ 'Start Time' | translate }}:</span>
-                                        <span>{{ selectedBooking.zoomMeeting.startTime | date: 'medium' }}</span>
+                                        <span>{{ selectedBooking.zoomMeeting.startTime }}</span>
                                     </div>
 
                                     <div class="mt-2">

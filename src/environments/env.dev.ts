@@ -6,9 +6,10 @@ export const environment = {
 
     // Zoom Configuration
     zoom: {
-        apiKey: 'YOUR_DEV_ZOOM_API_KEY',
-        clientId: 'A8LPvrl8RuiacV4ChXmaA',
-        clientSecret: 'mG4vF2yeSkVg54dJv0DzO4Qbrv4zqL4D',
+        apiKey: 'YOUR_PROD_ZOOM_API_KEY',
+
+        sdkKey: 'A8LPvrl8RuiacV4ChXmaA',
+        sdkSecret: 'mG4vF2yeSkVg54dJv0DzO4Qbrv4zqL4D',
         authCode: 'YOUR_DEV_ZOOM_AUTH_CODE',
         redirectUri: 'http://localhost:4200/oauth/zoom/callback'
     },

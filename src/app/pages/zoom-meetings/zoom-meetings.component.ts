@@ -9,10 +9,10 @@ import { ActivatedRoute } from '@angular/router';
 import { BookingService } from '../../services/booking.service';
 import { switchMap } from 'rxjs/operators';
 import { Booking } from '../../models/booking.model';
-import { environment } from '../../../environments/env.dev';
 import { ZoomService } from '../../services/zoom.service';
 import { TagModule } from 'primeng/tag';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
     selector: 'app-zoom-meeting',
@@ -76,33 +76,25 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
             </div>
 
             <!-- Zoom meeting container -->
-            <div #zoomContainer id="zoomContainer" class="w-full mt-4 rounded-lg overflow-hidden" [ngClass]="{ 'min-h-96': meetingJoined }" [ngStyle]="{ display: meetingJoined ? 'block' : 'none' }"></div>
+            <div id="zmmtg-root"></div>
         </div>
-    `,
-    styles: [
-        `
-            .min-h-96 {
-                min-height: 24rem;
-            }
-        `
-    ]
+    `
 })
-export class ZoomMeetingComponent implements OnInit, OnDestroy, AfterViewInit {
+export class ZoomMeetingComponent implements OnInit, OnDestroy {
     @Input() meeting: ZoomMeeting | undefined;
     @Input() isHost: boolean = false;
     @Output() meetingJoined = new EventEmitter<boolean>();
     @Output() meetingEnded = new EventEmitter<boolean>();
-    @ViewChild('zoomContainer') zoomContainer!: ElementRef;
 
     loading: boolean = true;
     booking: Booking | null = null;
     meetingActive: boolean = false;
-    zoomSDKLoaded: boolean = false;
 
     constructor(
         private zoomService: ZoomService,
         private route: ActivatedRoute,
-        private bookingService: BookingService
+        private bookingService: BookingService,
+        private authService: AuthService
     ) {}
 
     ngOnInit(): void {
@@ -135,59 +127,6 @@ export class ZoomMeetingComponent implements OnInit, OnDestroy, AfterViewInit {
         } else {
             this.loading = false;
         }
-
-        this.loadZoomSDK();
-    }
-
-    ngAfterViewInit(): void {
-        if (this.zoomSDKLoaded) {
-            this.initializeZoomContainer();
-        }
-    }
-
-    async loadZoomSDK(): Promise<void> {
-        try {
-            if (!document.getElementById('zoom-sdk')) {
-                const scripts = [
-                    { src: 'https://source.zoom.us/2.18.0/lib/vendor/react.min.js', id: 'zoom-react' },
-                    { src: 'https://source.zoom.us/2.18.0/lib/vendor/react-dom.min.js', id: 'zoom-react-dom' },
-                    { src: 'https://source.zoom.us/2.18.0/lib/vendor/redux.min.js', id: 'zoom-redux' },
-                    { src: 'https://source.zoom.us/2.18.0/lib/vendor/redux-thunk.min.js', id: 'zoom-redux-thunk' },
-                    { src: 'https://source.zoom.us/zoom-meeting-2.18.0.min.js', id: 'zoom-sdk' }
-                ];
-
-                for (const script of scripts) {
-                    await this.loadScript(script.src, script.id);
-                }
-            }
-
-            this.zoomSDKLoaded = true;
-            this.initializeZoomContainer();
-        } catch (error) {
-            console.error('Failed to load Zoom SDK:', error);
-        }
-    }
-
-    loadScript(src: string, id: string): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
-            if (document.getElementById(id)) {
-                resolve();
-                return;
-            }
-
-            const script = document.createElement('script');
-            script.src = src;
-            script.id = id;
-            script.async = true;
-            script.onload = () => resolve();
-            script.onerror = (e) => reject(e);
-            document.head.appendChild(script);
-        });
-    }
-
-    initializeZoomContainer(): void {
-        if (!this.zoomContainer || !this.zoomSDKLoaded) return;
-        console.log('Zoom container initialized');
     }
 
     async joinMeeting(): Promise<void> {
@@ -197,50 +136,19 @@ export class ZoomMeetingComponent implements OnInit, OnDestroy, AfterViewInit {
         }
 
         try {
-            const ZoomMtg = (window as any).ZoomMtg;
+            this.meetingActive = true;
+            this.meetingJoined.emit(true);
 
-            // Initialize Zoom
-            ZoomMtg.setZoomJSLib('https://source.zoom.us/2.18.0/lib', '/av');
-            ZoomMtg.preLoadWasm();
-            ZoomMtg.prepareWebSDK();
+            // Get the current user's display name
+            const currentUser = await this.authService.getCurrentUser();
+            const displayName = currentUser?.displayName || 'User';
 
-            // Set language
-            ZoomMtg.i18n.load('en-US');
-            ZoomMtg.i18n.reload('en-US');
-
-            // Generate signature
-            const signature = await this.zoomService.generateSignature(this.meeting.meetingNumber, this.isHost ? 1 : 0).toPromise();
-
-            const apiKey = environment.zoom.clientId;
-
-            // Initialize and join meeting
-            ZoomMtg.init({
-                leaveUrl: window.location.origin + '/dashboard',
-                disableCORP: true,
-                disablePreview: false,
-                success: () => {
-                    ZoomMtg.join({
-                        meetingNumber: this.meeting!.meetingNumber,
-                        signature: signature,
-                        userName: 'User', // Get from user profile
-                        apiKey: apiKey,
-                        passWord: this.meeting!.password,
-                        success: () => {
-                            console.log('Joined meeting successfully');
-                            this.meetingActive = true;
-                            this.meetingJoined.emit(true);
-                        },
-                        error: (error: any) => {
-                            console.error('Failed to join meeting:', error);
-                        }
-                    });
-                },
-                error: (error: any) => {
-                    console.error('Failed to initialize Zoom:', error);
-                }
-            });
+            // Join the meeting
+            await this.zoomService.joinMeeting(this.meeting.meetingNumber, this.meeting.password, displayName);
         } catch (error) {
             console.error('Error joining meeting:', error);
+            this.meetingActive = false;
+            this.meetingJoined.emit(false);
         }
     }
 

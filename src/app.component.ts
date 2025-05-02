@@ -1,8 +1,12 @@
+import { registerLocaleData } from '@angular/common';
 import { Component, OnInit, ErrorHandler, Injectable } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { GoogleTagManagerModule } from 'angular-google-tag-manager';
-
+import localeAr from '@angular/common/locales/ar';
+import localeEn from '@angular/common/locales/en';
+registerLocaleData(localeAr, 'ar');
+registerLocaleData(localeEn, 'en');
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
     handleError(error: any): void {

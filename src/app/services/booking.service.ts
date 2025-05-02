@@ -323,20 +323,7 @@ export class BookingService {
             const meetingTopic = `Session with ${leastBusySpecialist.firstName} ${leastBusySpecialist.lastName}`;
 
             try {
-                // Create Zoom meeting (in production this would be done via backend)
-                // For demo purposes, we'll create a mock meeting
-                // const zoomMeeting: ZoomMeeting = {
-                //     id: 'mock_' + Date.now().toString(),
-                //     meetingNumber: Math.floor(Math.random() * 1000000000).toString(),
-                //     password: Math.random().toString(36).substring(2, 8),
-                //     joinUrl: 'https://zoom.us/j/mock',
-                //     hostUrl: 'https://zoom.us/j/mock/host',
-                //     topic: meetingTopic,
-                //     startTime: startTime,
-                //     duration: duration
-                // };
-
-                // In production, we would use:
+                // Create Zoom meeting using our server-to-server API
                 const zoomMeetingResult = await this.zoomService.createMeeting(meetingTopic, zoomStartTime, duration).toPromise();
                 const zoomMeeting = this.transformZoomApiResponseToModel(zoomMeetingResult);
 
@@ -357,7 +344,7 @@ export class BookingService {
                         meetingNumber: zoomMeeting.meetingNumber,
                         password: zoomMeeting.password,
                         joinUrl: zoomMeeting.joinUrl,
-                        hostUrl: zoomMeeting.hostUrl,
+                        hostUrl: zoomMeeting.hostUrl || zoomMeeting.joinUrl,
                         topic: zoomMeeting.topic,
                         startTime: Timestamp.fromDate(zoomMeeting.startTime),
                         duration: zoomMeeting.duration
@@ -411,19 +398,6 @@ export class BookingService {
             }
 
             const bookingData = bookingDoc.data();
-            const zoomMeeting = bookingData['zoomMeeting'];
-
-            // Cancel the Zoom meeting if it exists
-            if (zoomMeeting && zoomMeeting.id) {
-                try {
-                    // In production, we would use:
-                    // await this.zoomService.endMeeting(zoomMeeting.id).toPromise();
-                    console.log('Cancelled Zoom meeting:', zoomMeeting.id);
-                } catch (error) {
-                    console.error('Error cancelling Zoom meeting:', error);
-                    // Continue with booking cancellation even if Zoom meeting cancellation fails
-                }
-            }
 
             // Update booking status
             transaction.update(bookingRef, {
@@ -441,7 +415,6 @@ export class BookingService {
             });
         });
     }
-
     /**
      * Confirm a booking by a specialist
      * @param bookingId The booking ID to confirm
