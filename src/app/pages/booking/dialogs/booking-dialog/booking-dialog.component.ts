@@ -7,6 +7,7 @@ import { ButtonModule } from 'primeng/button';
 import { CalendarModule } from 'primeng/calendar';
 import { DropdownModule } from 'primeng/dropdown';
 import { TranslateModule } from '@ngx-translate/core';
+import { Logger } from '../../../../services/logger.service';
 
 interface TimeSlot {
     label: string;
@@ -92,7 +93,7 @@ export class BookingDialogComponent implements OnInit {
     confirmBooking(): void {
         if (this.selectedTimeSlot) {
             // Handle booking confirmation
-            console.log('Booking confirmed:', {
+            Logger.log('Booking confirmed:', {
                 date: this.selectedDate,
                 timeSlot: this.selectedTimeSlot,
                 timezone: this.selectedTimeZone

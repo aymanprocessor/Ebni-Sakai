@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
 import { FirebaseError } from '@angular/fire/app';
 import { SweetalertService } from './sweetalert.service';
 import { RegisterModel } from '../pages/register-parent/register.model';
+import { Logger } from './logger.service';
 
 @Injectable({
     providedIn: 'root'
@@ -66,7 +67,7 @@ export class AuthService {
                 )
                 .subscribe({
                     next: (user) => {
-                        console.log('Authentication state:', user);
+                        Logger.log('Authentication state:', user);
                         this.currentUser$.next(user as UserProfile);
                         this.initializedSubject.next(true);
                     },
@@ -137,7 +138,7 @@ export class AuthService {
         try {
             const userDocRef = doc(this.firestore, `users/${uid}`);
             await setDoc(userDocRef, { role: role }, { merge: true });
-            console.log(`Role set to ${role} for user ${uid}`);
+            Logger.log(`Role set to ${role} for user ${uid}`);
         } catch (error) {
             console.error('Error setting user role:', error);
             this.sweetalert.showToast('Failed to set user role', 'error');

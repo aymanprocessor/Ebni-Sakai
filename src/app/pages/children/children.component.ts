@@ -56,7 +56,7 @@ export class ChildrenComponent implements OnInit {
         //         this.childrens = childrens;
         //     },
         //     error: (err) => {
-        //         console.log(err);
+        //         Logger.log(err);
         //     }
         // });
         this.maxBirthdayDate = new Date();

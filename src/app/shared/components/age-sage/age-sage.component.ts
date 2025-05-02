@@ -161,7 +161,7 @@ export class AgeSageComponent implements OnChanges {
      */
     // onCalculate(): void {
     //     if (this.birthDate) {
-    //         console.log('From Age Sage', this.birthDate);
+    //         Logger.log('From Age Sage', this.birthDate);
     //         this.result = this.calculateAge(this.birthDate);
     //     }
     // }

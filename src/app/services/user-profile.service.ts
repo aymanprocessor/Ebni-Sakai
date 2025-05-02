@@ -3,7 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 import { getAuth, onAuthStateChanged, signOut, updateProfile, User } from '@angular/fire/auth';
 import { initializeApp } from '@angular/fire/app';
 import { doc, getDoc, getFirestore, setDoc, updateDoc } from '@angular/fire/firestore';
-import { environment } from '../env/env';
+import { environment } from '../../environments/env.dev';
 import { UserProfile } from '../models/user.model';
 
 @Injectable({

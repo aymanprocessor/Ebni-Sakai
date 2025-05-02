@@ -107,7 +107,7 @@ export class DashboardComponent implements OnInit {
         //         .cancelBooking(booking.id)
         //         .then(() => {
         //             // The subscription will automatically update the view
-        //             console.log('Booking cancelled successfully');
+        //             Logger.log('Booking cancelled successfully');
         //         })
         //         .catch((error) => {
         //             console.error('Error cancelling booking:', error);

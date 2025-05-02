@@ -6,6 +6,7 @@ import { from, Observable, of, throwError } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { UserProfile } from '../models/user.model';
 import { AuthService } from './auth.service';
+import { Logger } from './logger.service';
 
 @Injectable({
     providedIn: 'root'
@@ -67,7 +68,7 @@ export class UserManagementService {
             if (currentUser?.email) {
                 // Note: This requires storing or getting the current user's password
                 // In practice, you might need to handle this differently
-                console.log('Need to restore current admin session');
+                Logger.log('Need to restore current admin session');
             }
 
             return uid;
@@ -133,7 +134,7 @@ export class UserManagementService {
 
             // Note: Deleting from Firebase Auth requires special handling
             // This would typically require an admin SDK or cloud function
-            console.log('User deleted from Firestore. Auth deletion requires admin privileges.');
+            Logger.log('User deleted from Firestore. Auth deletion requires admin privileges.');
         } catch (error) {
             console.error('Error deleting user:', error);
             throw error;

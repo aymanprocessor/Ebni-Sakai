@@ -17,6 +17,8 @@ import { AuthService } from '../../services/auth.service';
 import { BookingService } from '../../services/booking.service';
 import { SkeletonModule } from 'primeng/skeleton';
 import { ZoomMeetingComponent } from '../zoom-meetings/zoom-meetings.component';
+import { ZoomService } from '../../services/zoom.service';
+import { Logger } from '../../services/logger.service';
 
 @Component({
     selector: 'app-specialist-bookings',
@@ -38,7 +40,8 @@ export class SpecialistBookingsComponent implements OnInit, OnDestroy {
         private bookingService: BookingService,
         private authService: AuthService,
         private messageService: MessageService,
-        private confirmationService: ConfirmationService
+        private confirmationService: ConfirmationService,
+        private zoomService: ZoomService
     ) {}
 
     ngOnInit(): void {
@@ -92,9 +95,25 @@ export class SpecialistBookingsComponent implements OnInit, OnDestroy {
     }
 
     viewZoomMeeting(booking: Booking): void {
-        this.selectedBooking = booking;
-        this.activeBookingTab = 1; // Set to Zoom tab
-        this.showDetailsDialog = true;
+        // this.selectedBooking = booking;
+        // this.activeBookingTab = 1; // Set to Zoom tab
+        // this.showDetailsDialog = true;
+
+        if (!booking.zoomMeeting) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'No Zoom meeting available for this booking'
+            });
+            return;
+        }
+
+        // Open Zoom meeting in new tab
+        const currentUser = this.authService.getCurrentUser();
+        const isHost = booking.assignedSpecialistId === currentUser?.uid;
+
+        // Open Zoom meeting in new tab with correct host parameter
+        this.zoomService.openZoomMeetingInNewTab(booking.zoomMeeting.meetingNumber, booking.zoomMeeting.password, currentUser?.displayName || 'Unknown', isHost);
     }
 
     confirmBooking(booking: Booking): void {
@@ -223,11 +242,11 @@ export class SpecialistBookingsComponent implements OnInit, OnDestroy {
     }
 
     onZoomMeetingJoined(): void {
-        console.log('Zoom meeting joined');
+        Logger.log('Zoom meeting joined');
     }
 
     onZoomMeetingEnded(): void {
-        console.log('Zoom meeting ended');
+        Logger.log('Zoom meeting ended');
         this.showDetailsDialog = false;
     }
 }

@@ -1,4 +1,5 @@
 import { enableProdMode } from '@angular/core';
+import { Logger } from './services/logger.service';
 
 // Comprehensive startup diagnostics utility
 export class StartupDiagnostics {
@@ -57,7 +58,7 @@ export class StartupDiagnostics {
         // Console logging based on level
         switch (level) {
             case 'info':
-                console.log(logEntry);
+                Logger.log(logEntry);
                 break;
             case 'warn':
                 console.warn(logEntry);
@@ -91,7 +92,7 @@ export class StartupDiagnostics {
     public sendDiagnosticLog() {
         const logContent = this.exportDiagnosticLog();
         // Implement your logging service here
-        console.log('Diagnostic Log:', logContent);
+        Logger.log('Diagnostic Log:', logContent);
     }
 }
 

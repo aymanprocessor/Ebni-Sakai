@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
 import { Observable, map, take, tap, switchMap, from } from 'rxjs';
 import { AuthService } from '../services/auth.service';
+import { Logger } from '../services/logger.service';
 
 @Injectable({
     providedIn: 'root'
@@ -21,7 +22,7 @@ export class SpecialistGuard implements CanActivate {
             map((user) => user?.role === 'specialist'),
             tap((isSpecialist) => {
                 if (!isSpecialist) {
-                    console.log('Access denied - Specialist role required');
+                    Logger.log('Access denied - Specialist role required');
                     this.router.navigate(['app/dashboard']);
                 }
             })

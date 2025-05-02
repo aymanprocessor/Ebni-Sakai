@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, from, throwError, of } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap, take } from 'rxjs/operators';
 import { EnvironmentService } from './environment.service';
 import { SweetalertService } from './sweetalert.service';
 import { TokenStorageService } from './token-storage.service';
@@ -10,6 +10,7 @@ import { Booking } from '../models/booking.model';
 import { AuthService } from './auth.service';
 import { ZoomMtg } from '@zoom/meetingsdk';
 import { environment } from '../../environments/env.dev';
+import { Logger } from './logger.service';
 interface MeetingConfig {
     topic: string;
     startTime: string;
@@ -125,6 +126,26 @@ export class ZoomService {
         return this.createMeeting(topic, startTime, duration);
     }
 
+    // Add this method to ZoomService
+    /**
+     * Open Zoom meeting in a new tab
+     * @param meetingNumber Meeting number/ID
+     * @param meetingPassword Meeting password
+     * @param displayName User's display name
+     */
+    openZoomMeetingInNewTab(meetingNumber: string, meetingPassword: string, displayName: string, isHost: boolean = false): void {
+        // Generate a signature first
+        this.generateSignature(meetingNumber, isHost ? 1 : 0)
+            .pipe(take(1))
+            .subscribe((signature) => {
+                // Build the Zoom URL with the signature
+                const zoomUrl = `https://zoom.us/wc/${meetingNumber}/join?pwd=${meetingPassword}&uname=${encodeURIComponent(displayName)}&signature=${encodeURIComponent(signature)}`;
+
+                // Open in new tab
+                window.open(zoomUrl, '_blank');
+            });
+    }
+
     /**
      * Join a Zoom meeting
      * @param meetingNumber Meeting number/ID
@@ -151,7 +172,7 @@ export class ZoomService {
                             sdkKey: environment.zoom.sdkKey,
                             passWord: meetingPassword,
                             success: () => {
-                                console.log('Joined Zoom meeting successfully');
+                                Logger.log('Joined Zoom meeting successfully');
                             },
                             error: (error: any) => {
                                 console.error('Failed to join Zoom meeting:', error);

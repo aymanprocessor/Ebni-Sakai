@@ -9,6 +9,7 @@ import { UserProfileService } from '../../services/user-profile.service';
 import { AuthService } from '../../services/auth.service';
 import { Subscription } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
+import { Logger } from '../../services/logger.service';
 
 @Component({
     selector: 'app-user-profile',
@@ -45,7 +46,7 @@ export class UserProfileComponent {
     }
     private async loadUserProfile(uid: string): Promise<void> {
         try {
-            // console.log('USER ', this.authServ.getCurrentUser());
+            // Logger.log('USER ', this.authServ.getCurrentUser());
             const profile = await this.userProfileServ.getUserProfile(uid);
             if (profile) {
                 this.profileForm.patchValue(profile);
@@ -58,10 +59,10 @@ export class UserProfileComponent {
     async onSubmit() {
         if (this.profileForm.valid) {
             try {
-                console.log(this.profileForm.value);
+                Logger.log(this.profileForm.value);
                 await this.userProfileServ.updateUserProfile(this.profileForm.value);
             } catch (error) {
-                console.log(error);
+                Logger.log(error);
             }
         }
     }

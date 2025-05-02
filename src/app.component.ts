@@ -35,30 +35,9 @@ export class GlobalErrorHandler implements ErrorHandler {
     `
 })
 export class AppComponent implements OnInit {
-    constructor(private translateService: TranslateService) {
-        console.log('AppComponent constructor called');
-
-        // Add global error event listeners
-        window.addEventListener('error', (event) => {
-            console.error('Global Error Event:', event.error);
-        });
-
-        window.addEventListener('unhandledrejection', (event) => {
-            console.error('Unhandled Promise Rejection:', event.reason);
-        });
-    }
+    constructor(private translateService: TranslateService) {}
 
     ngOnInit() {
         this.translateService.use('ar-EG'); // Set default language
-        console.log('AppComponent initialized');
-
-        // Performance tracking
-        const startTime = performance.now();
-
-        // Log when initial rendering is complete
-        requestAnimationFrame(() => {
-            const renderTime = performance.now() - startTime;
-            console.log(`Initial render completed in ${renderTime.toFixed(2)}ms`);
-        });
     }
 }

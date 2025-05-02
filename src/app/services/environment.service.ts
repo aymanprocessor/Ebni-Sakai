@@ -2,6 +2,7 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/env.dev';
 import { Environment } from '../models/environment.model';
+import { Logger } from './logger.service';
 
 /**
  * Service to provide access to environment variables
@@ -16,9 +17,9 @@ export class EnvironmentService {
     constructor() {
         // Log environment mode on service initialization
         if (this.isDevelopment()) {
-            console.log('Application running in DEVELOPMENT mode');
+            Logger.log('Application running in DEVELOPMENT mode');
         } else {
-            console.log('Application running in PRODUCTION mode');
+            Logger.log('Application running in PRODUCTION mode');
         }
     }
 
@@ -80,7 +81,7 @@ export class EnvironmentService {
      */
     logDev(message?: any, ...optionalParams: any[]): void {
         if (this.isDevelopment() && this.environment.enableDebugLogs) {
-            console.log(message, ...optionalParams);
+            Logger.log(message, ...optionalParams);
         }
     }
 

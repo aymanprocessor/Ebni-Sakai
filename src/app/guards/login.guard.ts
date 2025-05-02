@@ -4,6 +4,7 @@ import { Auth, authState } from '@angular/fire/auth';
 import { Observable, from, of } from 'rxjs';
 import { catchError, map, take, timeout } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
+import { Logger } from '../services/logger.service';
 
 export const RedirectLoggedInGuard: CanActivateFn = (route, state) => {
     const auth = inject(Auth);
@@ -12,11 +13,11 @@ export const RedirectLoggedInGuard: CanActivateFn = (route, state) => {
     return authState(auth).pipe(
         map((user) => {
             if (user) {
-                console.log('User is logged in');
+                Logger.log('User is logged in');
                 router.navigate(['app/dashboard']);
                 return false;
             } else {
-                console.log('User is not logged in');
+                Logger.log('User is not logged in');
                 return true;
             }
         })

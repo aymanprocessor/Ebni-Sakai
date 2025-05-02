@@ -7,12 +7,14 @@ import { providePrimeNG } from 'primeng/config';
 import { routes } from './app.routes';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { provideAuth, getAuth } from '@angular/fire/auth';
-import { environment } from './app/env/env';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { DatePipe } from '@angular/common';
 import { AuthService } from './app/services/auth.service';
+import { EnvironmentService } from './app/services/environment.service';
+import { environment } from './environments/env.dev';
+import { Logger } from './app/services/logger.service';
 
 export function createTranslateLoader(http: HttpClient) {
     return new TranslateHttpLoader(http, './i18n/', '.json');
@@ -94,7 +96,7 @@ export const appConfig: ApplicationConfig = {
                         Promise.all([initializeApp(environment.firebase), getAuth(), getFirestore()])
                             .then((results) => {
                                 clearTimeout(timer);
-                                console.log('Firebase initialized successfully');
+                                Logger.log('Firebase initialized successfully');
                                 resolve(results);
                             })
                             .catch((error) => {

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
 import { Observable, from, map, switchMap, take, tap } from 'rxjs';
 import { AuthService } from '../services/auth.service';
+import { Logger } from '../services/logger.service';
 
 @Injectable({
     providedIn: 'root'
@@ -19,7 +20,7 @@ export class AdminGuard implements CanActivate {
             map((user) => user?.role === 'admin'),
             tap((isAdmin) => {
                 if (!isAdmin) {
-                    console.log('Access denied - Admin role required');
+                    Logger.log('Access denied - Admin role required');
                     this.router.navigate(['app/dashboard']);
                 }
             })

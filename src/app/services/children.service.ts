@@ -7,6 +7,7 @@ import { DatePipe } from '@angular/common';
 import { UserProfileService } from './user-profile.service';
 import { AuthService } from './auth.service';
 import { authState, Auth } from '@angular/fire/auth';
+import { Logger } from './logger.service';
 
 @Injectable({
     providedIn: 'root'
@@ -21,7 +22,7 @@ export class ChildrenService {
         private authServ: AuthService,
         private auth: Auth
     ) {
-        console.log('Children Constructor Started');
+        Logger.log('Children Constructor Started');
         this.childrenCollection = collection(this.firestore, 'children');
         this.loadChildren();
     }

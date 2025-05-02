@@ -11,6 +11,7 @@ import { AuthService } from '../../services/auth.service';
 import { SweetalertService } from '../../services/sweetalert.service';
 import { DividerModule } from 'primeng/divider';
 import { TranslateModule } from '@ngx-translate/core';
+import { Logger } from '../../services/logger.service';
 
 @Component({
     selector: 'app-login',
@@ -120,7 +121,7 @@ export class Login implements OnInit {
         try {
             const res = await this.authServ.googleLogin();
             this.router.navigateByUrl('app/dashboard');
-            console.log(res);
+            Logger.log(res);
             // No need to navigate, the auth service handles redirection
         } catch (error) {
             // this.sweetlaert.showToast(error + '', 'error');

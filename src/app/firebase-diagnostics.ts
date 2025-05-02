@@ -1,7 +1,8 @@
 import { initializeApp } from '@angular/fire/app';
 import { getAuth, connectAuthEmulator } from '@angular/fire/auth';
 import { getFirestore, connectFirestoreEmulator } from '@angular/fire/firestore';
-import { environment } from '../app/env/env';
+import { environment } from '../environments/env.dev';
+import { Logger } from './services/logger.service';
 
 export class FirebaseDiagnostics {
     private static instance: FirebaseDiagnostics;
@@ -27,7 +28,7 @@ export class FirebaseDiagnostics {
             const app = initializeApp(environment.firebase);
             const initTime = performance.now() - startTime;
 
-            console.log(`Firebase App Initialization: ${initTime.toFixed(2)}ms`);
+            Logger.log(`Firebase App Initialization: ${initTime.toFixed(2)}ms`);
 
             // Check Auth and Firestore
             const auth = getAuth(app);
@@ -38,7 +39,7 @@ export class FirebaseDiagnostics {
                 this.connectEmulators(auth, firestore);
             }
 
-            console.log('Firebase Configuration: VALID');
+            Logger.log('Firebase Configuration: VALID');
         } catch (error) {
             console.error('Firebase Configuration Error:', error);
             this.logDetailedError(error);
@@ -58,7 +59,7 @@ export class FirebaseDiagnostics {
     }
 
     private connectEmulators(auth: any, firestore: any) {
-        console.log('Connecting to Firebase Emulators');
+        Logger.log('Connecting to Firebase Emulators');
         connectAuthEmulator(auth, 'http://localhost:9099');
         connectFirestoreEmulator(firestore, 'localhost', 8080);
     }
@@ -90,8 +91,8 @@ export class FirebaseDiagnostics {
             });
 
             const networkTime = performance.now() - startTime;
-            console.log(`Network Connectivity Test: ${networkTime.toFixed(2)}ms`);
-            console.log('Internet Connection: AVAILABLE');
+            Logger.log(`Network Connectivity Test: ${networkTime.toFixed(2)}ms`);
+            Logger.log('Internet Connection: AVAILABLE');
         } catch (error) {
             console.error('Network Connectivity Error:', error);
             console.warn('Potential network issues detected');

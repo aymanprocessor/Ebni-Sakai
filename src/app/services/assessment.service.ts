@@ -7,6 +7,7 @@ import { QuestionItem } from '../models/survey-question.model';
 import { Child } from '../models/child.model';
 import { ChildrenService } from './children.service';
 import { DateUtilsService } from './date-utils.service';
+import { Logger } from './logger.service';
 
 /**
  * Interface to define a question sequence step
@@ -169,7 +170,7 @@ export class AssessmentService {
         this.currentSession.next(session);
 
         // For logging/debugging purposes
-        console.log(`Set session to domain: ${domainName}, age range: ${ageRange}, question index: ${questionIdx}`);
+        Logger.log(`Set session to domain: ${domainName}, age range: ${ageRange}, question index: ${questionIdx}`);
     }
 
     /**

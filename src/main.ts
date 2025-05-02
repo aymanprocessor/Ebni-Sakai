@@ -4,6 +4,7 @@ import { AppComponent } from './app.component';
 import { GlobalErrorHandler } from './app.component';
 import { ErrorHandler, enableProdMode } from '@angular/core';
 import { diagnostics } from './app/startup-diagnostics';
+import { Logger } from './app/services/logger.service';
 
 // Enable detailed error tracking
 diagnostics.log('Application Startup', 'Initializing application');
@@ -31,7 +32,7 @@ bootstrapApplication(AppComponent, {
         // Additional startup diagnostics
         diagnostics.capturePerformance(() => {
             // Any additional startup checks or initializations
-            console.log('Startup diagnostics completed');
+            Logger.log('Startup diagnostics completed');
         });
     })
     .catch((err) => {

@@ -19,6 +19,7 @@ import { QuestionItem } from '../../../models/survey-question.model';
 import { AssessmentSession } from '../../../models/assessment.model';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { Logger } from '../../../services/logger.service';
 
 @Component({
     selector: 'app-survey-question',
@@ -71,7 +72,7 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        console.log('SurveyQuestionComponent initialized');
+        Logger.log('SurveyQuestionComponent initialized');
         this.initSurvey();
     }
 
@@ -157,7 +158,7 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
             if (survey && survey.id) {
                 // Only update if survey exists and has an ID
                 this.surveyService.updateSurvey(survey).subscribe({
-                    next: () => console.log('Survey responses saved'),
+                    next: () => Logger.log('Survey responses saved'),
                     error: (err) => console.error('Error saving survey responses:', err)
                 });
             }
@@ -276,7 +277,7 @@ export class SurveyQuestionComponent implements OnInit, OnDestroy {
         // Update the references
         updatedResponses[this.currentAgeRange] = updatedAgeRangeResponses;
         survey.responses = updatedResponses;
-        console.log('updatedResponses:', updatedResponses);
+        Logger.log('updatedResponses:', updatedResponses);
     }
 
     private navigateToNextAgeBlock(survey: Survey): Observable<boolean> {

@@ -8,6 +8,7 @@ import { UserProfile } from '../models/user.model';
 import { ZoomMeeting } from '../models/zoom-meeting.model';
 import { SweetalertService } from './sweetalert.service';
 import { ZoomService } from './zoom.service';
+import { Logger } from './logger.service';
 
 @Injectable({
     providedIn: 'root'
@@ -155,9 +156,9 @@ export class BookingService {
     getUserBookings(): Observable<Booking[]> {
         return this.authService.currentUser$.pipe(
             switchMap((user) => {
-                console.log('getUserBookings - Current user:', user);
+                Logger.log('getUserBookings - Current user:', user);
                 if (!user) {
-                    console.log('No user found, returning empty array');
+                    Logger.log('No user found, returning empty array');
                     return of([]);
                 }
 
@@ -166,12 +167,12 @@ export class BookingService {
                     // Temporarily remove the status filter to avoid index requirement
                     const q = query(bookingsRef, where('userId', '==', user.uid));
 
-                    console.log('Setting up onSnapshot listener');
+                    Logger.log('Setting up onSnapshot listener');
 
                     const unsubscribe = onSnapshot(
                         q,
                         async (snapshot) => {
-                            console.log('onSnapshot triggered, documents:', snapshot.size);
+                            Logger.log('onSnapshot triggered, documents:', snapshot.size);
 
                             // Filter out cancelled bookings in memory
                             const bookingsData = snapshot.docs
@@ -227,7 +228,7 @@ export class BookingService {
 
                     // Cleanup function
                     return () => {
-                        console.log('Unsubscribing from onSnapshot');
+                        Logger.log('Unsubscribing from onSnapshot');
                         unsubscribe();
                     };
                 });
