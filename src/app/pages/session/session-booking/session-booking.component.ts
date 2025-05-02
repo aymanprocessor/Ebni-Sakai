@@ -27,6 +27,7 @@ import { BadgeModule } from 'primeng/badge';
 import { TagModule } from 'primeng/tag';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ZoomService } from '../../../services/zoom.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
     selector: 'app-session-booking',
@@ -92,7 +93,7 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
         private translateService: TranslateService,
         private envService: EnvironmentService,
         private zoomService: ZoomService,
-        private router: Router
+        private authService: AuthService
     ) {}
 
     ngOnInit(): void {
@@ -247,28 +248,9 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
             });
             return;
         }
-
-        this.zoomService
-            .joinMeeting(session.zoomMeeting.meetingNumber, session.zoomMeeting.password, session.userName || 'User')
-            .then(() => {
-                this.messageService.add({
-                    severity: 'success',
-                    summary: this.translateService.instant('Success'),
-                    detail: this.translateService.instant('Joined Zoom meeting successfully')
-                });
-            })
-            .catch((error) => {
-                console.error('Error joining Zoom meeting:', error);
-                this.messageService.add({
-                    severity: 'error',
-                    summary: this.translateService.instant('Error'),
-                    detail: this.translateService.instant('Failed to join Zoom meeting')
-                });
-            });
-
-        this.selectedSession = session;
-        this.activeSessionTab = 1; // Set to Zoom tab
-        this.showZoomMeetingDialog = true;
+        const currentUser = this.authService.getCurrentUser();
+        const isHost = session.assignedSpecialistId === currentUser?.uid;
+        this.zoomService.openZoomMeetingInNewTab(session.zoomMeeting.meetingNumber, session.zoomMeeting.password, session.userName || 'User', isHost);
     }
 
     // Confirm session cancellation

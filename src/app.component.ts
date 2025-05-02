@@ -8,22 +8,6 @@ import localeEn from '@angular/common/locales/en';
 registerLocaleData(localeAr, 'ar');
 registerLocaleData(localeEn, 'en');
 @Injectable()
-export class GlobalErrorHandler implements ErrorHandler {
-    handleError(error: any): void {
-        console.error('Unhandled Error:', error);
-
-        // Log detailed error information
-        if (error instanceof Error) {
-            console.error('Error Name:', error.name);
-            console.error('Error Message:', error.message);
-            console.error('Error Stack:', error.stack);
-        }
-
-        // Optional: Send error to monitoring service
-        // this.errorService.logError(error);
-    }
-}
-
 @Component({
     selector: 'app-root',
     standalone: true,
