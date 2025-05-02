@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
@@ -27,7 +27,7 @@ import { BadgeModule } from 'primeng/badge';
 import { TagModule } from 'primeng/tag';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ZoomService } from '../../../services/zoom.service';
-import { AuthService } from '../../../services/auth.service';
+import { SweetalertService } from '../../../services/sweetalert.service';
 
 @Component({
     selector: 'app-session-booking',
@@ -56,11 +56,20 @@ import { AuthService } from '../../../services/auth.service';
         ProgressSpinnerModule
     ],
     providers: [MessageService],
-    templateUrl: './session-booking.component.html'
+    templateUrl: './session-booking.component.html',
+    styles: [
+        `
+            :host ::ng-deep .card-no-round-top .p-card-header {
+                border-top-left-radius: 0;
+                border-top-right-radius: 0;
+            }
+        `
+    ]
 })
 export class SessionBookingComponent implements OnInit, OnDestroy {
     // Sessions data
     upcomingSessions: Booking[] = [];
+    completedSessions: Booking[] = [];
     pastSessions: Booking[] = [];
 
     // Time slots data
@@ -93,7 +102,8 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
         private translateService: TranslateService,
         private envService: EnvironmentService,
         private zoomService: ZoomService,
-        private authService: AuthService
+        private router: Router,
+        private sweetalertService: SweetalertService
     ) {}
 
     ngOnInit(): void {
@@ -106,7 +116,7 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
         this.destroy$.complete();
     }
 
-    // Load all bookings and split into upcoming and past
+    // Load all bookings and split into upcoming, completed, and past
     loadBookings(): void {
         this.loading = true;
 
@@ -117,20 +127,20 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
                 next: (bookings) => {
                     const now = new Date();
 
-                    // Split bookings into upcoming and past
+                    // Split bookings into categories
                     this.upcomingSessions = bookings.filter((booking) => booking.timeSlot && booking.timeSlot.startTime > now && booking.status !== 'cancelled').sort((a, b) => a.timeSlot!.startTime.getTime() - b.timeSlot!.startTime.getTime());
 
-                    this.pastSessions = bookings.filter((booking) => booking.timeSlot && (booking.timeSlot.startTime <= now || booking.status === 'cancelled')).sort((a, b) => b.timeSlot!.startTime.getTime() - a.timeSlot!.startTime.getTime());
+                    this.completedSessions = bookings.filter((booking) => booking.status === 'completed').sort((a, b) => b.timeSlot!.startTime.getTime() - a.timeSlot!.startTime.getTime());
+
+                    this.pastSessions = bookings
+                        .filter((booking) => (booking.timeSlot && booking.timeSlot.startTime <= now && booking.status !== 'completed') || booking.status === 'cancelled')
+                        .sort((a, b) => b.timeSlot!.startTime.getTime() - a.timeSlot!.startTime.getTime());
 
                     this.loading = false;
                 },
                 error: (error) => {
                     console.error('Error loading bookings:', error);
-                    this.messageService.add({
-                        severity: 'error',
-                        summary: this.translateService.instant('Error'),
-                        detail: this.translateService.instant('Failed to load bookings')
-                    });
+                    this.sweetalertService.showToast(this.translateService.instant('Failed to load bookings'), 'error');
                     this.loading = false;
                 }
             });
@@ -184,11 +194,7 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
                 error: (error) => {
                     this.loadingTimeSlots = false;
                     console.error('Error loading time slots:', error);
-                    this.messageService.add({
-                        severity: 'error',
-                        summary: this.translateService.instant('Error'),
-                        detail: this.translateService.instant('Failed to load time slots')
-                    });
+                    this.sweetalertService.showToast(this.translateService.instant('Failed to load time slots'), 'error');
                 }
             });
     }
@@ -196,11 +202,7 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
     // Submit booking with Zoom meeting
     async submitBookingWithZoom(): Promise<void> {
         if (!this.selectedTimeSlot) {
-            this.messageService.add({
-                severity: 'warn',
-                summary: this.translateService.instant('Validation Error'),
-                detail: this.translateService.instant('Please select a time slot')
-            });
+            this.sweetalertService.showToast(this.translateService.instant('Please select a time slot'), 'warning');
             return;
         }
 
@@ -210,22 +212,14 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
             // Book the time slot with Zoom meeting
             await this.bookingService.bookTimeSlotWithAutoAssignAndZoom(this.selectedTimeSlot.id!, this.bookingNotes);
 
-            this.messageService.add({
-                severity: 'success',
-                summary: this.translateService.instant('Success'),
-                detail: this.translateService.instant('Session booked successfully with Zoom meeting')
-            });
+            this.sweetalertService.showToast(this.translateService.instant('Session booked successfully with Zoom meeting'), 'success');
 
             this.showBookingDialog = false;
             this.loadBookings();
             this.resetForm();
         } catch (error) {
             console.error('Error submitting booking:', error);
-            this.messageService.add({
-                severity: 'error',
-                summary: this.translateService.instant('Error'),
-                detail: this.translateService.instant('Failed to book session')
-            });
+            this.sweetalertService.showToast(this.translateService.instant('Failed to book session'), 'error');
         } finally {
             this.isSubmitting = false;
         }
@@ -241,16 +235,23 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
     // Join Zoom meeting
     joinZoomMeeting(session: Booking): void {
         if (!session.zoomMeeting) {
-            this.messageService.add({
-                severity: 'error',
-                summary: this.translateService.instant('Error'),
-                detail: this.translateService.instant('No Zoom meeting available for this session')
-            });
+            this.sweetalertService.showToast(this.translateService.instant('No Zoom meeting available for this session'), 'error');
             return;
         }
-        const currentUser = this.authService.getCurrentUser();
-        const isHost = session.assignedSpecialistId === currentUser?.uid;
-        this.zoomService.openZoomMeetingInNewTab(session.zoomMeeting.meetingNumber, session.zoomMeeting.password, session.userName || 'User', isHost);
+
+        this.zoomService
+            .joinMeeting(session.zoomMeeting.meetingNumber, session.zoomMeeting.password, session.userName || 'User')
+            .then(() => {
+                this.sweetalertService.showToast(this.translateService.instant('Joined Zoom meeting successfully'), 'success');
+            })
+            .catch((error) => {
+                console.error('Error joining Zoom meeting:', error);
+                this.sweetalertService.showToast(this.translateService.instant('Failed to join Zoom meeting'), 'error');
+            });
+
+        this.selectedSession = session;
+        this.activeSessionTab = 1; // Set to Zoom tab
+        this.showZoomMeetingDialog = true;
     }
 
     // Confirm session cancellation
@@ -268,20 +269,12 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
         try {
             await this.bookingService.cancelBookingWithZoom(this.sessionToCancel.id!, this.sessionToCancel.timeSlotId);
 
-            this.messageService.add({
-                severity: 'success',
-                summary: this.translateService.instant('Success'),
-                detail: this.translateService.instant('Session cancelled successfully')
-            });
+            this.sweetalertService.showToast(this.translateService.instant('Session cancelled successfully'), 'success');
 
             this.loadBookings();
         } catch (error) {
             console.error('Error cancelling session:', error);
-            this.messageService.add({
-                severity: 'error',
-                summary: this.translateService.instant('Error'),
-                detail: this.translateService.instant('Failed to cancel session')
-            });
+            this.sweetalertService.showToast(this.translateService.instant('Failed to cancel session'), 'error');
         } finally {
             this.showCancelDialog = false;
             this.sessionToCancel = null;

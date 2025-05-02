@@ -1,4 +1,3 @@
-// src/app/pages/specialist-bookings/specialist-bookings.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
@@ -6,10 +5,9 @@ import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DialogModule } from 'primeng/dialog';
 import { TabViewModule } from 'primeng/tabview';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { Subscription } from 'rxjs';
 import { Booking } from '../../models/booking.model';
@@ -19,11 +17,12 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { ZoomMeetingComponent } from '../zoom-meetings/zoom-meetings.component';
 import { ZoomService } from '../../services/zoom.service';
 import { Logger } from '../../services/logger.service';
+import { SweetalertService } from '../../services/sweetalert.service';
 
 @Component({
     selector: 'app-specialist-bookings',
     standalone: true,
-    imports: [CommonModule, SkeletonModule, TableModule, CardModule, ButtonModule, TagModule, ToastModule, ConfirmDialogModule, DialogModule, TranslateModule, TabViewModule, ZoomMeetingComponent],
+    imports: [CommonModule, SkeletonModule, TableModule, CardModule, ButtonModule, TagModule, ToastModule, DialogModule, TranslateModule, TabViewModule, ZoomMeetingComponent],
     providers: [MessageService, ConfirmationService],
     templateUrl: './specialist-bookings.component.html'
 })
@@ -39,9 +38,9 @@ export class SpecialistBookingsComponent implements OnInit, OnDestroy {
     constructor(
         private bookingService: BookingService,
         private authService: AuthService,
-        private messageService: MessageService,
-        private confirmationService: ConfirmationService,
-        private zoomService: ZoomService
+        private translateService: TranslateService,
+        private zoomService: ZoomService,
+        private sweetalertService: SweetalertService
     ) {}
 
     ngOnInit(): void {
@@ -73,11 +72,7 @@ export class SpecialistBookingsComponent implements OnInit, OnDestroy {
                         },
                         error: (error) => {
                             console.error('Error loading bookings:', error);
-                            this.messageService.add({
-                                severity: 'error',
-                                summary: 'Error',
-                                detail: 'Failed to load bookings.'
-                            });
+                            this.sweetalertService.showToast('Failed to load bookings.', 'error');
                             this.loading = false;
                         }
                     })
@@ -95,16 +90,8 @@ export class SpecialistBookingsComponent implements OnInit, OnDestroy {
     }
 
     viewZoomMeeting(booking: Booking): void {
-        // this.selectedBooking = booking;
-        // this.activeBookingTab = 1; // Set to Zoom tab
-        // this.showDetailsDialog = true;
-
         if (!booking.zoomMeeting) {
-            this.messageService.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'No Zoom meeting available for this booking'
-            });
+            this.sweetalertService.showToast('No Zoom meeting available for this booking', 'error');
             return;
         }
 
@@ -117,89 +104,62 @@ export class SpecialistBookingsComponent implements OnInit, OnDestroy {
     }
 
     confirmBooking(booking: Booking): void {
-        this.confirmationService.confirm({
-            message: 'Are you sure you want to confirm this booking?',
-            header: 'Confirm',
-            icon: 'pi pi-check-circle',
-            accept: () => {
+        this.sweetalertService.showConfirmation(
+            this.translateService.instant('Are you sure you want to confirm this booking?'),
+            () => {
                 this.bookingService
                     .confirmBooking(booking.id!)
                     .then(() => {
-                        this.messageService.add({
-                            severity: 'success',
-                            summary: 'Success',
-                            detail: 'Booking confirmed successfully.'
-                        });
+                        this.sweetalertService.showToast('Booking confirmed successfully.', 'success');
                         this.loadSpecialistBookings();
                     })
                     .catch((error) => {
                         console.error('Error confirming booking:', error);
-                        this.messageService.add({
-                            severity: 'error',
-                            summary: 'Error',
-                            detail: 'Failed to confirm booking.'
-                        });
+                        this.sweetalertService.showToast('Failed to confirm booking.', 'error');
                     });
-            }
-        });
+            },
+            this.translateService.instant('Confirm')
+        );
     }
 
     cancelBooking(booking: Booking): void {
-        this.confirmationService.confirm({
-            message: 'Are you sure you want to cancel this booking?',
-            header: 'Cancel Booking',
-            icon: 'pi pi-exclamation-triangle',
-            accept: () => {
+        this.sweetalertService.showConfirmation(
+            this.translateService.instant('Are you sure you want to cancel this booking?'),
+            () => {
                 if (booking.timeSlotId) {
                     this.bookingService
                         .cancelBookingWithZoom(booking.id!, booking.timeSlotId)
                         .then(() => {
-                            this.messageService.add({
-                                severity: 'success',
-                                summary: 'Success',
-                                detail: 'Booking cancelled successfully.'
-                            });
+                            this.sweetalertService.showToast('Booking cancelled successfully.', 'success');
                             this.loadSpecialistBookings();
                         })
                         .catch((error) => {
                             console.error('Error cancelling booking:', error);
-                            this.messageService.add({
-                                severity: 'error',
-                                summary: 'Error',
-                                detail: 'Failed to cancel booking.'
-                            });
+                            this.sweetalertService.showToast('Failed to cancel booking.', 'error');
                         });
                 }
-            }
-        });
+            },
+            this.translateService.instant('Cancel Booking')
+        );
     }
 
     completeBooking(booking: Booking): void {
-        this.confirmationService.confirm({
-            message: 'Mark this booking as completed?',
-            header: 'Complete Booking',
-            icon: 'pi pi-check',
-            accept: () => {
+        this.sweetalertService.showConfirmation(
+            this.translateService.instant('Mark this booking as completed?'),
+            () => {
                 this.bookingService
                     .completeBooking(booking.id!)
                     .then(() => {
-                        this.messageService.add({
-                            severity: 'success',
-                            summary: 'Success',
-                            detail: 'Booking completed successfully.'
-                        });
+                        this.sweetalertService.showToast('Booking completed successfully.', 'success');
                         this.loadSpecialistBookings();
                     })
                     .catch((error) => {
                         console.error('Error completing booking:', error);
-                        this.messageService.add({
-                            severity: 'error',
-                            summary: 'Error',
-                            detail: 'Failed to complete booking.'
-                        });
+                        this.sweetalertService.showToast('Failed to complete booking.', 'error');
                     });
-            }
-        });
+            },
+            this.translateService.instant('Complete Booking')
+        );
     }
 
     getStatusSeverity(status: string): 'success' | 'warn' | 'danger' | 'info' {
