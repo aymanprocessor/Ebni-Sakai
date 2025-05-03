@@ -160,7 +160,7 @@
         <div class="flex flex-col gap-4">
             <div class="flex flex-col gap-2">
                 <label for="selectedDate" class="font-medium">{{ 'pages.session.selectDate' | translate }}</label>
-                <p-datepicker id="selectedDate" [(ngModel)]="selectedDate" [minDate]="minDate" [showIcon]="true" [showTime]="false" [disabledDates]="disabledDates" dateFormat="yy-mm-dd" appendTo="body" (onSelect)="onDateSelect()"> </p-datepicker>
+                <p-dropdown id="selectedDate" [(ngModel)]="selectedDate" [options]="availableDates" optionLabel="displayLabel" placeholder="{{ 'pages.booking.selectDate' | translate }}" styleClass="w-full" (onChange)="onDateSelect()"></p-dropdown>
 
                 <div *ngIf="loadingTimeSlots" class="text-center mt-2">
                     <p-skeleton width="100%" height="40px"></p-skeleton>
@@ -169,7 +169,7 @@
 
             <div class="flex flex-col gap-2" *ngIf="!loadingTimeSlots && availableTimeSlots.length > 0">
                 <label for="timeSlot" class="font-medium">{{ 'pages.session.availableTimeSlots' | translate }}</label>
-                <p-dropdown id="timeSlot" [(ngModel)]="selectedTimeSlot" [options]="availableTimeSlots" optionLabel="displayLabel" placeholder="{{ 'pages.booking.selectTimeslot' | translate }}" styleClass="w-full"> </p-dropdown>
+                <p-dropdown id="timeSlot" [(ngModel)]="selectedTimeSlot" [options]="availableTimeSlots" optionLabel="displayLabel" placeholder="{{ 'pages.booking.selectTimeslot' | translate }}" styleClass="w-full"></p-dropdown>
             </div>
 
             <div *ngIf="selectedDate && !loadingTimeSlots && availableTimeSlots.length === 0" class="bg-yellow-100 text-yellow-700 p-3 rounded">
@@ -178,7 +178,7 @@
 
             <div class="flex flex-col gap-2">
                 <label for="notes" class="font-medium">{{ 'pages.session.notesOptional' | translate }}</label>
-                <textarea pInputTextarea id="notes" [(ngModel)]="bookingNotes" rows="3" class="w-full"> </textarea>
+                <textarea pInputTextarea id="notes" [(ngModel)]="bookingNotes" rows="3" class="w-full"></textarea>
             </div>
 
             <div class="bg-blue-50 p-3 rounded text-blue-700 text-sm">
@@ -188,8 +188,8 @@
         </div>
 
         <ng-template pTemplate="footer">
-            <p-button label="{{ 'common.buttons.cancel' | translate }}" icon="pi pi-times" (click)="showBookingDialog = false" styleClass="p-button-text"> </p-button>
-            <p-button label="{{ 'pages.session.createZoomMeeting' | translate }}" icon="pi pi-check" (click)="submitBookingWithZoom()" [disabled]="!selectedTimeSlot" [loading]="isSubmitting"> </p-button>
+            <p-button label="{{ 'common.buttons.cancel' | translate }}" icon="pi pi-times" (click)="showBookingDialog = false" styleClass="p-button-text"></p-button>
+            <p-button label="{{ 'pages.session.createZoomMeeting' | translate }}" icon="pi pi-check" (click)="submitBookingWithZoom()" [disabled]="!selectedTimeSlot" [loading]="isSubmitting"></p-button>
         </ng-template>
     </p-dialog>
 

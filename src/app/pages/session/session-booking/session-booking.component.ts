@@ -16,7 +16,6 @@ import { TimeSlot } from '../../../models/time-slot.model';
 import { BookingService } from '../../../services/booking.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { DatePickerModule } from 'primeng/datepicker';
 import { TabViewModule } from 'primeng/tabview';
 import { ZoomMeetingComponent } from '../../zoom-meetings/zoom-meetings.component';
 import { Booking } from '../../../models/booking.model';
@@ -29,12 +28,16 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ZoomService } from '../../../services/zoom.service';
 import { SweetalertService } from '../../../services/sweetalert.service';
 
+interface DateOption {
+    date: Date;
+    displayLabel: string;
+}
+
 @Component({
     selector: 'app-session-booking',
     standalone: true,
     imports: [
         SharedModule,
-        DatePickerModule,
         CommonModule,
         FormsModule,
         TableModule,
@@ -73,12 +76,11 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
     pastSessions: Booking[] = [];
 
     // Time slots data
+    availableDates: DateOption[] = [];
     availableTimeSlots: any[] = [];
-    disabledDates: Date[] = [];
-    selectedDate: Date | null = null;
+    selectedDate: DateOption | null = null;
     selectedTimeSlot: TimeSlot | null = null;
     bookingNotes: string = '';
-    minDate: Date = new Date();
 
     // UI state
     loading: boolean = true;
@@ -108,7 +110,7 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.loadBookings();
-        this.loadDisabledDates();
+        this.loadAvailableDates();
     }
 
     ngOnDestroy(): void {
@@ -146,21 +148,36 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
             });
     }
 
-    // Load dates that should be disabled in the datepicker
-    loadDisabledDates(): void {
+    // Load available dates for dropdown
+    loadAvailableDates(): void {
         const startDate = new Date();
+        const daysToFetch = 30;
 
         this.bookingService
-            .getDisabledDates(startDate, 30)
+            .getAvailableDates(startDate, daysToFetch)
             .pipe(takeUntil(this.destroy$))
             .subscribe({
                 next: (dates) => {
-                    this.disabledDates = dates;
+                    this.availableDates = dates.map((date) => ({
+                        date: date,
+                        displayLabel: this.formatDateForDisplay(date)
+                    }));
                 },
                 error: (error) => {
-                    console.error('Error loading disabled dates:', error);
+                    console.error('Error loading available dates:', error);
+                    this.sweetalertService.showToast(this.translateService.instant('Failed to load available dates'), 'error');
                 }
             });
+    }
+
+    // Format date for display in dropdown
+    formatDateForDisplay(date: Date): string {
+        return date.toLocaleDateString(undefined, {
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
     }
 
     // When a date is selected in the booking dialog
@@ -170,10 +187,10 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
         this.loadingTimeSlots = true;
         this.selectedTimeSlot = null;
 
-        const startOfDay = new Date(this.selectedDate);
+        const startOfDay = new Date(this.selectedDate.date);
         startOfDay.setHours(0, 0, 0, 0);
 
-        const endOfDay = new Date(this.selectedDate);
+        const endOfDay = new Date(this.selectedDate.date);
         endOfDay.setHours(23, 59, 59, 999);
 
         this.bookingService
@@ -295,14 +312,6 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
         return hoursDiff >= 24;
     }
 
-    // Check if session is upcoming
-    isSessionUpcoming(session: Booking): boolean {
-        if (!session.timeSlot) return false;
-
-        const now = new Date();
-        return session.timeSlot.startTime > now && session.status !== 'cancelled';
-    }
-
     // Check if session is happening soon (within next hour)
     isSessionSoon(session: Booking): boolean {
         if (!session.timeSlot) return false;
@@ -313,14 +322,6 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
         const hoursDiff = timeDiff / (1000 * 60 * 60);
 
         return hoursDiff > 0 && hoursDiff <= 1;
-    }
-
-    // Check if session is in progress
-    isSessionInProgress(session: Booking): boolean {
-        if (!session.timeSlot) return false;
-
-        const now = new Date();
-        return session.timeSlot.startTime <= now && session.timeSlot.endTime >= now && session.status !== 'cancelled';
     }
 
     // Format time for display
