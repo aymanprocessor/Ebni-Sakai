@@ -154,7 +154,15 @@ export class BookingService {
     }
 
     getUserBookings(): Observable<Booking[]> {
-        return this.authService.currentUser$.pipe(
+        return from(this.authService.waitForInitialization()).pipe(
+            switchMap((initialized) => {
+                if (!initialized) {
+                    console.error('Auth service failed to initialize');
+                    return of([]);
+                }
+
+                return this.authService.currentUser$;
+            }),
             switchMap((user) => {
                 Logger.log('getUserBookings - Current user:', user);
                 if (!user) {
@@ -164,8 +172,7 @@ export class BookingService {
 
                 return new Observable<Booking[]>((subscriber) => {
                     const bookingsRef = collection(this.firestore, this.BOOKINGS_COLLECTION);
-                    // Temporarily remove the status filter to avoid index requirement
-                    const q = query(bookingsRef, where('userId', '==', user.uid));
+                    const q = query(bookingsRef, where('userId', '==', (user as UserProfile).uid));
 
                     Logger.log('Setting up onSnapshot listener');
 
@@ -174,7 +181,6 @@ export class BookingService {
                         async (snapshot) => {
                             Logger.log('onSnapshot triggered, documents:', snapshot.size);
 
-                            // Filter out cancelled bookings in memory
                             const bookingsData = snapshot.docs
                                 .map((doc) => {
                                     const data = doc.data();
@@ -197,14 +203,10 @@ export class BookingService {
                                 return;
                             }
 
-                            // Get all unique timeSlotIds
                             const timeSlotIds = [...new Set(bookingsData.map((booking) => booking.timeSlotId))];
 
                             try {
-                                // Fetch time slots for all bookings
                                 const timeSlotMap = await this.getTimeSlotsBatch(timeSlotIds);
-
-                                // Combine bookings with their timeSlots
                                 const bookingsWithTimeSlots = bookingsData.map(
                                     (booking) =>
                                         ({
@@ -212,11 +214,9 @@ export class BookingService {
                                             timeSlot: timeSlotMap.get(booking.timeSlotId)
                                         }) as Booking
                                 );
-
                                 subscriber.next(bookingsWithTimeSlots);
                             } catch (error) {
                                 console.error('Error fetching time slots:', error);
-                                // Return bookings without timeSlots if there's an error
                                 subscriber.next(bookingsData as Booking[]);
                             }
                         },
@@ -226,7 +226,6 @@ export class BookingService {
                         }
                     );
 
-                    // Cleanup function
                     return () => {
                         Logger.log('Unsubscribing from onSnapshot');
                         unsubscribe();
@@ -236,7 +235,6 @@ export class BookingService {
             shareReplay(1)
         );
     }
-
     // Add this method to your existing BookingService
 
     getSpecialistBookings(): Observable<Booking[]> {

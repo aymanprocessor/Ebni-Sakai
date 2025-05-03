@@ -86,8 +86,8 @@ export class ZoomService {
                 participant_video: true,
                 join_before_host: false,
                 mute_upon_entry: true,
-                auto_recording: 'none',
-                approval_type: 1
+                auto_recording: 'local',
+                approval_type: 2
             }
         };
 

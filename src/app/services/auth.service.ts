@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { Auth, authState, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, User, GoogleAuthProvider, signInWithPopup } from '@angular/fire/auth';
-import { BehaviorSubject, from, map, Observable, of, switchMap, catchError, timeout, firstValueFrom, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, from, map, Observable, of, switchMap, catchError, timeout, firstValueFrom, ReplaySubject, first, throwError, Subscription } from 'rxjs';
 import { UserProfile } from '../models/user.model';
 import { doc, docData, Firestore, getDoc, setDoc } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
@@ -12,10 +12,12 @@ import { Logger } from './logger.service';
 @Injectable({
     providedIn: 'root'
 })
-export class AuthService {
+export class AuthService implements OnDestroy {
     currentUser$: BehaviorSubject<UserProfile | null> = new BehaviorSubject<UserProfile | null>(null);
     private initializedSubject = new ReplaySubject<boolean>(1);
     initialized$ = this.initializedSubject.asObservable();
+    private authStateSubscription?: Subscription;
+
     constructor(
         private auth: Auth,
         private firestore: Firestore,
@@ -26,65 +28,72 @@ export class AuthService {
     }
 
     private initializeAuthState() {
-        try {
-            authState(this.auth)
-                .pipe(
-                    switchMap((firebaseUser) => {
-                        if (firebaseUser) {
-                            const userDocRef = doc(this.firestore, `users/${firebaseUser.uid}`);
-                            return docData(userDocRef, { idField: 'id' }).pipe(
-                                map((userProfile) => {
-                                    if (userProfile) {
-                                        try {
-                                            localStorage.setItem('currentUser', JSON.stringify(userProfile));
-                                        } catch (storageError) {
-                                            console.warn('Failed to set localStorage:', storageError);
-                                        }
-                                        return userProfile;
+        this.authStateSubscription = authState(this.auth)
+            .pipe(
+                switchMap((firebaseUser) => {
+                    if (firebaseUser) {
+                        const userDocRef = doc(this.firestore, `users/${firebaseUser.uid}`);
+                        return docData(userDocRef, { idField: 'id' }).pipe(
+                            map((userProfile) => {
+                                if (userProfile) {
+                                    try {
+                                        localStorage.setItem('currentUser', JSON.stringify(userProfile));
+                                    } catch (storageError) {
+                                        console.warn('Failed to set localStorage:', storageError);
                                     }
-                                    return null;
-                                }),
-                                catchError((error) => {
-                                    console.error('Error fetching user profile:', error);
-                                    this.sweetalert.showToast('Failed to load user profile', 'error');
-                                    return of(null);
-                                })
-                            );
-                        } else {
-                            try {
-                                localStorage.removeItem('currentUser');
-                            } catch (storageError) {
-                                console.warn('Failed to remove localStorage:', storageError);
-                            }
-                            return of(null);
+                                    return userProfile;
+                                }
+                                return null;
+                            }),
+                            catchError((error) => {
+                                console.error('Error fetching user profile:', error);
+                                this.sweetalert.showToast('Failed to load user profile', 'error');
+                                return of(null);
+                            })
+                        );
+                    } else {
+                        try {
+                            localStorage.removeItem('currentUser');
+                        } catch (storageError) {
+                            console.warn('Failed to remove localStorage:', storageError);
                         }
-                    }),
-                    catchError((error) => {
-                        console.error('Authentication state error:', error);
-                        this.sweetalert.showToast('Authentication initialization failed', 'error');
                         return of(null);
-                    })
-                )
-                .subscribe({
-                    next: (user) => {
-                        Logger.log('Authentication state:', user);
-                        this.currentUser$.next(user as UserProfile);
-                        this.initializedSubject.next(true);
-                    },
-                    error: (err) => {
-                        console.error('Subscription error:', err);
-                        this.currentUser$.next(null);
-                        this.sweetalert.showToast('Authentication service error', 'error');
                     }
-                });
-        } catch (initError) {
-            console.error('Failed to initialize auth state:', initError);
-            this.sweetalert.showToast('Authentication service initialization failed', 'error');
-        }
+                }),
+                catchError((error) => {
+                    console.error('Authentication state error:', error);
+                    this.sweetalert.showToast('Authentication initialization failed', 'error');
+                    return of(null);
+                })
+            )
+            .subscribe({
+                next: (user) => {
+                    Logger.log('Authentication state:', user);
+                    this.currentUser$.next(user as UserProfile);
+                    this.initializedSubject.next(true);
+                    this.initializedSubject.complete();
+                },
+                error: (err) => {
+                    console.error('Subscription error:', err);
+                    this.currentUser$.next(null);
+                    this.initializedSubject.next(false);
+                    this.initializedSubject.complete();
+                    this.sweetalert.showToast('Authentication service error', 'error');
+                }
+            });
     }
     // Add a method to wait for initialization
-    waitForInitialization(): Promise<boolean> {
-        return firstValueFrom(this.initialized$);
+    // Improved wait method with timeout
+    waitForInitialization(timeoutMs = 5000): Promise<boolean> {
+        return firstValueFrom(
+            this.initialized$.pipe(
+                timeout({
+                    each: timeoutMs,
+                    with: () => throwError(() => new Error('Auth initialization timeout'))
+                }),
+                catchError(() => of(false))
+            )
+        );
     }
 
     // Sign in with email and password
@@ -95,8 +104,9 @@ export class AuthService {
                 const userProfile = {
                     uid: userCredential.user.uid,
                     email: userCredential.user.email,
-                    firstName: '',
-                    lastName: '',
+                    firstName: userCredential.user.displayName?.split(' ')[0] || '',
+                    lastName: userCredential.user.displayName?.split(' ').slice(1).join(' ') || '',
+                    phone: userCredential.user.phoneNumber || '',
                     role: ''
                 };
                 localStorage.setItem('currentUser', JSON.stringify(userProfile));
@@ -316,5 +326,9 @@ export class AuthService {
 
     isPaidUser(): Observable<boolean> {
         return this.currentUser$.pipe(map((user) => user?.isSubscribed === true));
+    }
+    // Add cleanup method
+    ngOnDestroy() {
+        this.authStateSubscription?.unsubscribe();
     }
 }

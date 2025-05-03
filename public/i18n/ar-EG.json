@@ -1,216 +1,229 @@
 {
-    "common": {
-        "buttons": {
-            "add": "إضافة",
-            "edit": "تعديل",
-            "delete": "حذف",
-            "save": "حفظ",
-            "cancel": "إلغاء",
-            "close": "إغلاق",
-            "back": "رجوع",
-            "next": "التالي",
-            "submit": "إرسال",
-            "search": "بحث",
-            "filter": "تصفية",
-            "clear": "مسح",
-            "reset": "إعادة ضبط",
-            "confirm": "تأكيد",
-            "logout": "تسجيل الخروج",
-            "login": "تسجيل الدخول",
-            "register": "تسجيل",
-            "loginWithGoogle": "تسجيل الدخول مع جوجل",
-            "view": "عرض",
-            "yes": "نعم",
-            "no": "لا"
-        },
-        "weekdays": {
-            "mon": "الاثنين",
-            "tue": "الثلاثاء",
-            "wed": "الأربعاء",
-            "thu": "الخميس",
-            "fri": "الجمعة",
-            "sat": "السبت",
-            "sun": "الأحد"
-        },
-        "intervals": {
-            "15_minutes": "15 دقيقة",
-            "30_minutes": "30 دقيقة",
-            "45_minutes": "45 دقيقة",
-            "60_minutes": "60 دقيقة",
-            "90_minutes": "90 دقيقة",
-            "120_minutes": "120 دقيقة",
-            "180_minutes": "180 دقيقة"
-        },
-        "labels": {
-            "name": "الاسم",
-            "email": "البريد الإلكتروني",
-            "phone": "رقم الهاتف",
-            "address": "العنوان",
-            "description": "الوصف",
-            "status": "الحالة",
-            "date": "التاريخ",
-            "time": "الوقت",
-            "username": "اسم المستخدم",
-            "password": "كلمة المرور",
-            "confirmPassword": "تأكيد كلمة المرور",
-            "language": "اللغة",
-            "rememberMe": "تذكرني",
-            "forgotPassword": "نسيت كلمة المرور",
-            "or": "أو",
-            "alreadyHaveAccount": "هل لديك حساب بالفعل؟",
-            "firstName": "الاسم الأول",
-            "lastName": "الاسم الأخير",
-            "createAnAccount": "إنشاء حساب جديد؟",
-            "gender": "الجنس",
-            "selectGender": "اختر الجنس",
-            "years": "سنة",
-            "female": "أنثى",
-            "male": "ذكر",
-            "age": "العمر",
-            "actions": "الاجراءات",
-            "birthdate": "تاريخ الميلاد",
-            "day": "اليوم",
-            "week": "هذا الاسبوع",
-            "month": "هذا الشهر",
-            "start_date": "بداية التاريخ",
-            "end_date": "نهاية التاريخ",
-            "start_time": "بداية الميعاد",
-            "end_time": "نهاية الميعاد",
-            "session_time": "مدة الجلسة ",
-            "weekdays": "الايام",
-            "role": "الصلاحية",
-            "subscription": "مشترك",
-            "mobile": "الموبايل",
-            "isSubscribed": "مشترك؟",
-            "at": "في",
-            "details": "التفاصيل"
-        },
-        "age": {
-            "format": "{{years}} سنة، {{months}} شهر"
-        },
-        "messages": {
-            "loading": "جاري التحميل...",
-            "noData": "لا توجد بيانات متاحة",
-            "confirmDelete": "هل أنت متأكد من حذف هذا العنصر؟",
-            "itemSaved": "تم حفظ العنصر بنجاح",
-            "itemDeleted": "تم حذف العنصر بنجاح",
-            "unauthorized": "غير مصرح لك بالوصول إلى هذا المورد",
-            "sessionExpired": "انتهت صلاحية جلستك، يرجى تسجيل الدخول مرة أخرى",
-            "error": "حدث خطأ",
-            "welcome": "مرحبًا، {{name}}!",
-            "birthdayHelp": "اختر تاريخ ميلاد الطفل",
-            "paginatorTemplate": "عرض {first} إلى {last} من أصل {totalRecords} إدخال",
-            "loadingFailed": "فشل تحميل البيانات",
-            "deleteFailed": "فشل حذف العنصر",
-            "saveFailed": "فشل حفظ العنصر"
-        },
-        "validation": {
-            "required": "هذا الحقل مطلوب",
-            "email": "يرجى إدخال عنوان بريد إلكتروني صالح",
-            "minLength": "الحد الأدنى للطول هو {{length}} أحرف",
-            "maxLength": "الحد الأقصى للطول هو {{length}} أحرف",
-            "passwordMismatch": "كلمات المرور غير متطابقة",
-            "invalidFormat": "تنسيق غير صالح"
-        },
-        "statuses": {
-            "active": "نشط",
-            "inactive": "غير نشط",
-            "pending": "قيد الانتظار",
-            "completed": "مكتمل",
-            "cancelled": "ملغي",
-            "confirmed": "مؤكد"
-        }
+  "common": {
+    "buttons": {
+      "add": "إضافة",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "save": "حفظ",
+      "cancel": "إلغاء",
+      "close": "إغلاق",
+      "back": "رجوع",
+      "next": "التالي",
+      "submit": "إرسال",
+      "search": "بحث",
+      "filter": "تصفية",
+      "clear": "مسح",
+      "reset": "إعادة ضبط",
+      "confirm": "تأكيد",
+      "logout": "تسجيل الخروج",
+      "login": "تسجيل الدخول",
+      "register": "تسجيل",
+      "loginWithGoogle": "تسجيل الدخول مع جوجل",
+      "view": "عرض",
+      "yes": "نعم",
+      "no": "لا"
     },
-    "pages": {
-        "users": {
-            "title": "إدارة المستخدمين",
-            "addUser": "اضافة مستخدم",
-            "notSubscribed": "غير مشترك",
-            "noUsers": "لا يوجد المستخدمين"
-        },
-        "login": {
-            "welcome": "مرحبا بكم في كيد سكيلز"
-        },
-        "register": {
-            "welcome": "مرحبا بكم في كيد سكيلز"
-        },
-        "booking": {
-            "selectTimeSlotMessage": "اختر وقتًا لحجز موعد. الأوقات المتاحة موضحة أدناه.",
-            "bookApppointment": "حجز موعد جديد",
-            "availableSlotFor": "الفترات المتاحة لـ ",
-            "noTimeSlotAvailable": "لا يوجد الفترات المتاحة",
-            "bestTimeQuestion": "ما الوقت الأنسب للجلسة",
-            "30MinMeeting": "الجلسة 30 دقيقة",
-            "selectTimeslot": "اختار الميعاد"
-        },
-        "session": {
-            "title": "إدارة الجلسات",
-            "bookSession": "حجز جلسة",
-            "upcomingSessions": "الجلسات القادمة",
-            "completedSessions": "الجلسات المكتملة",
-            "pastSessions": "الجلسات السابقة",
-            "zoomMeeting": "اجتماع زوم",
-            "meetingId": "رقم الاجتماع",
-            "password": "كلمة المرور",
-            "startTime": "وقت البدء",
-            "duration": "المدة",
-            "minutes": "دقائق",
-            "status": "الحالة",
-            "noSessionsAvailable": "ليس لديك أي جلسات قادمة.",
-            "bookNow": "احجز الآن",
-            "joinMeeting": "انضم للاجتماع",
-            "leaveMeeting": "مغادرة الاجتماع",
-            "noMeetingAvailable": "لا يوجد اجتماع متاح",
-            "noMeetingMessage": "لا يوجد اجتماع زوم مرتبط بهذه الجلسة.",
-            "selectDate": "اختر التاريخ",
-            "availableTimeSlots": "المواعيد المتاحة",
-            "notes": "ملاحظات",
-            "notesOptional": "ملاحظات (اختياري)",
-            "confirmBooking": "هل أنت متأكد من رغبتك في حجز هذه الجلسة؟",
-            "meetingJoined": "تم الانضمام إلى اجتماع زوم بنجاح",
-            "meetingEnded": "انتهى اجتماع زوم",
-            "bookingConfirmed": "تم حجز الجلسة بنجاح مع اجتماع زوم",
-            "bookingCancelled": "تم إلغاء الجلسة بنجاح",
-            "bookingFailed": "فشل في حجز الجلسة",
-            "sessionInfo": "معلومات الجلسة",
-            "clientInfo": "معلومات العميل",
-            "createZoomMeeting": "إنشاء اجتماع زوم",
-            "confirmCancelSession": "هل أنت متأكد من رغبتك في إلغاء هذه الجلسة؟",
-            "cancelSession": "إلغاء الجلسة",
-            "markAsCompleted": "تعيين كمكتملة",
-            "zoomMeetingMessage": "سيتم إنشاء اجتماع زوم لجلستك"
-        },
-        "appointmentScheduler": {
-            "title": "جدولة المواعيد",
-            "generateTimeSlots": "توليد المواعيد",
-            "validation": {
-                "invalidTimeRange": "نطاق الوقت غير صالح",
-                "invalidDateRange": "تاريخ الموعد غير صالح"
-            }
-        }
+    "weekdays": {
+      "mon": "الاثنين",
+      "tue": "الثلاثاء",
+      "wed": "الأربعاء",
+      "thu": "الخميس",
+      "fri": "الجمعة",
+      "sat": "السبت",
+      "sun": "الأحد"
     },
-    "navigation": {
-        "home": "الرئيسية",
-        "dashboard": "لوحة التحكم",
-        "users": "المستخدمين",
-        "products": "المنتجات",
-        "orders": "الطلبات",
-        "settings": "الإعدادات",
-        "logout": "تسجيل الخروج",
-        "profile": "الملف الشخصي",
-        "user-profile": "بيانات المستخدم",
-        "survey": "استبيان",
-        "children": "الأطفال",
-        "sessions": "الجلسات"
+    "intervals": {
+      "15_minutes": "15 دقيقة",
+      "30_minutes": "30 دقيقة",
+      "45_minutes": "45 دقيقة",
+      "60_minutes": "60 دقيقة",
+      "90_minutes": "90 دقيقة",
+      "120_minutes": "120 دقيقة",
+      "180_minutes": "180 دقيقة"
     },
-    "dateTime": {
-        "formats": {
-            "shortDate": "dd-MM-yyyy"
-        }
+    "labels": {
+      "name": "الاسم",
+      "email": "البريد الإلكتروني",
+      "phone": "رقم الهاتف",
+      "address": "العنوان",
+      "description": "الوصف",
+      "status": "الحالة",
+      "date": "التاريخ",
+      "time": "الوقت",
+      "username": "اسم المستخدم",
+      "password": "كلمة المرور",
+      "confirmPassword": "تأكيد كلمة المرور",
+      "language": "اللغة",
+      "rememberMe": "تذكرني",
+      "forgotPassword": "نسيت كلمة المرور",
+      "or": "أو",
+      "alreadyHaveAccount": "هل لديك حساب بالفعل؟",
+      "firstName": "الاسم الأول",
+      "lastName": "الاسم الأخير",
+      "createAnAccount": "إنشاء حساب جديد؟",
+      "gender": "الجنس",
+      "selectGender": "اختر الجنس",
+      "years": "سنة",
+      "female": "أنثى",
+      "male": "ذكر",
+      "age": "العمر",
+      "actions": "الاجراءات",
+      "birthdate": "تاريخ الميلاد",
+      "day": "اليوم",
+      "week": "هذا الاسبوع",
+      "month": "هذا الشهر",
+      "start_date": "بداية التاريخ",
+      "end_date": "نهاية التاريخ",
+      "start_time": "بداية الميعاد",
+      "end_time": "نهاية الميعاد",
+      "session_time": "مدة الجلسة ",
+      "weekdays": "الايام",
+      "role": "الصلاحية",
+      "subscription": "مشترك",
+      "mobile": "الموبايل",
+      "isSubscribed": "مشترك؟",
+      "at": "في",
+      "details": "التفاصيل"
     },
-    "pcommon": {
-        "labels": {
-            "subscribed": "مشترك"
-        }
+    "age": {
+      "format": "{{years}} سنة، {{months}} شهر"
+    },
+    "messages": {
+      "loading": "جاري التحميل...",
+      "noData": "لا توجد بيانات متاحة",
+      "confirmDelete": "هل أنت متأكد من حذف هذا العنصر؟",
+      "itemSaved": "تم حفظ العنصر بنجاح",
+      "itemDeleted": "تم حذف العنصر بنجاح",
+      "unauthorized": "غير مصرح لك بالوصول إلى هذا المورد",
+      "sessionExpired": "انتهت صلاحية جلستك، يرجى تسجيل الدخول مرة أخرى",
+      "error": "حدث خطأ",
+      "welcome": "مرحبًا، {{name}}!",
+      "birthdayHelp": "اختر تاريخ ميلاد الطفل",
+      "paginatorTemplate": "عرض {first} إلى {last} من أصل {totalRecords} إدخال",
+      "loadingFailed": "فشل تحميل البيانات",
+      "deleteFailed": "فشل حذف العنصر",
+      "saveFailed": "فشل حفظ العنصر",
+      "failedToLoadBookings": "فشل تحميل الحجوزات",
+      "failedToLoadAvailableDates": "فشل تحميل التواريخ المتاحة",
+      "failedToLoadTimeSlots": "فشل تحميل الأوقات المتاحة",
+      "pleaseSelectTimeSlot": "يرجى اختيار وقت متاح",
+      "sessionBookedSuccessfully": "تم حجز الجلسة بنجاح مع اجتماع زوم",
+      "failedToBookSession": "فشل حجز الجلسة",
+      "noZoomMeetingAvailable": "لا يوجد اجتماع زوم متاح لهذه الجلسة",
+      "sessionCancelledSuccessfully": "تم إلغاء الجلسة بنجاح",
+      "failedToCancelSession": "فشل إلغاء الجلسة"
+    },
+    "validation": {
+      "required": "هذا الحقل مطلوب",
+      "email": "يرجى إدخال عنوان بريد إلكتروني صالح",
+      "minLength": "الحد الأدنى للطول هو {{length}} أحرف",
+      "maxLength": "الحد الأقصى للطول هو {{length}} أحرف",
+      "passwordMismatch": "كلمات المرور غير متطابقة",
+      "invalidFormat": "تنسيق غير صالح"
+    },
+    "statuses": {
+      "active": "نشط",
+      "inactive": "غير نشط",
+      "pending": "قيد الانتظار",
+      "completed": "مكتمل",
+      "cancelled": "ملغي",
+      "confirmed": "مؤكد"
     }
+  },
+  "pages": {
+    "users": {
+      "title": "إدارة المستخدمين",
+      "addUser": "اضافة مستخدم",
+      "notSubscribed": "غير مشترك",
+      "noUsers": "لا يوجد المستخدمين"
+    },
+    "login": {
+      "welcome": "مرحبا بكم في كيد سكيلز"
+    },
+    "register": {
+      "welcome": "مرحبا بكم في كيد سكيلز"
+    },
+    "booking": {
+      "selectTimeSlotMessage": "اختر وقتًا لحجز موعد. الأوقات المتاحة موضحة أدناه.",
+      "bookApppointment": "حجز موعد جديد",
+      "availableSlotFor": "الفترات المتاحة لـ ",
+      "noTimeSlotAvailable": "لا يوجد الفترات المتاحة",
+      "bestTimeQuestion": "ما الوقت الأنسب للجلسة",
+      "30MinMeeting": "الجلسة 30 دقيقة",
+      "selectTimeslot": "اختار الميعاد",
+      "selectDate": "اختر التاريخ"
+    },
+    "session": {
+      "title": "إدارة الجلسات",
+      "bookSession": "حجز جلسة",
+      "upcomingSessions": "الجلسات القادمة",
+      "currentSessions": "الجلسات الحالية",
+      "noCurrentSessions": "لا توجد جلسات حالية",
+      "inProgress": "قيد التنفيذ",
+      "completedSessions": "الجلسات المكتملة",
+      "pastSessions": "الجلسات السابقة",
+      "zoomMeeting": "اجتماع زوم",
+      "meetingId": "رقم الاجتماع",
+      "password": "كلمة المرور",
+      "startTime": "وقت البدء",
+      "duration": "المدة",
+      "minutes": "دقائق",
+      "status": "الحالة",
+      "noSessionsAvailable": "ليس لديك أي جلسات قادمة.",
+      "bookNow": "احجز الآن",
+      "joinMeeting": "انضم للاجتماع",
+      "leaveMeeting": "مغادرة الاجتماع",
+      "noMeetingAvailable": "لا يوجد اجتماع متاح",
+      "noMeetingMessage": "لا يوجد اجتماع زوم مرتبط بهذه الجلسة.",
+      "selectDate": "اختر التاريخ",
+      "availableTimeSlots": "المواعيد المتاحة",
+      "notes": "ملاحظات",
+      "notesOptional": "ملاحظات (اختياري)",
+      "confirmBooking": "هل أنت متأكد من رغبتك في حجز هذه الجلسة؟",
+      "meetingJoined": "تم الانضمام إلى اجتماع زوم بنجاح",
+      "meetingEnded": "انتهى اجتماع زوم",
+      "bookingConfirmed": "تم حجز الجلسة بنجاح مع اجتماع زوم",
+      "bookingCancelled": "تم إلغاء الجلسة بنجاح",
+      "bookingFailed": "فشل في حجز الجلسة",
+      "sessionInfo": "معلومات الجلسة",
+      "clientInfo": "معلومات العميل",
+      "createZoomMeeting": "إنشاء اجتماع زوم",
+      "confirmCancelSession": "هل أنت متأكد من رغبتك في إلغاء هذه الجلسة؟",
+      "cancelSession": "إلغاء الجلسة",
+      "markAsCompleted": "تعيين كمكتملة",
+      "zoomMeetingMessage": "سيتم إنشاء اجتماع زوم لجلستك"
+    },
+    "appointmentScheduler": {
+      "title": "جدولة المواعيد",
+      "generateTimeSlots": "توليد المواعيد",
+      "validation": {
+        "invalidTimeRange": "نطاق الوقت غير صالح",
+        "invalidDateRange": "تاريخ الموعد غير صالح"
+      }
+    }
+  },
+  "navigation": {
+    "home": "الرئيسية",
+    "dashboard": "لوحة التحكم",
+    "users": "المستخدمين",
+    "products": "المنتجات",
+    "orders": "الطلبات",
+    "settings": "الإعدادات",
+    "logout": "تسجيل الخروج",
+    "profile": "الملف الشخصي",
+    "user-profile": "بيانات المستخدم",
+    "survey": "استبيان",
+    "children": "الأطفال",
+    "sessions": "الجلسات"
+  },
+  "dateTime": {
+    "formats": {
+      "shortDate": "dd-MM-yyyy"
+    }
+  },
+  "pcommon": {
+    "labels": {
+      "subscribed": "مشترك"
+    }
+  }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
@@ -27,6 +27,7 @@ import { TagModule } from 'primeng/tag';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ZoomService } from '../../../services/zoom.service';
 import { SweetalertService } from '../../../services/sweetalert.service';
+import { Logger } from '../../../services/logger.service';
 
 interface DateOption {
     date: Date;
@@ -71,9 +72,9 @@ interface DateOption {
 })
 export class SessionBookingComponent implements OnInit, OnDestroy {
     // Sessions data
-    upcomingSessions: Booking[] = [];
+    upcomingSessions: Booking[] | null = null;
+    currentSessions: Booking[] = [];
     completedSessions: Booking[] = [];
-    pastSessions: Booking[] = [];
 
     // Time slots data
     availableDates: DateOption[] = [];
@@ -84,6 +85,7 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
 
     // UI state
     loading: boolean = true;
+    bookingLoaded: boolean = false;
     loadingTimeSlots: boolean = false;
     showBookingDialog: boolean = false;
     showZoomMeetingDialog: boolean = false;
@@ -96,6 +98,7 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
     sessionToCancel: Booking | null = null;
     activeSessionTab: number = 0;
 
+    currentDateTime: Date = new Date();
     private destroy$ = new Subject<void>();
 
     constructor(
@@ -105,7 +108,8 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
         private envService: EnvironmentService,
         private zoomService: ZoomService,
         private router: Router,
-        private sweetalertService: SweetalertService
+        private sweetalertService: SweetalertService,
+        private cdr: ChangeDetectorRef
     ) {}
 
     ngOnInit(): void {
@@ -118,10 +122,12 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
         this.destroy$.complete();
     }
 
-    // Load all bookings and split into upcoming, completed, and past
+    // Load all bookings and split into upcoming, current, and completed
     loadBookings(): void {
         this.loading = true;
+        this.cdr.detectChanges();
 
+        Logger.log('Loading bookings...');
         this.bookingService
             .getUserBookings()
             .pipe(takeUntil(this.destroy$))
@@ -132,20 +138,37 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
                     // Split bookings into categories
                     this.upcomingSessions = bookings.filter((booking) => booking.timeSlot && booking.timeSlot.startTime > now && booking.status !== 'cancelled').sort((a, b) => a.timeSlot!.startTime.getTime() - b.timeSlot!.startTime.getTime());
 
-                    this.completedSessions = bookings.filter((booking) => booking.status === 'completed').sort((a, b) => b.timeSlot!.startTime.getTime() - a.timeSlot!.startTime.getTime());
+                    // Current sessions are those happening right now
+                    this.currentSessions = bookings.filter((booking) => booking.timeSlot && this.isSessionTimeNow(booking));
 
-                    this.pastSessions = bookings
-                        .filter((booking) => (booking.timeSlot && booking.timeSlot.startTime <= now && booking.status !== 'completed') || booking.status === 'cancelled')
-                        .sort((a, b) => b.timeSlot!.startTime.getTime() - a.timeSlot!.startTime.getTime());
+                    this.completedSessions = bookings.filter((booking) => booking.status === 'completed').sort((a, b) => b.timeSlot!.startTime.getTime() - a.timeSlot!.startTime.getTime());
+                    Logger.log('upcomingSessions loaded:', this.upcomingSessions);
+                    Logger.log('currentSessions loaded:', this.currentSessions);
+                    Logger.log('completedSessions loaded:', this.completedSessions);
 
                     this.loading = false;
+                    this.bookingLoaded = true;
+                    this.cdr.detectChanges();
                 },
                 error: (error) => {
                     console.error('Error loading bookings:', error);
-                    this.sweetalertService.showToast(this.translateService.instant('Failed to load bookings'), 'error');
+                    this.sweetalertService.showToast(this.translateService.instant('common.messages.failedToLoadBookings'), 'error');
                     this.loading = false;
+                    this.bookingLoaded = false;
                 }
             });
+    }
+
+    // Check if session time equals current time
+    isSessionTimeNow(session: Booking): boolean {
+        if (!session.timeSlot) return false;
+
+        const now = new Date();
+        const sessionStart = session.timeSlot.startTime;
+        const sessionEnd = session.timeSlot.endTime;
+
+        // Check if current time is between start and end time of the session
+        return now >= sessionStart && now <= sessionEnd;
     }
 
     // Load available dates for dropdown
@@ -165,7 +188,7 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
                 },
                 error: (error) => {
                     console.error('Error loading available dates:', error);
-                    this.sweetalertService.showToast(this.translateService.instant('Failed to load available dates'), 'error');
+                    this.sweetalertService.showToast(this.translateService.instant('common.messages.failedToLoadAvailableDates'), 'error');
                 }
             });
     }
@@ -211,7 +234,7 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
                 error: (error) => {
                     this.loadingTimeSlots = false;
                     console.error('Error loading time slots:', error);
-                    this.sweetalertService.showToast(this.translateService.instant('Failed to load time slots'), 'error');
+                    this.sweetalertService.showToast(this.translateService.instant('common.messages.failedToLoadTimeSlots'), 'error');
                 }
             });
     }
@@ -219,7 +242,7 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
     // Submit booking with Zoom meeting
     async submitBookingWithZoom(): Promise<void> {
         if (!this.selectedTimeSlot) {
-            this.sweetalertService.showToast(this.translateService.instant('Please select a time slot'), 'warning');
+            this.sweetalertService.showToast(this.translateService.instant('common.messages.pleaseSelectTimeSlot'), 'warning');
             return;
         }
 
@@ -229,14 +252,14 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
             // Book the time slot with Zoom meeting
             await this.bookingService.bookTimeSlotWithAutoAssignAndZoom(this.selectedTimeSlot.id!, this.bookingNotes);
 
-            this.sweetalertService.showToast(this.translateService.instant('Session booked successfully with Zoom meeting'), 'success');
+            this.sweetalertService.showToast(this.translateService.instant('common.messages.sessionBookedSuccessfully'), 'success');
 
             this.showBookingDialog = false;
             this.loadBookings();
             this.resetForm();
         } catch (error) {
             console.error('Error submitting booking:', error);
-            this.sweetalertService.showToast(this.translateService.instant('Failed to book session'), 'error');
+            this.sweetalertService.showToast(this.translateService.instant('common.messages.failedToBookSession'), 'error');
         } finally {
             this.isSubmitting = false;
         }
@@ -252,23 +275,10 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
     // Join Zoom meeting
     joinZoomMeeting(session: Booking): void {
         if (!session.zoomMeeting) {
-            this.sweetalertService.showToast(this.translateService.instant('No Zoom meeting available for this session'), 'error');
+            this.sweetalertService.showToast(this.translateService.instant('pages.session.noMeetingAvailable'), 'error');
             return;
         }
-
-        this.zoomService
-            .joinMeeting(session.zoomMeeting.meetingNumber, session.zoomMeeting.password, session.userName || 'User')
-            .then(() => {
-                this.sweetalertService.showToast(this.translateService.instant('Joined Zoom meeting successfully'), 'success');
-            })
-            .catch((error) => {
-                console.error('Error joining Zoom meeting:', error);
-                this.sweetalertService.showToast(this.translateService.instant('Failed to join Zoom meeting'), 'error');
-            });
-
-        this.selectedSession = session;
-        this.activeSessionTab = 1; // Set to Zoom tab
-        this.showZoomMeetingDialog = true;
+        this.zoomService.openZoomMeetingInNewTab(session.zoomMeeting.meetingNumber, session.zoomMeeting.password, session.userName || 'User', this.zoomService.isCurrentUserHost(session));
     }
 
     // Confirm session cancellation
@@ -286,12 +296,12 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
         try {
             await this.bookingService.cancelBookingWithZoom(this.sessionToCancel.id!, this.sessionToCancel.timeSlotId);
 
-            this.sweetalertService.showToast(this.translateService.instant('Session cancelled successfully'), 'success');
+            this.sweetalertService.showToast(this.translateService.instant('pages.session.bookingCancelled'), 'success');
 
             this.loadBookings();
         } catch (error) {
             console.error('Error cancelling session:', error);
-            this.sweetalertService.showToast(this.translateService.instant('Failed to cancel session'), 'error');
+            this.sweetalertService.showToast(this.translateService.instant('pages.session.bookingFailed'), 'error');
         } finally {
             this.showCancelDialog = false;
             this.sessionToCancel = null;
