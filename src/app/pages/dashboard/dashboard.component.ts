@@ -1,27 +1,30 @@
-// src/app/dashboard/components/dashboard/dashboard.component.ts
+// src/app/pages/dashboard/dashboard.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { ChartModule } from 'primeng/chart';
-
-import { Observable, map } from 'rxjs';
+import { TagModule } from 'primeng/tag';
+import { Observable, map, of, switchMap } from 'rxjs';
 import { Booking } from '../../models/booking.model';
 import { AuthService } from '../../services/auth.service';
 import { BookingService } from '../../services/booking.service';
 import { UserProfile } from '../../models/user.model';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-dashboard',
     standalone: true,
-    imports: [CommonModule, RouterModule, CardModule, ButtonModule, ChartModule],
+    imports: [CommonModule, RouterModule, CardModule, ButtonModule, ChartModule, TagModule, TranslateModule],
     templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit {
     user$: Observable<UserProfile | null>;
     upcomingBookings$: Observable<Booking[]>;
     isAdmin$: Observable<boolean>;
+    isSpecialist$: Observable<boolean>;
+    isUser$: Observable<boolean>;
 
     bookingChartData: any;
     bookingChartOptions: any;
@@ -32,13 +35,40 @@ export class DashboardComponent implements OnInit {
     ) {
         this.user$ = this.authService.currentUser$;
         this.isAdmin$ = this.authService.isAdmin();
-        this.upcomingBookings$ = this.bookingService.getUserBookings().pipe(
-            map((bookings) =>
-                bookings
-                    .filter((booking) => booking.status === 'confirmed' && booking.timeSlot && booking.timeSlot.startTime > new Date())
-                    .sort((a, b) => a.timeSlot!.startTime.getTime() - b.timeSlot!.startTime.getTime())
-                    .slice(0, 3)
-            )
+        this.isSpecialist$ = this.user$.pipe(map((user) => user?.role === 'specialist'));
+        this.isUser$ = this.user$.pipe(map((user) => user?.role === 'user'));
+
+        // Load upcoming bookings based on user role
+        this.upcomingBookings$ = this.user$.pipe(
+            map((user) => {
+                if (!user) return of([]);
+
+                if (user.role === 'specialist') {
+                    // For specialists, show their assigned bookings
+                    return this.bookingService.getSpecialistBookings().pipe(
+                        map(
+                            (bookings) =>
+                                bookings
+                                    .filter((booking) => booking.status === 'confirmed' && booking.timeSlot && booking.timeSlot.startTime > new Date())
+                                    .sort((a, b) => a.timeSlot!.startTime.getTime() - b.timeSlot!.startTime.getTime())
+                                    .slice(0, 5) // Show first 5 upcoming bookings
+                        )
+                    );
+                } else if (user.role === 'user') {
+                    // For regular users, show their bookings
+                    return this.bookingService.getUserBookings().pipe(
+                        map((bookings) =>
+                            bookings
+                                .filter((booking) => booking.status === 'confirmed' && booking.timeSlot && booking.timeSlot.startTime > new Date())
+                                .sort((a, b) => a.timeSlot!.startTime.getTime() - b.timeSlot!.startTime.getTime())
+                                .slice(0, 5)
+                        )
+                    );
+                }
+
+                return of([]);
+            }),
+            switchMap((obs) => obs)
         );
     }
 
@@ -102,16 +132,29 @@ export class DashboardComponent implements OnInit {
     }
 
     cancelBooking(booking: Booking): void {
-        // if (confirm('Are you sure you want to cancel this booking?')) {
-        //     this.bookingService
-        //         .cancelBooking(booking.id)
-        //         .then(() => {
-        //             // The subscription will automatically update the view
-        //             Logger.log('Booking cancelled successfully');
-        //         })
-        //         .catch((error) => {
-        //             console.error('Error cancelling booking:', error);
-        //         });
-        // }
+        if (confirm('Are you sure you want to cancel this booking?')) {
+            this.bookingService
+                .cancelBookingWithZoom(booking.id!, booking.timeSlotId)
+                .then(() => {
+                    // The subscription will automatically update the view
+                    console.log('Booking cancelled successfully');
+                })
+                .catch((error) => {
+                    console.error('Error cancelling booking:', error);
+                });
+        }
+    }
+
+    getStatusSeverity(status: string): string {
+        switch (status) {
+            case 'confirmed':
+                return 'success';
+            case 'pending':
+                return 'warning';
+            case 'cancelled':
+                return 'danger';
+            default:
+                return 'info';
+        }
     }
 }

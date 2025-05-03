@@ -3,26 +3,30 @@
     <div *ngIf="user$ | async as user" class="mb-6">
         <div class="flex flex-col md:flex-row justify-between gap-4 mb-4">
             <div>
-                <h1 class="text-2xl font-semibold text-gray-800 dark:text-white">Welcome, {{ user.displayName || 'User' }}!</h1>
-                <p class="text-gray-600 dark:text-gray-300">Manage your bookings and view your schedule.</p>
+                <h1 class="text-2xl font-semibold text-gray-800 dark:text-white">{{ 'pages.dashboard.welcome' | translate }} {{ user.firstName }} {{ user.lastName }}!</h1>
+                <p class="text-gray-600 dark:text-gray-300">
+                    <ng-container *ngIf="isSpecialist$ | async">{{ 'pages.dashboard.manageAppointments' | translate }}</ng-container>
+                    <ng-container *ngIf="isUser$ | async">{{ 'pages.dashboard.bookSessions' | translate }}</ng-container>
+                    <ng-container *ngIf="isAdmin$ | async">{{ 'pages.dashboard.managePlatform' | translate }}</ng-container>
+                </p>
             </div>
 
             <div class="flex items-center gap-2">
-                <button pButton pRipple label="Book Appointment" icon="pi pi-calendar-plus" class="p-button-primary" routerLink="/booking"></button>
-
-                <button *ngIf="isAdmin$ | async" pButton pRipple label="Manage Time Slots" icon="pi pi-cog" class="p-button-secondary" routerLink="/admin/time-slots"></button>
+                <button *ngIf="isUser$ | async" pButton pRipple label="{{ 'pages.dashboard.bookAppointment' | translate }}" icon="pi pi-calendar-plus" class="p-button-primary" routerLink="/app/booking"></button>
+                <button *ngIf="isSpecialist$ | async" pButton pRipple label="{{ 'pages.dashboard.manageAppointmentsButton' | translate }}" icon="pi pi-calendar" class="p-button-primary" routerLink="/app/specialist-bookings"></button>
+                <button *ngIf="isAdmin$ | async" pButton pRipple label="{{ 'pages.dashboard.manageTimeslots' | translate }}" icon="pi pi-cog" class="p-button-secondary" routerLink="/app/admin/time-slots"></button>
             </div>
         </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Upcoming Bookings Card -->
+        <!-- Upcoming Appointments Card -->
         <div class="md:col-span-2">
-            <p-card [header]="'Upcoming Appointments'" [styleClass]="'h-full'">
+            <p-card [header]="'pages.dashboard.upcomingAppointments' | translate" [styleClass]="'h-full'">
                 <ng-template pTemplate="content">
                     <div *ngIf="(upcomingBookings$ | async)?.length === 0" class="py-4 text-center">
-                        <p class="text-gray-500 dark:text-gray-400">You don't have any upcoming appointments.</p>
-                        <button pButton pRipple label="Book Now" icon="pi pi-calendar-plus" class="p-button-primary mt-4" routerLink="/booking"></button>
+                        <p class="text-gray-500 dark:text-gray-400">{{ 'pages.dashboard.noUpcomingAppointments' | translate }}</p>
+                        <button *ngIf="isUser$ | async" pButton pRipple label="{{ 'pages.dashboard.bookNow' | translate }}" icon="pi pi-calendar-plus" class="p-button-primary mt-4" routerLink="/app/booking"></button>
                     </div>
 
                     <div *ngIf="(upcomingBookings$ | async)!.length > 0">
@@ -32,18 +36,32 @@
                                     <h5 class="text-lg font-medium text-gray-800 dark:text-white">
                                         {{ formatDateTime(booking.timeSlot!.startTime) }}
                                     </h5>
-                                    <p class="text-gray-600 dark:text-gray-300">Duration: {{ booking.timeSlot!.startTime | date: 'shortTime' }} - {{ booking.timeSlot!.endTime | date: 'shortTime' }}</p>
-                                    <p *ngIf="booking.notes" class="text-gray-500 dark:text-gray-400 mt-2"><span class="font-medium">Notes:</span> {{ booking.notes }}</p>
+                                    <p class="text-gray-600 dark:text-gray-300">{{ 'pages.dashboard.duration' | translate }} {{ booking.timeSlot!.startTime | date: 'shortTime' }} - {{ booking.timeSlot!.endTime | date: 'shortTime' }}</p>
+
+                                    <!-- Show client name for specialists -->
+                                    <p *ngIf="isSpecialist$ | async" class="text-gray-600 dark:text-gray-300 mt-1">
+                                        <span class="font-medium">{{ 'pages.dashboard.client' | translate }}</span> {{ booking.userName }}
+                                    </p>
+
+                                    <!-- Show specialist name for users -->
+                                    <p *ngIf="isUser$ | async" class="text-gray-600 dark:text-gray-300 mt-1">
+                                        <span class="font-medium">{{ 'pages.dashboard.specialist' | translate }}</span> {{ booking.assignedSpecialistName }}
+                                    </p>
+
+                                    <p *ngIf="booking.notes" class="text-gray-500 dark:text-gray-400 mt-2">
+                                        <span class="font-medium">{{ 'pages.dashboard.notes' | translate }}</span> {{ booking.notes }}
+                                    </p>
                                 </div>
 
-                                <div class="flex items-start">
-                                    <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-danger p-button-outlined" (click)="cancelBooking(booking)"></button>
+                                <div class="flex items-start gap-2">
+                                    <p-tag [value]="booking.status | translate" [severity]="getStatusSeverity(booking.status)"></p-tag>
+                                    <button pButton pRipple label="{{ 'common.buttons.cancel' | translate }}" icon="pi pi-times" class="p-button-danger p-button-outlined" (click)="cancelBooking(booking)"></button>
                                 </div>
                             </div>
                         </div>
 
                         <div class="mt-4 text-right">
-                            <a routerLink="/my-bookings" class="text-indigo-600 dark:text-indigo-400 hover:underline"> View all bookings </a>
+                            <a routerLink="/app/session" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ 'pages.dashboard.viewAllAppointments' | translate }}</a>
                         </div>
                     </div>
                 </ng-template>
@@ -52,16 +70,29 @@
 
         <!-- Quick Actions Card -->
         <div>
-            <p-card [header]="'Quick Actions'" [styleClass]="'h-full'">
+            <p-card [header]="'pages.dashboard.quickActions' | translate" [styleClass]="'h-full'">
                 <ng-template pTemplate="content">
                     <div class="flex flex-col gap-3">
-                        <button pButton pRipple label="Book New Appointment" icon="pi pi-calendar-plus" class="p-button-primary" routerLink="/booking"></button>
+                        <!-- User Quick Actions -->
+                        <ng-container *ngIf="isUser$ | async">
+                            <button pButton pRipple label="{{ 'pages.dashboard.bookNewAppointment' | translate }}" icon="pi pi-calendar-plus" class="p-button-primary" routerLink="/app/booking"></button>
+                            <button pButton pRipple label="{{ 'pages.dashboard.mySessions' | translate }}" icon="pi pi-calendar" class="p-button-secondary" routerLink="/app/session"></button>
+                            <button pButton pRipple label="{{ 'pages.dashboard.myChildren' | translate }}" icon="pi pi-users" class="p-button-secondary" routerLink="/app/children"></button>
+                            <button pButton pRipple label="{{ 'pages.dashboard.surveys' | translate }}" icon="pi pi-file" class="p-button-secondary" routerLink="/app/survey/list"></button>
+                        </ng-container>
 
-                        <button pButton pRipple label="My Bookings" icon="pi pi-calendar" class="p-button-secondary" routerLink="/my-bookings"></button>
+                        <!-- Specialist Quick Actions -->
+                        <ng-container *ngIf="isSpecialist$ | async">
+                            <button pButton pRipple label="{{ 'pages.dashboard.viewTodaySchedule' | translate }}" icon="pi pi-calendar" class="p-button-primary" routerLink="/app/specialist-bookings"></button>
+                            <button pButton pRipple label="{{ 'pages.dashboard.manageAppointmentsButton' | translate }}" icon="pi pi-calendar-times" class="p-button-secondary" routerLink="/app/specialist-bookings"></button>
+                            <button pButton pRipple label="{{ 'pages.dashboard.viewReports' | translate }}" icon="pi pi-chart-bar" class="p-button-secondary" routerLink="/app/reports"></button>
+                        </ng-container>
 
-                        <button pButton pRipple label="Profile Settings" icon="pi pi-user-edit" class="p-button-outlined" routerLink="/profile"></button>
+                        <!-- Common Actions -->
+                        <button pButton pRipple label="{{ 'pages.dashboard.profileSettings' | translate }}" icon="pi pi-user-edit" class="p-button-outlined" routerLink="/app/user-profile"></button>
 
-                        <button *ngIf="isAdmin$ | async" pButton pRipple label="Admin Dashboard" icon="pi pi-cog" class="p-button-help mt-2" routerLink="/admin"></button>
+                        <!-- Admin Actions -->
+                        <button *ngIf="isAdmin$ | async" pButton pRipple label="{{ 'pages.dashboard.adminDashboard' | translate }}" icon="pi pi-cog" class="p-button-help mt-2" routerLink="/app/admin"></button>
                     </div>
                 </ng-template>
             </p-card>
@@ -70,27 +101,27 @@
 
     <!-- Admin Stats/Charts -->
     <div *ngIf="isAdmin$ | async" class="mt-6">
-        <p-card [header]="'Booking Statistics'" styleClass="mb-4">
+        <p-card [header]="'pages.dashboard.bookingStatistics' | translate" styleClass="mb-4">
             <ng-template pTemplate="content">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div class="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
-                        <div class="text-blue-600 dark:text-blue-300 font-medium mb-1">Total Bookings</div>
+                        <div class="text-blue-600 dark:text-blue-300 font-medium mb-1">{{ 'pages.dashboard.totalBookings' | translate }}</div>
                         <div class="text-2xl font-bold text-gray-800 dark:text-white">156</div>
                     </div>
 
                     <div class="bg-green-50 dark:bg-green-900 p-4 rounded-lg">
-                        <div class="text-green-600 dark:text-green-300 font-medium mb-1">Completed</div>
+                        <div class="text-green-600 dark:text-green-300 font-medium mb-1">{{ 'pages.dashboard.completed' | translate }}</div>
                         <div class="text-2xl font-bold text-gray-800 dark:text-white">124</div>
                     </div>
 
                     <div class="bg-orange-50 dark:bg-orange-900 p-4 rounded-lg">
-                        <div class="text-orange-600 dark:text-orange-300 font-medium mb-1">Upcoming</div>
+                        <div class="text-orange-600 dark:text-orange-300 font-medium mb-1">{{ 'pages.dashboard.upcoming' | translate }}</div>
                         <div class="text-2xl font-bold text-gray-800 dark:text-white">32</div>
                     </div>
                 </div>
 
                 <div>
-                    <h3 class="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">Booking Trends</h3>
+                    <h3 class="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">{{ 'pages.dashboard.bookingTrends' | translate }}</h3>
                     <p-chart type="bar" [data]="bookingChartData" [options]="bookingChartOptions" height="300px"></p-chart>
                 </div>
             </ng-template>
