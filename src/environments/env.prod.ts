@@ -1,15 +1,16 @@
 import { Environment } from '../app/models/environment.model';
 
+// src/environments/environment.ts
 export const environment = {
     production: true,
-
     // Zoom Configuration
     zoom: {
         apiKey: 'YOUR_PROD_ZOOM_API_KEY',
-        clientId: 'YOUR_PROD_ZOOM_CLIENT_ID',
-        clientSecret: 'YOUR_PROD_ZOOM_CLIENT_SECRET',
-        authCode: 'YOUR_PROD_ZOOM_AUTH_CODE',
-        redirectUri: 'https://your-production-domain.com/oauth/zoom/callback'
+
+        sdkKey: 'A8LPvrl8RuiacV4ChXmaA',
+        sdkSecret: 'mG4vF2yeSkVg54dJv0DzO4Qbrv4zqL4D',
+        authCode: 'YOUR_DEV_ZOOM_AUTH_CODE',
+        redirectUri: 'http://localhost:4200/oauth/zoom/callback'
     },
     firebase: {
         apiKey: 'AIzaSyADNdy8cCZmAx3MkZNtFukpETTXXd18UU0',
@@ -21,17 +22,16 @@ export const environment = {
         measurementId: 'G-3LDCZF3LM7'
     },
     // Security Configuration
-    // In production, this should be set via environment variables
-    encryptionKey: '${ENCRYPTION_KEY}',
+    encryptionKey: 'dev_encryption_key_for_testing_only',
 
     // API URLs
-    apiUrl: 'https://api.your-production-domain.com',
-    zoomProxyUrl: 'https://api.your-production-domain.com/zoom',
+    apiUrl: 'http://localhost:3000/api',
+    zoomProxyUrl: 'https://petal-tidal-kicker.glitch.me/zoom',
 
     // Logging
-    enableDebugLogs: false,
+    enableDebugLogs: true,
 
     // Other application settings
-    appName: 'Your App Name',
+    appName: 'Your App Name - Dev',
     defaultLanguage: 'en'
 };
