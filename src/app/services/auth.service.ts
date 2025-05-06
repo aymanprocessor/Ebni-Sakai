@@ -131,7 +131,7 @@ export class AuthService implements OnDestroy {
                 // Store user profile with role in Firestore
                 await this.checkUserProfile(user);
                 // Ensure role is set correctly
-                await this.setUserRole(user.uid, role);
+                await this.setUserRole(user.uid, 'user');
                 await this.setUserData(user.uid, registerData);
             }
 

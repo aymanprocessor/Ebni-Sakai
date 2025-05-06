@@ -334,7 +334,7 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
         const timeDiff = sessionStart.getTime() - now.getTime();
         const hoursDiff = timeDiff / (1000 * 60 * 60);
 
-        return hoursDiff > 0 && hoursDiff <= 1;
+        return hoursDiff > 0 && hoursDiff <= 48;
     }
 
     // Format time for display
