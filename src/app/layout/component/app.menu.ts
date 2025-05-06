@@ -54,10 +54,10 @@ export class AppMenu implements OnInit {
                 label: '',
                 items: [
                     { label: 'navigation.dashboard', icon: 'pi pi-fw pi-home', routerLink: ['dashboard'] },
-                    { label: 'navigation.bookAppointment', icon: 'pi pi-fw pi-calendar-plus', routerLink: ['booking'] },
+                    // { label: 'navigation.bookAppointment', icon: 'pi pi-fw pi-calendar-plus', routerLink: ['booking'] },
                     { label: 'navigation.sessions', icon: 'pi pi-fw pi-calendar', routerLink: ['session'] },
-                    { label: 'navigation.children', icon: 'pi pi-fw pi-users', routerLink: ['children'] },
-                    { label: 'navigation.survey', icon: 'pi pi-fw pi-file', routerLink: ['survey'] },
+                    //  { label: 'navigation.children', icon: 'pi pi-fw pi-users', routerLink: ['children'] },
+                    //  { label: 'navigation.survey', icon: 'pi pi-fw pi-file', routerLink: ['survey'] },
                     { label: 'navigation.user-profile', icon: 'pi pi-fw pi-user', routerLink: ['user-profile'] }
                 ]
             }
@@ -88,8 +88,8 @@ export class AppMenu implements OnInit {
                 items: [
                     { label: 'navigation.dashboard', icon: 'pi pi-fw pi-home', routerLink: ['dashboard'] },
                     { label: 'navigation.myAppointments', icon: 'pi pi-fw pi-calendar', routerLink: ['specialist-bookings'] },
-                    { label: 'navigation.schedule', icon: 'pi pi-fw pi-calendar-plus', routerLink: ['booking/appointments'] },
-                    { label: 'navigation.reports', icon: 'pi pi-fw pi-chart-bar', routerLink: ['reports'] },
+                    //{ label: 'navigation.schedule', icon: 'pi pi-fw pi-calendar-plus', routerLink: ['booking/appointments'] },
+                    //{ label: 'navigation.reports', icon: 'pi pi-fw pi-chart-bar', routerLink: ['reports'] },
                     { label: 'navigation.user-profile', icon: 'pi pi-fw pi-user', routerLink: ['user-profile'] }
                 ]
             }

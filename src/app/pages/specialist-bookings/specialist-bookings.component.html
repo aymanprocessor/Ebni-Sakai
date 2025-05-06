@@ -1,243 +1,345 @@
 <div class="container mx-auto px-4 py-6">
-    <div class="mb-6">
-        <div class="flex flex-col sm:flex-row justify-between gap-4 mb-4">
-            <h1 class="text-2xl font-semibold text-gray-800 dark:text-white">{{ 'pages.specialist.myBookings' | translate }}</h1>
-        </div>
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">{{ 'pages.specialist.myBookings' | translate }}</h1>
+    </div>
 
-        <div class="bg-indigo-50 dark:bg-indigo-900 p-4 rounded-lg mb-4">
-            <div class="flex items-center text-indigo-800 dark:text-indigo-200">
-                <i class="pi pi-info-circle mr-2"></i>
-                <p>{{ 'pages.specialist.bookingsInfo' | translate }}</p>
+    <!-- Booking Tabs -->
+    <p-tabView>
+        <!-- Pending Bookings Tab -->
+        <p-tabPanel header="{{ 'pages.specialist.pendingBookings' | translate }}">
+            <!-- Loading Skeleton Cards -->
+            <div *ngIf="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div *ngFor="let i of [1, 2, 3]" class="border rounded-lg">
+                    <div class="bg-blue-50 dark:bg-blue-900 p-4">
+                        <p-skeleton width="200px" height="20px" styleClass="mb-2"></p-skeleton>
+                        <p-skeleton width="150px" height="16px"></p-skeleton>
+                    </div>
+                    <div class="p-4">
+                        <p-skeleton width="80px" height="16px" styleClass="mb-2"></p-skeleton>
+                        <p-skeleton width="100%" height="40px" styleClass="mb-4"></p-skeleton>
+                        <div class="flex justify-between items-center">
+                            <p-skeleton width="60px" height="24px"></p-skeleton>
+                            <p-skeleton width="80px" height="32px"></p-skeleton>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
 
-    <div *ngIf="loading" class="flex justify-center my-8">
-        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
-    </div>
-
-    <div *ngIf="!loading" class="card">
-        <p-table [value]="bookings" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} bookings" [rowHover]="true" styleClass="p-datatable-striped" [loading]="loading">
-            <ng-template pTemplate="header">
-                <tr>
-                    <th>{{ 'common.labels.date' | translate }}</th>
-                    <th>{{ 'common.labels.time' | translate }}</th>
-                    <th>{{ 'common.labels.client' | translate }}</th>
-                    <th>{{ 'common.labels.email' | translate }}</th>
-                    <th>{{ 'common.labels.status' | translate }}</th>
-                    <th>{{ 'common.labels.notes' | translate }}</th>
-                    <th>{{ 'common.labels.actions' | translate }}</th>
-                </tr>
-            </ng-template>
-
-            <ng-template pTemplate="loadingbody">
-                <tr *ngFor="let _ of [1, 2, 3]">
-                    <td><p-skeleton></p-skeleton></td>
-                    <td><p-skeleton></p-skeleton></td>
-                    <td><p-skeleton></p-skeleton></td>
-                    <td><p-skeleton></p-skeleton></td>
-                    <td><p-skeleton></p-skeleton></td>
-                    <td><p-skeleton></p-skeleton></td>
-                    <td class="text-center">
-                        <p-skeleton width="2rem" height="2rem" shape="circle" styleClass="mr-2"></p-skeleton>
-                        <p-skeleton width="2rem" height="2rem" shape="circle"></p-skeleton>
-                    </td>
-                </tr>
-            </ng-template>
-
-            <ng-template pTemplate="body" let-booking>
-                <tr>
-                    <td>
-                        <span *ngIf="booking.timeSlot">
-                            {{ booking.timeSlot.startTime }}
-                        </span>
-                    </td>
-                    <td>
-                        <span *ngIf="booking.timeSlot">
-                            {{ booking.timeSlot.startTime }} -
-                            {{ booking.timeSlot.endTime }}
-                        </span>
-                    </td>
-                    <td>{{ booking.userName }}</td>
-                    <td>{{ booking.userEmail }}</td>
-                    <td>
-                        <p-tag [value]="booking.status" [severity]="getStatusSeverity(booking.status)"></p-tag>
-                    </td>
-                    <td>{{ booking.notes || '-' }}</td>
-                    <td>
-                        <div class="flex gap-2">
-                            <!-- View Details Button -->
-                            <button pButton pRipple icon="pi pi-eye" class="p-button-rounded p-button-text p-button-info" (click)="viewBookingDetails(booking)" pTooltip="View Details" tooltipPosition="top"></button>
-
-                            <!-- Zoom Meeting Button - Only show for confirmed status -->
-                            <button
-                                *ngIf="booking.zoomMeeting && booking.status === 'confirmed'"
-                                pButton
-                                pRipple
-                                icon="pi pi-video"
-                                class="p-button-rounded p-button-text p-button-success"
-                                (click)="viewZoomMeeting(booking)"
-                                pTooltip="Join Zoom Meeting"
-                                tooltipPosition="top"
-                            ></button>
-
-                            <!-- Confirm Button (for pending bookings) -->
-                            <button
-                                *ngIf="booking.status === 'pending'"
-                                pButton
-                                pRipple
-                                icon="pi pi-check"
-                                class="p-button-rounded p-button-text p-button-success"
-                                (click)="confirmBooking(booking)"
-                                pTooltip="Confirm Booking"
-                                tooltipPosition="top"
-                            ></button>
-
-                            <!-- Complete Button (for confirmed bookings) -->
-                            <button
-                                *ngIf="booking.status === 'confirmed'"
-                                pButton
-                                pRipple
-                                icon="pi pi-check-circle"
-                                class="p-button-rounded p-button-text p-button-primary"
-                                (click)="completeBooking(booking)"
-                                pTooltip="Mark as Completed"
-                                tooltipPosition="top"
-                            ></button>
-
-                            <!-- Cancel Button (for pending or confirmed bookings) -->
-                            <button
-                                *ngIf="booking.status !== 'cancelled' && booking.status !== 'completed'"
-                                pButton
-                                pRipple
-                                icon="pi pi-times"
-                                class="p-button-rounded p-button-text p-button-danger"
-                                (click)="cancelBooking(booking)"
-                                pTooltip="Cancel Booking"
-                                tooltipPosition="top"
-                            ></button>
+            <!-- Pending Booking Cards -->
+            <div *ngIf="!loading && pendingBookings.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <p-card *ngFor="let booking of pendingBookings" styleClass="hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+                    <ng-template pTemplate="header">
+                        <div class="bg-blue-50 dark:bg-blue-900 p-4">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-lg font-medium text-blue-800 dark:text-blue-200">
+                                    {{ booking.timeSlot?.startTime | date: 'fullDate' }}
+                                </h3>
+                                <p-tag [value]="booking.status" [severity]="getStatusSeverity(booking.status)"></p-tag>
+                            </div>
+                            <p class="text-blue-600 dark:text-blue-300 mt-1">{{ booking.timeSlot?.startTime | date: 'shortTime' }} - {{ booking.timeSlot?.endTime | date: 'shortTime' }}</p>
                         </div>
-                    </td>
-                </tr>
-            </ng-template>
+                    </ng-template>
 
-            <ng-template pTemplate="emptymessage">
-                <tr>
-                    <td colspan="7" class="text-center py-4">
-                        <div class="flex flex-col items-center">
-                            <i class="pi pi-calendar-times text-4xl text-gray-400 mb-2"></i>
-                            <p class="text-gray-500">{{ 'pages.specialist.noBookings' | translate }}</p>
-                        </div>
-                    </td>
-                </tr>
-            </ng-template>
-        </p-table>
-    </div>
-
-    <!-- Booking Details + Zoom Meeting Dialog -->
-    <p-dialog [(visible)]="showDetailsDialog" [style]="{ width: '700px' }" [header]="'Booking Details' | translate" [modal]="true" styleClass="p-fluid" [draggable]="false" [resizable]="false">
-        <p-tabView [(activeIndex)]="activeBookingTab">
-            <p-tabPanel [header]="'Details' | translate">
-                <div *ngIf="selectedBooking" class="p-4">
-                    <div class="grid">
-                        <div class="col-12 md:col-6">
-                            <h3 class="text-xl font-semibold mb-4">{{ 'Client Information' | translate }}</h3>
-
-                            <div class="flex flex-col gap-3">
-                                <div>
-                                    <span class="font-semibold block">{{ 'Client Name' | translate }}:</span>
-                                    <span>{{ selectedBooking.userName }}</span>
-                                </div>
-
-                                <div>
-                                    <span class="font-semibold block">{{ 'Email' | translate }}:</span>
-                                    <span>{{ selectedBooking.userEmail }}</span>
-                                </div>
-
-                                <div>
-                                    <span class="font-semibold block">{{ 'Booking Date' | translate }}:</span>
-                                    <span>{{ selectedBooking.bookingDate }}</span>
-                                </div>
-
-                                <div>
-                                    <span class="font-semibold block">{{ 'Status' | translate }}:</span>
-                                    <p-tag [value]="selectedBooking.status" [severity]="getStatusSeverity(selectedBooking.status)"></p-tag>
-                                </div>
+                    <div class="p-4">
+                        <div class="mb-4">
+                            <div class="flex items-center mb-2">
+                                <i class="pi pi-user mr-2 text-gray-600"></i>
+                                <span class="font-semibold">{{ booking.userName }}</span>
+                            </div>
+                            <div class="flex items-center mb-2">
+                                <i class="pi pi-envelope mr-2 text-gray-600"></i>
+                                <span>{{ booking.userEmail }}</span>
+                            </div>
+                            <div *ngIf="booking.notes" class="flex items-start">
+                                <i class="pi pi-comment mr-2 text-gray-600 mt-1"></i>
+                                <span>{{ booking.notes }}</span>
                             </div>
                         </div>
 
-                        <div class="col-12 md:col-6">
-                            <h3 class="text-xl font-semibold mb-4">{{ 'Session Information' | translate }}</h3>
+                        <div class="flex justify-between items-center mt-4">
+                            <div class="flex gap-2">
+                                <!-- View Details Button -->
+                                <p-button icon="pi pi-eye" styleClass="p-button-outlined p-button-sm" pTooltip="View Details" tooltipPosition="top" (onClick)="viewBookingDetails(booking)"></p-button>
+                            </div>
 
-                            <div class="flex flex-col gap-3">
-                                <div>
-                                    <span class="font-semibold block">{{ 'Date' | translate }}:</span>
-                                    <span>{{ selectedBooking.timeSlot?.startTime }}</span>
-                                </div>
+                            <div class="flex gap-2">
+                                <!-- Confirm Button -->
+                                <p-button icon="pi pi-check" styleClass="p-button-success p-button-sm" pTooltip="Confirm Booking" tooltipPosition="top" (onClick)="confirmBooking(booking)"></p-button>
 
-                                <div>
-                                    <span class="font-semibold block">{{ 'Time' | translate }}:</span>
-                                    <span>{{ selectedBooking.timeSlot?.startTime }} - {{ selectedBooking.timeSlot?.endTime }}</span>
-                                </div>
+                                <!-- Cancel Button -->
+                                <p-button icon="pi pi-times" styleClass="p-button-danger p-button-sm" pTooltip="Cancel Booking" tooltipPosition="top" (onClick)="cancelBooking(booking)"></p-button>
+                            </div>
+                        </div>
+                    </div>
+                </p-card>
+            </div>
 
-                                <div *ngIf="selectedBooking.notes">
-                                    <span class="font-semibold block">{{ 'Notes' | translate }}:</span>
-                                    <p class="mt-1 text-gray-600">{{ selectedBooking.notes }}</p>
-                                </div>
+            <!-- Empty state for Pending Bookings -->
+            <div *ngIf="!loading && pendingBookings.length === 0" class="text-center py-8">
+                <i class="pi pi-calendar-times text-6xl text-gray-300 mb-4"></i>
+                <h3 class="text-xl font-medium text-gray-700 mb-2">{{ 'pages.specialist.noPendingBookings' | translate }}</h3>
+                <p class="text-gray-500 mb-4">{{ 'common.messages.noData' | translate }}</p>
+            </div>
+        </p-tabPanel>
 
-                                <div class="mt-3 flex gap-2">
-                                    <p-button *ngIf="selectedBooking.status === 'pending'" icon="pi pi-check" label="Confirm Booking" styleClass="p-button-success" (onClick)="confirmBooking(selectedBooking); showDetailsDialog = false"> </p-button>
+        <!-- Confirmed Bookings Tab -->
+        <p-tabPanel header="{{ 'pages.specialist.confirmedBookings' | translate }}">
+            <!-- Loading Skeleton Cards -->
+            <div *ngIf="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div *ngFor="let i of [1, 2, 3]" class="border rounded-lg">
+                    <div class="bg-green-50 dark:bg-green-900 p-4">
+                        <p-skeleton width="200px" height="20px" styleClass="mb-2"></p-skeleton>
+                        <p-skeleton width="150px" height="16px"></p-skeleton>
+                    </div>
+                    <div class="p-4">
+                        <p-skeleton width="80px" height="16px" styleClass="mb-2"></p-skeleton>
+                        <p-skeleton width="100%" height="40px" styleClass="mb-4"></p-skeleton>
+                        <div class="flex justify-between items-center">
+                            <p-skeleton width="60px" height="24px"></p-skeleton>
+                            <p-skeleton width="80px" height="32px"></p-skeleton>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                                    <p-button *ngIf="selectedBooking.status === 'confirmed'" icon="pi pi-check-circle" label="Mark as Completed" styleClass="p-button-primary" (onClick)="completeBooking(selectedBooking); showDetailsDialog = false">
-                                    </p-button>
-                                </div>
+            <!-- Confirmed Booking Cards -->
+            <div *ngIf="!loading && confirmedBookings.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <p-card *ngFor="let booking of confirmedBookings" styleClass="hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+                    <ng-template pTemplate="header">
+                        <div class="bg-green-50 dark:bg-green-900 p-4">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-lg font-medium text-green-800 dark:text-green-200">
+                                    {{ booking.timeSlot?.startTime | date: 'fullDate' }}
+                                </h3>
+                                <p-tag [value]="booking.status" [severity]="getStatusSeverity(booking.status)"></p-tag>
+                            </div>
+                            <p class="text-green-600 dark:text-green-300 mt-1">{{ booking.timeSlot?.startTime | date: 'shortTime' }} - {{ booking.timeSlot?.endTime | date: 'shortTime' }}</p>
+                        </div>
+                    </ng-template>
+
+                    <div class="p-4">
+                        <div class="mb-4">
+                            <div class="flex items-center mb-2">
+                                <i class="pi pi-user mr-2 text-gray-600"></i>
+                                <span class="font-semibold">{{ booking.userName }}</span>
+                            </div>
+                            <div class="flex items-center mb-2">
+                                <i class="pi pi-envelope mr-2 text-gray-600"></i>
+                                <span>{{ booking.userEmail }}</span>
+                            </div>
+                            <div *ngIf="booking.notes" class="flex items-start">
+                                <i class="pi pi-comment mr-2 text-gray-600 mt-1"></i>
+                                <span>{{ booking.notes }}</span>
                             </div>
                         </div>
 
-                        <div class="col-12 mt-4" *ngIf="selectedBooking.zoomMeeting && selectedBooking.status === 'confirmed'">
-                            <h3 class="text-xl font-semibold mb-3">{{ 'Zoom Meeting' | translate }}</h3>
+                        <div class="flex justify-between items-center mt-4">
+                            <div class="flex gap-2">
+                                <!-- View Details Button -->
+                                <p-button icon="pi pi-eye" styleClass="p-button-outlined p-button-sm" pTooltip="{{ 'pages.buttons.viewDetails' | translate }}" tooltipPosition="top" (onClick)="viewBookingDetails(booking)"></p-button>
 
-                            <div class="grid">
-                                <div class="col-12 md:col-6">
-                                    <div>
-                                        <span class="font-semibold block">{{ 'Meeting ID' | translate }}:</span>
-                                        <span>{{ selectedBooking.zoomMeeting.meetingNumber }}</span>
-                                    </div>
+                                <!-- Zoom Meeting Button -->
+                                <p-button
+                                    *ngIf="booking.zoomMeeting"
+                                    icon="pi pi-video"
+                                    styleClass="p-button-success p-button-sm"
+                                    pTooltip="{{ 'pages.buttons.joinMeeting' | translate }}"
+                                    tooltipPosition="top"
+                                    (onClick)="viewZoomMeeting(booking)"
+                                ></p-button>
+                            </div>
 
-                                    <div class="mt-2">
-                                        <span class="font-semibold block">{{ 'Password' | translate }}:</span>
-                                        <span>{{ selectedBooking.zoomMeeting.password }}</span>
-                                    </div>
+                            <div class="flex gap-2">
+                                <!-- Complete Button -->
+                                <p-button icon="pi pi-check-circle" styleClass="p-button-primary p-button-sm" pTooltip="{{ 'pages.buttons.markAsCompleted' | translate }}" tooltipPosition="top" (onClick)="completeBooking(booking)"></p-button>
+
+                                <!-- Cancel Button -->
+                                <p-button icon="pi pi-times" styleClass="p-button-danger p-button-sm" pTooltip="{{ 'pages.buttons.cancelBooking' | translate }}" tooltipPosition="top" (onClick)="cancelBooking(booking)"></p-button>
+                            </div>
+                        </div>
+                    </div>
+                </p-card>
+            </div>
+
+            <!-- Empty state for Confirmed Bookings -->
+            <div *ngIf="!loading && confirmedBookings.length === 0" class="text-center py-8">
+                <i class="pi pi-calendar-times text-6xl text-gray-300 mb-4"></i>
+                <h3 class="text-xl font-medium text-gray-700 mb-2">{{ 'pages.specialist.noConfirmedBookings' | translate }}</h3>
+                <p class="text-gray-500 mb-4">{{ 'common.messages.noData' | translate }}</p>
+            </div>
+        </p-tabPanel>
+
+        <!-- Completed Bookings Tab -->
+        <p-tabPanel header="{{ 'pages.specialist.completedBookings' | translate }}">
+            <!-- Loading Skeleton Cards -->
+            <div *ngIf="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div *ngFor="let i of [1, 2, 3]" class="border rounded-lg">
+                    <div class="bg-green-50 dark:bg-green-900 p-4">
+                        <p-skeleton width="200px" height="20px" styleClass="mb-2"></p-skeleton>
+                        <p-skeleton width="150px" height="16px"></p-skeleton>
+                    </div>
+                    <div class="p-4">
+                        <p-skeleton width="80px" height="16px" styleClass="mb-2"></p-skeleton>
+                        <p-skeleton width="100%" height="40px" styleClass="mb-4"></p-skeleton>
+                        <div class="flex justify-end">
+                            <p-skeleton width="80px" height="32px"></p-skeleton>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Completed Booking Cards -->
+            <div *ngIf="!loading && completedBookings.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <p-card *ngFor="let booking of completedBookings" styleClass="hover:shadow-lg transition-shadow duration-300 card-no-round-top">
+                    <ng-template pTemplate="header">
+                        <div class="bg-green-50 dark:bg-green-900 p-4">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-lg font-medium text-green-800 dark:text-green-200">
+                                    {{ booking.timeSlot?.startTime | date: 'fullDate' }}
+                                </h3>
+                                <p-tag [value]="booking.status" [severity]="getStatusSeverity(booking.status)"></p-tag>
+                            </div>
+                            <p class="text-green-600 dark:text-green-300 mt-1">{{ booking.timeSlot?.startTime | date: 'shortTime' }} - {{ booking.timeSlot?.endTime | date: 'shortTime' }}</p>
+                        </div>
+                    </ng-template>
+
+                    <div class="p-4">
+                        <div class="mb-4">
+                            <div class="flex items-center mb-2">
+                                <i class="pi pi-user mr-2 text-gray-600"></i>
+                                <span class="font-semibold">{{ booking.userName }}</span>
+                            </div>
+                            <div class="flex items-center mb-2">
+                                <i class="pi pi-envelope mr-2 text-gray-600"></i>
+                                <span>{{ booking.userEmail }}</span>
+                            </div>
+                            <div *ngIf="booking.notes" class="flex items-start">
+                                <i class="pi pi-comment mr-2 text-gray-600 mt-1"></i>
+                                <span>{{ booking.notes }}</span>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end mt-4">
+                            <p-button icon="pi pi-eye" styleClass="p-button-outlined p-button-sm" pTooltip="{{ 'pages.buttons.viewDetails' | translate }}" tooltipPosition="top" (onClick)="viewBookingDetails(booking)"></p-button>
+                        </div>
+                    </div>
+                </p-card>
+            </div>
+
+            <!-- Empty state for Completed Bookings -->
+            <div *ngIf="!loading && completedBookings.length === 0" class="text-center py-8">
+                <i class="pi pi-check-circle text-6xl text-gray-300 mb-4"></i>
+                <h3 class="text-xl font-medium text-gray-700 mb-2">{{ 'pages.specialist.noCompletedBookings' | translate }}</h3>
+                <p class="text-gray-500 mb-4">{{ 'common.messages.noData' | translate }}</p>
+            </div>
+        </p-tabPanel>
+    </p-tabView>
+</div>
+
+<!-- Booking Details + Zoom Meeting Dialog (same as before) -->
+<p-dialog [(visible)]="showDetailsDialog" [style]="{ width: '700px' }" [header]="'Booking Details' | translate" [modal]="true" styleClass="p-fluid" [draggable]="false" [resizable]="false">
+    <p-tabView [(activeIndex)]="activeBookingTab">
+        <p-tabPanel [header]="'Details' | translate">
+            <div *ngIf="selectedBooking" class="p-4">
+                <div class="grid">
+                    <div class="col-12 md:col-6">
+                        <h3 class="text-xl font-semibold mb-4">{{ 'Client Information' | translate }}</h3>
+
+                        <div class="flex flex-col gap-3">
+                            <div>
+                                <span class="font-semibold block">{{ 'Client Name' | translate }}:</span>
+                                <span>{{ selectedBooking.userName }}</span>
+                            </div>
+
+                            <div>
+                                <span class="font-semibold block">{{ 'Email' | translate }}:</span>
+                                <span>{{ selectedBooking.userEmail }}</span>
+                            </div>
+
+                            <div>
+                                <span class="font-semibold block">{{ 'Booking Date' | translate }}:</span>
+                                <span>{{ selectedBooking.bookingDate | date: 'fullDate' }}</span>
+                            </div>
+
+                            <div>
+                                <span class="font-semibold block">{{ 'Status' | translate }}:</span>
+                                <p-tag [value]="selectedBooking.status" [severity]="getStatusSeverity(selectedBooking.status)"></p-tag>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 md:col-6">
+                        <h3 class="text-xl font-semibold mb-4">{{ 'Session Information' | translate }}</h3>
+
+                        <div class="flex flex-col gap-3">
+                            <div>
+                                <span class="font-semibold block">{{ 'Date' | translate }}:</span>
+                                <span>{{ selectedBooking.timeSlot?.startTime | date: 'fullDate' }}</span>
+                            </div>
+
+                            <div>
+                                <span class="font-semibold block">{{ 'Time' | translate }}:</span>
+                                <span>{{ selectedBooking.timeSlot?.startTime | date: 'shortTime' }} - {{ selectedBooking.timeSlot?.endTime | date: 'shortTime' }}</span>
+                            </div>
+
+                            <div *ngIf="selectedBooking.notes">
+                                <span class="font-semibold block">{{ 'Notes' | translate }}:</span>
+                                <p class="mt-1 text-gray-600">{{ selectedBooking.notes }}</p>
+                            </div>
+
+                            <div class="mt-3 flex gap-2">
+                                <p-button *ngIf="selectedBooking.status === 'pending'" icon="pi pi-check" label="Confirm Booking" styleClass="p-button-success" (onClick)="confirmBooking(selectedBooking); showDetailsDialog = false"> </p-button>
+
+                                <p-button *ngIf="selectedBooking.status === 'confirmed'" icon="pi pi-check-circle" label="Mark as Completed" styleClass="p-button-primary" (onClick)="completeBooking(selectedBooking); showDetailsDialog = false">
+                                </p-button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-4" *ngIf="selectedBooking.zoomMeeting && selectedBooking.status === 'confirmed'">
+                        <h3 class="text-xl font-semibold mb-3">{{ 'Zoom Meeting' | translate }}</h3>
+
+                        <div class="grid">
+                            <div class="col-12 md:col-6">
+                                <div>
+                                    <span class="font-semibold block">{{ 'Meeting ID' | translate }}:</span>
+                                    <span>{{ selectedBooking.zoomMeeting.meetingNumber }}</span>
                                 </div>
 
-                                <div class="col-12 md:col-6">
-                                    <div>
-                                        <span class="font-semibold block">{{ 'Start Time' | translate }}:</span>
-                                        <span>{{ selectedBooking.zoomMeeting.startTime }}</span>
-                                    </div>
+                                <div class="mt-2">
+                                    <span class="font-semibold block">{{ 'Password' | translate }}:</span>
+                                    <span>{{ selectedBooking.zoomMeeting.password }}</span>
+                                </div>
+                            </div>
 
-                                    <div class="mt-2">
-                                        <span class="font-semibold block">{{ 'Duration' | translate }}:</span>
-                                        <span>{{ selectedBooking.zoomMeeting.duration }} minutes</span>
-                                    </div>
+                            <div class="col-12 md:col-6">
+                                <div>
+                                    <span class="font-semibold block">{{ 'Start Time' | translate }}:</span>
+                                    <span>{{ selectedBooking.zoomMeeting.startTime | date: 'full' }}</span>
                                 </div>
 
-                                <div class="col-12 mt-3">
-                                    <p-button icon="pi pi-video" label="Join Meeting" styleClass="p-button-success" (onClick)="activeBookingTab = 1"> </p-button>
+                                <div class="mt-2">
+                                    <span class="font-semibold block">{{ 'Duration' | translate }}:</span>
+                                    <span>{{ selectedBooking.zoomMeeting.duration }} minutes</span>
                                 </div>
+                            </div>
+
+                            <div class="col-12 mt-3">
+                                <p-button icon="pi pi-video" label="Join Meeting" styleClass="p-button-success" (onClick)="activeBookingTab = 1"> </p-button>
                             </div>
                         </div>
                     </div>
                 </div>
-            </p-tabPanel>
+            </div>
+        </p-tabPanel>
 
-            <p-tabPanel [header]="'Zoom Meeting' | translate" *ngIf="selectedBooking?.zoomMeeting && selectedBooking?.status === 'confirmed'">
-                <app-zoom-meeting [meeting]="selectedBooking?.zoomMeeting" [isHost]="true" (meetingJoined)="onZoomMeetingJoined()" (meetingEnded)="onZoomMeetingEnded()"> </app-zoom-meeting>
-            </p-tabPanel>
-        </p-tabView>
+        <p-tabPanel [header]="'Zoom Meeting' | translate" *ngIf="selectedBooking?.zoomMeeting && selectedBooking?.status === 'confirmed'">
+            <app-zoom-meeting [meeting]="selectedBooking?.zoomMeeting" [isHost]="true" (meetingJoined)="onZoomMeetingJoined()" (meetingEnded)="onZoomMeetingEnded()"> </app-zoom-meeting>
+        </p-tabPanel>
+    </p-tabView>
 
-        <ng-template pTemplate="footer">
-            <p-button label="{{ 'Close' | translate }}" icon="pi pi-times" (click)="showDetailsDialog = false" styleClass="p-button-secondary"></p-button>
-        </ng-template>
-    </p-dialog>
-</div>
+    <ng-template pTemplate="footer">
+        <p-button label="{{ 'Close' | translate }}" icon="pi pi-times" (click)="showDetailsDialog = false" styleClass="p-button-secondary"></p-button>
+    </ng-template>
+</p-dialog>

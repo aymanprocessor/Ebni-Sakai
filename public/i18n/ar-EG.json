@@ -131,6 +131,22 @@
         }
     },
     "pages": {
+        "specialist": {
+            "myBookings": "حجوزاتي",
+            "pendingBookings": "الحجوزات المعلقة",
+            "noPendingBookings": "لا توجد حجوزات معلقة",
+            "confirmedBookings": "الحجوزات المؤكدة",
+            "noConfirmedBookings": "لا توجد حجوزات مؤكدة",
+            "completedBookings": "الحجوزات المكتملة",
+            "noCompletedBookings": "لا توجد حجوزات مكتملة"
+        },
+        "buttons": {
+            "viewDetails": "عرض التفاصيل",
+            "confirmBooking": "تأكيد الحجز",
+            "cancelBooking": "إلغاء الحجز",
+            "markAsCompleted": "تعيين كمكتمل",
+            "joinMeeting": "الانضمام للاجتماع"
+        },
         "users": {
             "title": "إدارة المستخدمين",
             "addUser": "اضافة مستخدم",
@@ -143,7 +159,6 @@
         "register": {
             "welcome": "مرحبا بكم في كيد سكيلز"
         },
-
         "dashboard": {
             "welcome": "مرحباً،",
             "manageAppointments": "إدارة مواعيدك وعرض جلسات العملاء.",

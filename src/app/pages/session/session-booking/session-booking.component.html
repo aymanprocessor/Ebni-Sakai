@@ -317,7 +317,7 @@
         </div>
 
         <ng-template pTemplate="footer">
-            <p-button label="{{ 'common.buttons.no' | translate }}" icon="pi pi-times" (click)="showCancelDialog = false" styleClass="p-button-text"> </p-button>
+            <p-button label="{{ 'common.buttons.no' | translate }}" icon="pi pi-times" (click)="hideCancelDialog()" styleClass="p-button-text"> </p-button>
             <p-button label="{{ 'common.buttons.yes' | translate }}" icon="pi pi-check" (click)="cancelSession()" styleClass="p-button-danger" [loading]="isCancelling"> </p-button>
         </ng-template>
     </p-dialog>

@@ -1,9 +1,10 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
+import { TooltipModule } from 'primeng/tooltip';
 import { ToastModule } from 'primeng/toast';
 import { DialogModule } from 'primeng/dialog';
 import { TabViewModule } from 'primeng/tabview';
@@ -16,18 +17,20 @@ import { BookingService } from '../../services/booking.service';
 import { SkeletonModule } from 'primeng/skeleton';
 import { ZoomMeetingComponent } from '../zoom-meetings/zoom-meetings.component';
 import { ZoomService } from '../../services/zoom.service';
-import { Logger } from '../../services/logger.service';
 import { SweetalertService } from '../../services/sweetalert.service';
 
 @Component({
     selector: 'app-specialist-bookings',
     standalone: true,
-    imports: [CommonModule, SkeletonModule, TableModule, CardModule, ButtonModule, TagModule, ToastModule, DialogModule, TranslateModule, TabViewModule, ZoomMeetingComponent],
+    imports: [CommonModule, SkeletonModule, TableModule, CardModule, ButtonModule, TagModule, ToastModule, DialogModule, TranslateModule, TabViewModule, ZoomMeetingComponent, TooltipModule],
     providers: [MessageService, ConfirmationService],
     templateUrl: './specialist-bookings.component.html'
 })
 export class SpecialistBookingsComponent implements OnInit, OnDestroy {
     bookings: Booking[] = [];
+    pendingBookings: Booking[] = [];
+    confirmedBookings: Booking[] = [];
+    completedBookings: Booking[] = [];
     loading: boolean = true;
     selectedBooking: Booking | null = null;
     showDetailsDialog: boolean = false;
@@ -40,7 +43,8 @@ export class SpecialistBookingsComponent implements OnInit, OnDestroy {
         private authService: AuthService,
         private translateService: TranslateService,
         private zoomService: ZoomService,
-        private sweetalertService: SweetalertService
+        private sweetalertService: SweetalertService,
+        private cdr: ChangeDetectorRef
     ) {}
 
     ngOnInit(): void {
@@ -68,6 +72,7 @@ export class SpecialistBookingsComponent implements OnInit, OnDestroy {
                                 }
                                 return 0;
                             });
+                            this.categorizeBookings(this.bookings);
                             this.loading = false;
                         },
                         error: (error) => {
@@ -83,10 +88,32 @@ export class SpecialistBookingsComponent implements OnInit, OnDestroy {
         this.subscriptions.add(sub);
     }
 
+    categorizeBookings(bookings: Booking[]): void {
+        this.pendingBookings = bookings.filter((booking) => booking.status === 'pending');
+        this.confirmedBookings = bookings.filter((booking) => booking.status === 'confirmed');
+        this.completedBookings = bookings.filter((booking) => booking.status === 'completed');
+    }
+
+    getStatusSeverity(status: string): string {
+        switch (status) {
+            case 'pending':
+                return 'warning';
+            case 'confirmed':
+                return 'success';
+            case 'completed':
+                return 'info';
+            case 'cancelled':
+                return 'danger';
+            default:
+                return 'secondary';
+        }
+    }
+
     viewBookingDetails(booking: Booking): void {
         this.selectedBooking = booking;
         this.activeBookingTab = 0; // Set to details tab
         this.showDetailsDialog = true;
+        this.cdr.markForCheck();
     }
 
     viewZoomMeeting(booking: Booking): void {
@@ -162,51 +189,13 @@ export class SpecialistBookingsComponent implements OnInit, OnDestroy {
         );
     }
 
-    getStatusSeverity(status: string): 'success' | 'warn' | 'danger' | 'info' {
-        switch (status) {
-            case 'confirmed':
-                return 'success';
-            case 'pending':
-                return 'warn';
-            case 'cancelled':
-                return 'danger';
-            case 'completed':
-                return 'info';
-            default:
-                return 'info';
-        }
-    }
-
-    formatDateTime(date: Date): string {
-        return date.toLocaleString([], {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    }
-
-    isSessionUpcoming(booking: Booking): boolean {
-        if (!booking.timeSlot) return false;
-
-        const now = new Date();
-        return booking.timeSlot.startTime > now && booking.status !== 'cancelled';
-    }
-
-    isSessionInProgress(booking: Booking): boolean {
-        if (!booking.timeSlot) return false;
-
-        const now = new Date();
-        return booking.timeSlot.startTime <= now && booking.timeSlot.endTime >= now && booking.status !== 'cancelled';
-    }
-
     onZoomMeetingJoined(): void {
-        Logger.log('Zoom meeting joined');
+        // Implement zoom meeting joined logic
+        this.sweetalertService.showToast('Zoom meeting joined successfully.', 'success');
     }
 
     onZoomMeetingEnded(): void {
-        Logger.log('Zoom meeting ended');
-        this.showDetailsDialog = false;
+        // Implement zoom meeting ended logic
+        this.sweetalertService.showToast('Zoom meeting ended.', 'info');
     }
 }

@@ -270,6 +270,7 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
         this.selectedSession = session;
         this.activeSessionTab = 0; // Set to details tab
         this.showZoomMeetingDialog = true;
+        this.cdr.markForCheck();
     }
 
     // Join Zoom meeting
@@ -285,6 +286,7 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
     confirmCancelSession(session: Booking): void {
         this.sessionToCancel = session;
         this.showCancelDialog = true;
+        this.cdr.detectChanges();
     }
 
     // Cancel session
@@ -306,6 +308,7 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
             this.showCancelDialog = false;
             this.sessionToCancel = null;
             this.isCancelling = false;
+            this.cdr.detectChanges();
         }
     }
 
@@ -383,5 +386,11 @@ export class SessionBookingComponent implements OnInit, OnDestroy {
     onZoomMeetingEnded(): void {
         this.envService.logDev('Zoom meeting ended');
         this.showZoomMeetingDialog = false;
+        this.cdr.markForCheck();
+    }
+
+    hideCancelDialog() {
+        this.showCancelDialog = false;
+        this.cdr.markForCheck();
     }
 }

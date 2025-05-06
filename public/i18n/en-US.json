@@ -131,6 +131,22 @@
         }
     },
     "pages": {
+        "specialist": {
+            "myBookings": "My Bookings",
+            "pendingBookings": "Pending Bookings",
+            "noPendingBookings": "No Pending Bookings",
+            "confirmedBookings": "Confirmed Bookings",
+            "noConfirmedBookings": "No Confirmed Bookings",
+            "completedBookings": "Completed Bookings",
+            "noCompletedBookings": "No Completed Bookings"
+        },
+        "buttons": {
+            "viewDetails": "View Details",
+            "confirmBooking": "Confirm Booking",
+            "cancelBooking": "Cancel Booking",
+            "markAsCompleted": "Mark as Completed",
+            "joinMeeting": "Join Meeting"
+        },
         "users": {
             "title": "User Management",
             "addUser": "Add User",
@@ -143,7 +159,6 @@
         "register": {
             "welcome": "Welcome to Kid Skills"
         },
-
         "dashboard": {
             "welcome": "Welcome,",
             "manageAppointments": "Manage your appointments and view client sessions.",
@@ -173,67 +188,66 @@
             "completed": "Completed",
             "upcoming": "Upcoming",
             "bookingTrends": "Booking Trends"
+        },
+        "booking": {
+            "selectTimeSlotMessage": "Select a time to book an appointment. Available times are shown below.",
+            "bookApppointment": "Book New Appointment",
+            "availableSlotFor": "Available slots for ",
+            "noTimeSlotAvailable": "No time slots available",
+            "bestTimeQuestion": "What is the best time for the session",
+            "30MinMeeting": "Session is 30 minutes",
+            "selectTimeslot": "Select Time Slot",
+            "selectDate": "Select Date"
+        },
+        "session": {
+            "title": "Session Management",
+            "bookSession": "Book Session",
+            "upcomingSessions": "Upcoming Sessions",
+            "currentSessions": "Current Sessions",
+            "noCurrentSessions": "No current sessions",
+            "inProgress": "In Progress",
+            "completedSessions": "Completed Sessions",
+            "pastSessions": "Past Sessions",
+            "zoomMeeting": "Zoom Meeting",
+            "meetingId": "Meeting ID",
+            "password": "Password",
+            "startTime": "Start Time",
+            "duration": "Duration",
+            "minutes": "minutes",
+            "status": "Status",
+            "noSessionsAvailable": "You have no upcoming sessions.",
+            "bookNow": "Book Now",
+            "joinMeeting": "Join Meeting",
+            "leaveMeeting": "Leave Meeting",
+            "noMeetingAvailable": "No meeting available",
+            "noMeetingMessage": "There is no Zoom meeting associated with this session.",
+            "selectDate": "Select Date",
+            "availableTimeSlots": "Available Time Slots",
+            "notes": "Notes",
+            "notesOptional": "Notes (Optional)",
+            "confirmBooking": "Are you sure you want to book this session?",
+            "meetingJoined": "Successfully joined Zoom meeting",
+            "meetingEnded": "Zoom meeting ended",
+            "bookingConfirmed": "Session successfully booked with Zoom meeting",
+            "bookingCancelled": "Session successfully cancelled",
+            "bookingFailed": "Failed to book session",
+            "sessionInfo": "Session Information",
+            "clientInfo": "Client Information",
+            "createZoomMeeting": "Create Zoom Meeting",
+            "confirmCancelSession": "Are you sure you want to cancel this session?",
+            "cancelSession": "Cancel Session",
+            "markAsCompleted": "Mark as Completed",
+            "zoomMeetingMessage": "A Zoom meeting will be created for your session"
+        },
+        "appointmentScheduler": {
+            "title": "Appointment Scheduler",
+            "generateTimeSlots": "Generate Time Slots",
+            "validation": {
+                "invalidTimeRange": "Invalid time range",
+                "invalidDateRange": "Invalid date range"
+            }
         }
     },
-    "booking": {
-        "selectTimeSlotMessage": "Select a time to book an appointment. Available times are shown below.",
-        "bookApppointment": "Book New Appointment",
-        "availableSlotFor": "Available slots for ",
-        "noTimeSlotAvailable": "No time slots available",
-        "bestTimeQuestion": "What is the best time for the session",
-        "30MinMeeting": "Session is 30 minutes",
-        "selectTimeslot": "Select Time Slot",
-        "selectDate": "Select Date"
-    },
-    "session": {
-        "title": "Session Management",
-        "bookSession": "Book Session",
-        "upcomingSessions": "Upcoming Sessions",
-        "currentSessions": "Current Sessions",
-        "noCurrentSessions": "No current sessions",
-        "inProgress": "In Progress",
-        "completedSessions": "Completed Sessions",
-        "pastSessions": "Past Sessions",
-        "zoomMeeting": "Zoom Meeting",
-        "meetingId": "Meeting ID",
-        "password": "Password",
-        "startTime": "Start Time",
-        "duration": "Duration",
-        "minutes": "minutes",
-        "status": "Status",
-        "noSessionsAvailable": "You have no upcoming sessions.",
-        "bookNow": "Book Now",
-        "joinMeeting": "Join Meeting",
-        "leaveMeeting": "Leave Meeting",
-        "noMeetingAvailable": "No meeting available",
-        "noMeetingMessage": "There is no Zoom meeting associated with this session.",
-        "selectDate": "Select Date",
-        "availableTimeSlots": "Available Time Slots",
-        "notes": "Notes",
-        "notesOptional": "Notes (Optional)",
-        "confirmBooking": "Are you sure you want to book this session?",
-        "meetingJoined": "Successfully joined Zoom meeting",
-        "meetingEnded": "Zoom meeting ended",
-        "bookingConfirmed": "Session successfully booked with Zoom meeting",
-        "bookingCancelled": "Session successfully cancelled",
-        "bookingFailed": "Failed to book session",
-        "sessionInfo": "Session Information",
-        "clientInfo": "Client Information",
-        "createZoomMeeting": "Create Zoom Meeting",
-        "confirmCancelSession": "Are you sure you want to cancel this session?",
-        "cancelSession": "Cancel Session",
-        "markAsCompleted": "Mark as Completed",
-        "zoomMeetingMessage": "A Zoom meeting will be created for your session"
-    },
-    "appointmentScheduler": {
-        "title": "Appointment Scheduler",
-        "generateTimeSlots": "Generate Time Slots",
-        "validation": {
-            "invalidTimeRange": "Invalid time range",
-            "invalidDateRange": "Invalid date range"
-        }
-    },
-
     "navigation": {
         "dashboard": "Dashboard",
         "users": "Users",
