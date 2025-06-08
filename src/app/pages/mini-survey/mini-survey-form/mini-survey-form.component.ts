@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, NgModule } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 
 // PrimeNG Modules
 import { MenubarModule } from 'primeng/menubar';
@@ -34,19 +35,23 @@ import { ToastModule } from 'primeng/toast';
 export class MiniSurveyFormComponent {
     registrationForm: FormGroup;
     hasDisabilty: boolean = false;
+    isSubmitting: boolean = false;
+
+    private webhookUrl = 'https://n8n.kidskills.app/webhook-test/8c0717cb-dfeb-4fc5-9069-d8d0462f122f';
 
     constructor(
         private fb: FormBuilder,
-        private messageService: MessageService
+        private messageService: MessageService,
+        private http: HttpClient
     ) {
         this.registrationForm = this.fb.group({
             childName: ['', [Validators.required, Validators.minLength(2)]],
             childBirthday: ['', Validators.required],
-            hasDisabilty: [false, Validators.required], // Note: you may want to rename this to hasAllergies
+            hasDisability: [null, Validators.required],
             parentName: ['', [Validators.required, Validators.minLength(2)]],
-            contactMethod: ['', Validators.required], // New field
-            parentEmail: [''], // Now conditionally required
-            parentMobile: [''] // Now conditionally required
+            contactMethod: ['', Validators.required],
+            parentEmail: [''],
+            parentMobile: ['']
         });
     }
 
@@ -68,12 +73,53 @@ export class MiniSurveyFormComponent {
         this.registrationForm.get('parentMobile')?.updateValueAndValidity();
 
         if (this.registrationForm.valid) {
-            // Process form submission
-            console.log(this.registrationForm.value);
+            this.submitToWebhook();
+        } else {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'خطأ في النموذج',
+                detail: 'يرجى التأكد من ملء جميع الحقول المطلوبة بشكل صحيح'
+            });
         }
     }
+
+    private submitToWebhook() {
+        this.isSubmitting = true;
+
+        const formData = {
+            childName: this.registrationForm.get('childName')?.value,
+            childBirthday: this.registrationForm.get('childBirthday')?.value,
+            hasDisability: this.registrationForm.get('hasDisability')?.value,
+            parentName: this.registrationForm.get('parentName')?.value,
+            contactMethod: this.registrationForm.get('contactMethod')?.value,
+            parentEmail: this.registrationForm.get('parentEmail')?.value || null,
+            parentMobile: this.registrationForm.get('parentMobile')?.value || null,
+            submittedAt: new Date().toISOString()
+        };
+
+        this.http.post(this.webhookUrl, formData).subscribe({
+            next: (response) => {
+                this.isSubmitting = false;
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'تم الإرسال بنجاح',
+                    detail: 'تم تسجيل بيانات الطفل بنجاح. سيتم التواصل معك قريباً.'
+                });
+                this.registrationForm.reset();
+            },
+            error: (error) => {
+                this.isSubmitting = false;
+                console.error('Webhook submission error:', error);
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'خطأ في الإرسال',
+                    detail: 'حدث خطأ أثناء إرسال البيانات. يرجى المحاولة مرة أخرى.'
+                });
+            }
+        });
+    }
+
     onLogin(): void {
-        // Handle login logic here
         console.log('Login clicked');
     }
 
@@ -96,6 +142,7 @@ export class MiniSurveyFormComponent {
     get contactMethod() {
         return this.registrationForm.get('contactMethod');
     }
+
     isDarkMode = false;
     isHighContrast = false;
 
@@ -123,11 +170,13 @@ export class MiniSurveyFormComponent {
     }
 
     getSubmitButtonClass() {
+        const baseClasses = 'font-bold px-8 py-3 rounded-full text-sm tracking-[0.015em] disabled:opacity-50 disabled:cursor-not-allowed';
+
         if (this.isHighContrast) {
-            return 'bg-yellow-400 hover:bg-yellow-300 text-black border-2 border-white font-bold px-8 py-3 rounded-full text-sm tracking-[0.015em] disabled:opacity-50 disabled:cursor-not-allowed';
+            return `bg-yellow-400 hover:bg-yellow-300 text-black border-2 border-white ${baseClasses}`;
         } else if (this.isDarkMode) {
-            return 'bg-yellow-500 hover:bg-yellow-600 text-gray-900 border-none font-bold px-8 py-3 rounded-full text-sm tracking-[0.015em] disabled:opacity-50 disabled:cursor-not-allowed';
+            return `bg-yellow-500 hover:bg-yellow-600 text-gray-900 border-none ${baseClasses}`;
         }
-        return 'bg-[#f9c024] hover:bg-[#e8b122] text-[#181611] border-none font-bold px-8 py-3 rounded-full text-sm tracking-[0.015em] disabled:opacity-50 disabled:cursor-not-allowed';
+        return `bg-[#f9c024] hover:bg-[#e8b122] text-[#181611] border-none ${baseClasses}`;
     }
 }

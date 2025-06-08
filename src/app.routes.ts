@@ -15,6 +15,10 @@ export const routes: Routes = [
         loadComponent: () => import('./app/pages/mini-survey/mini-survey-form/mini-survey-form.component').then((m) => m.MiniSurveyFormComponent)
     },
     {
+        path: 'mini-survey/:id',
+        loadComponent: () => import('./app/pages/mini-survey/mini-survey-qurstions/mini-survey-qurstions.component').then((m) => m.MiniSurveyQurstionsComponent)
+    },
+    {
         path: 'app',
         component: AppLayout,
         children: [
