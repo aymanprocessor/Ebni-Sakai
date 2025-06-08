@@ -15,6 +15,7 @@ import { AuthService } from './app/services/auth.service';
 import { EnvironmentService } from './app/services/environment.service';
 import { environment } from './environments/env.dev';
 import { Logger } from './app/services/logger.service';
+import { MessageService } from 'primeng/api';
 
 export function createTranslateLoader(http: HttpClient) {
     return new TranslateHttpLoader(http, './i18n/', '.json');
@@ -109,6 +110,7 @@ export const appConfig: ApplicationConfig = {
             deps: ['FIREBASE_INITIALIZATION_TIMEOUT'],
             multi: true
         },
-        DatePipe
+        DatePipe,
+        MessageService
     ]
 };

@@ -1,0 +1,442 @@
+<!-- child-registration.component.html - Arabic Version with Dark Mode & High Contrast -->
+<div
+    class="relative flex min-h-screen flex-col transition-colors duration-300"
+    [ngClass]="{
+        'bg-white': !isDarkMode && !isHighContrast,
+        'bg-gray-900': isDarkMode && !isHighContrast,
+        'bg-black': isHighContrast
+    }"
+    style="font-family: 'Tajawal', 'Noto Sans Arabic', 'Amiri', Arial, sans-serif"
+    dir="rtl"
+>
+    <!-- Google Fonts Import -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@200;300;400;500;700;800;900&display=swap" rel="stylesheet" />
+
+    <!-- Header with Logo and Accessibility Controls -->
+    <header
+        class="border-b border-solid px-10 py-4 transition-colors duration-300"
+        [ngClass]="{
+            'border-b-[#f5f3f0] bg-white': !isDarkMode && !isHighContrast,
+            'border-b-gray-700 bg-gray-900': isDarkMode && !isHighContrast,
+            'border-b-white bg-black': isHighContrast
+        }"
+    >
+        <div class="flex items-center justify-between">
+            <!-- Logo Placeholder -->
+            <div
+                class="flex items-center gap-4 transition-colors duration-300"
+                [ngClass]="{
+                    'text-[#181611]': !isDarkMode && !isHighContrast,
+                    'text-white': isDarkMode || isHighContrast
+                }"
+            >
+                <div
+                    class="size-12 flex items-center justify-center rounded-lg transition-colors duration-300"
+                    [ngClass]="{
+                        'bg-[#f9c024]': !isDarkMode && !isHighContrast,
+                        'bg-yellow-500': isDarkMode && !isHighContrast,
+                        'bg-yellow-400': isHighContrast
+                    }"
+                >
+                    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" class="size-6">
+                        <g clip-path="url(#clip0_6_535)">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M47.2426 24L24 47.2426L0.757355 24L24 0.757355L47.2426 24ZM12.2426 21H35.7574L24 9.24264L12.2426 21Z" fill="currentColor"></path>
+                        </g>
+                        <defs>
+                            <clipPath id="clip0_6_535">
+                                <rect width="48" height="48" fill="white"></rect>
+                            </clipPath>
+                        </defs>
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold leading-tight">أطفال التعليم</h1>
+            </div>
+
+            <!-- Accessibility Controls -->
+            <div class="flex items-center gap-3">
+                <!-- Dark Mode Toggle -->
+                <button
+                    (click)="toggleDarkMode()"
+                    class="p-2 rounded-lg transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2"
+                    [ngClass]="{
+                        'text-[#181611] hover:bg-[#f5f3f0] focus:ring-[#f9c024]': !isDarkMode && !isHighContrast,
+                        'text-white hover:bg-gray-800 focus:ring-yellow-500': isDarkMode && !isHighContrast,
+                        'text-white hover:bg-gray-800 focus:ring-yellow-400 border-2 border-white': isHighContrast
+                    }"
+                    [attr.aria-label]="isDarkMode ? 'تفعيل الوضع المضيء' : 'تفعيل الوضع المظلم'"
+                >
+                    <svg *ngIf="!isDarkMode" class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                    </svg>
+                    <svg *ngIf="isDarkMode" class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                        ></path>
+                    </svg>
+                </button>
+
+                <!-- High Contrast Toggle -->
+                <button
+                    (click)="toggleHighContrast()"
+                    class="p-2 rounded-lg transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2"
+                    [ngClass]="{
+                        'text-[#181611] hover:bg-[#f5f3f0] focus:ring-[#f9c024]': !isDarkMode && !isHighContrast,
+                        'text-white hover:bg-gray-800 focus:ring-yellow-500': isDarkMode && !isHighContrast,
+                        'text-white hover:bg-gray-800 focus:ring-yellow-400 border-2 border-white': isHighContrast
+                    }"
+                    [attr.aria-label]="isHighContrast ? 'إلغاء التباين العالي' : 'تفعيل التباين العالي'"
+                >
+                    <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="px-4 md:px-40 flex flex-1 justify-center py-5">
+        <div class="flex flex-col w-full max-w-[512px] py-5">
+            <!-- Hero Image -->
+            <p-card
+                class="mb-6 overflow-hidden transition-colors duration-300"
+                [ngClass]="{
+                    'bg-white': !isDarkMode && !isHighContrast,
+                    'bg-gray-800': isDarkMode && !isHighContrast,
+                    'bg-black border-2 border-white': isHighContrast
+                }"
+            >
+                <div
+                    class="w-full h-[218px] bg-center bg-no-repeat bg-cover rounded-xl overflow-hidden opacity-90"
+                    style="
+                        background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBCRhbcgY9D0Iv-Sb6LW2WUN6kagzs2mO1PwJTYTtBxORzyS6jqbzzMJ8SLtfjfODO6KPkzQTzR1gGh_C2r3joowN_YkAGhliMAuRf2eO67AAwW0dcDHKIsQk5TQpxHjUxaadE4XeBQdrGphwTU4cuTcexSXWvgX_vXaVxIPS11ujNlf0buDKNZDU9pbQKSaSnQrPRMrwDQVDW347Sw0d7TEwCKT8MX781InmvGfoqcidvfqrgcnTwiTH7B9J631qB229nEBBxZYI3r');
+                    "
+                ></div>
+            </p-card>
+
+            <!-- Registration Form -->
+            <p-card
+                class="transition-colors duration-300"
+                [ngClass]="{
+                    'bg-white': !isDarkMode && !isHighContrast,
+                    'bg-gray-800': isDarkMode && !isHighContrast,
+                    'bg-black border-2 border-white': isHighContrast
+                }"
+            >
+                <ng-template pTemplate="header">
+                    <h2
+                        class="text-[28px] font-bold leading-tight text-center pb-3 pt-5 transition-colors duration-300"
+                        [ngClass]="{
+                            'text-[#181611]': !isDarkMode && !isHighContrast,
+                            'text-white': isDarkMode || isHighContrast
+                        }"
+                    >
+                        تسجيل الطفل
+                    </h2>
+                </ng-template>
+
+                <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()" class="space-y-6">
+                    <!-- Child's Name -->
+                    <div class="flex flex-col">
+                        <label
+                            class="text-base font-medium leading-normal pb-2 text-right transition-colors duration-300"
+                            [ngClass]="{
+                                'text-[#181611]': !isDarkMode && !isHighContrast,
+                                'text-white': isDarkMode || isHighContrast
+                            }"
+                        >
+                            اسم الطفل *
+                        </label>
+                        <input
+                            pInputText
+                            formControlName="childName"
+                            placeholder="أدخل الاسم الكامل للطفل"
+                            class="w-full h-14 rounded-xl border p-[15px] text-base text-right transition-all duration-300 focus:ring-2"
+                            [ngClass]="{
+                                'border-[#e6e3db] bg-white text-[#181611] focus:border-[#f9c024] focus:ring-[#f9c024]/20': !isDarkMode && !isHighContrast,
+                                'border-gray-600 bg-gray-700 text-white focus:border-yellow-500 focus:ring-yellow-500/20': isDarkMode && !isHighContrast,
+                                'border-white bg-black text-white focus:border-yellow-400 focus:ring-yellow-400/50 border-2': isHighContrast
+                            }"
+                            [class.ng-invalid]="childName?.invalid && childName?.touched"
+                            [class.ng-dirty]="childName?.dirty"
+                        />
+                        <small
+                            *ngIf="childName?.invalid && childName?.touched"
+                            class="mt-1 text-right transition-colors duration-300"
+                            [ngClass]="{
+                                'text-red-600': !isDarkMode && !isHighContrast,
+                                'text-red-400': isDarkMode && !isHighContrast,
+                                'text-red-300 font-bold': isHighContrast
+                            }"
+                        >
+                            اسم الطفل مطلوب (حد أدنى حرفان)
+                        </small>
+                    </div>
+
+                    <!-- Child's Birthday -->
+                    <div class="flex flex-col">
+                        <label
+                            class="text-base font-medium leading-normal pb-2 text-right transition-colors duration-300"
+                            [ngClass]="{
+                                'text-[#181611]': !isDarkMode && !isHighContrast,
+                                'text-white': isDarkMode || isHighContrast
+                            }"
+                        >
+                            تاريخ ميلاد الطفل *
+                        </label>
+                        <p-calendar formControlName="childBirthday" placeholder="اختر تاريخ الميلاد" dateFormat="dd/mm/yy" [showIcon]="true" [inputStyleClass]="getCalendarInputClass()" styleClass="w-full"> </p-calendar>
+                        <small
+                            *ngIf="childBirthday?.invalid && childBirthday?.touched"
+                            class="mt-1 text-right transition-colors duration-300"
+                            [ngClass]="{
+                                'text-red-600': !isDarkMode && !isHighContrast,
+                                'text-red-400': isDarkMode && !isHighContrast,
+                                'text-red-300 font-bold': isHighContrast
+                            }"
+                        >
+                            يرجى اختيار تاريخ ميلاد الطفل
+                        </small>
+                    </div>
+
+                    <!-- disability Question -->
+                    <div class="flex flex-col">
+                        <label
+                            class="text-base font-medium leading-normal pb-3 text-right transition-colors duration-300"
+                            for="disability-yes"
+                            [ngClass]="{
+                                'text-[#181611]': !isDarkMode && !isHighContrast,
+                                'text-white': isDarkMode || isHighContrast
+                            }"
+                        >
+                            هل يعاني طفلك من تأخر؟ *
+                        </label>
+
+                        <div class="flex gap-3 justify-end">
+                            <!-- خيار نعم -->
+                            <p-radioButton inputId="disability-yes" name="hasDisability" formControlName="hasDisability" [value]="true"></p-radioButton>
+                            <label
+                                for="disability-yes"
+                                class="text-sm font-medium leading-normal flex items-center justify-center rounded-xl border px-4 h-11 cursor-pointer transition-all duration-300"
+                                [ngClass]="{
+                                    'border-[#e6e3db] text-[#181611] hover:bg-[#f5f3f0]': !isDarkMode && !isHighContrast,
+                                    'border-gray-600 text-white hover:bg-gray-700': isDarkMode && !isHighContrast,
+                                    'border-white text-white hover:bg-gray-800 border-2 font-bold': isHighContrast
+                                }"
+                            >
+                                نعم
+                            </label>
+
+                            <!-- خيار لا -->
+                            <p-radioButton inputId="disability-no" name="hasDisability" formControlName="hasDisability" [value]="false"></p-radioButton>
+                            <label
+                                for="disability-no"
+                                class="text-sm font-medium leading-normal flex items-center justify-center rounded-xl border px-4 h-11 cursor-pointer transition-all duration-300"
+                                [ngClass]="{
+                                    'border-[#e6e3db] text-[#181611] hover:bg-[#f5f3f0]': !isDarkMode && !isHighContrast,
+                                    'border-gray-600 text-white hover:bg-gray-700': isDarkMode && !isHighContrast,
+                                    'border-white text-white hover:bg-gray-800 border-2 font-bold': isHighContrast
+                                }"
+                            >
+                                لا
+                            </label>
+                        </div>
+
+                        <small
+                            *ngIf="registrationForm.get('hasDisability')?.invalid && registrationForm.get('hasDisability')?.touched"
+                            class="mt-1 text-right transition-colors duration-300"
+                            [ngClass]="{
+                                'text-red-600': !isDarkMode && !isHighContrast,
+                                'text-red-400': isDarkMode && !isHighContrast,
+                                'text-red-300 font-bold': isHighContrast
+                            }"
+                        >
+                            يرجى اختيار إجابة
+                        </small>
+                    </div>
+
+                    <!-- Parent's Name -->
+                    <div class="flex flex-col">
+                        <label
+                            class="text-base font-medium leading-normal pb-2 text-right transition-colors duration-300"
+                            [ngClass]="{
+                                'text-[#181611]': !isDarkMode && !isHighContrast,
+                                'text-white': isDarkMode || isHighContrast
+                            }"
+                        >
+                            اسم ولي الأمر *
+                        </label>
+                        <input
+                            pInputText
+                            formControlName="parentName"
+                            placeholder="أدخل الاسم الكامل لولي الأمر"
+                            class="w-full h-14 rounded-xl border p-[15px] text-base text-right transition-all duration-300 focus:ring-2"
+                            [ngClass]="{
+                                'border-[#e6e3db] bg-white text-[#181611] focus:border-[#f9c024] focus:ring-[#f9c024]/20': !isDarkMode && !isHighContrast,
+                                'border-gray-600 bg-gray-700 text-white focus:border-yellow-500 focus:ring-yellow-500/20': isDarkMode && !isHighContrast,
+                                'border-white bg-black text-white focus:border-yellow-400 focus:ring-yellow-400/50 border-2': isHighContrast
+                            }"
+                            [class.ng-invalid]="parentName?.invalid && parentName?.touched"
+                            [class.ng-dirty]="parentName?.dirty"
+                        />
+                        <small
+                            *ngIf="parentName?.invalid && parentName?.touched"
+                            class="mt-1 text-right transition-colors duration-300"
+                            [ngClass]="{
+                                'text-red-600': !isDarkMode && !isHighContrast,
+                                'text-red-400': isDarkMode && !isHighContrast,
+                                'text-red-300 font-bold': isHighContrast
+                            }"
+                        >
+                            اسم ولي الأمر مطلوب (حد أدنى حرفان)
+                        </small>
+                    </div>
+
+                    <!-- Contact Method Selection -->
+                    <div class="flex flex-col">
+                        <label
+                            class="text-base font-medium leading-normal pb-3 text-right transition-colors duration-300"
+                            [ngClass]="{
+                                'text-[#181611]': !isDarkMode && !isHighContrast,
+                                'text-white': isDarkMode || isHighContrast
+                            }"
+                        >
+                            كيف تريد استلام النتائج؟ *
+                        </label>
+                        <div class="flex gap-3 justify-end mb-4">
+                            <label
+                                for="contact-email"
+                                class="text-sm font-medium leading-normal flex items-center justify-center rounded-xl border px-4 h-11 cursor-pointer transition-all duration-300 mr-2"
+                                [ngClass]="{
+                                    'border-[#e6e3db] text-[#181611] hover:bg-[#f5f3f0]': !isDarkMode && !isHighContrast,
+                                    'border-gray-600 text-white hover:bg-gray-700': isDarkMode && !isHighContrast,
+                                    'border-white text-white hover:bg-gray-800 border-2 font-bold': isHighContrast
+                                }"
+                            >
+                                <svg class="size-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                </svg>
+                                البريد الإلكتروني
+                            </label>
+                            <p-radioButton name="contactMethod" formControlName="contactMethod" value="email" inputId="contact-email"> </p-radioButton>
+
+                            <label
+                                for="contact-mobile"
+                                class="text-sm font-medium leading-normal flex items-center justify-center rounded-xl border px-4 h-11 cursor-pointer transition-all duration-300 mr-2 ml-4"
+                                [ngClass]="{
+                                    'border-[#e6e3db] text-[#181611] hover:bg-[#f5f3f0]': !isDarkMode && !isHighContrast,
+                                    'border-gray-600 text-white hover:bg-gray-700': isDarkMode && !isHighContrast,
+                                    'border-white text-white hover:bg-gray-800 border-2 font-bold': isHighContrast
+                                }"
+                            >
+                                <svg class="size-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                </svg>
+                                الهاتف المحمول
+                            </label>
+                            <p-radioButton name="contactMethod" value="mobile" formControlName="contactMethod" inputId="contact-mobile" class="mr-4"> </p-radioButton>
+                        </div>
+                        <small
+                            *ngIf="contactMethod?.invalid && contactMethod?.touched"
+                            class="mt-1 text-right transition-colors duration-300"
+                            [ngClass]="{
+                                'text-red-600': !isDarkMode && !isHighContrast,
+                                'text-red-400': isDarkMode && !isHighContrast,
+                                'text-red-300 font-bold': isHighContrast
+                            }"
+                        >
+                            يرجى اختيار طريقة التواصل
+                        </small>
+                    </div>
+
+                    <!-- Email Input (shown when email is selected) -->
+                    <div class="flex flex-col" *ngIf="contactMethod?.value === 'email'">
+                        <label
+                            class="text-base font-medium leading-normal pb-2 text-right transition-colors duration-300"
+                            [ngClass]="{
+                                'text-[#181611]': !isDarkMode && !isHighContrast,
+                                'text-white': isDarkMode || isHighContrast
+                            }"
+                        >
+                            البريد الإلكتروني لولي الأمر *
+                        </label>
+                        <input
+                            pInputText
+                            formControlName="parentEmail"
+                            placeholder="أدخل عنوان البريد الإلكتروني لولي الأمر"
+                            type="email"
+                            class="w-full h-14 rounded-xl border p-[15px] text-base text-right transition-all duration-300 focus:ring-2"
+                            [ngClass]="{
+                                'border-[#e6e3db] bg-white text-[#181611] focus:border-[#f9c024] focus:ring-[#f9c024]/20': !isDarkMode && !isHighContrast,
+                                'border-gray-600 bg-gray-700 text-white focus:border-yellow-500 focus:ring-yellow-500/20': isDarkMode && !isHighContrast,
+                                'border-white bg-black text-white focus:border-yellow-400 focus:ring-yellow-400/50 border-2': isHighContrast
+                            }"
+                            [class.ng-invalid]="parentEmail?.invalid && parentEmail?.touched"
+                            [class.ng-dirty]="parentEmail?.dirty"
+                        />
+                        <small
+                            *ngIf="parentEmail?.invalid && parentEmail?.touched"
+                            class="mt-1 text-right transition-colors duration-300"
+                            [ngClass]="{
+                                'text-red-600': !isDarkMode && !isHighContrast,
+                                'text-red-400': isDarkMode && !isHighContrast,
+                                'text-red-300 font-bold': isHighContrast
+                            }"
+                        >
+                            يرجى إدخال عنوان بريد إلكتروني صحيح
+                        </small>
+                    </div>
+
+                    <!-- Mobile Input (shown when mobile is selected) -->
+                    <div class="flex flex-col" *ngIf="contactMethod?.value === 'mobile'">
+                        <label
+                            class="text-base font-medium leading-normal pb-2 text-right transition-colors duration-300"
+                            [ngClass]="{
+                                'text-[#181611]': !isDarkMode && !isHighContrast,
+                                'text-white': isDarkMode || isHighContrast
+                            }"
+                        >
+                            رقم الهاتف المحمول لولي الأمر *
+                        </label>
+                        <input
+                            pInputText
+                            formControlName="parentMobile"
+                            placeholder="أدخل رقم الهاتف المحمول لولي الأمر"
+                            type="tel"
+                            class="w-full h-14 rounded-xl border p-[15px] text-base text-right transition-all duration-300 focus:ring-2"
+                            [ngClass]="{
+                                'border-[#e6e3db] bg-white text-[#181611] focus:border-[#f9c024] focus:ring-[#f9c024]/20': !isDarkMode && !isHighContrast,
+                                'border-gray-600 bg-gray-700 text-white focus:border-yellow-500 focus:ring-yellow-500/20': isDarkMode && !isHighContrast,
+                                'border-white bg-black text-white focus:border-yellow-400 focus:ring-yellow-400/50 border-2': isHighContrast
+                            }"
+                            [class.ng-invalid]="parentMobile?.invalid && parentMobile?.touched"
+                            [class.ng-dirty]="parentMobile?.dirty"
+                        />
+                        <small
+                            *ngIf="parentMobile?.invalid && parentMobile?.touched"
+                            class="mt-1 text-right transition-colors duration-300"
+                            [ngClass]="{
+                                'text-red-600': !isDarkMode && !isHighContrast,
+                                'text-red-400': isDarkMode && !isHighContrast,
+                                'text-red-300 font-bold': isHighContrast
+                            }"
+                        >
+                            يرجى إدخال رقم هاتف محمول صحيح
+                        </small>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="flex justify-center pt-4">
+                        <p-button label="تسجيل" type="submit" [disabled]="registrationForm.invalid" class="transition-all duration-300 hover:scale-105 focus:scale-105" [styleClass]="getSubmitButtonClass()"> </p-button>
+                    </div>
+                </form>
+            </p-card>
+        </div>
+    </div>
+
+    <!-- Toast Messages -->
+    <p-toast position="top-left"></p-toast>
+</div>

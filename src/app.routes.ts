@@ -11,6 +11,10 @@ const redirectLoggedInToDashboard = () => redirectLoggedInTo(['app/dashboard']);
 export const routes: Routes = [
     { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
     {
+        path: 'mini-survey',
+        loadComponent: () => import('./app/pages/mini-survey/mini-survey-form/mini-survey-form.component').then((m) => m.MiniSurveyFormComponent)
+    },
+    {
         path: 'app',
         component: AppLayout,
         children: [
@@ -100,6 +104,7 @@ export const routes: Routes = [
                 loadComponent: () => import('./app/pages/user-profile/user-profile.component').then((m) => m.UserProfileComponent),
                 canActivate: [authGuard]
             },
+
             {
                 path: '',
                 redirectTo: 'dashboard',
