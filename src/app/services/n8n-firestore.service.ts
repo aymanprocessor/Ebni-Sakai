@@ -10,4 +10,9 @@ export class N8nFirestoreService {
         const url = 'https://n8n.kidskills.app/webhook/get-age-range-block-questions';
         return this.http.post(url, payload);
     }
+
+    saveAnswers(payload: any) {
+        const url = 'https://n8n.kidskills.app/webhook-test/answer-questions';
+        return this.http.post(url, payload);
+    }
 }

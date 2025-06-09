@@ -1,1 +1,41 @@
-<button (click)="sendRequest()">Send</button>
+<div class="survey-container">
+    <div class="questions-card" *ngIf="questions.length > 0">
+        <div class="card-header">
+            <div class="age-range-navigation">
+                <button class="age-nav-btn" [disabled]="!canGoToPrevAgeRange" (click)="prevAgeRange()">← المرحلة السابقة</button>
+
+                <div class="current-age-range">
+                    <h1>الفئة العمرية: {{ currentAgeRange }} شهر</h1>
+                    <span class="age-indicator">{{ currentAgeRangeIndex + 1 }} / {{ ageRanges.length }}</span>
+                </div>
+
+                <button class="age-nav-btn" [disabled]="!canGoToNextAgeRange" (click)="nextAgeRange()">المرحلة التالية →</button>
+            </div>
+        </div>
+
+        <div class="questions-list">
+            <div class="question-item" *ngFor="let question of questions; let i = index">
+                <div class="question-number">{{ i + 1 }}</div>
+
+                <div class="question-content">
+                    <h3 class="question-text">{{ question.q }}</h3>
+                    <p class="question-hint" *ngIf="question.th">{{ question.th }}</p>
+                </div>
+
+                <div class="answer-section">
+                    <button class="answer-btn" [class.selected]="question.ans === 'yes'" (click)="selectAnswer(i, 'yes')">نعم</button>
+                    <button class="answer-btn" [class.selected]="question.ans === 'no'" (click)="selectAnswer(i, 'no')">لا</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="submit-section">
+            <button class="submit-btn" (click)="submitAnswers()">إرسال الإجابات</button>
+        </div>
+    </div>
+
+    <div class="loading" *ngIf="questions.length === 0">
+        <p>جاري تحميل الأسئلة...</p>
+        <button (click)="sendRequest()">تحميل الأسئلة</button>
+    </div>
+</div>
