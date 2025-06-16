@@ -21,7 +21,7 @@ export class N8nFirestoreService {
     }
 
     postAction(payload: any) {
-        const url = 'https://n8n.kidskills.app/webhook-test/post-age-range-action';
+        const url = 'https://n8n.kidskills.app/webhook/post-age-range-action';
 
         return this.http.post(url, payload);
     }

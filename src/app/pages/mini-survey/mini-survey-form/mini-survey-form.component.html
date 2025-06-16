@@ -31,25 +31,17 @@
                 }"
             >
                 <div
-                    class="size-12 flex items-center justify-center rounded-lg transition-colors duration-300"
-                    [ngClass]="{
-                        'bg-[#f9c024]': !isDarkMode && !isHighContrast,
-                        'bg-yellow-500': isDarkMode && !isHighContrast,
-                        'bg-yellow-400': isHighContrast
-                    }"
+                style="width: 100px;"
+                    class=" flex items-center justify-center rounded-lg transition-colors duration-300"
+                    
                 >
-                    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" class="size-6">
-                        <g clip-path="url(#clip0_6_535)">
-                            <path fill-rule="evenodd" clip-rule="evenodd" d="M47.2426 24L24 47.2426L0.757355 24L24 0.757355L47.2426 24ZM12.2426 21H35.7574L24 9.24264L12.2426 21Z" fill="currentColor"></path>
-                        </g>
-                        <defs>
-                            <clipPath id="clip0_6_535">
-                                <rect width="48" height="48" fill="white"></rect>
-                            </clipPath>
-                        </defs>
-                    </svg>
+                    
+                    <img
+                        src="https://firebasestorage.googleapis.com/v0/b/ebni-81db7.firebasestorage.app/o/Logo%202.png?alt=media&token=b286ce10-58d0-43e8-89c6-4949becb3274"
+                        alt="Kid Skills Logo"
+                        />
                 </div>
-                <h1 class="text-2xl font-bold leading-tight">أطفال التعليم</h1>
+                <!-- <h1 class="text-2xl font-bold leading-tight">Kid Skills</h1> -->
             </div>
 
             <!-- Accessibility Controls -->
@@ -178,7 +170,7 @@
                     </div>
 
                     <!-- Child's Birthday -->
-                    <div class="flex flex-col">
+                    <div class="flex flex-col" dir="rtl">
                         <label
                             class="text-base font-medium leading-normal pb-2 text-right transition-colors duration-300"
                             [ngClass]="{
@@ -188,7 +180,7 @@
                         >
                             تاريخ ميلاد الطفل *
                         </label>
-                        <p-calendar formControlName="childBirthday" placeholder="اختر تاريخ الميلاد" dateFormat="dd/mm/yy" [showIcon]="true" [inputStyleClass]="getCalendarInputClass()" styleClass="w-full"> </p-calendar>
+                        <p-calendar dir="rtl" formControlName="childBirthday" placeholder="اختر تاريخ الميلاد" dateFormat="dd/mm/yy" [showIcon]="true" [inputStyleClass]="getCalendarInputClass()" styleClass="w-full"> </p-calendar>
                         <small
                             *ngIf="childBirthday?.invalid && childBirthday?.touched"
                             class="mt-1 text-right transition-colors duration-300"

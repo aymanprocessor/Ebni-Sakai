@@ -1,5 +1,5 @@
 import { state } from '@angular/animations';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { N8nFirestoreService } from '../../../services/n8n-firestore.service';
@@ -39,7 +39,8 @@ interface StorageAnswers {
     selector: 'app-mini-survey-qurstions',
     imports: [CommonModule, ButtonModule],
     templateUrl: './mini-survey-qurstions.component.html',
-    styleUrl: './mini-survey-qurstions.component.scss'
+    styleUrl: './mini-survey-qurstions.component.scss',
+    changeDetection: ChangeDetectionStrategy.Default
 })
 export class MiniSurveyQurstionsComponent implements OnInit {
     surveyId: string | null = null;
@@ -224,6 +225,13 @@ export class MiniSurveyQurstionsComponent implements OnInit {
         }
     }
 
+    refreshRoute() {
+  const currentUrl = this.router.url;
+  this.router.navigateByUrl('/mini-survey/' + this.surveyId, { skipLocationChange: true }).then(() => {
+    this.router.navigate([currentUrl]);
+  });
+}
+
     async getAgeRangeBlockQuestions() {
         const response: any = await firstValueFrom(this.n8nFirestoreSerivice.getAgeRangeBlockQuestionsFromStatus(this.surveyId!));
         console.log('Response Question:', response);
@@ -237,6 +245,10 @@ export class MiniSurveyQurstionsComponent implements OnInit {
             this.cacheAgeRangeData(this.currentAgeRange, this.questions, this.questionKeys);
             // Load any existing answers
             this.loadAnswersFromLocalStorage();
+            //refresh page to reflect changes
+            this.refreshRoute();
+            
+
         } else {
             if (response.code === 1002) {
                 this.router.navigateByUrl('/error', {
@@ -266,6 +278,7 @@ export class MiniSurveyQurstionsComponent implements OnInit {
             console.error('Error:', error);
         } finally {
             this.isLoading = false;
+            window.location.reload(); // Reload the page to reflect changes
         }
     }
 
@@ -297,6 +310,8 @@ export class MiniSurveyQurstionsComponent implements OnInit {
         console.log('Processing question response:', response);
         this.questionKeys = Object.keys(response);
         this.questions = this.questionKeys.map((key) => response[key]);
+            this.refreshRoute();
+        this.cdr.detectChanges(); // Ensure view updates after processing
     }
 
     selectAnswer(questionIndex: number, answer: 'yes' | 'no') {
