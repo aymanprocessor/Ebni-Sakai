@@ -13,6 +13,7 @@ import { CalendarModule } from 'primeng/calendar';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-mini-survey-form',
@@ -37,12 +38,13 @@ export class MiniSurveyFormComponent {
     hasDisabilty: boolean = false;
     isSubmitting: boolean = false;
 
-    private webhookUrl = 'https://n8n.kidskills.app/webhook-test/8c0717cb-dfeb-4fc5-9069-d8d0462f122f';
+    private webhookUrl = 'https://n8n.kidskills.app/webhook/8c0717cb-dfeb-4fc5-9069-d8d0462f122f';
 
     constructor(
         private fb: FormBuilder,
         private messageService: MessageService,
-        private http: HttpClient
+        private http: HttpClient,
+        private router: Router
     ) {
         this.registrationForm = this.fb.group({
             childName: ['', [Validators.required, Validators.minLength(2)]],
@@ -98,14 +100,17 @@ export class MiniSurveyFormComponent {
         };
 
         this.http.post(this.webhookUrl, formData).subscribe({
-            next: (response) => {
+            next: (response: any) => {
                 this.isSubmitting = false;
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'تم الإرسال بنجاح',
-                    detail: 'تم تسجيل بيانات الطفل بنجاح. سيتم التواصل معك قريباً.'
-                });
-                this.registrationForm.reset();
+                if (response.success) {
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'تم الإرسال بنجاح',
+                        detail: 'تم تسجيل بيانات الطفل بنجاح. سيتم التواصل معك قريباً.'
+                    });
+                    this.registrationForm.reset();
+                    this.router.navigateByUrl('mini-survey/' + response.id);
+                }
             },
             error: (error) => {
                 this.isSubmitting = false;

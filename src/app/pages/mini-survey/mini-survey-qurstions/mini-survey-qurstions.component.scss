@@ -124,10 +124,11 @@
     }
 
     .question-hint {
-        font-size: 14px;
-        color: #666;
+        font-size: 16px;
+        color: #888;
         line-height: 1.4;
-        font-style: italic;
+        font-weight: 600;
+
         margin: 0;
     }
 }
@@ -185,6 +186,12 @@
         &:hover {
             background: #45a049;
             transform: translateY(-2px);
+        }
+
+        &.disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
         }
     }
 }

@@ -19,6 +19,14 @@ export const routes: Routes = [
         loadComponent: () => import('./app/pages/mini-survey/mini-survey-qurstions/mini-survey-qurstions.component').then((m) => m.MiniSurveyQurstionsComponent)
     },
     {
+        path: 'error',
+        loadComponent: () => import('./app/pages/error-page/error-page.component').then((m) => m.ErrorPageComponent)
+    },
+    {
+        path: 'complete-survey',
+        loadComponent: () => import('./app/pages/complete-page/complete-page.component').then((m) => m.CompletePageComponent)
+    },
+    {
         path: 'app',
         component: AppLayout,
         children: [
