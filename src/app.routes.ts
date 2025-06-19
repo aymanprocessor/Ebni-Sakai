@@ -19,6 +19,10 @@ export const routes: Routes = [
         loadComponent: () => import('./app/pages/mini-survey/mini-survey-qurstions/mini-survey-qurstions.component').then((m) => m.MiniSurveyQurstionsComponent)
     },
     {
+        path: 'client-profile-form',
+        loadComponent: () => import('./app/pages/client-profile-form/client-profile-form.component').then((m) => m.ClientProfileFormComponent)
+    },
+    {
         path: 'error',
         loadComponent: () => import('./app/pages/error-page/error-page.component').then((m) => m.ErrorPageComponent)
     },

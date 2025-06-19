@@ -1,0 +1,620 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4" dir="rtl">
+    <div class="max-w-2xl mx-auto">
+        <!-- Header with Dark Mode Toggle -->
+        <div class="text-center mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <div></div>
+                <!-- Empty div for spacing -->
+                <h1 class="text-4xl font-bold text-gray-900 mb-2">شخصية العميل</h1>
+                <!-- Dark Mode Toggle Button -->
+                <p-button [icon]="isDarkMode ? 'pi pi-sun' : 'pi pi-moon'" styleClass="p-button-rounded p-button-text p-button-lg dark-mode-toggle" [title]="isDarkMode ? 'التبديل للوضع المضيء' : 'التبديل للوضع المظلم'" (click)="toggleDarkMode()">
+                </p-button>
+            </div>
+            <p class="text-lg text-gray-600">يرجى ملء جميع الحقول المطلوبة بدقة</p>
+        </div>
+
+        <!-- Form Card -->
+        <p-card class="shadow-lg">
+            <form [formGroup]="clientForm" (ngSubmit)="onSubmit()" class="space-y-8">
+                <!-- Basic Information Section -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <i class="pi pi-user ml-2 text-blue-600"></i>
+                        المعلومات الأساسية
+                    </h2>
+
+                    <div class="form-grid">
+                        <!-- Name -->
+                        <div class="field-group">
+                            <label for="name" class="field-label">الاسم <span class="required">*</span></label>
+                            <input id="name" type="text" pInputText formControlName="name" class="w-full" [class.ng-invalid]="isFieldInvalid('name')" placeholder="أدخل الاسم الكامل" />
+                            <small class="error-text" *ngIf="isFieldInvalid('name')">
+                                {{ getFieldError('name') }}
+                            </small>
+                        </div>
+
+                        <!-- Age -->
+                        <div class="field-group">
+                            <label for="age" class="field-label">العمر <span class="required">*</span></label>
+                            <p-inputNumber id="age" formControlName="age" mode="decimal" [min]="18" [max]="100" placeholder="أدخل العمر" styleClass="w-full" [class.ng-invalid]="isFieldInvalid('age')"> </p-inputNumber>
+                            <small class="error-text" *ngIf="isFieldInvalid('age')">
+                                {{ getFieldError('age') }}
+                            </small>
+                        </div>
+
+                        <!-- Job -->
+                        <div class="field-group">
+                            <label for="job" class="field-label">الوظيفة <span class="required">*</span></label>
+                            <input id="job" type="text" pInputText formControlName="job" class="w-full" [class.ng-invalid]="isFieldInvalid('job')" placeholder="في حالة عدم وجود وظيفة اكتبي ربة منزل" />
+                            <small class="error-text" *ngIf="isFieldInvalid('job')">
+                                {{ getFieldError('job') }}
+                            </small>
+                        </div>
+
+                        <!-- Education -->
+                        <div class="field-group">
+                            <label for="education" class="field-label">الدرجة العلمية <span class="required">*</span></label>
+                            <p-dropdown id="education" formControlName="education" [options]="educationLevels" placeholder="اختر الدرجة العلمية" styleClass="w-full" [class.ng-invalid]="isFieldInvalid('education')"> </p-dropdown>
+                            <small class="error-text" *ngIf="isFieldInvalid('education')">
+                                {{ getFieldError('education') }}
+                            </small>
+                        </div>
+
+                        <!-- Marital Status -->
+                        <div class="field-group">
+                            <label class="field-label">الحالة الاجتماعية <span class="required">*</span></label>
+                            <div class="radio-group">
+                                <div *ngFor="let status of maritalStatuses" class="radio-item">
+                                    <p-radioButton [value]="status.value" formControlName="maritalStatus" [inputId]="'marital_' + status.value"></p-radioButton>
+                                    <label [for]="'marital_' + status.value" class="radio-label">
+                                        {{ status.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            <small class="error-text" *ngIf="isFieldInvalid('maritalStatus')">
+                                {{ getFieldError('maritalStatus') }}
+                            </small>
+                        </div>
+
+                        <!-- Address -->
+                        <div class="field-group">
+                            <label for="address" class="field-label">العنوان (المحافظة والمدينة) <span class="required">*</span></label>
+                            <input id="address" type="text" pInputText formControlName="address" class="w-full" [class.ng-invalid]="isFieldInvalid('address')" placeholder="أدخل المحافظة والمدينة" />
+                            <small class="error-text" *ngIf="isFieldInvalid('address')">
+                                {{ getFieldError('address') }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Children Information Section -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <i class="pi pi-users ml-2 text-green-600"></i>
+                        معلومات الأطفال
+                    </h2>
+
+                    <div class="form-grid">
+                        <!-- Has Children -->
+                        <div class="field-group">
+                            <label class="field-label">هل عندك أبناء؟ <span class="required">*</span></label>
+                            <div class="radio-group">
+                                <div *ngFor="let option of yesNoOptions" class="radio-item">
+                                    <p-radioButton [value]="option.value" formControlName="hasChildren" [inputId]="'children_' + option.value"></p-radioButton>
+                                    <label [for]="'children_' + option.value" class="radio-label">
+                                        {{ option.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            <small class="error-text" *ngIf="isFieldInvalid('hasChildren')">
+                                {{ getFieldError('hasChildren') }}
+                            </small>
+                        </div>
+
+                        <!-- Children Details (conditional) -->
+                        <div *ngIf="clientForm.get('hasChildren')?.value === 'yes'" class="conditional-fields">
+                            <div class="field-group">
+                                <label for="childrenDetails" class="field-label">عدد الأبناء وجنسهم وأعمارهم <span class="required">*</span></label>
+                                <textarea
+                                    id="childrenDetails"
+                                    pInputTextarea
+                                    formControlName="childrenDetails"
+                                    rows="3"
+                                    class="w-full"
+                                    [class.ng-invalid]="isFieldInvalid('childrenDetails')"
+                                    placeholder="مثال: ولدان (8 سنوات، 5 سنوات) وبنت (3 سنوات)"
+                                >
+                                </textarea>
+                                <small class="error-text" *ngIf="isFieldInvalid('childrenDetails')">
+                                    {{ getFieldError('childrenDetails') }}
+                                </small>
+                            </div>
+
+                            <!-- School Type -->
+                            <div class="field-group">
+                                <label class="field-label">نوع المدرسة التي يذهب إليها الأبناء <span class="required">*</span></label>
+                                <div class="radio-group">
+                                    <div *ngFor="let school of schoolTypes" class="radio-item">
+                                        <p-radioButton [value]="school.value" formControlName="schoolType" [inputId]="'school_' + school.value"></p-radioButton>
+                                        <label [for]="'school_' + school.value" class="radio-label">
+                                            {{ school.label }}
+                                        </label>
+                                    </div>
+                                </div>
+                                <small class="error-text" *ngIf="isFieldInvalid('schoolType')">
+                                    {{ getFieldError('schoolType') }}
+                                </small>
+                            </div>
+
+                            <!-- Children Morning Routine -->
+                            <div class="field-group">
+                                <label for="childrenMorningRoutine" class="field-label">الأنشطة التي تقومين بها لأطفالك في الصباح <span class="required">*</span></label>
+                                <textarea
+                                    id="childrenMorningRoutine"
+                                    pInputTextarea
+                                    formControlName="childrenMorningRoutine"
+                                    rows="3"
+                                    class="w-full"
+                                    [class.ng-invalid]="isFieldInvalid('childrenMorningRoutine')"
+                                    placeholder="اذكري الأنشطة الصباحية مع الأطفال"
+                                >
+                                </textarea>
+                                <small class="error-text" *ngIf="isFieldInvalid('childrenMorningRoutine')">
+                                    {{ getFieldError('childrenMorningRoutine') }}
+                                </small>
+                            </div>
+
+                            <!-- Evening Time with Children -->
+                            <div class="field-group">
+                                <label for="eveningTimeWithChildren" class="field-label">كيف تقضين وقتك مع أطفالك بعد العمل؟ <span class="required">*</span></label>
+                                <textarea
+                                    id="eveningTimeWithChildren"
+                                    pInputTextarea
+                                    formControlName="eveningTimeWithChildren"
+                                    rows="3"
+                                    class="w-full"
+                                    [class.ng-invalid]="isFieldInvalid('eveningTimeWithChildren')"
+                                    placeholder="مثال: تساعديهم في الدراسة - تمارسون أنشطة سوياً - مشاهدة التليفزيون"
+                                >
+                                </textarea>
+                                <small class="error-text" *ngIf="isFieldInvalid('eveningTimeWithChildren')">
+                                    {{ getFieldError('eveningTimeWithChildren') }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Housing and Transportation -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <i class="pi pi-home ml-2 text-purple-600"></i>
+                        السكن والمواصلات
+                    </h2>
+
+                    <div class="form-grid">
+                        <!-- Housing Type -->
+                        <div class="field-group">
+                            <label class="field-label">نوع المنزل أو السكن <span class="required">*</span></label>
+                            <div class="radio-group">
+                                <div *ngFor="let house of housingTypes" class="radio-item">
+                                    <p-radioButton [value]="house.value" formControlName="housingType" [inputId]="'house_' + house.value"></p-radioButton>
+                                    <label [for]="'house_' + house.value" class="radio-label">
+                                        {{ house.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            <small class="error-text" *ngIf="isFieldInvalid('housingType')">
+                                {{ getFieldError('housingType') }}
+                            </small>
+                        </div>
+
+                        <!-- Has Car -->
+                        <div class="field-group">
+                            <label class="field-label">هل تمتلك سيارة خاصة؟ <span class="required">*</span></label>
+                            <div class="radio-group">
+                                <div *ngFor="let option of yesNoOptions" class="radio-item">
+                                    <p-radioButton [value]="option.value" formControlName="hasCar" [inputId]="'car_' + option.value"></p-radioButton>
+                                    <label [for]="'car_' + option.value" class="radio-label">
+                                        {{ option.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            <small class="error-text" *ngIf="isFieldInvalid('hasCar')">
+                                {{ getFieldError('hasCar') }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activities and Lifestyle -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <i class="pi pi-heart ml-2 text-red-500"></i>
+                        الأنشطة ونمط الحياة
+                    </h2>
+
+                    <div class="form-grid">
+                        <!-- Sports -->
+                        <div class="field-group">
+                            <label class="field-label">هل تمارسين أي نوع من أنواع الرياضة؟ <span class="required">*</span></label>
+                            <div class="radio-group">
+                                <div *ngFor="let option of yesNoOptions" class="radio-item">
+                                    <p-radioButton [value]="option.value" formControlName="playsports" [inputId]="'sports_' + option.value"></p-radioButton>
+                                    <label [for]="'sports_' + option.value" class="radio-label">
+                                        {{ option.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            <small class="error-text" *ngIf="isFieldInvalid('playsports')">
+                                {{ getFieldError('playsports') }}
+                            </small>
+                        </div>
+
+                        <!-- Sports Type (conditional) -->
+                        <div *ngIf="clientForm.get('playsports')?.value === 'yes'" class="field-group">
+                            <label for="sportsType" class="field-label">نوع الرياضة <span class="required">*</span></label>
+                            <input id="sportsType" type="text" pInputText formControlName="sportsType" class="w-full" [class.ng-invalid]="isFieldInvalid('sportsType')" placeholder="اذكري نوع الرياضة" />
+                            <small class="error-text" *ngIf="isFieldInvalid('sportsType')">
+                                {{ getFieldError('sportsType') }}
+                            </small>
+                        </div>
+
+                        <!-- Club Membership -->
+                        <div class="field-group">
+                            <label class="field-label">هل لديكم اشتراك في أي نادي؟ <span class="required">*</span></label>
+                            <div class="radio-group">
+                                <div *ngFor="let option of yesNoOptions" class="radio-item">
+                                    <p-radioButton [value]="option.value" formControlName="hasClubMembership" [inputId]="'club_' + option.value"></p-radioButton>
+                                    <label [for]="'club_' + option.value" class="radio-label">
+                                        {{ option.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            <small class="error-text" *ngIf="isFieldInvalid('hasClubMembership')">
+                                {{ getFieldError('hasClubMembership') }}
+                            </small>
+                        </div>
+
+                        <!-- Club Name (conditional) -->
+                        <div *ngIf="clientForm.get('hasClubMembership')?.value === 'yes'" class="field-group">
+                            <label for="clubName" class="field-label">اسم النادي <span class="required">*</span></label>
+                            <input id="clubName" type="text" pInputText formControlName="clubName" class="w-full" [class.ng-invalid]="isFieldInvalid('clubName')" placeholder="اذكر اسم النادي" />
+                            <small class="error-text" *ngIf="isFieldInvalid('clubName')">
+                                {{ getFieldError('clubName') }}
+                            </small>
+                        </div>
+
+                        <!-- Leisure Time Activities -->
+                        <div class="field-group">
+                            <label class="field-label">كيف تقضي وقت فراغك؟ <span class="required">*</span></label>
+                            <div class="checkbox-group">
+                                <div *ngFor="let activity of leisureActivities" class="checkbox-item">
+                                    <p-checkbox [value]="activity.value" formControlName="leisureTime" [inputId]="'leisure_' + activity.value"></p-checkbox>
+                                    <label [for]="'leisure_' + activity.value" class="checkbox-label">
+                                        {{ activity.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            <small class="error-text" *ngIf="isFieldInvalid('leisureTime')">
+                                {{ getFieldError('leisureTime') }}
+                            </small>
+                        </div>
+
+                        <!-- Other Leisure Activities -->
+                        <div class="field-group">
+                            <label for="otherLeisureActivities" class="field-label">أنشطة أخرى تقضين بها وقت فراغك</label>
+                            <textarea id="otherLeisureActivities" pInputTextarea formControlName="otherLeisureActivities" rows="2" class="w-full" placeholder="اذكري أي أنشطة أخرى"> </textarea>
+                        </div>
+
+                        <!-- Morning Routine -->
+                        <div class="field-group">
+                            <label for="morningRoutine" class="field-label">الأنشطة الصباحية التي تقومين بها لنفسك <span class="required">*</span></label>
+                            <textarea id="morningRoutine" pInputTextarea formControlName="morningRoutine" rows="3" class="w-full" [class.ng-invalid]="isFieldInvalid('morningRoutine')" placeholder="اذكري روتينك الصباحي الشخصي"> </textarea>
+                            <small class="error-text" *ngIf="isFieldInvalid('morningRoutine')">
+                                {{ getFieldError('morningRoutine') }}
+                            </small>
+                        </div>
+
+                        <!-- Frequent Places -->
+                        <div class="field-group">
+                            <label for="frequentPlaces" class="field-label">أكثر الأماكن التي تترددين عليها في وقت فراغك</label>
+                            <textarea id="frequentPlaces" pInputTextarea formControlName="frequentPlaces" rows="2" class="w-full" placeholder="مثال: نوادي - كافيهات - مراكز تسوق"> </textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Parenting and Advisory -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <i class="pi pi-book ml-2 text-indigo-600"></i>
+                        التربية والاستشارات
+                    </h2>
+
+                    <div class="form-grid">
+                        <!-- Advisory Sources -->
+                        <div class="field-group">
+                            <label class="field-label">مصادر النصائح التربوية <span class="required">*</span></label>
+                            <div class="checkbox-group">
+                                <div *ngFor="let source of advisorySources" class="checkbox-item">
+                                    <p-checkbox [value]="source.value" formControlName="advisorySources" [inputId]="'source_' + source.value"></p-checkbox>
+                                    <label [for]="'source_' + source.value" class="checkbox-label">
+                                        {{ source.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            <small class="error-text" *ngIf="isFieldInvalid('advisorySources')">
+                                {{ getFieldError('advisorySources') }}
+                            </small>
+                        </div>
+
+                        <!-- Consulted Specialist -->
+                        <div class="field-group">
+                            <label class="field-label">هل سبق أن استشرت مختصاً تربوياً؟ <span class="required">*</span></label>
+                            <div class="radio-group">
+                                <div *ngFor="let option of yesNoOptions" class="radio-item">
+                                    <p-radioButton [value]="option.value" formControlName="consultedSpecialist" [inputId]="'specialist_' + option.value"></p-radioButton>
+                                    <label [for]="'specialist_' + option.value" class="radio-label">
+                                        {{ option.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            <small class="error-text" *ngIf="isFieldInvalid('consultedSpecialist')">
+                                {{ getFieldError('consultedSpecialist') }}
+                            </small>
+                        </div>
+
+                        <!-- Uses Parenting Apps -->
+                        <div class="field-group">
+                            <label class="field-label">هل تستخدمين تطبيقات أو مواقع إلكترونية للمساعدة في التربية؟ <span class="required">*</span></label>
+                            <div class="radio-group">
+                                <div *ngFor="let option of yesNoOptions" class="radio-item">
+                                    <p-radioButton [value]="option.value" formControlName="usesParentingApps" [inputId]="'apps_' + option.value"></p-radioButton>
+                                    <label [for]="'apps_' + option.value" class="radio-label">
+                                        {{ option.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            <small class="error-text" *ngIf="isFieldInvalid('usesParentingApps')">
+                                {{ getFieldError('usesParentingApps') }}
+                            </small>
+                        </div>
+
+                        <!-- Parenting Apps Names (conditional) -->
+                        <div *ngIf="clientForm.get('usesParentingApps')?.value === 'yes'" class="field-group">
+                            <label for="parentingAppsNames" class="field-label">أسماء التطبيقات أو المواقع <span class="required">*</span></label>
+                            <textarea id="parentingAppsNames" pInputTextarea formControlName="parentingAppsNames" rows="2" class="w-full" [class.ng-invalid]="isFieldInvalid('parentingAppsNames')" placeholder="اذكري أسماء التطبيقات أو المواقع">
+                            </textarea>
+                            <small class="error-text" *ngIf="isFieldInvalid('parentingAppsNames')">
+                                {{ getFieldError('parentingAppsNames') }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Social Media -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <i class="pi pi-share-alt ml-2 text-pink-600"></i>
+                        وسائل التواصل الاجتماعي
+                    </h2>
+
+                    <div class="form-grid">
+                        <!-- Social Media Behavior -->
+                        <div class="field-group">
+                            <label class="field-label">سلوكك على السوشيال ميديا <span class="required">*</span></label>
+                            <div class="radio-group">
+                                <div *ngFor="let behavior of socialMediaBehaviors" class="radio-item">
+                                    <p-radioButton [value]="behavior.value" formControlName="socialMediaBehavior" [inputId]="'behavior_' + behavior.value"></p-radioButton>
+                                    <label [for]="'behavior_' + behavior.value" class="radio-label">
+                                        {{ behavior.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            <small class="error-text" *ngIf="isFieldInvalid('socialMediaBehavior')">
+                                {{ getFieldError('socialMediaBehavior') }}
+                            </small>
+                        </div>
+
+                        <!-- Social Media Platforms (conditional) -->
+                        <div *ngIf="clientForm.get('socialMediaBehavior')?.value !== 'none'" class="field-group">
+                            <label class="field-label">أكثر منصات السوشيال ميديا استخداماً <span class="required">*</span></label>
+                            <div class="checkbox-group">
+                                <div *ngFor="let platform of socialMediaPlatforms" class="checkbox-item">
+                                    <p-checkbox [value]="platform.value" formControlName="socialMediaPlatforms" [inputId]="'platform_' + platform.value"></p-checkbox>
+                                    <label [for]="'platform_' + platform.value" class="checkbox-label">
+                                        {{ platform.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            <small class="error-text" *ngIf="isFieldInvalid('socialMediaPlatforms')">
+                                {{ getFieldError('socialMediaPlatforms') }}
+                            </small>
+                        </div>
+
+                        <!-- Phone Type -->
+                        <div class="field-group">
+                            <label for="phoneType" class="field-label">نوع الهاتف الذي تستخدميه <span class="required">*</span></label>
+                            <input id="phoneType" type="text" pInputText formControlName="phoneType" class="w-full" [class.ng-invalid]="isFieldInvalid('phoneType')" placeholder="مثال: iPhone 14, Samsung Galaxy S23" />
+                            <small class="error-text" *ngIf="isFieldInvalid('phoneType')">
+                                {{ getFieldError('phoneType') }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Parenting Challenges -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <i class="pi pi-exclamation-triangle ml-2 text-orange-600"></i>
+                        تحديات التربية
+                    </h2>
+
+                    <div class="form-grid">
+                        <!-- Influence Factors -->
+                        <div class="field-group">
+                            <label class="field-label">العوامل المؤثرة في قراراتك التربوية <span class="required">*</span></label>
+                            <div class="checkbox-group">
+                                <div *ngFor="let factor of influenceFactors" class="checkbox-item">
+                                    <p-checkbox [value]="factor.value" formControlName="influenceFactors" [inputId]="'influence_' + factor.value"></p-checkbox>
+                                    <label [for]="'influence_' + factor.value" class="checkbox-label">
+                                        {{ factor.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            <small class="error-text" *ngIf="isFieldInvalid('influenceFactors')">
+                                {{ getFieldError('influenceFactors') }}
+                            </small>
+                        </div>
+
+                        <!-- Other Influence Factors -->
+                        <div class="field-group">
+                            <label for="otherInfluenceFactors" class="field-label">عوامل أو أشخاص أخرين مؤثرين</label>
+                            <textarea id="otherInfluenceFactors" pInputTextarea formControlName="otherInfluenceFactors" rows="2" class="w-full" placeholder="اذكري أي عوامل أو أشخاص أخرين"> </textarea>
+                        </div>
+
+                        <!-- Parenting Challenges -->
+                        <div class="field-group">
+                            <label for="parentingChallenges" class="field-label">أكثر المشاكل أو التحديات التي تقلقك في تربية أطفالك <span class="required">*</span></label>
+                            <textarea
+                                id="parentingChallenges"
+                                pInputTextarea
+                                formControlName="parentingChallenges"
+                                rows="3"
+                                class="w-full"
+                                [class.ng-invalid]="isFieldInvalid('parentingChallenges')"
+                                placeholder="مثال: مشاكل سلوكية / التحصيل الدراسي / قلة الوقت مع الأطفال / تأثير التكنولوجيا"
+                            >
+                            </textarea>
+                            <small class="error-text" *ngIf="isFieldInvalid('parentingChallenges')">
+                                {{ getFieldError('parentingChallenges') }}
+                            </small>
+                        </div>
+
+                        <!-- Parenting Guilt -->
+                        <div class="field-group">
+                            <label for="parentingGuilt" class="field-label">أكثر الجوانب التي تشعرين أنك مقصرة فيها <span class="required">*</span></label>
+                            <textarea id="parentingGuilt" pInputTextarea formControlName="parentingGuilt" rows="3" class="w-full" [class.ng-invalid]="isFieldInvalid('parentingGuilt')" placeholder="اذكري أكثر ما يشعرك بالذنب تجاه تربية أطفالك">
+                            </textarea>
+                            <small class="error-text" *ngIf="isFieldInvalid('parentingGuilt')">
+                                {{ getFieldError('parentingGuilt') }}
+                            </small>
+                        </div>
+
+                        <!-- Compensation Behaviors -->
+                        <div class="field-group">
+                            <label for="compensationBehaviors" class="field-label">التصرفات التي تقومين بها لتعويض شعور التقصير <span class="required">*</span></label>
+                            <textarea
+                                id="compensationBehaviors"
+                                pInputTextarea
+                                formControlName="compensationBehaviors"
+                                rows="3"
+                                class="w-full"
+                                [class.ng-invalid]="isFieldInvalid('compensationBehaviors')"
+                                placeholder="مثال: قضاء مزيد من الوقت معهم / شراء الهدايا / الخروج للنزهة"
+                            >
+                            </textarea>
+                            <small class="error-text" *ngIf="isFieldInvalid('compensationBehaviors')">
+                                {{ getFieldError('compensationBehaviors') }}
+                            </small>
+                        </div>
+
+                        <!-- Parenting Dreams -->
+                        <div class="field-group">
+                            <label for="parentingDreams" class="field-label">ما الذي تحلمين بتحقيقه في تربية أطفالك؟ <span class="required">*</span></label>
+                            <textarea id="parentingDreams" pInputTextarea formControlName="parentingDreams" rows="3" class="w-full" [class.ng-invalid]="isFieldInvalid('parentingDreams')" placeholder="اذكري أحلامك وأهدافك في تربية أطفالك"> </textarea>
+                            <small class="error-text" *ngIf="isFieldInvalid('parentingDreams')">
+                                {{ getFieldError('parentingDreams') }}
+                            </small>
+                        </div>
+
+                        <!-- Advisory Problems -->
+                        <div class="field-group">
+                            <label for="advisoryProblems" class="field-label">أكثر المشكلات في البحث عن استشارات تربوية موثوقة <span class="required">*</span></label>
+                            <textarea
+                                id="advisoryProblems"
+                                pInputTextarea
+                                formControlName="advisoryProblems"
+                                rows="3"
+                                class="w-full"
+                                [class.ng-invalid]="isFieldInvalid('advisoryProblems')"
+                                placeholder="اذكري المشاكل التي تواجهينها في البحث عن نصائح تربوية موثوقة"
+                            >
+                            </textarea>
+                            <small class="error-text" *ngIf="isFieldInvalid('advisoryProblems')">
+                                {{ getFieldError('advisoryProblems') }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- App Preferences -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <i class="pi pi-mobile ml-2 text-cyan-600"></i>
+                        تفضيلات التطبيق
+                    </h2>
+
+                    <div class="form-grid">
+                        <!-- App Motivations -->
+                        <div class="field-group">
+                            <label class="field-label">ما الذي قد يدفعك لاستخدام تطبيق يقدم استشارات تربوية؟ <span class="required">*</span></label>
+                            <div class="checkbox-group">
+                                <div *ngFor="let motivation of appMotivations" class="checkbox-item">
+                                    <p-checkbox [value]="motivation.value" formControlName="appMotivations" [inputId]="'motivation_' + motivation.value"></p-checkbox>
+                                    <label [for]="'motivation_' + motivation.value" class="checkbox-label">
+                                        {{ motivation.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            <small class="error-text" *ngIf="isFieldInvalid('appMotivations')">
+                                {{ getFieldError('appMotivations') }}
+                            </small>
+                        </div>
+
+                        <!-- Content Preference -->
+                        <div class="field-group">
+                            <label class="field-label">أيهما تفضلين أكثر؟ <span class="required">*</span></label>
+                            <div class="radio-group">
+                                <div *ngFor="let content of contentTypes" class="radio-item">
+                                    <p-radioButton [value]="content.value" formControlName="contentPreference" [inputId]="'content_' + content.value"></p-radioButton>
+                                    <label [for]="'content_' + content.value" class="radio-label">
+                                        {{ content.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            <small class="error-text" *ngIf="isFieldInvalid('contentPreference')">
+                                {{ getFieldError('contentPreference') }}
+                            </small>
+                        </div>
+
+                        <!-- Notification Method -->
+                        <div class="field-group">
+                            <label class="field-label">الوسيلة الأفضل لتلقي إشعارات من التطبيق <span class="required">*</span></label>
+                            <div class="radio-group">
+                                <div *ngFor="let method of notificationMethods" class="radio-item">
+                                    <p-radioButton [value]="method.value" formControlName="notificationMethod" [inputId]="'notification_' + method.value"></p-radioButton>
+                                    <label [for]="'notification_' + method.value" class="radio-label">
+                                        {{ method.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            <small class="error-text" *ngIf="isFieldInvalid('notificationMethod')">
+                                {{ getFieldError('notificationMethod') }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <p-button type="submit" label="إرسال النموذج" icon="pi pi-check" styleClass="p-button-success" [disabled]="clientForm.invalid" size="large"> </p-button>
+                    <p-button type="button" label="مسح النموذج" icon="pi pi-times" styleClass="p-button-secondary" (click)="onReset()" size="large"> </p-button>
+                </div>
+            </form>
+        </p-card>
+
+        <!-- Toast Messages -->
+        <p-toast></p-toast>
+    </div>
+</div>
