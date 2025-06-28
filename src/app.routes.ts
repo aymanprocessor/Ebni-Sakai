@@ -30,6 +30,7 @@ export const routes: Routes = [
         path: 'complete-survey',
         loadComponent: () => import('./app/pages/complete-page/complete-page.component').then((m) => m.CompletePageComponent)
     },
+
     {
         path: 'app',
         component: AppLayout,
@@ -120,7 +121,14 @@ export const routes: Routes = [
                 loadComponent: () => import('./app/pages/user-profile/user-profile.component').then((m) => m.UserProfileComponent),
                 canActivate: [authGuard]
             },
-
+            {
+                path: 'privacy-policy',
+                loadComponent: () => import('./app/pages/privacy-policy/privacy-policy.component').then((m) => m.PrivacyPolicyComponent)
+            },
+            {
+                path: 'terms-of-use',
+                loadComponent: () => import('./app/pages/terms-of-use/terms-of-use.component').then((m) => m.TermsOfUseComponent)
+            },
             {
                 path: '',
                 redirectTo: 'dashboard',

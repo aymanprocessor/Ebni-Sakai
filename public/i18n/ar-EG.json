@@ -272,5 +272,13 @@
         "labels": {
             "subscribed": "مشترك"
         }
+    },
+    "footer": {
+        "text": "© 2023 Kid Skills. جميع الحقوق محفوظة.",
+        "privacyPolicy": "سياسة الخصوصية",
+        "termsOfService": "شروط الخدمة",
+        "contactUs": "اتصل بنا",
+        "aboutUs": "من نحن",
+        "madeby": "صُنع بحب في مصر بواسطة فريق Kid Skills."
     }
 }

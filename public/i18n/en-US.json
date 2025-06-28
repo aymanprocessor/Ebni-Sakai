@@ -272,5 +272,13 @@
         "labels": {
             "subscribed": "Subscribed"
         }
+    },
+    "footer": {
+        "text": "© 2023 Kid Skills. All rights reserved.",
+        "privacyPolicy": "Privacy Policy",
+        "termsOfService": "Terms of Service",
+        "contactUs": "Contact Us",
+        "aboutUs": "About Us",
+        "madeby": "Made with ❤️ in Egypt by Kid Skills Team."
     }
 }
