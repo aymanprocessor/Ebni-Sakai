@@ -58,7 +58,8 @@ export class AppMenu implements OnInit {
                     { label: 'navigation.sessions', icon: 'pi pi-fw pi-calendar', routerLink: ['session'] },
                     //  { label: 'navigation.children', icon: 'pi pi-fw pi-users', routerLink: ['children'] },
                     //  { label: 'navigation.survey', icon: 'pi pi-fw pi-file', routerLink: ['survey'] },
-                    { label: 'navigation.user-profile', icon: 'pi pi-fw pi-user', routerLink: ['user-profile'] }
+                    { label: 'navigation.user-profile', icon: 'pi pi-fw pi-user', routerLink: ['user-profile'] },
+                    { label: 'navigation.survey', icon: 'pi pi-fw pi-file', routerLink: ['mini-survey'] }
                 ]
             }
         ];
@@ -75,7 +76,8 @@ export class AppMenu implements OnInit {
                     { label: 'navigation.appointments', icon: 'pi pi-fw pi-calendar-times', routerLink: ['booking/appointments'] },
                     { label: 'navigation.reports', icon: 'pi pi-fw pi-chart-bar', routerLink: ['reports'] },
                     { label: 'navigation.settings', icon: 'pi pi-fw pi-cog', routerLink: ['settings'] },
-                    { label: 'navigation.user-profile', icon: 'pi pi-fw pi-user', routerLink: ['user-profile'] }
+                    { label: 'navigation.user-profile', icon: 'pi pi-fw pi-user', routerLink: ['user-profile'] },
+                    { label: 'navigation.survey', icon: 'pi pi-fw pi-file', routerLink: ['mini-survey'] }
                 ]
             }
         ];
@@ -90,7 +92,8 @@ export class AppMenu implements OnInit {
                     { label: 'navigation.myAppointments', icon: 'pi pi-fw pi-calendar', routerLink: ['specialist-bookings'] },
                     //{ label: 'navigation.schedule', icon: 'pi pi-fw pi-calendar-plus', routerLink: ['booking/appointments'] },
                     //{ label: 'navigation.reports', icon: 'pi pi-fw pi-chart-bar', routerLink: ['reports'] },
-                    { label: 'navigation.user-profile', icon: 'pi pi-fw pi-user', routerLink: ['user-profile'] }
+                    { label: 'navigation.user-profile', icon: 'pi pi-fw pi-user', routerLink: ['user-profile'] },
+                    { label: 'navigation.survey', icon: 'pi pi-fw pi-file', routerLink: ['mini-survey'] }
                 ]
             }
         ];

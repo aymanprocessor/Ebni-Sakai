@@ -5,6 +5,9 @@ import { CommonModule } from '@angular/common';
 import { N8nFirestoreService } from '../../../services/n8n-firestore.service';
 import { firstValueFrom } from 'rxjs';
 import { ButtonModule } from 'primeng/button';
+import { ToolbarModule } from 'primeng/toolbar';
+import { SelectButtonModule } from 'primeng/selectbutton';
+import { RadioButtonModule } from 'primeng/radiobutton';
 
 interface Question {
     id: string;
@@ -37,7 +40,7 @@ interface StorageAnswers {
 
 @Component({
     selector: 'app-mini-survey-qurstions',
-    imports: [CommonModule, ButtonModule],
+    imports: [CommonModule, ButtonModule, ToolbarModule, SelectButtonModule, RadioButtonModule],
     templateUrl: './mini-survey-qurstions.component.html',
     styleUrl: './mini-survey-qurstions.component.scss',
     changeDetection: ChangeDetectionStrategy.Default
@@ -226,11 +229,11 @@ export class MiniSurveyQurstionsComponent implements OnInit {
     }
 
     refreshRoute() {
-  const currentUrl = this.router.url;
-  this.router.navigateByUrl('/mini-survey/' + this.surveyId, { skipLocationChange: true }).then(() => {
-    this.router.navigate([currentUrl]);
-  });
-}
+        const currentUrl = this.router.url;
+        this.router.navigateByUrl('/mini-survey/' + this.surveyId, { skipLocationChange: true }).then(() => {
+            this.router.navigate([currentUrl]);
+        });
+    }
 
     async getAgeRangeBlockQuestions() {
         const response: any = await firstValueFrom(this.n8nFirestoreSerivice.getAgeRangeBlockQuestionsFromStatus(this.surveyId!));
@@ -247,8 +250,6 @@ export class MiniSurveyQurstionsComponent implements OnInit {
             this.loadAnswersFromLocalStorage();
             //refresh page to reflect changes
             this.refreshRoute();
-            
-
         } else {
             if (response.code === 1002) {
                 this.router.navigateByUrl('/error', {
@@ -310,7 +311,7 @@ export class MiniSurveyQurstionsComponent implements OnInit {
         console.log('Processing question response:', response);
         this.questionKeys = Object.keys(response);
         this.questions = this.questionKeys.map((key) => response[key]);
-            this.refreshRoute();
+        this.refreshRoute();
         this.cdr.detectChanges(); // Ensure view updates after processing
     }
 

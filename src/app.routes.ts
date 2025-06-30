@@ -10,14 +10,7 @@ const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['auth/login'])
 const redirectLoggedInToDashboard = () => redirectLoggedInTo(['app/dashboard']);
 export const routes: Routes = [
     { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
-    {
-        path: 'mini-survey',
-        loadComponent: () => import('./app/pages/mini-survey/mini-survey-form/mini-survey-form.component').then((m) => m.MiniSurveyFormComponent)
-    },
-    {
-        path: 'mini-survey/:id',
-        loadComponent: () => import('./app/pages/mini-survey/mini-survey-qurstions/mini-survey-qurstions.component').then((m) => m.MiniSurveyQurstionsComponent)
-    },
+
     {
         path: 'client-profile-form',
         loadComponent: () => import('./app/pages/client-profile-form/client-profile-form.component').then((m) => m.ClientProfileFormComponent)
@@ -89,6 +82,14 @@ export const routes: Routes = [
             {
                 path: 'zoom-meeting/:id',
                 loadComponent: () => import('./app/pages/zoom-meetings/zoom-meetings.component').then((m) => m.ZoomMeetingComponent)
+            },
+            {
+                path: 'mini-survey',
+                loadComponent: () => import('./app/pages/mini-survey/mini-survey-form/mini-survey-form.component').then((m) => m.MiniSurveyFormComponent)
+            },
+            {
+                path: 'mini-survey/:id',
+                loadComponent: () => import('./app/pages/mini-survey/mini-survey-qurstions/mini-survey-qurstions.component').then((m) => m.MiniSurveyQurstionsComponent)
             },
             {
                 path: 'survey',

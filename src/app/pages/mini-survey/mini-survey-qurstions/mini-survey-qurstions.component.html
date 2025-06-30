@@ -1,23 +1,24 @@
-<div class="survey-container">
-    <div class="questions-card" *ngIf="questions.length > 0">
+<div class="container">
+    <div class="card" *ngIf="questions.length > 0">
         <div class="card-header">
             <h2>الأسئلة</h2>
         </div>
-        <div class="questions-list">
-            <div class="question-item" *ngFor="let question of questions; let i = index">
-                <!-- <div class="question-number">{{ i + 1 }}</div> -->
-
-                <div class="question-content">
-                    <h3 class="question-text">{{ question.q }}</h3>
-                    <p class="question-hint" *ngIf="question.th">{{ question.th }}</p>
+        <p-toolbar class="" *ngFor="let question of questions; let i = index">
+            <!-- <div class="question-number">{{ i + 1 }}</div> -->
+            <ng-template #start>
+                <div>
+                    <p class="text-xl font-medium">{{ question.q }}</p>
+                    <p *ngIf="question.th" class="mt-2 text-gray-600">
+                        {{ question.th }}
+                    </p>
                 </div>
+            </ng-template>
 
-                <div class="answer-section">
-                    <button class="answer-btn" [class.selected]="question.ans === 'yes'" (click)="selectAnswer(i, 'yes')">نعم</button>
-                    <button class="answer-btn" [class.selected]="question.ans === 'no'" (click)="selectAnswer(i, 'no')">لا</button>
-                </div>
-            </div>
-        </div>
+            <ng-template #end>
+                <button class="answer-btn ml-2" [class.selected]="question.ans === 'yes'" (click)="selectAnswer(i, 'yes')">نعم</button>
+                <button class="answer-btn" [class.selected]="question.ans === 'no'" (click)="selectAnswer(i, 'no')">لا</button>
+            </ng-template>
+        </p-toolbar>
 
         <div class="submit-section">
             <button pButton class="submit-btn" (click)="nextAgeRange()" [class.disabled]="disableSubmit() || isLoading" [loading]="isLoading">التالي</button>
