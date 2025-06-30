@@ -50,6 +50,7 @@ export class MiniSurveyQurstionsComponent implements OnInit {
     questions: Question[] = [];
     questionKeys: string[] = [];
     isLoading: boolean = false;
+    currentDomain:string = '';
     // Age range navigation
     ageRanges: string[] = ['0-6', '7-12', '13-18', '18-24', '25-36'];
     currentAgeRangeIndex: number = 2; // Default to '13-18'
@@ -238,6 +239,7 @@ export class MiniSurveyQurstionsComponent implements OnInit {
     async getAgeRangeBlockQuestions() {
         const response: any = await firstValueFrom(this.n8nFirestoreSerivice.getAgeRangeBlockQuestionsFromStatus(this.surveyId!));
         console.log('Response Question:', response);
+        this.currentDomain = response.currentDomainAr;
         if (response.success) {
             if (response.status.isCompleted === 'true') {
                 this.router.navigateByUrl('complete-survey');
@@ -249,7 +251,7 @@ export class MiniSurveyQurstionsComponent implements OnInit {
             // Load any existing answers
             this.loadAnswersFromLocalStorage();
             //refresh page to reflect changes
-            this.refreshRoute();
+           // this.refreshRoute();
         } else {
             if (response.code === 1002) {
                 this.router.navigateByUrl('/error', {

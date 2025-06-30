@@ -1,7 +1,7 @@
 <div class="container">
     <div class="card" *ngIf="questions.length > 0">
         <div class="card-header">
-            <h2>الأسئلة</h2>
+            <h2>{{currentDomain}}</h2>
         </div>
         <p-toolbar class="" *ngFor="let question of questions; let i = index">
             <!-- <div class="question-number">{{ i + 1 }}</div> -->
