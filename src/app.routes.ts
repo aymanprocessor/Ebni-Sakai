@@ -19,10 +19,6 @@ export const routes: Routes = [
         path: 'error',
         loadComponent: () => import('./app/pages/error-page/error-page.component').then((m) => m.ErrorPageComponent)
     },
-    {
-        path: 'complete-survey',
-        loadComponent: () => import('./app/pages/complete-page/complete-page.component').then((m) => m.CompletePageComponent)
-    },
 
     {
         path: 'app',
@@ -90,6 +86,10 @@ export const routes: Routes = [
             {
                 path: 'mini-survey/:id',
                 loadComponent: () => import('./app/pages/mini-survey/mini-survey-qurstions/mini-survey-qurstions.component').then((m) => m.MiniSurveyQurstionsComponent)
+            },
+            {
+                path: 'complete-survey',
+                loadComponent: () => import('./app/pages/complete-page/complete-page.component').then((m) => m.CompletePageComponent)
             },
             {
                 path: 'survey',

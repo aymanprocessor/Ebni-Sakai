@@ -10,6 +10,6 @@ export class CompletePageComponent {
     constructor(private router: Router) {}
 
     goToForm(): void {
-        this.router.navigate(['/mini-survey']);
+        this.router.navigate(['app/mini-survey']);
     }
 }

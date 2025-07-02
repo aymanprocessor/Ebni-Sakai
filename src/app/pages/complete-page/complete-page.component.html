@@ -1,20 +1,28 @@
-<div class="container">
-    <div class="card">
+<div class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transition-colors duration-300">
         <!-- Logo Section -->
-        <div class="logo-section">
-            <div class="logo-container">
-                <img src="assets/images/Logo 2.png" alt="logo" class="logo" />
+        <div class="bg-gradient-to-r from-blue-500 to-purple-600 p-8 text-center">
+            <div class="w-20 h-20 mx-auto mb-4 bg-white dark:bg-gray-200 rounded-full flex items-center justify-center shadow-lg">
+                <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
             </div>
         </div>
 
         <!-- Content Section -->
-        <div class="content-section">
-            <div class="content">
-                <h2>تم إكمال الاستبيان بنجاح</h2>
-                <p>شكرًا لمشاركتك. تم إرسال جميع إجاباتك بنجاح.</p>
+        <div class="p-8">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">تم إكمال الاستبيان بنجاح</h2>
+                <p class="text-gray-600 dark:text-gray-300 leading-relaxed">شكرًا لمشاركتك. تم إرسال جميع إجاباتك بنجاح.</p>
             </div>
-            <div class="action-buttons text-center">
-                <button class="btn btn-primary" (click)="goToForm()">الرجوع الى تسجيل الاستمارة</button>
+
+            <div class="text-center">
+                <button
+                    (click)="goToForm()"
+                    class="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+                >
+                    الرجوع الى تسجيل الاستمارة
+                </button>
             </div>
         </div>
     </div>

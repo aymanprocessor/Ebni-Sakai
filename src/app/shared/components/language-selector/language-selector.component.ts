@@ -41,6 +41,8 @@ export class LanguageSelectorComponent implements OnInit {
                 this.selectedLanguage = found;
                 this.applyLanguage(found);
             }
+        } else {
+            this.applyLanguage(this.languages[0]);
         }
     }
 

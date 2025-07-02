@@ -8,9 +8,11 @@ import { ButtonModule } from 'primeng/button';
 import { ToolbarModule } from 'primeng/toolbar';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { RadioButtonModule } from 'primeng/radiobutton';
+import { CardModule } from 'primeng/card';
 
 interface Question {
     id: string;
+    domain: string;
     ans: string;
     q: string;
     th?: string;
@@ -28,19 +30,20 @@ interface AgeRangeData {
 }
 
 interface StorageAnswers {
-    [ageRange: string]: {
-        [questionId: string]: {
-            questionIndex: number;
-            question: string;
-            answer: string;
-            ageRange: string;
+    [domain: string]: {
+        [ageRange: string]: {
+            [questionId: string]: {
+                questionIndex: number;
+                question: string;
+                answer: string;
+            };
         };
     };
 }
 
 @Component({
     selector: 'app-mini-survey-qurstions',
-    imports: [CommonModule, ButtonModule, ToolbarModule, SelectButtonModule, RadioButtonModule],
+    imports: [CommonModule, ButtonModule, ToolbarModule, SelectButtonModule, RadioButtonModule, CardModule],
     templateUrl: './mini-survey-qurstions.component.html',
     styleUrl: './mini-survey-qurstions.component.scss',
     changeDetection: ChangeDetectionStrategy.Default
@@ -50,10 +53,11 @@ export class MiniSurveyQurstionsComponent implements OnInit {
     questions: Question[] = [];
     questionKeys: string[] = [];
     isLoading: boolean = false;
-    currentDomain:string = '';
+    currentDomainAr: string = '';
+    currentDomainEn: string = '';
     // Age range navigation
-    ageRanges: string[] = ['0-6', '7-12', '13-18', '18-24', '25-36'];
-    currentAgeRangeIndex: number = 2; // Default to '13-18'
+    ageRanges: string[] = ['0-6', '7-12', '13-18', '18-24', '25-36', '37-42', '43-54', '55-66', '67-78', '79-90'];
+    currentAgeRangeIndex: number = 0; // Default to '13-18'
 
     // Local storage keys
     private get ageRangeStackKey(): string {
@@ -79,14 +83,6 @@ export class MiniSurveyQurstionsComponent implements OnInit {
 
     get currentAgeRange(): string {
         return this.ageRanges[this.currentAgeRangeIndex];
-    }
-
-    get canGoToNextAgeRange(): boolean {
-        return this.currentAgeRangeIndex < this.ageRanges.length - 1;
-    }
-
-    get canGoToPrevAgeRange(): boolean {
-        return this.currentAgeRangeIndex > 0;
     }
 
     // Local Storage Methods
@@ -120,20 +116,25 @@ export class MiniSurveyQurstionsComponent implements OnInit {
         try {
             // Get existing answers from localStorage
             const existingAnswers: StorageAnswers = this.getStoredAnswers();
+            const currentDomain = this.currentDomainEn.toLowerCase();
 
-            // Initialize age range if it doesn't exist
-            if (!existingAnswers[this.currentAgeRange]) {
-                existingAnswers[this.currentAgeRange] = {};
+            // Initialize domain if it doesn't exist
+            if (!existingAnswers[currentDomain]) {
+                existingAnswers[currentDomain] = {};
             }
 
-            // Save current age range answers
+            // Initialize age range within domain if it doesn't exist
+            if (!existingAnswers[currentDomain][this.currentAgeRange]) {
+                existingAnswers[currentDomain][this.currentAgeRange] = {};
+            }
+
+            // Save current age range answers for the current domain
             this.questionKeys.forEach((key, index) => {
                 if (this.questions[index] && this.questions[index].ans) {
-                    existingAnswers[this.currentAgeRange][key] = {
+                    existingAnswers[currentDomain][this.currentAgeRange][key] = {
                         questionIndex: index + 1,
                         question: this.questions[index].q,
-                        answer: this.questions[index].ans,
-                        ageRange: this.currentAgeRange
+                        answer: this.questions[index].ans
                     };
                 }
             });
@@ -157,7 +158,9 @@ export class MiniSurveyQurstionsComponent implements OnInit {
     private loadAnswersFromLocalStorage() {
         try {
             const storedAnswers = this.getStoredAnswers();
-            const currentAgeRangeAnswers = storedAnswers[this.currentAgeRange];
+            const currentDomain = this.currentDomainEn.toLowerCase();
+            const currentDomainAnswers = storedAnswers[currentDomain];
+            const currentAgeRangeAnswers = currentDomainAnswers?.[this.currentAgeRange];
 
             if (currentAgeRangeAnswers && this.questions.length > 0) {
                 this.questionKeys.forEach((key, index) => {
@@ -175,11 +178,15 @@ export class MiniSurveyQurstionsComponent implements OnInit {
         const storedAnswers = this.getStoredAnswers();
         const allAnswers: any[] = [];
 
-        Object.keys(storedAnswers).forEach((ageRange) => {
-            Object.keys(storedAnswers[ageRange]).forEach((questionId) => {
-                allAnswers.push({
-                    questionId,
-                    ...storedAnswers[ageRange][questionId]
+        Object.keys(storedAnswers).forEach((domain) => {
+            Object.keys(storedAnswers[domain]).forEach((ageRange) => {
+                Object.keys(storedAnswers[domain][ageRange]).forEach((questionId) => {
+                    allAnswers.push({
+                        questionId,
+                        domain,
+                        ageRange,
+                        ...storedAnswers[domain][ageRange][questionId]
+                    });
                 });
             });
         });
@@ -239,10 +246,11 @@ export class MiniSurveyQurstionsComponent implements OnInit {
     async getAgeRangeBlockQuestions() {
         const response: any = await firstValueFrom(this.n8nFirestoreSerivice.getAgeRangeBlockQuestionsFromStatus(this.surveyId!));
         console.log('Response Question:', response);
-        this.currentDomain = response.currentDomainAr;
+        this.currentDomainAr = response.currentDomainAr;
+        this.currentDomainEn = response.currentDomainEn;
         if (response.success) {
             if (response.status.isCompleted === 'true') {
-                this.router.navigateByUrl('complete-survey');
+                this.router.navigateByUrl('app/complete-survey');
                 return;
             }
             this.processQuestionResponse(response.questions);
@@ -251,7 +259,7 @@ export class MiniSurveyQurstionsComponent implements OnInit {
             // Load any existing answers
             this.loadAnswersFromLocalStorage();
             //refresh page to reflect changes
-           // this.refreshRoute();
+            // this.refreshRoute();
         } else {
             if (response.code === 1002) {
                 this.router.navigateByUrl('/error', {
@@ -281,32 +289,12 @@ export class MiniSurveyQurstionsComponent implements OnInit {
             console.error('Error:', error);
         } finally {
             this.isLoading = false;
-            window.location.reload(); // Reload the page to reflect changes
+            // window.location.reload(); // Reload the page to reflect changes
         }
     }
 
     disableSubmit() {
         return this.questions.some((question) => question.ans === '');
-    }
-    prevAgeRange() {
-        if (this.canGoToPrevAgeRange) {
-            // Save current answers before navigating
-            this.saveCurrentAnswersToLocalStorage();
-
-            this.n8nFirestoreSerivice.prevAgeRange(this.surveyId!).subscribe({
-                next: (response) => {
-                    console.log('Response:', response);
-                    this.processQuestionResponse(response);
-                    // Cache the data
-                    this.cacheAgeRangeData(this.currentAgeRange, this.questions, this.questionKeys);
-                    // Load any existing answers
-                    this.loadAnswersFromLocalStorage();
-                },
-                error: (error) => {
-                    console.error('Error:', error);
-                }
-            });
-        }
     }
 
     processQuestionResponse(response: any) {
@@ -319,6 +307,7 @@ export class MiniSurveyQurstionsComponent implements OnInit {
 
     selectAnswer(questionIndex: number, answer: 'yes' | 'no') {
         this.questions[questionIndex].ans = answer;
+        this.questions[questionIndex].domain = this.currentDomainEn.toLowerCase(); // Set domain for the question
         // Auto-save answers when user selects an answer
         this.saveCurrentAnswersToLocalStorage();
     }
@@ -329,7 +318,7 @@ export class MiniSurveyQurstionsComponent implements OnInit {
 
         // Get all stored answers
         const allAnswers = this.getAllStoredAnswers();
-        console.log('All answers from all age ranges:', allAnswers);
+        console.log('All answers from all domains and age ranges:', allAnswers);
 
         const payload = {
             id: this.surveyId,
@@ -377,7 +366,8 @@ export class MiniSurveyQurstionsComponent implements OnInit {
             questionIndex: index + 1,
             question: this.questions[index].q,
             answer: this.questions[index].ans,
-            ageRange: this.currentAgeRange
+            ageRange: this.currentAgeRange,
+            domain: this.questions[index].domain // Ensure domain is set
         }));
     }
 

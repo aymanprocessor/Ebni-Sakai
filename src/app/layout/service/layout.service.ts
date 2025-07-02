@@ -26,6 +26,8 @@ interface MenuChangeEvent {
     providedIn: 'root'
 })
 export class LayoutService {
+    private readonly STORAGE_KEY = 'layout-config';
+
     _config: layoutConfig = {
         preset: 'Aura',
         primary: 'purple',
@@ -79,10 +81,14 @@ export class LayoutService {
     private initialized = false;
 
     constructor() {
+        // Load saved configuration from localStorage
+        this.loadConfigFromStorage();
+
         effect(() => {
             const config = this.layoutConfig();
             if (config) {
                 this.onConfigUpdate();
+                this.saveConfigToStorage(config);
             }
         });
 
@@ -174,5 +180,35 @@ export class LayoutService {
 
     reset() {
         this.resetSource.next(true);
+    }
+
+    private loadConfigFromStorage(): void {
+        try {
+            if (typeof window !== 'undefined' && window.localStorage) {
+                const savedConfig = localStorage.getItem(this.STORAGE_KEY);
+                if (savedConfig) {
+                    const parsedConfig = JSON.parse(savedConfig);
+                    this._config = { ...this._config, ...parsedConfig };
+                    this.layoutConfig.set(this._config);
+
+                    // Apply dark mode immediately if it was saved
+                    if (this._config.darkTheme) {
+                        document.documentElement.classList.add('app-dark');
+                    }
+                }
+            }
+        } catch (error) {
+            console.warn('Failed to load layout configuration from localStorage:', error);
+        }
+    }
+
+    private saveConfigToStorage(config: layoutConfig): void {
+        try {
+            if (typeof window !== 'undefined' && window.localStorage) {
+                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(config));
+            }
+        } catch (error) {
+            console.warn('Failed to save layout configuration to localStorage:', error);
+        }
     }
 }

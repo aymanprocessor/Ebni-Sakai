@@ -1,24 +1,22 @@
 <div class="container">
     <div class="card" *ngIf="questions.length > 0">
         <div class="card-header">
-            <h2>{{currentDomain}}</h2>
+            <h2>{{ currentDomainAr }}</h2>
         </div>
-        <p-toolbar class="" *ngFor="let question of questions; let i = index">
+        <div class="flex flex-col md:flex-row mb-5 border shadow rounded-lg p-5" *ngFor="let question of questions; let i = index">
             <!-- <div class="question-number">{{ i + 1 }}</div> -->
-            <ng-template #start>
-                <div>
-                    <p class="text-xl font-medium">{{ question.q }}</p>
-                    <p *ngIf="question.th" class="mt-2 text-gray-600">
-                        {{ question.th }}
-                    </p>
-                </div>
-            </ng-template>
+            <div class="flex-1">
+                <p class="text-xl font-medium">{{ question.q }}</p>
+                <p *ngIf="question.th" class="mt-2 text-lg text-gray-600 dark:text-gray-300">
+                    {{ question.th }}
+                </p>
+            </div>
 
-            <ng-template #end>
+            <div class="flex self-center justify-end mt-4 md:mt-0">
                 <button class="answer-btn ml-2" [class.selected]="question.ans === 'yes'" (click)="selectAnswer(i, 'yes')">نعم</button>
                 <button class="answer-btn" [class.selected]="question.ans === 'no'" (click)="selectAnswer(i, 'no')">لا</button>
-            </ng-template>
-        </p-toolbar>
+            </div>
+        </div>
 
         <div class="submit-section">
             <button pButton class="submit-btn" (click)="nextAgeRange()" [class.disabled]="disableSubmit() || isLoading" [loading]="isLoading">التالي</button>
