@@ -1,59 +1,67 @@
-# Sakai19
+# Programming Portfolio Dashboard
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.0.6.
+![Dashboard Preview](screenshot.png)
 
-## Development server
+A comprehensive dashboard to showcase programming projects, skills, and achievements. Built with modern web technologies for a responsive and interactive experience.
 
-To start a local development server, run:
+## Features
 
+- Project showcase with filtering by technology/tags
+- Skills visualization (charts/graphs)
+- Interactive timeline of experience
+- Contact form
+- Dark/light mode toggle
+- Responsive design for all devices
+
+## Technologies Used
+
+- Frontend: React.js, TypeScript, Tailwind CSS
+- Charts: Chart.js
+- Backend (optional): Node.js, Express
+- Database (optional): MongoDB
+
+## Installation
+
+1. Clone the repository:
 ```bash
-ng serve
+git clone https://github.com/yourusername/portfolio-dashboard.git
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
+2. Install dependencies:
 ```bash
-ng generate component component-name
+cd portfolio-dashboard
+npm install
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
+3. Start development server:
 ```bash
-ng generate --help
+npm start
 ```
 
-## Building
+## Usage
 
-To build the project run:
+After starting the development server, open [http://localhost:3000](http://localhost:3000) in your browser.
 
-```bash
-ng build
-```
+To customize:
+1. Edit `src/data/projects.js` to add your projects
+2. Modify `src/data/skills.js` to update your skills
+3. Update `src/components/About.js` with your personal information
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## Screenshots
 
-## Running unit tests
+![Projects Section](screenshots/projects.png)
+![Skills Section](screenshots/skills.png)
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+## Contributing
 
-```bash
-ng test
-```
+Contributions are welcome! Please follow these steps:
 
-## Running end-to-end tests
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-For end-to-end (e2e) testing, run:
+## License
 
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Distributed under the MIT License. See `LICENSE` for more information.
