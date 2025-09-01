@@ -1,0 +1,1048 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>لعبة المرونة في نقل الانتباه</title>
+        <style>
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: 'Arial', sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                direction: rtl;
+            }
+
+            .game-container {
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+                padding: 30px;
+                max-width: 900px;
+                width: 90%;
+                text-align: center;
+            }
+
+            .game-header {
+                margin-bottom: 30px;
+            }
+
+            .game-title {
+                font-size: 28px;
+                color: #4a5568;
+                margin-bottom: 10px;
+                font-weight: bold;
+            }
+
+            .level-info {
+                background: linear-gradient(45deg, #ff6b6b, #feca57);
+                color: white;
+                padding: 10px 20px;
+                border-radius: 25px;
+                display: inline-block;
+                font-size: 18px;
+                font-weight: bold;
+                margin-bottom: 10px;
+            }
+
+            .score-board {
+                display: flex;
+                justify-content: center;
+                gap: 20px;
+                margin-bottom: 20px;
+            }
+
+            .score-item {
+                background: #f7fafc;
+                padding: 10px 15px;
+                border-radius: 15px;
+                border: 2px solid #e2e8f0;
+            }
+
+            .stars {
+                font-size: 24px;
+                margin-bottom: 10px;
+            }
+
+            .game-content {
+                display: flex;
+                justify-content: space-around;
+                align-items: flex-start;
+                gap: 30px;
+                margin-bottom: 30px;
+                flex-wrap: wrap;
+            }
+
+            .pattern-section,
+            .answer-section {
+                flex: 1;
+                min-width: 200px;
+            }
+
+            .section-title {
+                font-size: 18px;
+                color: #2d3748;
+                margin-bottom: 15px;
+                font-weight: bold;
+            }
+
+            .grid {
+                display: grid;
+                gap: 5px;
+                margin: 0 auto;
+                justify-content: center;
+            }
+
+            .grid-2x2 {
+                grid-template-columns: repeat(2, 70px);
+            }
+            .grid-3x3 {
+                grid-template-columns: repeat(3, 60px);
+            }
+            .grid-4x4 {
+                grid-template-columns: repeat(4, 50px);
+            }
+
+            .cell {
+                aspect-ratio: 1;
+                border: 3px solid #2d3748;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 18px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                background: white;
+            }
+
+            .cell:hover {
+                transform: scale(1.05);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .cell.filled {
+                cursor: default;
+            }
+
+            .color-palette {
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+                margin-top: 20px;
+                flex-wrap: wrap;
+            }
+
+            .color-btn {
+                width: 60px;
+                height: 60px;
+                border: 3px solid #2d3748;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                font-size: 16px;
+            }
+
+            .color-btn:hover {
+                transform: scale(1.1);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            }
+
+            .color-btn.selected {
+                border-width: 5px;
+                border-color: #f56565;
+            }
+
+            .control-buttons {
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+                margin-top: 30px;
+            }
+
+            .btn {
+                padding: 12px 25px;
+                border: none;
+                border-radius: 25px;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .btn-primary {
+                background: linear-gradient(45deg, #4caf50, #45a049);
+                color: white;
+            }
+
+            .btn-secondary {
+                background: linear-gradient(45deg, #2196f3, #1976d2);
+                color: white;
+            }
+
+            .btn-warning {
+                background: linear-gradient(45deg, #ff9800, #f57c00);
+                color: white;
+            }
+
+            .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .btn:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+            .legend {
+                background: #f7fafc;
+                border: 2px solid #e2e8f0;
+                border-radius: 15px;
+                padding: 15px;
+                margin: 20px auto;
+                max-width: 400px;
+            }
+
+            .legend-title {
+                font-weight: bold;
+                margin-bottom: 10px;
+                color: #2d3748;
+            }
+
+            .legend-item {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                margin: 5px 10px;
+            }
+
+            .legend-color {
+                width: 25px;
+                height: 25px;
+                border: 2px solid #2d3748;
+                border-radius: 5px;
+            }
+
+            .success-message {
+                background: linear-gradient(45deg, #4caf50, #45a049);
+                color: white;
+                padding: 15px;
+                border-radius: 15px;
+                margin: 20px 0;
+                font-size: 18px;
+                font-weight: bold;
+            }
+
+            .error-message {
+                background: linear-gradient(45deg, #f44336, #d32f2f);
+                color: white;
+                padding: 15px;
+                border-radius: 15px;
+                margin: 20px 0;
+                font-size: 18px;
+                font-weight: bold;
+            }
+
+            @keyframes bounce {
+                0%,
+                20%,
+                60%,
+                100% {
+                    transform: translateY(0);
+                }
+                40% {
+                    transform: translateY(-10px);
+                }
+                80% {
+                    transform: translateY(-5px);
+                }
+            }
+
+            .bounce {
+                animation: bounce 0.6s ease;
+            }
+
+            @keyframes shake {
+                0%,
+                100% {
+                    transform: translateX(0);
+                }
+                10%,
+                30%,
+                50%,
+                70%,
+                90% {
+                    transform: translateX(-5px);
+                }
+                20%,
+                40%,
+                60%,
+                80% {
+                    transform: translateX(5px);
+                }
+            }
+
+            .shake {
+                animation: shake 0.6s ease;
+            }
+
+            @keyframes glitter {
+                0% {
+                    transform: scale(1) rotate(0deg);
+                    box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+                }
+                25% {
+                    transform: scale(1.1) rotate(90deg);
+                    box-shadow:
+                        0 0 20px rgba(255, 215, 0, 1),
+                        0 0 30px rgba(255, 255, 255, 0.8);
+                }
+                50% {
+                    transform: scale(1) rotate(180deg);
+                    box-shadow: 0 0 15px rgba(255, 215, 0, 0.9);
+                }
+                75% {
+                    transform: scale(1.1) rotate(270deg);
+                    box-shadow:
+                        0 0 25px rgba(255, 215, 0, 1),
+                        0 0 35px rgba(255, 255, 255, 0.9);
+                }
+                100% {
+                    transform: scale(1) rotate(360deg);
+                    box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+                }
+            }
+
+            @keyframes confetti {
+                0% {
+                    transform: translateY(0) rotate(0deg);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateY(-100vh) rotate(720deg);
+                    opacity: 0;
+                }
+            }
+
+            .confetti-piece {
+                position: fixed;
+                width: 10px;
+                height: 10px;
+                background: #ff6b6b;
+                animation: confetti 3s linear forwards;
+                z-index: 1000;
+            }
+
+            .glitter {
+                animation: glitter 1s ease;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="game-container">
+            <div class="game-header">
+                <h1 class="game-title">🧩 لعبة المرونة في نقل الانتباه 🧩</h1>
+                <div class="level-info" id="levelInfo">المستوى 1 - الصفحة 1</div>
+                <div class="score-board">
+                    <div class="score-item">
+                        <div class="stars" id="stars">⭐⭐⭐</div>
+                        <div>النجوم: <span id="starCount">3</span></div>
+                    </div>
+                    <div class="score-item">
+                        <div>النقاط: <span id="score">0</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-content">
+                <div class="pattern-section">
+                    <h3 class="section-title">النموذج</h3>
+                    <div class="grid grid-2x2" id="patternGrid"></div>
+                </div>
+
+                <div class="answer-section">
+                    <h3 class="section-title">أكمل النموذج</h3>
+                    <div class="grid grid-2x2" id="answerGrid"></div>
+                </div>
+            </div>
+
+            <div class="legend" id="legend" style="display: none">
+                <div class="legend-title">مفتاح الألوان:</div>
+                <div id="legendContent"></div>
+            </div>
+
+            <div class="color-palette" id="colorPalette"></div>
+
+            <div class="control-buttons">
+                <button class="btn btn-primary" onclick="checkAnswer()">تحقق من الإجابة</button>
+                <button class="btn btn-secondary" onclick="nextPage()">الصفحة التالية</button>
+                <button class="btn btn-warning" onclick="resetPage()">إعادة تعيين</button>
+            </div>
+
+            <div id="messageArea"></div>
+        </div>
+
+        <script>
+            // Game state
+            let currentLevel = 1;
+            let currentPage = 1;
+            let score = 0;
+            let stars = 3;
+            let selectedColor = null;
+            let gameData = {};
+            let audioContext;
+            let isAudioInitialized = false;
+
+            // Game levels data
+            const levels = {
+                1: {
+                    // Level 1: Direct color matching
+                    pages: [
+                        {
+                            gridSize: '2x2',
+                            pattern: [
+                                { color: '#FFD700', filled: true },
+                                { color: '#32CD32', filled: true },
+                                { color: '#32CD32', filled: true },
+                                { color: '#FFD700', filled: true }
+                            ],
+                            colors: ['#FFD700', '#32CD32', '#FF6347', '#4169E1']
+                        },
+                        {
+                            gridSize: '2x2',
+                            pattern: [
+                                { color: '#4169E1', filled: true },
+                                { color: '#FF0000', filled: true },
+                                { color: '#FF0000', filled: true },
+                                { color: '#4169E1', filled: true }
+                            ],
+                            colors: ['#4169E1', '#FF0000', '#FFD700', '#32CD32', '#FF6347']
+                        },
+                        {
+                            gridSize: '3x3',
+                            pattern: [
+                                { color: '#FFD700', filled: true },
+                                { color: '#FFD700', filled: true },
+                                { color: '#32CD32', filled: true },
+                                { color: '#FF0000', filled: true },
+                                { color: '#FF0000', filled: true },
+                                { color: '#4169E1', filled: true },
+                                { color: '#32CD32', filled: true },
+                                { color: '#4169E1', filled: true },
+                                { color: '#FFD700', filled: true }
+                            ],
+                            colors: ['#FFD700', '#32CD32', '#FF0000', '#4169E1', '#FF6347', '#9932CC']
+                        }
+                    ]
+                },
+                2: {
+                    // Level 2: Number to color matching
+                    legend: { 1: '#FF0000', 2: '#32CD32', 3: '#FFD700' },
+                    pages: [
+                        {
+                            gridSize: '3x3',
+                            pattern: [
+                                { number: 1, filled: true },
+                                { number: 2, filled: true },
+                                { number: 3, filled: true },
+                                { number: 2, filled: true },
+                                { number: 3, filled: true },
+                                { number: 1, filled: true },
+                                { number: 3, filled: true },
+                                { number: 1, filled: true },
+                                { number: 2, filled: true }
+                            ],
+                            colors: ['#FF0000', '#32CD32', '#FFD700', '#4169E1', '#FF6347']
+                        },
+                        {
+                            gridSize: '3x3',
+                            pattern: [
+                                { number: 2, filled: true },
+                                { number: 1, filled: true },
+                                { number: 2, filled: true },
+                                { number: 1, filled: true },
+                                { number: 3, filled: true },
+                                { number: 1, filled: true },
+                                { number: 2, filled: true },
+                                { number: 1, filled: true },
+                                { number: 2, filled: true }
+                            ],
+                            colors: ['#FF0000', '#32CD32', '#FFD700', '#4169E1', '#FF6347']
+                        },
+                        {
+                            gridSize: '3x3',
+                            pattern: [
+                                { number: 1, filled: true },
+                                { number: 1, filled: true },
+                                { number: 2, filled: true },
+                                { number: 1, filled: true },
+                                { number: 2, filled: true },
+                                { number: 3, filled: true },
+                                { number: 2, filled: true },
+                                { number: 3, filled: true },
+                                { number: 3, filled: true }
+                            ],
+                            colors: ['#FF0000', '#32CD32', '#FFD700', '#4169E1', '#FF6347']
+                        }
+                    ]
+                },
+                3: {
+                    // Level 3: Advanced number-color conversion
+                    legend: { 1: '#32CD32', 2: '#4169E1', 3: '#FFD700', 4: '#FF69B4', 5: '#FFA500', 6: '#FF0000', 7: '#87CEEB', 8: '#9932CC', 9: '#FFFFFF' },
+                    pages: [
+                        {
+                            gridSize: '4x4',
+                            pattern: [
+                                { number: 9, filled: true },
+                                { number: 6, filled: true },
+                                { number: 3, filled: true },
+                                { number: 1, filled: true },
+                                { number: 2, filled: true },
+                                { number: 4, filled: true },
+                                { number: 6, filled: true },
+                                { number: 9, filled: true },
+                                { number: 1, filled: true },
+                                { number: 7, filled: true },
+                                { number: 2, filled: true },
+                                { number: 8, filled: true },
+                                { number: 5, filled: true },
+                                { number: 8, filled: true },
+                                { number: 5, filled: true },
+                                { number: 7, filled: true }
+                            ],
+                            colors: ['#32CD32', '#4169E1', '#FFD700', '#FF69B4', '#FFA500', '#FF0000', '#87CEEB', '#9932CC', '#FFFFFF']
+                        },
+                        {
+                            gridSize: '4x4',
+                            pattern: [
+                                { color: '#9932CC', filled: true },
+                                { color: '#FFFFFF', filled: true },
+                                { color: '#FFFFFF', filled: true },
+                                { color: '#FFFFFF', filled: true },
+                                { color: '#9932CC', filled: true },
+                                { color: '#FFA500', filled: true },
+                                { color: '#87CEEB', filled: true },
+                                { color: '#4169E1', filled: true },
+                                { color: '#32CD32', filled: true },
+                                { color: '#FF69B4', filled: true },
+                                { color: '#FFFFFF', filled: true },
+                                { color: '#FFD700', filled: true },
+                                { color: '#FFA500', filled: true },
+                                { color: '#32CD32', filled: true },
+                                { color: '#FF0000', filled: true },
+                                { color: '#9932CC', filled: true }
+                            ],
+                            colors: ['#32CD32', '#4169E1', '#FFD700', '#FF69B4', '#FFA500', '#FF0000', '#87CEEB', '#9932CC', '#FFFFFF']
+                        },
+                        {
+                            gridSize: '4x4',
+                            pattern: [
+                                { number: 3, filled: true },
+                                { color: '#4169E1', filled: true },
+                                { number: 7, filled: true },
+                                { color: '#32CD32', filled: true },
+                                { color: '#FF0000', filled: true },
+                                { number: 4, filled: true },
+                                { color: '#9932CC', filled: true },
+                                { number: 2, filled: true },
+                                { number: 9, filled: true },
+                                { color: '#FFD700', filled: true },
+                                { number: 1, filled: true },
+                                { color: '#FFA500', filled: true },
+                                { color: '#87CEEB', filled: true },
+                                { number: 8, filled: true },
+                                { color: '#FF69B4', filled: true },
+                                { number: 6, filled: true }
+                            ],
+                            colors: ['#32CD32', '#4169E1', '#FFD700', '#FF69B4', '#FFA500', '#FF0000', '#87CEEB', '#9932CC', '#FFFFFF']
+                        }
+                    ]
+                }
+            };
+
+            function initAudio() {
+                if (!isAudioInitialized && window.AudioContext) {
+                    try {
+                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        isAudioInitialized = true;
+                    } catch (e) {
+                        console.log('Audio context not available');
+                    }
+                }
+            }
+
+            // Create glitter/success sound effect
+            function createGlitterSound() {
+                if (!audioContext) return;
+
+                const duration = 0.8;
+                const gainNode = audioContext.createGain();
+                gainNode.connect(audioContext.destination);
+
+                // Create multiple oscillators for sparkle effect
+                for (let i = 0; i < 5; i++) {
+                    const oscillator = audioContext.createOscillator();
+                    const noteGain = audioContext.createGain();
+
+                    oscillator.connect(noteGain);
+                    noteGain.connect(gainNode);
+
+                    // Random high frequencies for sparkle
+                    const freq = 800 + Math.random() * 1200;
+                    oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(freq * 2, audioContext.currentTime + 0.1);
+
+                    // Quick attack, slow decay
+                    noteGain.gain.setValueAtTime(0, audioContext.currentTime);
+                    noteGain.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.01);
+                    noteGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+
+                    oscillator.start(audioContext.currentTime + i * 0.1);
+                    oscillator.stop(audioContext.currentTime + duration);
+                }
+            }
+
+            // Create buzzer/error sound effect
+            function createBuzzerSound() {
+                if (!audioContext) return;
+
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                // Low frequency buzz
+                oscillator.frequency.setValueAtTime(150, audioContext.currentTime);
+                oscillator.type = 'sawtooth';
+
+                // Sharp attack, quick decay
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.01);
+                gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.3);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            }
+
+            // Create level up sound effect
+            function createLevelUpSound() {
+                if (!audioContext) return;
+
+                const gainNode = audioContext.createGain();
+                gainNode.connect(audioContext.destination);
+
+                // Ascending notes
+                const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
+
+                notes.forEach((freq, index) => {
+                    const oscillator = audioContext.createOscillator();
+                    const noteGain = audioContext.createGain();
+
+                    oscillator.connect(noteGain);
+                    noteGain.connect(gainNode);
+
+                    oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+                    oscillator.type = 'sine';
+
+                    const startTime = audioContext.currentTime + index * 0.15;
+                    const duration = 0.3;
+
+                    noteGain.gain.setValueAtTime(0, startTime);
+                    noteGain.gain.linearRampToValueAtTime(0.2, startTime + 0.05);
+                    noteGain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+                    oscillator.start(startTime);
+                    oscillator.stop(startTime + duration);
+                });
+            }
+
+            // Audio functions with sound effects only (no speech)
+            function playSuccessSound() {
+                initAudio();
+                createGlitterSound();
+            }
+
+            function playErrorSound() {
+                initAudio();
+                createBuzzerSound();
+            }
+
+            function playLevelUpSound() {
+                initAudio();
+                createLevelUpSound();
+            }
+
+            function playWelcomeSound() {
+                initAudio();
+                // Just initialize audio, no speech
+            }
+
+            // Create confetti effect
+            function createConfettiEffect() {
+                const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dda0dd', '#98d8c8'];
+
+                for (let i = 0; i < 50; i++) {
+                    setTimeout(() => {
+                        const confetti = document.createElement('div');
+                        confetti.className = 'confetti-piece';
+                        confetti.style.left = Math.random() * 100 + 'vw';
+                        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                        confetti.style.animationDelay = Math.random() * 2 + 's';
+                        confetti.style.animationDuration = Math.random() * 2 + 2 + 's';
+
+                        document.body.appendChild(confetti);
+
+                        setTimeout(() => {
+                            confetti.remove();
+                        }, 4000);
+                    }, i * 100);
+                }
+            }
+
+            // Initialize game
+            function initGame() {
+                loadPage();
+                // Add click listener for audio initialization
+                document.addEventListener('click', startGame, { once: true });
+            }
+
+            // Initialize game on click (for audio context)
+            function startGame() {
+                initAudio();
+                playWelcomeSound();
+            }
+
+            // Load current page
+            function loadPage() {
+                const levelData = levels[currentLevel];
+                const pageData = levelData.pages[currentPage - 1];
+
+                updateUI();
+                setupGrids(pageData);
+                setupColorPalette(pageData);
+                setupLegend(levelData);
+                clearMessages();
+            }
+
+            // Update UI elements
+            function updateUI() {
+                document.getElementById('levelInfo').textContent = `المستوى ${currentLevel} - الصفحة ${currentPage}`;
+                document.getElementById('score').textContent = score;
+                document.getElementById('starCount').textContent = stars;
+                document.getElementById('stars').textContent = '⭐'.repeat(stars);
+            }
+
+            // Setup grids
+            function setupGrids(pageData) {
+                const patternGrid = document.getElementById('patternGrid');
+                const answerGrid = document.getElementById('answerGrid');
+
+                // Update grid classes
+                patternGrid.className = `grid grid-${pageData.gridSize}`;
+                answerGrid.className = `grid grid-${pageData.gridSize}`;
+
+                // Clear grids
+                patternGrid.innerHTML = '';
+                answerGrid.innerHTML = '';
+
+                // Setup pattern grid
+                pageData.pattern.forEach((cell, index) => {
+                    const cellElement = createPatternCell(cell);
+                    patternGrid.appendChild(cellElement);
+                });
+
+                // Setup answer grid
+                pageData.pattern.forEach((cell, index) => {
+                    const cellElement = createAnswerCell(index);
+                    answerGrid.appendChild(cellElement);
+                });
+
+                gameData.pattern = [...pageData.pattern];
+                gameData.answers = new Array(pageData.pattern.length).fill(null);
+            }
+
+            // Create pattern cell
+            function createPatternCell(cell) {
+                const div = document.createElement('div');
+                div.className = 'cell filled';
+
+                if (cell.color) {
+                    div.style.backgroundColor = cell.color;
+                    div.style.border = `3px solid #2d3748`;
+                } else if (cell.number) {
+                    div.textContent = cell.number;
+                    div.style.backgroundColor = 'white';
+                }
+
+                return div;
+            }
+
+            // Create answer cell
+            function createAnswerCell(index) {
+                const div = document.createElement('div');
+                div.className = 'cell';
+                div.dataset.index = index;
+                div.addEventListener('click', () => fillCell(index));
+                return div;
+            }
+
+            // Fill cell with selected color only if correct
+            function fillCell(index) {
+                if (!selectedColor) {
+                    showMessage('اختر لوناً أولاً', 'error');
+                    return;
+                }
+
+                const levelData = levels[currentLevel];
+                const expected = getExpectedColor(gameData.pattern[index], levelData.legend);
+
+                // Check if selected color is correct for this cell
+                if (selectedColor === expected) {
+                    // Correct color - fill the cell
+                    const cell = document.querySelector(`#answerGrid .cell[data-index="${index}"]`);
+                    cell.style.backgroundColor = selectedColor;
+                    gameData.answers[index] = selectedColor;
+
+                    // Add bounce effect
+                    cell.classList.add('bounce');
+                    setTimeout(() => cell.classList.remove('bounce'), 600);
+
+                    // Check if all cells are filled correctly
+                    if (gameData.answers.every((answer) => answer !== null)) {
+                        setTimeout(() => {
+                            // All correct - play success and advance
+                            score += 10 * currentLevel;
+                            playSuccessSound();
+
+                            // Add glitter effect to all filled cells
+                            document.querySelectorAll('#answerGrid .cell').forEach((cell) => {
+                                cell.classList.add('glitter');
+                            });
+
+                            // Auto advance
+                            setTimeout(() => {
+                                autoAdvance();
+                            }, 800);
+
+                            updateUI();
+                        }, 300);
+                    }
+                } else {
+                    // Wrong color - don't fill, play error sound
+                    if (stars > 1) stars--;
+                    playErrorSound();
+
+                    // Add shake effect to the specific cell
+                    const cell = document.querySelector(`#answerGrid .cell[data-index="${index}"]`);
+                    cell.classList.add('shake');
+                    setTimeout(() => {
+                        cell.classList.remove('shake');
+                    }, 600);
+
+                    updateUI();
+                }
+            }
+
+            // Auto check and advance immediately
+            function autoCheckAndAdvance() {
+                const levelData = levels[currentLevel];
+                const pageData = levelData.pages[currentPage - 1];
+                let correct = true;
+
+                for (let i = 0; i < gameData.pattern.length; i++) {
+                    const expected = getExpectedColor(gameData.pattern[i], levelData.legend);
+                    if (gameData.answers[i] !== expected) {
+                        correct = false;
+                        break;
+                    }
+                }
+
+                if (correct) {
+                    score += 10 * currentLevel;
+                    playSuccessSound();
+
+                    // Add glitter effect to all filled cells
+                    document.querySelectorAll('#answerGrid .cell').forEach((cell) => {
+                        cell.classList.add('glitter');
+                    });
+
+                    // Auto advance immediately
+                    setTimeout(() => {
+                        autoAdvance();
+                    }, 800);
+                } else {
+                    if (stars > 1) stars--;
+                    playErrorSound();
+
+                    // Add shake effect to container
+                    document.querySelector('.game-container').classList.add('shake');
+                    setTimeout(() => {
+                        document.querySelector('.game-container').classList.remove('shake');
+                    }, 600);
+
+                    // Clear wrong answers and let user try again
+                    setTimeout(() => {
+                        gameData.answers = new Array(gameData.pattern.length).fill(null);
+                        document.querySelectorAll('#answerGrid .cell').forEach((cell) => {
+                            cell.style.backgroundColor = 'white';
+                        });
+                    }, 1000);
+                }
+
+                updateUI();
+            }
+
+            // Setup color palette
+            function setupColorPalette(pageData) {
+                const palette = document.getElementById('colorPalette');
+                palette.innerHTML = '';
+
+                pageData.colors.forEach((color, index) => {
+                    const btn = document.createElement('div');
+                    btn.className = 'color-btn';
+                    btn.style.backgroundColor = color;
+                    btn.addEventListener('click', () => selectColor(color, btn));
+
+                    // Add number for level 3
+                    if (currentLevel === 3) {
+                        const legend = levels[currentLevel].legend;
+                        const number = Object.keys(legend).find((key) => legend[key] === color);
+                        if (number) {
+                            btn.textContent = number;
+                            btn.style.color = color === '#FFFFFF' ? '#000' : '#fff';
+                        }
+                    }
+
+                    palette.appendChild(btn);
+                });
+            }
+
+            // Select color
+            function selectColor(color, btn) {
+                // Remove previous selection
+                document.querySelectorAll('.color-btn').forEach((b) => b.classList.remove('selected'));
+
+                // Add selection
+                btn.classList.add('selected');
+                selectedColor = color;
+            }
+
+            // Setup legend for levels 2 and 3
+            function setupLegend(levelData) {
+                const legend = document.getElementById('legend');
+                const legendContent = document.getElementById('legendContent');
+
+                if (levelData.legend) {
+                    legend.style.display = 'block';
+                    legendContent.innerHTML = '';
+
+                    Object.entries(levelData.legend).forEach(([number, color]) => {
+                        const item = document.createElement('div');
+                        item.className = 'legend-item';
+                        item.innerHTML = `
+                        <div class="legend-color" style="background-color: ${color}"></div>
+                        <span>${number}</span>
+                    `;
+                        legendContent.appendChild(item);
+                    });
+                } else {
+                    legend.style.display = 'none';
+                }
+            }
+
+            // Check answer (manual button - optional)
+            function checkAnswer() {
+                autoCheckAndAdvance();
+            }
+
+            // Auto advance to next page/level (simplified)
+            function autoAdvance() {
+                if (currentPage < levels[currentLevel].pages.length) {
+                    // Next page in same level
+                    currentPage++;
+                    selectedColor = null;
+                    loadPage();
+                } else if (currentLevel < Object.keys(levels).length) {
+                    // Next level - same sound and animation
+                    currentLevel++;
+                    currentPage = 1;
+                    stars = 3; // Reset stars for new level
+                    selectedColor = null;
+                    loadPage();
+                } else {
+                    // Game completed
+                    showMessage('🏆 تهانينا! أكملت جميع المستويات! 🏆', 'success');
+                    createConfettiEffect();
+                }
+            }
+
+            // Get expected color for a pattern cell
+            function getExpectedColor(patternCell, legend) {
+                if (patternCell.color) {
+                    return patternCell.color;
+                } else if (patternCell.number && legend) {
+                    return legend[patternCell.number];
+                }
+                return null;
+            }
+
+            // Next page
+            function nextPage() {
+                if (currentPage < levels[currentLevel].pages.length) {
+                    currentPage++;
+                } else if (currentLevel < Object.keys(levels).length) {
+                    currentLevel++;
+                    currentPage = 1;
+                    stars = 3; // Reset stars for new level
+                } else {
+                    showMessage('تهانينا! أكملت جميع المستويات! 🎊', 'success');
+                    return;
+                }
+
+                selectedColor = null;
+                loadPage();
+            }
+
+            // Reset page
+            function resetPage() {
+                selectedColor = null;
+                document.querySelectorAll('.color-btn').forEach((btn) => btn.classList.remove('selected'));
+                loadPage();
+            }
+
+            // Show message
+            function showMessage(text, type) {
+                const messageArea = document.getElementById('messageArea');
+                messageArea.innerHTML = `<div class="${type}-message">${text}</div>`;
+
+                setTimeout(() => {
+                    messageArea.innerHTML = '';
+                }, 3000);
+            }
+
+            // Clear messages
+            function clearMessages() {
+                document.getElementById('messageArea').innerHTML = '';
+            }
+
+            // Initialize game on load
+            window.onload = initGame;
+        </script>
+    </body>
+</html>

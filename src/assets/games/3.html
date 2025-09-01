@@ -1,0 +1,884 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>لعبة الشطب التفاعلية</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Comic Sans MS', cursive, Arial, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                color: #333;
+            }
+
+            .game-container {
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+                padding: 30px;
+                max-width: 800px;
+                width: 95%;
+                text-align: center;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .game-header {
+                margin-bottom: 20px;
+            }
+
+            .game-title {
+                color: #4a5568;
+                font-size: 2.5em;
+                margin-bottom: 10px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .game-info {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                background: #f7fafc;
+                padding: 15px;
+                border-radius: 15px;
+                margin-bottom: 20px;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .level-info,
+            .timer,
+            .score {
+                background: #4299e1;
+                color: white;
+                padding: 8px 16px;
+                border-radius: 20px;
+                font-weight: bold;
+                font-size: 1.1em;
+            }
+
+            .timer {
+                background: #f56565;
+            }
+
+            .score {
+                background: #48bb78;
+            }
+
+            .task-instruction {
+                background: #fed7d7;
+                border: 2px solid #f56565;
+                border-radius: 15px;
+                padding: 15px;
+                margin-bottom: 20px;
+                font-size: 1.3em;
+                font-weight: bold;
+                color: #c53030;
+            }
+
+            .game-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+                gap: 15px;
+                margin-bottom: 20px;
+                background: #f0f8ff;
+                padding: 20px;
+                border-radius: 15px;
+                border: 3px solid #4299e1;
+            }
+
+            .game-item {
+                width: 80px;
+                height: 80px;
+                border: 3px solid #e2e8f0;
+                border-radius: 15px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2.5em;
+                cursor: pointer;
+                background: white;
+                transition: all 0.3s ease;
+                position: relative;
+                user-select: none;
+            }
+
+            .game-item:hover {
+                transform: scale(1.1);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .game-item.crossed {
+                background: linear-gradient(-45deg, transparent 40%, #f56565 40%, #f56565 60%, transparent 60%);
+                opacity: 0.7;
+            }
+
+            .game-item.colored {
+                animation: colorSuccess 0.5s ease;
+            }
+
+            @keyframes colorSuccess {
+                0% {
+                    background: white;
+                }
+                50% {
+                    background: #68d391;
+                    transform: scale(1.2);
+                }
+                100% {
+                    background: #68d391;
+                    transform: scale(1);
+                }
+            }
+
+            .celebration {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 30px;
+                border-radius: 20px;
+                font-size: 2em;
+                font-weight: bold;
+                z-index: 1000;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+                animation: celebrate 0.6s ease;
+            }
+
+            @keyframes celebrate {
+                0% {
+                    transform: translate(-50%, -50%) scale(0.5);
+                    opacity: 0;
+                }
+                50% {
+                    transform: translate(-50%, -50%) scale(1.2);
+                }
+                100% {
+                    transform: translate(-50%, -50%) scale(1);
+                    opacity: 1;
+                }
+            }
+
+            .control-buttons {
+                display: flex;
+                gap: 15px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .btn {
+                padding: 12px 24px;
+                border: none;
+                border-radius: 25px;
+                font-size: 1.1em;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                text-transform: uppercase;
+            }
+
+            .btn-start {
+                background: #48bb78;
+                color: white;
+            }
+
+            .btn-restart {
+                background: #ed8936;
+                color: white;
+            }
+
+            .btn-next {
+                background: #4299e1;
+                color: white;
+            }
+
+            .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .confetti {
+                position: fixed;
+                width: 10px;
+                height: 10px;
+                background: #f56565;
+                animation: confetti-fall 3s linear infinite;
+            }
+
+            @keyframes confetti-fall {
+                to {
+                    transform: translateY(100vh) rotate(360deg);
+                }
+            }
+
+            .hidden {
+                display: none;
+            }
+
+            @media (max-width: 600px) {
+                .game-container {
+                    padding: 20px;
+                    margin: 10px;
+                }
+
+                .game-title {
+                    font-size: 2em;
+                }
+
+                .game-item {
+                    width: 60px;
+                    height: 60px;
+                    font-size: 2em;
+                }
+
+                .game-grid {
+                    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+                    gap: 10px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="game-container">
+            <div class="game-header">
+                <h1 class="game-title">🎯 لعبة الشطب التفاعلية 🎯</h1>
+            </div>
+
+            <div class="game-info">
+                <div class="level-info" id="levelInfo">المستوى: 1 - مبتدئ</div>
+                <div class="timer" id="timer">الوقت: 60</div>
+                <div class="score" id="score">النقاط: 0</div>
+            </div>
+
+            <div class="task-instruction" id="taskInstruction">اضغط "ابدأ اللعبة" للبدء!</div>
+
+            <div class="game-grid" id="gameGrid"></div>
+
+            <div class="control-buttons">
+                <button class="btn btn-start" id="startBtn">ابدأ اللعبة</button>
+                <button class="btn btn-restart hidden" id="restartBtn">إعادة تشغيل</button>
+                <button class="btn btn-next hidden" id="nextBtn">المستوى التالي</button>
+            </div>
+        </div>
+
+        <script>
+            class VisualTrackingGame {
+                constructor() {
+                    this.currentLevel = 1;
+                    this.currentDifficulty = 1; // 1: مبتدئ, 2: متوسط, 3: عالي
+                    this.score = 0;
+                    this.timeLeft = 60;
+                    this.timer = null;
+                    this.gameStarted = false;
+                    this.targetItems = [];
+                    this.foundItems = [];
+                    this.completedTargets = []; // لتتبع العناصر المكتملة
+                    this.gameData = [];
+
+                    this.levels = {
+                        1: {
+                            name: 'أشكال وفواكه وخضار',
+                            items: {
+                                easy: ['🍎', '🍌', '🥕', '🔴', '🟢', '🔵', '🍊', '🥒'],
+                                medium: ['🍎', '🍌', '🥕', '🔴', '🟢', '🔵', '🍊', '🥒', '🍇', '🥬', '🟡', '🟣'],
+                                hard: ['🍎', '🍌', '🥕', '🔴', '🟢', '🔵', '🍊', '🥒', '🍇', '🥬', '🟡', '🟣', '🍓', '🥦', '🟠', '🟤']
+                            },
+                            colors: ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dda0dd']
+                        },
+                        2: {
+                            name: 'حيوانات',
+                            items: {
+                                easy: ['🐱', '🐶', '🐸', '🐦', '🐟', '🦆', '🐷', '🐰'],
+                                medium: ['🐱', '🐶', '🐸', '🐦', '🐟', '🦆', '🐷', '🐰', '🐻', '🦁', '🐯', '🐼'],
+                                hard: ['🐱', '🐶', '🐸', '🐦', '🐟', '🦆', '🐷', '🐰', '🐻', '🦁', '🐯', '🐼', '🐨', '🦘', '🦒', '🐘']
+                            },
+                            colors: ['#ff9ff3', '#54a0ff', '#5f27cd', '#ff6348', '#ff9f43', '#10ac84']
+                        },
+                        3: {
+                            name: 'رموز وعلامات',
+                            items: {
+                                easy: ['⭐', '❤️', '⚡', '🔥', '💎', '🎵', '🌟', '✨'],
+                                medium: ['⭐', '❤️', '⚡', '🔥', '💎', '🎵', '🌟', '✨', '🎯', '🎭', '🎨', '🔔'],
+                                hard: ['⭐', '❤️', '⚡', '🔥', '💎', '🎵', '🌟', '✨', '🎯', '🎭', '🎨', '🔔', '🎪', '🎊', '🎉', '🔮']
+                            },
+                            colors: ['#ff7675', '#74b9ff', '#a29bfe', '#fd79a8', '#fdcb6e', '#6c5ce7']
+                        }
+                    };
+
+                    this.initializeEventListeners();
+                    this.updateDisplay();
+                }
+
+                initializeEventListeners() {
+                    document.getElementById('startBtn').addEventListener('click', () => this.startGame());
+                    document.getElementById('restartBtn').addEventListener('click', () => this.restartGame());
+                    document.getElementById('nextBtn').addEventListener('click', () => this.nextLevel());
+                }
+
+                startGame() {
+                    this.gameStarted = true;
+                    this.generateGameData();
+                    this.displayGame();
+                    this.startTimer();
+                    document.getElementById('startBtn').classList.add('hidden');
+                    this.playSound('start');
+                }
+
+                generateGameData() {
+                    const level = this.levels[this.currentLevel];
+                    const difficulty = ['easy', 'medium', 'hard'][this.currentDifficulty - 1];
+                    const items = level.items[difficulty];
+
+                    // تحديد حجم الشبكة بناءً على المستوى
+                    const gridSizes = {
+                        1: { easy: 16, medium: 24, hard: 32 },
+                        2: { easy: 20, medium: 28, hard: 36 },
+                        3: { easy: 24, medium: 32, hard: 40 }
+                    };
+
+                    const gridSize = gridSizes[this.currentLevel][difficulty];
+                    this.gameData = [];
+
+                    if (this.currentLevel === 1) {
+                        // المستوى الأول: عنصر واحد فقط مكرر أكثر من 3 مرات
+                        const targetItem = items[Math.floor(Math.random() * items.length)];
+                        this.targetItems = [targetItem];
+
+                        // تحديد عدد مرات تكرار العنصر المستهدف (4-6 مرات)
+                        const targetCount = 4 + Math.floor(Math.random() * 3);
+
+                        // إضافة العنصر المستهدف
+                        for (let i = 0; i < targetCount; i++) {
+                            this.gameData.push(targetItem);
+                        }
+
+                        // ملء باقي الشبكة بعناصر أخرى
+                        const otherItems = items.filter((item) => item !== targetItem);
+                        for (let i = targetCount; i < gridSize; i++) {
+                            const randomItem = otherItems[Math.floor(Math.random() * otherItems.length)];
+                            this.gameData.push(randomItem);
+                        }
+
+                        // خلط العناصر عشوائياً
+                        for (let i = this.gameData.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [this.gameData[i], this.gameData[j]] = [this.gameData[j], this.gameData[i]];
+                        }
+                    } else if (this.currentLevel === 2) {
+                        // المستوى الثاني: شكلين مكررين، البحث عن جميع النسخ لكل شكل
+                        const shuffledItems = [...items].sort(() => Math.random() - 0.5);
+                        const targetItem1 = shuffledItems[0];
+                        const targetItem2 = shuffledItems[1];
+                        this.targetItems = [targetItem1, targetItem2];
+
+                        // تحديد عدد مرات تكرار كل عنصر (3-5 مرات لكل عنصر)
+                        const targetCount1 = 3 + Math.floor(Math.random() * 3);
+                        const targetCount2 = 3 + Math.floor(Math.random() * 3);
+
+                        // إضافة العناصر المستهدفة
+                        for (let i = 0; i < targetCount1; i++) {
+                            this.gameData.push(targetItem1);
+                        }
+                        for (let i = 0; i < targetCount2; i++) {
+                            this.gameData.push(targetItem2);
+                        }
+
+                        // ملء باقي الشبكة بعناصر أخرى
+                        const otherItems = items.filter((item) => item !== targetItem1 && item !== targetItem2);
+                        const remainingSlots = gridSize - targetCount1 - targetCount2;
+                        for (let i = 0; i < remainingSlots; i++) {
+                            const randomItem = otherItems[Math.floor(Math.random() * otherItems.length)];
+                            this.gameData.push(randomItem);
+                        }
+
+                        // خلط العناصر عشوائياً
+                        for (let i = this.gameData.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [this.gameData[i], this.gameData[j]] = [this.gameData[j], this.gameData[i]];
+                        }
+                    } else {
+                        // المستوى الثالث: ثلاثة عناصر مكررة، البحث عن جميع النسخ لكل عنصر
+                        const shuffledItems = [...items].sort(() => Math.random() - 0.5);
+                        const targetItem1 = shuffledItems[0];
+                        const targetItem2 = shuffledItems[1];
+                        const targetItem3 = shuffledItems[2];
+                        this.targetItems = [targetItem1, targetItem2, targetItem3];
+
+                        // تحديد عدد مرات تكرار كل عنصر (3-4 مرات لكل عنصر)
+                        const targetCount1 = 3 + Math.floor(Math.random() * 2);
+                        const targetCount2 = 3 + Math.floor(Math.random() * 2);
+                        const targetCount3 = 3 + Math.floor(Math.random() * 2);
+
+                        // إضافة العناصر المستهدفة
+                        for (let i = 0; i < targetCount1; i++) {
+                            this.gameData.push(targetItem1);
+                        }
+                        for (let i = 0; i < targetCount2; i++) {
+                            this.gameData.push(targetItem2);
+                        }
+                        for (let i = 0; i < targetCount3; i++) {
+                            this.gameData.push(targetItem3);
+                        }
+
+                        // ملء باقي الشبكة بعناصر أخرى
+                        const otherItems = items.filter((item) => item !== targetItem1 && item !== targetItem2 && item !== targetItem3);
+                        const remainingSlots = gridSize - targetCount1 - targetCount2 - targetCount3;
+                        for (let i = 0; i < remainingSlots; i++) {
+                            const randomItem = otherItems[Math.floor(Math.random() * otherItems.length)];
+                            this.gameData.push(randomItem);
+                        }
+
+                        // خلط العناصر عشوائياً
+                        for (let i = this.gameData.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [this.gameData[i], this.gameData[j]] = [this.gameData[j], this.gameData[i]];
+                        }
+                    }
+
+                    this.foundItems = [];
+                    this.completedTargets = []; // لتتبع العناصر المكتملة
+                    this.updateTaskInstruction();
+                }
+
+                displayGame() {
+                    const gameGrid = document.getElementById('gameGrid');
+                    gameGrid.innerHTML = '';
+
+                    this.gameData.forEach((item, index) => {
+                        const gameItem = document.createElement('div');
+                        gameItem.className = 'game-item';
+                        gameItem.innerHTML = item;
+                        gameItem.setAttribute('data-index', index);
+                        gameItem.addEventListener('click', () => this.handleItemClick(item, gameItem));
+                        gameGrid.appendChild(gameItem);
+                    });
+                }
+
+                handleItemClick(item, element) {
+                    if (!this.gameStarted || element.classList.contains('crossed') || element.classList.contains('colored')) {
+                        return;
+                    }
+
+                    if (this.targetItems.includes(item)) {
+                        // إجابة صحيحة
+                        element.classList.add('crossed');
+
+                        this.score += 10;
+                        this.playSound('correct');
+                        this.showCelebration('أحسنت! 🎉');
+
+                        // في المستوى الأول: العثور على جميع نسخ العنصر الواحد
+                        if (this.currentLevel === 1) {
+                            const targetItem = this.targetItems[0];
+                            const totalCount = this.gameData.filter((gameItem) => gameItem === targetItem).length;
+                            const foundCount = document.querySelectorAll('.game-item.crossed').length;
+
+                            if (foundCount === totalCount) {
+                                this.completeLevel();
+                            }
+                        }
+                        // في المستوى الثاني: العثور على جميع نسخ الشكلين
+                        else if (this.currentLevel === 2) {
+                            this.checkLevel2Completion();
+                        }
+                        // في المستوى الثالث: العثور على جميع نسخ الأشكال الثلاثة
+                        else if (this.currentLevel === 3) {
+                            this.checkLevel3Completion();
+                        }
+                    } else {
+                        // إجابة خاطئة
+                        this.playSound('wrong');
+                        element.style.animation = 'shake 0.5s ease';
+                        setTimeout(() => {
+                            element.style.animation = '';
+                        }, 500);
+                    }
+
+                    this.updateDisplay();
+                }
+
+                checkLevel2Completion() {
+                    const target1 = this.targetItems[0];
+                    const target2 = this.targetItems[1];
+
+                    // حساب العدد الكلي لكل عنصر مستهدف
+                    const total1 = this.gameData.filter((item) => item === target1).length;
+                    const total2 = this.gameData.filter((item) => item === target2).length;
+
+                    // حساب العدد المشطوب لكل عنصر
+                    const crossedElements = document.querySelectorAll('.game-item.crossed');
+                    let found1 = 0,
+                        found2 = 0;
+
+                    crossedElements.forEach((element) => {
+                        const itemText = element.textContent.trim();
+                        if (itemText === target1) found1++;
+                        if (itemText === target2) found2++;
+                    });
+
+                    // التحقق من اكتمال كل عنصر
+                    if (found1 === total1 && !this.completedTargets.includes(target1)) {
+                        this.completedTargets.push(target1);
+                        this.showCelebration(`رائع! وجدت جميع ${target1} 🎉`);
+                    }
+
+                    if (found2 === total2 && !this.completedTargets.includes(target2)) {
+                        this.completedTargets.push(target2);
+                        this.showCelebration(`ممتاز! وجدت جميع ${target2} 🎉`);
+                    }
+
+                    // إذا تم العثور على جميع نسخ الشكلين
+                    if (found1 === total1 && found2 === total2) {
+                        this.completeLevel();
+                    }
+                }
+
+                checkLevel3Completion() {
+                    const target1 = this.targetItems[0];
+                    const target2 = this.targetItems[1];
+                    const target3 = this.targetItems[2];
+
+                    // حساب العدد الكلي لكل عنصر مستهدف
+                    const total1 = this.gameData.filter((item) => item === target1).length;
+                    const total2 = this.gameData.filter((item) => item === target2).length;
+                    const total3 = this.gameData.filter((item) => item === target3).length;
+
+                    // حساب العدد المشطوب لكل عنصر
+                    const crossedElements = document.querySelectorAll('.game-item.crossed');
+                    let found1 = 0,
+                        found2 = 0,
+                        found3 = 0;
+
+                    crossedElements.forEach((element) => {
+                        const itemText = element.textContent.trim();
+                        if (itemText === target1) found1++;
+                        if (itemText === target2) found2++;
+                        if (itemText === target3) found3++;
+                    });
+
+                    // التحقق من اكتمال كل عنصر
+                    if (found1 === total1 && !this.completedTargets.includes(target1)) {
+                        this.completedTargets.push(target1);
+                        this.showCelebration(`رائع! وجدت جميع ${target1} 🎉`);
+                    }
+
+                    if (found2 === total2 && !this.completedTargets.includes(target2)) {
+                        this.completedTargets.push(target2);
+                        this.showCelebration(`ممتاز! وجدت جميع ${target2} 🎉`);
+                    }
+
+                    if (found3 === total3 && !this.completedTargets.includes(target3)) {
+                        this.completedTargets.push(target3);
+                        this.showCelebration(`عمل رائع! وجدت جميع ${target3} 🎉`);
+                    }
+
+                    // إذا تم العثور على جميع نسخ الأشكال الثلاثة
+                    if (found1 === total1 && found2 === total2 && found3 === total3) {
+                        this.completeLevel();
+                    }
+                }
+
+                isColorItem(item) {
+                    const colorItems = ['🔴', '🟢', '🔵', '🟡', '🟣', '🟠', '🟤'];
+                    return colorItems.includes(item);
+                }
+
+                completeLevel() {
+                    this.gameStarted = false;
+                    clearInterval(this.timer);
+                    this.score += this.timeLeft * 2; // نقاط إضافية للوقت المتبقي
+                    this.showCelebration('ممتاز! عمل رائع! 🌟');
+                    this.playSound('levelComplete');
+
+                    this.createConfetti();
+
+                    // انتقال تلقائي للمستوى التالي بعد 3 ثوان
+                    setTimeout(() => {
+                        this.autoNextLevel();
+                    }, 3000);
+                }
+
+                autoNextLevel() {
+                    if (this.currentDifficulty < 3) {
+                        this.currentDifficulty++;
+                        this.showCelebration('الانتقال للمستوى التالي... 🚀');
+                        setTimeout(() => {
+                            this.resetGame();
+                            this.startGame();
+                        }, 1500);
+                    } else if (this.currentLevel < 3) {
+                        this.currentLevel++;
+                        this.currentDifficulty = 1;
+                        this.showCelebration('الانتقال للمرحلة التالية... 🎯');
+                        setTimeout(() => {
+                            this.resetGame();
+                            this.startGame();
+                        }, 1500);
+                    } else {
+                        this.showCelebration('🎊 تهانينا! أنهيت جميع المستويات! 🎊');
+                        setTimeout(() => {
+                            document.getElementById('restartBtn').classList.remove('hidden');
+                        }, 2000);
+                    }
+                }
+
+                nextLevel() {
+                    if (this.currentDifficulty < 3) {
+                        this.currentDifficulty++;
+                    } else if (this.currentLevel < 3) {
+                        this.currentLevel++;
+                        this.currentDifficulty = 1;
+                    } else {
+                        this.showCelebration('🎊 تهانينا! أنهيت جميع المستويات! 🎊');
+                        return;
+                    }
+
+                    this.resetGame();
+                    this.startGame();
+                }
+
+                restartGame() {
+                    // إعادة تعيين كامل للعبة
+                    this.currentLevel = 1;
+                    this.currentDifficulty = 1;
+                    this.score = 0;
+                    this.resetGame();
+                    document.getElementById('startBtn').classList.remove('hidden');
+                }
+
+                resetGame() {
+                    this.gameStarted = false;
+                    clearInterval(this.timer);
+                    this.timeLeft = 60;
+                    this.foundItems = [];
+                    this.targetItems = [];
+                    this.completedTargets = [];
+                    document.getElementById('gameGrid').innerHTML = '';
+                    document.getElementById('nextBtn').classList.add('hidden');
+                    document.getElementById('restartBtn').classList.add('hidden');
+                    this.updateDisplay();
+                    this.updateTaskInstruction();
+                }
+
+                startTimer() {
+                    this.timer = setInterval(() => {
+                        this.timeLeft--;
+                        this.updateDisplay();
+
+                        if (this.timeLeft <= 0) {
+                            this.gameOver();
+                        }
+                    }, 1000);
+                }
+
+                gameOver() {
+                    this.gameStarted = false;
+                    clearInterval(this.timer);
+                    this.showCelebration('انتهى الوقت! 🕐');
+                    this.playSound('timeUp');
+
+                    // انتقال تلقائي للمحاولة التالية بعد 3 ثوان
+                    setTimeout(() => {
+                        this.showCelebration('المحاولة مرة أخرى... 🔄');
+                        setTimeout(() => {
+                            this.resetGame();
+                            this.startGame();
+                        }, 1500);
+                    }, 3000);
+                }
+
+                updateDisplay() {
+                    const difficultyNames = ['مبتدئ', 'متوسط', 'عالي'];
+                    const levelName = this.levels[this.currentLevel].name;
+
+                    document.getElementById('levelInfo').textContent = `المستوى ${this.currentLevel}: ${levelName} - ${difficultyNames[this.currentDifficulty - 1]}`;
+                    document.getElementById('timer').textContent = `الوقت: ${this.timeLeft}`;
+                    document.getElementById('score').textContent = `النقاط: ${this.score}`;
+                }
+
+                updateTaskInstruction() {
+                    if (this.targetItems.length > 0) {
+                        if (this.currentLevel === 1) {
+                            const targetItem = this.targetItems[0];
+                            const itemNames = {
+                                '🍎': 'التفاحة',
+                                '🍌': 'الموزة',
+                                '🥕': 'الجزرة',
+                                '🔴': 'الدائرة الحمراء',
+                                '🟢': 'الدائرة الخضراء',
+                                '🔵': 'الدائرة الزرقاء',
+                                '🍊': 'البرتقالة',
+                                '🥒': 'الخيارة',
+                                '🍇': 'العنب',
+                                '🥬': 'الخس',
+                                '🟡': 'الدائرة الصفراء',
+                                '🟣': 'الدائرة البنفسجية',
+                                '🍓': 'الفراولة',
+                                '🥦': 'البروكلي',
+                                '🟠': 'الدائرة البرتقالية',
+                                '🟤': 'الدائرة البنية'
+                            };
+                            const itemName = itemNames[targetItem] || targetItem;
+                            document.getElementById('taskInstruction').innerHTML = `ابحث عن جميع ${targetItem} (${itemName}) واشطبها بالضغط عليها`;
+                        } else if (this.currentLevel === 2) {
+                            const target1 = this.targetItems[0];
+                            const target2 = this.targetItems[1];
+                            const animalNames = {
+                                '🐱': 'القطة',
+                                '🐶': 'الكلب',
+                                '🐸': 'الضفدع',
+                                '🐦': 'العصفور',
+                                '🐟': 'السمكة',
+                                '🦆': 'البطة',
+                                '🐷': 'الخنزير',
+                                '🐰': 'الأرنب',
+                                '🐻': 'الدب',
+                                '🦁': 'الأسد',
+                                '🐯': 'النمر',
+                                '🐼': 'الباندا',
+                                '🐨': 'الكوالا',
+                                '🦘': 'الكنغر',
+                                '🦒': 'الزرافة',
+                                '🐘': 'الفيل'
+                            };
+                            const name1 = animalNames[target1] || target1;
+                            const name2 = animalNames[target2] || target2;
+                            document.getElementById('taskInstruction').innerHTML = `ابحث عن جميع ${target1} (${name1}) وجميع ${target2} (${name2}) واشطبها`;
+                        } else if (this.currentLevel === 3) {
+                            const target1 = this.targetItems[0];
+                            const target2 = this.targetItems[1];
+                            const target3 = this.targetItems[2];
+                            const symbolNames = {
+                                '⭐': 'النجمة',
+                                '❤️': 'القلب',
+                                '⚡': 'البرق',
+                                '🔥': 'النار',
+                                '💎': 'الماسة',
+                                '🎵': 'النوتة الموسيقية',
+                                '🌟': 'النجمة المضيئة',
+                                '✨': 'البريق',
+                                '🎯': 'الهدف',
+                                '🎭': 'القناع',
+                                '🎨': 'الفرشاة',
+                                '🔔': 'الجرس',
+                                '🎪': 'السيرك',
+                                '🎊': 'الاحتفال',
+                                '🎉': 'الحفلة',
+                                '🔮': 'الكرة البلورية'
+                            };
+                            const name1 = symbolNames[target1] || target1;
+                            const name2 = symbolNames[target2] || target2;
+                            const name3 = symbolNames[target3] || target3;
+                            document.getElementById('taskInstruction').innerHTML = `ابحث عن جميع ${target1} (${name1}) وجميع ${target2} (${name2}) وجميع ${target3} (${name3}) واشطبها`;
+                        }
+                    } else {
+                        document.getElementById('taskInstruction').textContent = 'اضغط "ابدأ اللعبة" للبدء!';
+                    }
+                }
+
+                showCelebration(message) {
+                    const celebration = document.createElement('div');
+                    celebration.className = 'celebration';
+                    celebration.textContent = message;
+                    document.body.appendChild(celebration);
+
+                    setTimeout(() => {
+                        document.body.removeChild(celebration);
+                    }, 2000);
+                }
+
+                createConfetti() {
+                    const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dda0dd'];
+
+                    for (let i = 0; i < 20; i++) {
+                        setTimeout(() => {
+                            const confetti = document.createElement('div');
+                            confetti.className = 'confetti';
+                            confetti.style.left = Math.random() * 100 + 'vw';
+                            confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                            confetti.style.animationDelay = Math.random() * 3 + 's';
+                            document.body.appendChild(confetti);
+
+                            setTimeout(() => {
+                                if (document.body.contains(confetti)) {
+                                    document.body.removeChild(confetti);
+                                }
+                            }, 3000);
+                        }, i * 100);
+                    }
+                }
+
+                playSound(type) {
+                    // إنشاء أصوات بسيطة باستخدام Web Audio API
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    let frequency, duration;
+
+                    switch (type) {
+                        case 'correct':
+                            frequency = 800;
+                            duration = 0.2;
+                            break;
+                        case 'wrong':
+                            frequency = 200;
+                            duration = 0.3;
+                            break;
+                        case 'levelComplete':
+                            frequency = 600;
+                            duration = 0.5;
+                            break;
+                        case 'start':
+                            frequency = 400;
+                            duration = 0.3;
+                            break;
+                        case 'timeUp':
+                            frequency = 150;
+                            duration = 1;
+                            break;
+                        default:
+                            frequency = 400;
+                            duration = 0.2;
+                    }
+
+                    oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + duration);
+                }
+            }
+
+            // إضافة CSS للاهتزاز
+            const style = document.createElement('style');
+            style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-5px); }
+                75% { transform: translateX(5px); }
+            }
+        `;
+            document.head.appendChild(style);
+
+            // بدء اللعبة
+            const game = new VisualTrackingGame();
+        </script>
+    </body>
+</html>

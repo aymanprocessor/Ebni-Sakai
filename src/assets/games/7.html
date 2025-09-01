@@ -1,0 +1,1190 @@
+if (this.maze[y][x] === 1) { // رسم الجدران مع تدرج وظلال const gradient = this.ctx.createLinearGradient(cellX, cellY, cellX + this.cellSize, cellY + this.cellSize);<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>لعبة المتاهات التعليمية - KidSkills</title>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap');
+
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Tajawal', Arial, sans-serif;
+                background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+                background-size: 400% 400%;
+                animation: gradientShift 6s ease infinite;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 20px;
+            }
+
+            @keyframes gradientShift {
+                0% {
+                    background-position: 0% 50%;
+                }
+                50% {
+                    background-position: 100% 50%;
+                }
+                100% {
+                    background-position: 0% 50%;
+                }
+            }
+
+            .logo {
+                color: white;
+                font-size: 2.5rem;
+                font-weight: 700;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+                margin-bottom: 10px;
+                animation: bounce 2s ease-in-out infinite;
+            }
+
+            @keyframes bounce {
+                0%,
+                20%,
+                50%,
+                80%,
+                100% {
+                    transform: translateY(0);
+                }
+                40% {
+                    transform: translateY(-10px);
+                }
+                60% {
+                    transform: translateY(-5px);
+                }
+            }
+
+            .subtitle {
+                color: white;
+                font-size: 1.2rem;
+                margin-bottom: 30px;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            }
+
+            .game-container {
+                background: rgba(255, 255, 255, 0.95);
+                border-radius: 20px;
+                padding: 30px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                text-align: center;
+                max-width: 800px;
+                width: 100%;
+                backdrop-filter: blur(10px);
+            }
+
+            .level-selection {
+                margin-bottom: 30px;
+            }
+
+            .level-btn {
+                background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+                color: white;
+                border: none;
+                padding: 15px 30px;
+                margin: 10px;
+                border-radius: 50px;
+                font-size: 1.2rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .level-btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            }
+
+            .level-btn.active {
+                background: linear-gradient(45deg, #45b7d1, #96ceb4);
+                transform: scale(1.1);
+            }
+
+            .maze-selection {
+                margin-bottom: 20px;
+            }
+
+            .maze-btn {
+                background: linear-gradient(45deg, #96ceb4, #ffeaa7);
+                color: #333;
+                border: none;
+                padding: 12px 25px;
+                margin: 5px;
+                border-radius: 25px;
+                font-size: 1rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .maze-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            }
+
+            .maze-btn.completed {
+                background: linear-gradient(45deg, #00d084, #7de383);
+                color: white;
+            }
+
+            .maze-container {
+                position: relative;
+                margin: 20px auto;
+                background: white;
+                border-radius: 15px;
+                padding: 20px;
+                box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+            }
+
+            #mazeCanvas {
+                border-radius: 10px;
+                cursor: pointer;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .controls {
+                margin-top: 20px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 15px;
+                flex-wrap: wrap;
+            }
+
+            .btn {
+                background: linear-gradient(45deg, #45b7d1, #96ceb4);
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 25px;
+                font-size: 1rem;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            }
+
+            .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            }
+
+            .stats {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 20px;
+                margin: 20px 0;
+                font-size: 1.2rem;
+                font-weight: 600;
+            }
+
+            .stars {
+                color: #ffd700;
+                font-size: 1.5rem;
+            }
+
+            .timer {
+                color: #45b7d1;
+            }
+
+            .success-message {
+                background: linear-gradient(45deg, #00d084, #7de383);
+                color: white;
+                padding: 20px;
+                border-radius: 15px;
+                margin: 20px 0;
+                font-size: 1.3rem;
+                font-weight: 600;
+                display: none;
+                animation: successPulse 0.6s ease-in-out;
+            }
+
+            @keyframes successPulse {
+                0% {
+                    transform: scale(0.8);
+                    opacity: 0;
+                }
+                50% {
+                    transform: scale(1.1);
+                }
+                100% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+            }
+
+            .footer {
+                margin-top: 30px;
+                color: #666;
+                font-size: 1rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .heart {
+                color: #ff6b6b;
+                font-size: 1.2rem;
+                animation: heartbeat 1.5s ease-in-out infinite;
+            }
+
+            @keyframes heartbeat {
+                0%,
+                100% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.1);
+                }
+            }
+
+            .hidden {
+                display: none;
+            }
+
+            @media (max-width: 768px) {
+                .logo {
+                    font-size: 2rem;
+                }
+                .game-container {
+                    padding: 20px;
+                    margin: 10px;
+                }
+                .level-btn {
+                    padding: 12px 20px;
+                    font-size: 1rem;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="logo">KidSkills</div>
+        <div class="subtitle">لعبة المتاهات التعليمية</div>
+
+        <div class="game-container">
+            <div class="level-selection">
+                <button class="level-btn active" onclick="selectLevel(1)">المستوى الأول - الأشكال الهندسية</button>
+                <button class="level-btn" onclick="selectLevel(2)">المستوى الثاني - الحيوانات</button>
+                <button class="level-btn" onclick="selectLevel(3)">المستوى الثالث - الطبيعة</button>
+            </div>
+
+            <div class="maze-selection">
+                <div id="level1-mazes">
+                    <button class="maze-btn" onclick="loadMaze(1, 1)">مربع</button>
+                    <button class="maze-btn" onclick="loadMaze(1, 2)">دائرة</button>
+                    <button class="maze-btn" onclick="loadMaze(1, 3)">مثلث</button>
+                </div>
+                <div id="level2-mazes" class="hidden">
+                    <button class="maze-btn" onclick="loadMaze(2, 1)">أرنب</button>
+                    <button class="maze-btn" onclick="loadMaze(2, 2)">قطة</button>
+                    <button class="maze-btn" onclick="loadMaze(2, 3)">فيل</button>
+                </div>
+                <div id="level3-mazes" class="hidden">
+                    <button class="maze-btn" onclick="loadMaze(3, 1)">غابة</button>
+                    <button class="maze-btn" onclick="loadMaze(3, 2)">محيط</button>
+                    <button class="maze-btn" onclick="loadMaze(3, 3)">حديقة</button>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stars">نجوم: <span id="starCount">0</span> ⭐</div>
+                <div class="timer">الوقت: <span id="timer">0</span>s</div>
+            </div>
+
+            <div class="success-message" id="successMessage">🎉 أحسنت! لقد أكملت المتاهة! 🎉</div>
+
+            <div class="maze-container">
+                <canvas id="mazeCanvas" width="600" height="400"></canvas>
+            </div>
+
+            <div class="controls">
+                <button class="btn" onclick="resetMaze()">إعادة البداية</button>
+                <button class="btn" onclick="showHint()">مساعدة</button>
+                <button class="btn" onclick="nextMaze()">المتاهة التالية</button>
+            </div>
+
+            <div class="footer">
+                <span>صُنعت بـ</span>
+                <span class="heart">♥</span>
+                <span>بواسطة KidSkills</span>
+            </div>
+        </div>
+
+        <script>
+            class MazeGame {
+                constructor() {
+                    this.canvas = document.getElementById('mazeCanvas');
+                    this.ctx = this.canvas.getContext('2d');
+                    this.currentLevel = 1;
+                    this.currentMaze = 1;
+                    this.playerPos = { x: 0, y: 0 };
+                    this.startPos = { x: 0, y: 0 };
+                    this.endPos = { x: 0, y: 0 };
+                    this.isDrawing = false;
+                    this.path = [];
+                    this.cellSize = 20;
+                    this.maze = [];
+                    this.stars = 0;
+                    this.timer = 0;
+                    this.timerInterval = null;
+                    this.completedMazes = new Set();
+                    this.audioContext = null;
+
+                    this.initAudio();
+                    this.loadMaze(1, 1);
+                    this.bindEvents();
+                }
+
+                initAudio() {
+                    try {
+                        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    } catch (e) {
+                        console.log('Audio not supported');
+                    }
+                }
+
+                playSound(frequency, duration) {
+                    if (!this.audioContext) return;
+
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+
+                    oscillator.frequency.value = frequency;
+                    oscillator.type = 'sine';
+
+                    gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.1, this.audioContext.currentTime + 0.01);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
+
+                    oscillator.start(this.audioContext.currentTime);
+                    oscillator.stop(this.audioContext.currentTime + duration);
+                }
+
+                playBuzzer() {
+                    // صوت بازر تحذيري
+                    this.playSound(200, 0.2);
+                    setTimeout(() => this.playSound(150, 0.2), 100);
+                }
+
+                speakText(text) {
+                    if ('speechSynthesis' in window) {
+                        const utterance = new SpeechSynthesisUtterance(text);
+                        utterance.lang = 'ar-SA';
+                        utterance.rate = 0.8;
+                        utterance.pitch = 1.2;
+                        speechSynthesis.speak(utterance);
+                    }
+                }
+
+                generateMaze(level, mazeNum) {
+                    let width, height;
+
+                    // تحديد حجم المتاهة حسب المستوى
+                    switch (level) {
+                        case 1:
+                            width = 15;
+                            height = 10;
+                            break; // سهل
+                        case 2:
+                            width = 20;
+                            height = 13;
+                            break; // متوسط
+                        case 3:
+                            width = 25;
+                            height = 16;
+                            break; // صعب
+                    }
+
+                    // إنشاء متاهة فارغة
+                    const maze = Array(height)
+                        .fill()
+                        .map(() => Array(width).fill(1));
+
+                    // خوارزمية بسيطة لإنشاء مسارات
+                    const stack = [];
+                    const visited = Array(height)
+                        .fill()
+                        .map(() => Array(width).fill(false));
+
+                    function getRandomNeighbor(x, y) {
+                        const neighbors = [];
+                        const directions = [
+                            [0, -2],
+                            [2, 0],
+                            [0, 2],
+                            [-2, 0]
+                        ];
+
+                        directions.forEach(([dx, dy]) => {
+                            const nx = x + dx;
+                            const ny = y + dy;
+                            if (nx >= 0 && nx < width && ny >= 0 && ny < height && !visited[ny][nx]) {
+                                neighbors.push([nx, ny, x + dx / 2, y + dy / 2]);
+                            }
+                        });
+
+                        return neighbors[Math.floor(Math.random() * neighbors.length)];
+                    }
+
+                    // البداية من موضع عشوائي
+                    let startX = 1;
+                    let startY = 1;
+                    visited[startY][startX] = true;
+                    maze[startY][startX] = 0;
+                    stack.push([startX, startY]);
+
+                    while (stack.length > 0) {
+                        const [x, y] = stack[stack.length - 1];
+                        const neighbor = getRandomNeighbor(x, y);
+
+                        if (neighbor) {
+                            const [nx, ny, wx, wy] = neighbor;
+                            visited[ny][nx] = true;
+                            maze[ny][nx] = 0;
+                            maze[wy][wx] = 0;
+                            stack.push([nx, ny]);
+                        } else {
+                            stack.pop();
+                        }
+                    }
+
+                    // إضافة مسارات إضافية لتسهيل اللعب
+                    for (let i = 0; i < width * height * 0.1; i++) {
+                        const x = Math.floor(Math.random() * width);
+                        const y = Math.floor(Math.random() * height);
+                        if (x > 0 && x < width - 1 && y > 0 && y < height - 1) {
+                            maze[y][x] = 0;
+                        }
+                    }
+
+                    // تحديد نقاط البداية والنهاية
+                    this.startPos = { x: 1, y: 1 };
+                    this.endPos = { x: width - 2, y: height - 2 };
+                    maze[this.startPos.y][this.startPos.x] = 0;
+                    maze[this.endPos.y][this.endPos.x] = 0;
+
+                    return maze;
+                }
+
+                loadMaze(level, mazeNum) {
+                    this.currentLevel = level;
+                    this.currentMaze = mazeNum;
+                    this.maze = this.generateMaze(level, mazeNum);
+                    this.playerPos = { ...this.startPos };
+                    this.path = [];
+                    this.isDrawing = false;
+
+                    // بداية العداد
+                    this.timer = 0;
+                    if (this.timerInterval) clearInterval(this.timerInterval);
+                    this.timerInterval = setInterval(() => {
+                        this.timer++;
+                        document.getElementById('timer').textContent = this.timer;
+                    }, 1000);
+
+                    this.draw();
+                }
+
+                draw() {
+                    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                    // رسم المتاهة
+                    const colors = this.getMazeColors();
+
+                    for (let y = 0; y < this.maze.length; y++) {
+                        for (let x = 0; x < this.maze[y].length; x++) {
+                            const cellX = x * this.cellSize;
+                            const cellY = y * this.cellSize;
+
+                            if (this.maze[y][x] === 1) {
+                                // رسم الجدران
+                                this.ctx.fillStyle = colors.wall;
+                                this.ctx.fillRect(cellX, cellY, this.cellSize, this.cellSize);
+                            } else {
+                                // رسم المسار
+                                this.ctx.fillStyle = colors.path;
+                                this.ctx.fillRect(cellX, cellY, this.cellSize, this.cellSize);
+                            }
+                        }
+                    }
+
+                    // رسم نقطة البداية مع شخصية جميلة
+                    this.drawStartCharacter();
+
+                    // رسم نقطة النهاية مع شكل جميل
+                    this.drawShape(this.endPos.x * this.cellSize, this.endPos.y * this.cellSize);
+
+                    // رسم المسار المرسوم مع تأثيرات جميلة
+                    if (this.path.length > 1) {
+                        // ظل المسار
+                        this.ctx.strokeStyle = 'rgba(69, 183, 209, 0.3)';
+                        this.ctx.lineWidth = 6;
+                        this.ctx.lineCap = 'round';
+                        this.ctx.lineJoin = 'round';
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(this.path[0].x + 2, this.path[0].y + 2);
+                        for (let i = 1; i < this.path.length; i++) {
+                            this.ctx.lineTo(this.path[i].x + 2, this.path[i].y + 2);
+                        }
+                        this.ctx.stroke();
+
+                        // المسار الرئيسي
+                        this.ctx.strokeStyle = '#45B7D1';
+                        this.ctx.lineWidth = 4;
+                        this.ctx.lineCap = 'round';
+                        this.ctx.lineJoin = 'round';
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(this.path[0].x, this.path[0].y);
+                        for (let i = 1; i < this.path.length; i++) {
+                            this.ctx.lineTo(this.path[i].x, this.path[i].y);
+                        }
+                        this.ctx.stroke();
+
+                        // نقاط لامعة على المسار
+                        this.ctx.fillStyle = '#FFD700';
+                        for (let i = 0; i < this.path.length; i += 5) {
+                            this.ctx.beginPath();
+                            this.ctx.arc(this.path[i].x, this.path[i].y, 2, 0, 2 * Math.PI);
+                            this.ctx.fill();
+                        }
+                    }
+                }
+
+                getMazeColors() {
+                    switch (this.currentLevel) {
+                        case 1:
+                            return { wall: '#FF6B6B', path: '#FFE5E5' };
+                        case 2:
+                            return { wall: '#4ECDC4', path: '#E5F9F6' };
+                        case 3:
+                            return { wall: '#96CEB4', path: '#E8F5E8' };
+                        default:
+                            return { wall: '#333', path: '#FFF' };
+                    }
+                }
+
+                drawShape(x, y) {
+                    const centerX = x + this.cellSize / 2;
+                    const centerY = y + this.cellSize / 2;
+                    const size = this.cellSize / 2;
+
+                    this.ctx.save();
+
+                    if (this.currentLevel === 1) {
+                        // أشكال هندسية ملونة
+                        switch (this.currentMaze) {
+                            case 1: // مربع
+                                // خلفية للمربع
+                                this.ctx.fillStyle = '#FFD700';
+                                this.ctx.fillRect(centerX - size / 2.5, centerY - size / 2.5, size / 1.25, size / 1.25);
+
+                                // حدود المربع
+                                this.ctx.strokeStyle = '#FF6B6B';
+                                this.ctx.lineWidth = 3;
+                                this.ctx.strokeRect(centerX - size / 2.5, centerY - size / 2.5, size / 1.25, size / 1.25);
+
+                                // نجمة داخل المربع
+                                this.ctx.fillStyle = '#FF6B6B';
+                                this.drawStar(centerX, centerY, size / 6, 5);
+                                break;
+                            case 2: // دائرة
+                                // خلفية الدائرة
+                                this.ctx.fillStyle = '#FF6B6B';
+                                this.ctx.beginPath();
+                                this.ctx.arc(centerX, centerY, size / 2.5, 0, 2 * Math.PI);
+                                this.ctx.fill();
+
+                                // حدود الدائرة
+                                this.ctx.strokeStyle = '#FFD700';
+                                this.ctx.lineWidth = 3;
+                                this.ctx.beginPath();
+                                this.ctx.arc(centerX, centerY, size / 2.5, 0, 2 * Math.PI);
+                                this.ctx.stroke();
+
+                                // دائرة صغيرة في المنتصف
+                                this.ctx.fillStyle = '#FFD700';
+                                this.ctx.beginPath();
+                                this.ctx.arc(centerX, centerY, size / 8, 0, 2 * Math.PI);
+                                this.ctx.fill();
+                                break;
+                            case 3: // مثلث
+                                // خلفية المثلث
+                                this.ctx.fillStyle = '#4ECDC4';
+                                this.ctx.beginPath();
+                                this.ctx.moveTo(centerX, centerY - size / 2.2);
+                                this.ctx.lineTo(centerX - size / 2.2, centerY + size / 2.8);
+                                this.ctx.lineTo(centerX + size / 2.2, centerY + size / 2.8);
+                                this.ctx.closePath();
+                                this.ctx.fill();
+
+                                // حدود المثلث
+                                this.ctx.strokeStyle = '#FF6B6B';
+                                this.ctx.lineWidth = 3;
+                                this.ctx.beginPath();
+                                this.ctx.moveTo(centerX, centerY - size / 2.2);
+                                this.ctx.lineTo(centerX - size / 2.2, centerY + size / 2.8);
+                                this.ctx.lineTo(centerX + size / 2.2, centerY + size / 2.8);
+                                this.ctx.closePath();
+                                this.ctx.stroke();
+
+                                // نقطة في المنتصف
+                                this.ctx.fillStyle = '#FF6B6B';
+                                this.ctx.beginPath();
+                                this.ctx.arc(centerX, centerY, size / 10, 0, 2 * Math.PI);
+                                this.ctx.fill();
+                                break;
+                        }
+                    } else if (this.currentLevel === 2) {
+                        // أشكال حيوانات
+                        switch (this.currentMaze) {
+                            case 1: // أرنب
+                                this.drawRabbit(centerX, centerY, size);
+                                break;
+                            case 2: // قطة
+                                this.drawCat(centerX, centerY, size);
+                                break;
+                            case 3: // فيل
+                                this.drawElephant(centerX, centerY, size);
+                                break;
+                        }
+                    } else {
+                        // أشكال طبيعة
+                        switch (this.currentMaze) {
+                            case 1: // غابة
+                                this.drawTree(centerX, centerY, size);
+                                break;
+                            case 2: // محيط
+                                this.drawWave(centerX, centerY, size);
+                                break;
+                            case 3: // حديقة
+                                this.drawFlower(centerX, centerY, size);
+                                break;
+                        }
+                    }
+
+                    this.ctx.restore();
+                }
+
+                drawStar(x, y, radius, points) {
+                    this.ctx.beginPath();
+                    for (let i = 0; i < points * 2; i++) {
+                        const angle = (i * Math.PI) / points;
+                        const r = i % 2 === 0 ? radius : radius / 2;
+                        const pointX = x + Math.cos(angle) * r;
+                        const pointY = y + Math.sin(angle) * r;
+
+                        if (i === 0) {
+                            this.ctx.moveTo(pointX, pointY);
+                        } else {
+                            this.ctx.lineTo(pointX, pointY);
+                        }
+                    }
+                    this.ctx.closePath();
+                    this.ctx.fill();
+                }
+
+                drawRabbit(x, y, size) {
+                    // جسم الأرنب
+                    this.ctx.fillStyle = '#FFB6C1';
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y, size / 4, 0, 2 * Math.PI);
+                    this.ctx.fill();
+
+                    // الأذنين
+                    this.ctx.fillStyle = '#FFB6C1';
+                    this.ctx.beginPath();
+                    this.ctx.ellipse(x - size / 6, y - size / 3, size / 8, size / 4, 0, 0, 2 * Math.PI);
+                    this.ctx.ellipse(x + size / 6, y - size / 3, size / 8, size / 4, 0, 0, 2 * Math.PI);
+                    this.ctx.fill();
+
+                    // العينين
+                    this.ctx.fillStyle = '#000';
+                    this.ctx.beginPath();
+                    this.ctx.arc(x - size / 8, y - size / 12, size / 20, 0, 2 * Math.PI);
+                    this.ctx.arc(x + size / 8, y - size / 12, size / 20, 0, 2 * Math.PI);
+                    this.ctx.fill();
+                }
+
+                drawCat(x, y, size) {
+                    // رأس القطة
+                    this.ctx.fillStyle = '#FFA500';
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y, size / 4, 0, 2 * Math.PI);
+                    this.ctx.fill();
+
+                    // الأذنين المثلثتين
+                    this.ctx.fillStyle = '#FFA500';
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x - size / 5, y - size / 4);
+                    this.ctx.lineTo(x - size / 8, y - size / 2);
+                    this.ctx.lineTo(x - size / 12, y - size / 4);
+                    this.ctx.closePath();
+                    this.ctx.fill();
+
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x + size / 5, y - size / 4);
+                    this.ctx.lineTo(x + size / 8, y - size / 2);
+                    this.ctx.lineTo(x + size / 12, y - size / 4);
+                    this.ctx.closePath();
+                    this.ctx.fill();
+
+                    // العينين
+                    this.ctx.fillStyle = '#000';
+                    this.ctx.beginPath();
+                    this.ctx.arc(x - size / 10, y - size / 12, size / 25, 0, 2 * Math.PI);
+                    this.ctx.arc(x + size / 10, y - size / 12, size / 25, 0, 2 * Math.PI);
+                    this.ctx.fill();
+
+                    // الأنف
+                    this.ctx.fillStyle = '#FF69B4';
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x, y);
+                    this.ctx.lineTo(x - size / 20, y + size / 20);
+                    this.ctx.lineTo(x + size / 20, y + size / 20);
+                    this.ctx.closePath();
+                    this.ctx.fill();
+                }
+
+                drawElephant(x, y, size) {
+                    // جسم الفيل
+                    this.ctx.fillStyle = '#808080';
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y, size / 3, 0, 2 * Math.PI);
+                    this.ctx.fill();
+
+                    // الخرطوم
+                    this.ctx.fillStyle = '#808080';
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y + size / 4, size / 6, 0, Math.PI);
+                    this.ctx.fill();
+
+                    // الأذنين
+                    this.ctx.fillStyle = '#696969';
+                    this.ctx.beginPath();
+                    this.ctx.ellipse(x - size / 4, y - size / 6, size / 6, size / 4, 0, 0, 2 * Math.PI);
+                    this.ctx.ellipse(x + size / 4, y - size / 6, size / 6, size / 4, 0, 0, 2 * Math.PI);
+                    this.ctx.fill();
+
+                    // العينين
+                    this.ctx.fillStyle = '#000';
+                    this.ctx.beginPath();
+                    this.ctx.arc(x - size / 8, y - size / 8, size / 20, 0, 2 * Math.PI);
+                    this.ctx.arc(x + size / 8, y - size / 8, size / 20, 0, 2 * Math.PI);
+                    this.ctx.fill();
+                }
+
+                drawTree(x, y, size) {
+                    // جذع الشجرة
+                    this.ctx.fillStyle = '#8B4513';
+                    this.ctx.fillRect(x - size / 8, y, size / 4, size / 3);
+
+                    // أوراق الشجرة
+                    this.ctx.fillStyle = '#228B22';
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y - size / 6, size / 3, 0, 2 * Math.PI);
+                    this.ctx.fill();
+
+                    // تفاح أحمر
+                    this.ctx.fillStyle = '#FF0000';
+                    this.ctx.beginPath();
+                    this.ctx.arc(x - size / 6, y - size / 4, size / 12, 0, 2 * Math.PI);
+                    this.ctx.arc(x + size / 8, y - size / 8, size / 12, 0, 2 * Math.PI);
+                    this.ctx.fill();
+                }
+
+                drawWave(x, y, size) {
+                    // موجات المحيط
+                    this.ctx.strokeStyle = '#4169E1';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.beginPath();
+
+                    for (let i = 0; i < 3; i++) {
+                        const waveY = y - size / 4 + (i * size) / 6;
+                        this.ctx.moveTo(x - size / 3, waveY);
+                        this.ctx.quadraticCurveTo(x - size / 6, waveY - size / 8, x, waveY);
+                        this.ctx.quadraticCurveTo(x + size / 6, waveY + size / 8, x + size / 3, waveY);
+                    }
+                    this.ctx.stroke();
+
+                    // سمكة صغيرة
+                    this.ctx.fillStyle = '#FFD700';
+                    this.ctx.beginPath();
+                    this.ctx.ellipse(x, y, size / 6, size / 8, 0, 0, 2 * Math.PI);
+                    this.ctx.fill();
+
+                    // ذيل السمكة
+                    this.ctx.fillStyle = '#FFD700';
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x - size / 6, y);
+                    this.ctx.lineTo(x - size / 3, y - size / 12);
+                    this.ctx.lineTo(x - size / 3, y + size / 12);
+                    this.ctx.closePath();
+                    this.ctx.fill();
+                }
+
+                drawFlower(x, y, size) {
+                    // بتلات الزهرة
+                    this.ctx.fillStyle = '#FF69B4';
+                    for (let i = 0; i < 6; i++) {
+                        const angle = (i * Math.PI) / 3;
+                        const petalX = x + (Math.cos(angle) * size) / 6;
+                        const petalY = y + (Math.sin(angle) * size) / 6;
+                        this.ctx.beginPath();
+                        this.ctx.arc(petalX, petalY, size / 8, 0, 2 * Math.PI);
+                        this.ctx.fill();
+                    }
+
+                    // مركز الزهرة
+                    this.ctx.fillStyle = '#FFD700';
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y, size / 8, 0, 2 * Math.PI);
+                    this.ctx.fill();
+
+                    // الساق
+                    this.ctx.strokeStyle = '#228B22';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x, y + size / 8);
+                    this.ctx.lineTo(x, y + size / 3);
+                    this.ctx.stroke();
+
+                    // الأوراق
+                    this.ctx.fillStyle = '#228B22';
+                    this.ctx.beginPath();
+                    this.ctx.ellipse(x - size / 8, y + size / 6, size / 12, size / 8, Math.PI / 4, 0, 2 * Math.PI);
+                    this.ctx.ellipse(x + size / 8, y + size / 5, size / 12, size / 8, -Math.PI / 4, 0, 2 * Math.PI);
+                    this.ctx.fill();
+                }
+
+                drawStartCharacter() {
+                    const x = this.startPos.x * this.cellSize + this.cellSize / 2;
+                    const y = this.startPos.y * this.cellSize + this.cellSize / 2;
+                    const size = this.cellSize / 2;
+
+                    this.ctx.save();
+
+                    // شخصية طفل صغير
+                    // الوجه
+                    this.ctx.fillStyle = '#FDBCB4';
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y, size / 3, 0, 2 * Math.PI);
+                    this.ctx.fill();
+
+                    // الشعر
+                    this.ctx.fillStyle = '#8B4513';
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y - size / 6, size / 3, Math.PI, 2 * Math.PI);
+                    this.ctx.fill();
+
+                    // العينين
+                    this.ctx.fillStyle = '#000';
+                    this.ctx.beginPath();
+                    this.ctx.arc(x - size / 8, y - size / 12, size / 20, 0, 2 * Math.PI);
+                    this.ctx.arc(x + size / 8, y - size / 12, size / 20, 0, 2 * Math.PI);
+                    this.ctx.fill();
+
+                    // الابتسامة
+                    this.ctx.strokeStyle = '#000';
+                    this.ctx.lineWidth = 1;
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y, size / 8, 0, Math.PI);
+                    this.ctx.stroke();
+
+                    // الجسم
+                    this.ctx.fillStyle = '#4ECDC4';
+                    this.ctx.fillRect(x - size / 6, y + size / 6, size / 3, size / 3);
+
+                    // اليدين والقدمين
+                    this.ctx.fillStyle = '#FDBCB4';
+                    this.ctx.beginPath();
+                    // اليدين
+                    this.ctx.arc(x - size / 4, y + size / 4, size / 12, 0, 2 * Math.PI);
+                    this.ctx.arc(x + size / 4, y + size / 4, size / 12, 0, 2 * Math.PI);
+                    // القدمين
+                    this.ctx.arc(x - size / 8, y + size / 2, size / 12, 0, 2 * Math.PI);
+                    this.ctx.arc(x + size / 8, y + size / 2, size / 12, 0, 2 * Math.PI);
+                    this.ctx.fill();
+
+                    this.ctx.restore();
+                }
+
+                bindEvents() {
+                    this.canvas.addEventListener('mousedown', (e) => this.startDrawing(e));
+                    this.canvas.addEventListener('mousemove', (e) => this.draw_path(e));
+                    this.canvas.addEventListener('mouseup', () => this.stopDrawing());
+                    this.canvas.addEventListener('mouseleave', () => this.stopDrawing());
+                }
+
+                startDrawing(e) {
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+
+                    // التحقق من البداية من النقطة الصحيحة
+                    const startX = this.startPos.x * this.cellSize + this.cellSize / 2;
+                    const startY = this.startPos.y * this.cellSize + this.cellSize / 2;
+                    const distance = Math.sqrt((x - startX) ** 2 + (y - startY) ** 2);
+
+                    if (distance <= this.cellSize) {
+                        this.isDrawing = true;
+                        this.path = [{ x: startX, y: startY }];
+                    }
+                }
+
+                draw_path(e) {
+                    if (!this.isDrawing) return;
+
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+
+                    // التحقق من أن المسار داخل المتاهة وليس في الجدران
+                    const mazeX = Math.floor(x / this.cellSize);
+                    const mazeY = Math.floor(y / this.cellSize);
+
+                    if (mazeX >= 0 && mazeX < this.maze[0].length && mazeY >= 0 && mazeY < this.maze.length) {
+                        if (this.maze[mazeY][mazeX] === 0) {
+                            // المسار صحيح
+                            this.path.push({ x, y });
+
+                            // التحقق من الوصول للنهاية
+                            const endX = this.endPos.x * this.cellSize + this.cellSize / 2;
+                            const endY = this.endPos.y * this.cellSize + this.cellSize / 2;
+                            const distanceToEnd = Math.sqrt((x - endX) ** 2 + (y - endY) ** 2);
+
+                            if (distanceToEnd <= this.cellSize) {
+                                this.completeMaze();
+                            }
+
+                            this.draw();
+                        } else {
+                            // لمس الجدران (الحدود الحمراء) - تشغيل صوت البازر
+                            this.playBuzzer();
+                            this.speakText('انتبه');
+
+                            // إيقاف الرسم مؤقتاً
+                            this.isDrawing = false;
+
+                            // إظهار تحذير بصري
+                            this.showWarning();
+
+                            // مسح آخر جزء من المسار المرسوم
+                            if (this.path.length > 5) {
+                                this.path = this.path.slice(0, -5);
+                                this.draw();
+                            }
+                        }
+                    } else {
+                        // خارج حدود المتاهة - صوت بازر أيضاً
+                        this.playBuzzer();
+                        this.speakText('انتبه');
+                        this.isDrawing = false;
+                        this.showWarning();
+                    }
+                }
+
+                showWarning() {
+                    // إظهار تحذير بصري عند الخروج من المسار
+                    this.ctx.save();
+                    this.ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                    this.ctx.restore();
+
+                    setTimeout(() => {
+                        this.draw();
+                    }, 200);
+                }
+
+                stopDrawing() {
+                    this.isDrawing = false;
+                }
+
+                completeMaze() {
+                    if (this.timerInterval) {
+                        clearInterval(this.timerInterval);
+                        this.timerInterval = null;
+                    }
+
+                    // إضافة النجوم حسب الوقت
+                    let starsEarned = 3;
+                    if (this.timer > 30) starsEarned = 2;
+                    if (this.timer > 60) starsEarned = 1;
+
+                    this.stars += starsEarned;
+                    document.getElementById('starCount').textContent = this.stars;
+
+                    // تحديد المتاهة كمكتملة
+                    const mazeId = `${this.currentLevel}-${this.currentMaze}`;
+                    this.completedMazes.add(mazeId);
+                    this.updateMazeButtons();
+
+                    // كلمتين تحفيزيتين فقط
+                    const encouragementWords = ['ممتاز', 'أحسنت'];
+
+                    const randomWord = encouragementWords[Math.floor(Math.random() * encouragementWords.length)];
+
+                    // إظهار رسالة النجاح
+                    const successElement = document.getElementById('successMessage');
+                    successElement.textContent = `🎉 ${randomWord}! 🎉`;
+                    successElement.style.display = 'block';
+
+                    // نطق كلمة التحفيز
+                    this.speakText(randomWord);
+
+                    // تشغيل صوت النجاح
+                    this.playSuccessSound();
+
+                    // الانتقال التلقائي للمتاهة التالية بعد 3 ثواني
+                    setTimeout(() => {
+                        successElement.style.display = 'none';
+                        this.autoNextMaze();
+                    }, 3000);
+                }
+
+                autoNextMaze() {
+                    let nextLevel = this.currentLevel;
+                    let nextMaze = this.currentMaze + 1;
+
+                    if (nextMaze > 3) {
+                        nextLevel++;
+                        nextMaze = 1;
+                    }
+
+                    if (nextLevel <= 3) {
+                        // تحديث المستوى في الواجهة باستخدام selectLevel
+                        selectLevel(nextLevel);
+
+                        // تحميل المتاهة الجديدة مباشرة بدون رسائل
+                        setTimeout(() => {
+                            this.loadMaze(nextLevel, nextMaze);
+                        }, 500);
+                    } else {
+                        // انتهت جميع المتاهات
+                        this.speakText('ممتاز');
+
+                        // إظهار رسالة إكمال اللعبة
+                        const successElement = document.getElementById('successMessage');
+                        successElement.innerHTML = '🏆 ممتاز! 🏆<br>🌟 انتهيت من جميع المتاهات! 🌟';
+                        successElement.style.display = 'block';
+                    }
+                }
+
+                playSuccessSound() {
+                    // نغمة النجاح
+                    const notes = [523, 659, 784, 1047]; // C, E, G, C
+                    notes.forEach((note, index) => {
+                        setTimeout(() => this.playSound(note, 0.2), index * 100);
+                    });
+                }
+
+                updateMazeButtons() {
+                    document.querySelectorAll('.maze-btn').forEach((btn) => {
+                        btn.classList.remove('completed');
+                    });
+
+                    this.completedMazes.forEach((mazeId) => {
+                        const [level, maze] = mazeId.split('-');
+                        const levelMazes = document.getElementById(`level${level}-mazes`);
+                        const buttons = levelMazes.children;
+                        if (buttons[maze - 1]) {
+                            buttons[maze - 1].classList.add('completed');
+                        }
+                    });
+                }
+
+                resetMaze() {
+                    this.loadMaze(this.currentLevel, this.currentMaze);
+                }
+
+                showHint() {
+                    // إظهار اتجاه تقريبي للهدف
+                    this.ctx.strokeStyle = 'rgba(255, 107, 107, 0.3)';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.setLineDash([5, 5]);
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(this.startPos.x * this.cellSize + this.cellSize / 2, this.startPos.y * this.cellSize + this.cellSize / 2);
+                    this.ctx.lineTo(this.endPos.x * this.cellSize + this.cellSize / 2, this.endPos.y * this.cellSize + this.cellSize / 2);
+                    this.ctx.stroke();
+                    this.ctx.setLineDash([]);
+
+                    setTimeout(() => this.draw(), 2000);
+                }
+
+                nextMaze() {
+                    let nextLevel = this.currentLevel;
+                    let nextMaze = this.currentMaze + 1;
+
+                    if (nextMaze > 3) {
+                        nextLevel++;
+                        nextMaze = 1;
+                    }
+
+                    if (nextLevel <= 3) {
+                        selectLevel(nextLevel);
+                        this.loadMaze(nextLevel, nextMaze);
+                    }
+                }
+            }
+
+            // المتغيرات العامة
+            let game;
+
+            // الوظائف العامة
+            function selectLevel(level) {
+                // إزالة الفئة النشطة من جميع الأزرار
+                document.querySelectorAll('.level-btn').forEach((btn) => btn.classList.remove('active'));
+                document.querySelectorAll('.level-btn')[level - 1].classList.add('active');
+
+                // إخفاء جميع مجموعات المتاهات
+                document.querySelectorAll('[id$="-mazes"]').forEach((div) => div.classList.add('hidden'));
+                document.getElementById(`level${level}-mazes`).classList.remove('hidden');
+
+                // تحميل أول متاهة في المستوى المحدد
+                if (game) {
+                    game.loadMaze(level, 1);
+                }
+            }
+
+            function loadMaze(level, mazeNum) {
+                if (game) {
+                    game.loadMaze(level, mazeNum);
+                }
+            }
+
+            function resetMaze() {
+                if (game) {
+                    game.resetMaze();
+                }
+            }
+
+            function showHint() {
+                if (game) {
+                    game.showHint();
+                }
+            }
+
+            function nextMaze() {
+                if (game) {
+                    game.nextMaze();
+                }
+            }
+
+            // بدء اللعبة
+            window.addEventListener('load', () => {
+                game = new MazeGame();
+            });
+        </script>
+    </body>
+</html>

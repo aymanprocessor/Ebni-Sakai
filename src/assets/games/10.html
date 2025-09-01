@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>🎵 لعبة التركيز السمعي - نسخة مبسطة</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Arial', sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                direction: rtl;
+                padding: 20px;
+            }
+
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+            }
+
+            .header {
+                text-align: center;
+                color: white;
+                margin-bottom: 30px;
+            }
+
+            .header h1 {
+                font-size: 2.5em;
+                margin-bottom: 10px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            }
+
+            .game-box {
+                background: rgba(255, 255, 255, 0.95);
+                border-radius: 20px;
+                padding: 30px;
+                text-align: center;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+                margin-bottom: 20px;
+            }
+
+            .level-buttons {
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+                margin-bottom: 30px;
+                flex-wrap: wrap;
+            }
+
+            .level-btn {
+                padding: 12px 20px;
+                border: none;
+                border-radius: 25px;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+                background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+                color: #333;
+            }
+
+            .level-btn.active {
+                background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+                transform: translateY(-2px);
+            }
+
+            .level-btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+            }
+
+            .score-display {
+                font-size: 24px;
+                font-weight: bold;
+                color: #333;
+                margin-bottom: 20px;
+            }
+
+            .play-button {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                border-radius: 50%;
+                width: 120px;
+                height: 120px;
+                font-size: 50px;
+                cursor: pointer;
+                margin: 20px auto;
+                display: block;
+                transition: all 0.3s ease;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            }
+
+            .play-button:hover {
+                transform: scale(1.1);
+                box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
+            }
+
+            .play-button:active {
+                transform: scale(0.95);
+            }
+
+            .play-button.playing {
+                background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+                animation: pulse 1s infinite;
+            }
+
+            .message {
+                font-size: 20px;
+                font-weight: bold;
+                margin: 20px 0;
+                padding: 15px;
+                border-radius: 15px;
+                min-height: 60px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .message.success {
+                background: linear-gradient(135deg, #c3f53c 0%, #4facfe 100%);
+                color: white;
+            }
+
+            .message.error {
+                background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+                color: white;
+            }
+
+            .cards-container {
+                display: grid;
+                gap: 20px;
+                justify-content: center;
+                margin: 30px 0;
+            }
+
+            .cards-3 {
+                grid-template-columns: repeat(3, 1fr);
+                max-width: 600px;
+                margin: 0 auto;
+            }
+
+            .cards-6 {
+                grid-template-columns: repeat(3, 1fr);
+                max-width: 800px;
+                margin: 0 auto;
+            }
+
+            .card {
+                background: white;
+                border-radius: 20px;
+                padding: 20px;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+                border: 4px solid transparent;
+                min-height: 150px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            }
+
+            .card.correct {
+                border-color: #4caf50;
+                background: linear-gradient(135deg, #c3f53c 0%, #4facfe 100%);
+                animation: correctPulse 0.6s ease;
+            }
+
+            .card.wrong {
+                border-color: #f44336;
+                background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+                animation: wrongShake 0.6s ease;
+            }
+
+            .card-emoji {
+                font-size: 50px;
+                margin-bottom: 10px;
+            }
+
+            .card-text {
+                font-size: 18px;
+                font-weight: bold;
+                color: #333;
+            }
+
+            .test-button {
+                background: #27ae60;
+                color: white;
+                border: none;
+                border-radius: 15px;
+                padding: 12px 25px;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+                margin: 10px;
+                transition: all 0.3s ease;
+            }
+
+            .test-button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+            }
+
+            .next-button {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                border-radius: 25px;
+                padding: 15px 30px;
+                font-size: 18px;
+                font-weight: bold;
+                cursor: pointer;
+                margin: 20px auto;
+                display: none;
+                transition: all 0.3s ease;
+            }
+
+            @keyframes pulse {
+                0%,
+                100% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.1);
+                }
+            }
+
+            @keyframes correctPulse {
+                0%,
+                100% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.05);
+                }
+            }
+
+            @keyframes wrongShake {
+                0%,
+                100% {
+                    transform: translateX(0);
+                }
+                25% {
+                    transform: translateX(-5px);
+                }
+                75% {
+                    transform: translateX(5px);
+                }
+            }
+
+            @media (max-width: 768px) {
+                .cards-3,
+                .cards-6 {
+                    grid-template-columns: repeat(2, 1fr);
+                    max-width: 400px;
+                }
+
+                .card {
+                    min-height: 120px;
+                    padding: 15px;
+                }
+
+                .card-emoji {
+                    font-size: 35px;
+                }
+
+                .card-text {
+                    font-size: 14px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🎵 لعبة التركيز السمعي 🎵</h1>
+                <p>استمع للصوت واختر الإجابة الصحيحة!</p>
+            </div>
+
+            <div class="game-box">
+                <div class="level-buttons">
+                    <button class="level-btn active" onclick="selectLevel(1)">🐾 الحيوانات (سهل)</button>
+                    <button class="level-btn" onclick="selectLevel(2)">🦁 الحيوانات (متوسط)</button>
+                    <button class="level-btn" onclick="selectLevel(3)">🎹 الآلات الموسيقية</button>
+                </div>
+
+                <div class="score-display" id="score-display">النقاط: <span id="score">0</span> | الجولة: <span id="round">1</span>/5</div>
+
+                <button class="test-button" onclick="testSpeech()">🔊 اختبار الصوت</button>
+
+                <button class="play-button" id="play-btn" onclick="playSound()">🔊</button>
+
+                <div class="message" id="message">اضغط على "اختبار الصوت" أولاً ثم ابدأ اللعب!</div>
+
+                <div class="cards-container" id="cards-container">
+                    <!-- البطاقات ستظهر هنا -->
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // متغيرات اللعبة البسيطة
+            let currentLevel = 1;
+            let currentRound = 1;
+            let score = 0;
+            let currentAnswer = '';
+            let isPlaying = false;
+
+            // بيانات المستويات
+            const levels = {
+                1: {
+                    name: 'الحيوانات (سهل)',
+                    items: [
+                        { emoji: '🐱', name: 'قطة', sound: 'مياو مياو' },
+                        { emoji: '🐶', name: 'كلب', sound: 'هاف هاف هاف' },
+                        { emoji: '🐄', name: 'بقرة', sound: 'مووووووو' }
+                    ]
+                },
+                2: {
+                    name: 'الحيوانات (متوسط)',
+                    items: [
+                        { emoji: '🦁', name: 'أسد', sound: 'روووووووار' },
+                        { emoji: '🐘', name: 'فيل', sound: 'فووووووو' },
+                        { emoji: '🐦', name: 'طائر', sound: 'تشيب تشيب تشيب' },
+                        { emoji: '🐑', name: 'خروف', sound: 'بااااع بااع' },
+                        { emoji: '🐴', name: 'حصان', sound: 'هييييه هيه' },
+                        { emoji: '🐓', name: 'ديك', sound: 'كوكو ريكوووو' }
+                    ]
+                },
+                3: {
+                    name: 'الآلات الموسيقية',
+                    items: [
+                        { emoji: '🎹', name: 'بيانو', sound: 'تين تين تاان' },
+                        { emoji: '🥁', name: 'طبل', sound: 'دم دم دم' },
+                        { emoji: '🎸', name: 'جيتار', sound: 'ترين ترين' },
+                        { emoji: '🎻', name: 'كمان', sound: 'لااااا لااا' },
+                        { emoji: '🎵', name: 'ناي', sound: 'فووووو فوو' },
+                        { emoji: '🔔', name: 'جرس', sound: 'تينغ تونغ' }
+                    ]
+                }
+            };
+
+            // دالة النطق البسيطة
+            function speak(text, options = {}) {
+                return new Promise((resolve) => {
+                    // التأكد من دعم المتصفح
+                    if (!('speechSynthesis' in window)) {
+                        console.error('المتصفح لا يدعم SpeechSynthesis');
+                        showMessage('❌ المتصفح لا يدعم الأصوات المنطوقة', 'error');
+                        resolve();
+                        return;
+                    }
+
+                    // إيقاف أي كلام سابق
+                    speechSynthesis.cancel();
+
+                    const utterance = new SpeechSynthesisUtterance(text);
+
+                    // إعدادات الصوت
+                    utterance.rate = options.rate || 1.0;
+                    utterance.pitch = options.pitch || 1.0;
+                    utterance.volume = options.volume || 0.8;
+                    utterance.lang = 'ar-SA';
+
+                    // أحداث النطق
+                    utterance.onstart = () => {
+                        console.log('🎤 بدء النطق:', text);
+                    };
+
+                    utterance.onend = () => {
+                        console.log('✅ انتهى النطق:', text);
+                        resolve();
+                    };
+
+                    utterance.onerror = (error) => {
+                        console.error('❌ خطأ في النطق:', error);
+                        resolve();
+                    };
+
+                    // تشغيل النطق
+                    try {
+                        speechSynthesis.speak(utterance);
+                    } catch (error) {
+                        console.error('❌ فشل في تشغيل النطق:', error);
+                        showMessage('❌ فشل في تشغيل الصوت', 'error');
+                        resolve();
+                    }
+                });
+            }
+
+            // اختبار النطق
+            async function testSpeech() {
+                console.log('🧪 بدء اختبار النطق...');
+                showMessage('🎤 جاري اختبار الأصوات...', 'success');
+
+                try {
+                    await speak('أهلاً وسهلاً بك في لعبة التركيز السمعي');
+                    await new Promise((resolve) => setTimeout(resolve, 500));
+
+                    await speak('مياو مياو', { pitch: 1.8, rate: 1.2 });
+                    await new Promise((resolve) => setTimeout(resolve, 500));
+
+                    await speak('هاف هاف هاف', { pitch: 0.7, rate: 1.5 });
+                    await new Promise((resolve) => setTimeout(resolve, 500));
+
+                    await speak('مووووووو', { pitch: 0.5, rate: 0.8 });
+
+                    showMessage('🎉 ممتاز! الأصوات تعمل بشكل رائع. ابدأ اللعب الآن!', 'success');
+                } catch (error) {
+                    console.error('❌ فشل اختبار النطق:', error);
+                    showMessage('❌ مشكلة في اختبار الأصوات. تأكد من السماح بتشغيل الصوت.', 'error');
+                }
+            }
+
+            // اختيار المستوى
+            function selectLevel(level) {
+                currentLevel = level;
+
+                // تحديث الأزرار
+                document.querySelectorAll('.level-btn').forEach((btn) => btn.classList.remove('active'));
+                event.target.classList.add('active');
+
+                // إعادة تشغيل اللعبة
+                restartGame();
+            }
+
+            // إعادة تشغيل اللعبة
+            function restartGame() {
+                currentRound = 1;
+                score = 0;
+                updateDisplay();
+                generateRound();
+                showMessage('🎮 مستوى جديد! اضغط على زر السماعة لسماع الصوت.');
+            }
+
+            // تحديث العرض
+            function updateDisplay() {
+                document.getElementById('score').textContent = score;
+                document.getElementById('round').textContent = currentRound;
+            }
+
+            // إنشاء جولة جديدة
+            function generateRound() {
+                const levelData = levels[currentLevel];
+                const items = [...levelData.items];
+
+                // اختيار الإجابة الصحيحة
+                const correctIndex = Math.floor(Math.random() * items.length);
+                currentAnswer = items[correctIndex].name;
+
+                // تحديد عدد البطاقات
+                const cardCount = currentLevel === 1 ? 3 : 6;
+                const displayItems = [items[correctIndex]];
+                items.splice(correctIndex, 1);
+
+                // إضافة باقي البطاقات
+                while (displayItems.length < cardCount && items.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * items.length);
+                    displayItems.push(items[randomIndex]);
+                    items.splice(randomIndex, 1);
+                }
+
+                // خلط البطاقات
+                displayItems.sort(() => Math.random() - 0.5);
+
+                // عرض البطاقات
+                displayCards(displayItems);
+            }
+
+            // عرض البطاقات
+            function displayCards(items) {
+                const container = document.getElementById('cards-container');
+                const cardCount = currentLevel === 1 ? 3 : 6;
+
+                container.className = `cards-container cards-${cardCount}`;
+                container.innerHTML = '';
+
+                items.forEach((item) => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.onclick = () => selectAnswer(item.name, card);
+
+                    card.innerHTML = `
+                    <div class="card-emoji">${item.emoji}</div>
+                    <div class="card-text">${item.name}</div>
+                `;
+
+                    container.appendChild(card);
+                });
+            }
+
+            // تشغيل الصوت
+            async function playSound() {
+                if (isPlaying) {
+                    showMessage('⏳ الصوت قيد التشغيل، انتظر...', 'error');
+                    return;
+                }
+
+                if (!currentAnswer) {
+                    showMessage('❌ لا يوجد صوت للتشغيل! ابدأ جولة جديدة.', 'error');
+                    return;
+                }
+
+                isPlaying = true;
+                const playBtn = document.getElementById('play-btn');
+                playBtn.classList.add('playing');
+                playBtn.innerHTML = '🎤';
+
+                try {
+                    const levelData = levels[currentLevel];
+                    const correctItem = levelData.items.find((item) => item.name === currentAnswer);
+
+                    if (correctItem) {
+                        showMessage(`🎤 يتم نطق صوت: ${correctItem.name}`, 'success');
+
+                        // تحديد إعدادات النطق حسب نوع الصوت
+                        let speechOptions = { volume: 0.9 };
+
+                        if (correctItem.sound.includes('مياو')) {
+                            speechOptions = { pitch: 1.8, rate: 1.2, volume: 0.9 };
+                        } else if (correctItem.sound.includes('هاف')) {
+                            speechOptions = { pitch: 0.7, rate: 1.5, volume: 0.9 };
+                        } else if (correctItem.sound.includes('مووو')) {
+                            speechOptions = { pitch: 0.5, rate: 0.8, volume: 0.9 };
+                        } else if (correctItem.sound.includes('روو')) {
+                            speechOptions = { pitch: 0.4, rate: 0.9, volume: 1.0 };
+                        } else if (correctItem.sound.includes('فوو')) {
+                            speechOptions = { pitch: 0.6, rate: 1.0, volume: 0.9 };
+                        } else if (correctItem.sound.includes('تشيب')) {
+                            speechOptions = { pitch: 2.0, rate: 1.8, volume: 0.8 };
+                        } else if (correctItem.sound.includes('بااع')) {
+                            speechOptions = { pitch: 1.2, rate: 1.1, volume: 0.8 };
+                        } else if (correctItem.sound.includes('هيه')) {
+                            speechOptions = { pitch: 1.0, rate: 1.3, volume: 0.9 };
+                        } else if (correctItem.sound.includes('كوكو')) {
+                            speechOptions = { pitch: 1.4, rate: 1.2, volume: 0.9 };
+                        } else if (correctItem.sound.includes('تين')) {
+                            speechOptions = { pitch: 1.3, rate: 1.1, volume: 0.7 };
+                        } else if (correctItem.sound.includes('دم')) {
+                            speechOptions = { pitch: 0.6, rate: 1.8, volume: 1.0 };
+                        } else if (correctItem.sound.includes('ترين')) {
+                            speechOptions = { pitch: 1.0, rate: 1.2, volume: 0.8 };
+                        } else if (correctItem.sound.includes('لااا')) {
+                            speechOptions = { pitch: 1.6, rate: 0.9, volume: 0.7 };
+                        } else if (correctItem.sound.includes('تينغ')) {
+                            speechOptions = { pitch: 1.9, rate: 1.3, volume: 0.8 };
+                        }
+
+                        await speak(correctItem.sound, speechOptions);
+
+                        showMessage('👂 استمع جيداً واختر الإجابة الصحيحة!');
+                    } else {
+                        showMessage('❌ خطأ في العثور على الصوت', 'error');
+                    }
+                } catch (error) {
+                    console.error('❌ خطأ في تشغيل الصوت:', error);
+                    showMessage('❌ مشكلة في تشغيل الصوت', 'error');
+                }
+
+                // إعادة تعيين الزر
+                setTimeout(() => {
+                    playBtn.classList.remove('playing');
+                    playBtn.innerHTML = '🔊';
+                    isPlaying = false;
+                }, 1000);
+            }
+
+            // اختيار الإجابة
+            function selectAnswer(selectedName, cardElement) {
+                // منع النقر المتعدد
+                const allCards = document.querySelectorAll('.card');
+                allCards.forEach((card) => (card.style.pointerEvents = 'none'));
+
+                if (selectedName === currentAnswer) {
+                    // إجابة صحيحة
+                    cardElement.classList.add('correct');
+                    score += 10;
+                    updateDisplay();
+
+                    showMessage('🎉 ممتاز! إجابة صحيحة! +10 نقاط', 'success');
+
+                    // تشغيل صوت النجاح
+                    setTimeout(() => {
+                        speak('أحسنت', { pitch: 1.5, rate: 1.2 });
+                    }, 500);
+
+                    // الانتقال التلقائي للجولة التالية
+                    setTimeout(() => {
+                        if (currentRound >= 5) {
+                            // انتهى المستوى - انتقال تلقائي للمستوى التالي
+                            if (currentLevel < 3) {
+                                currentLevel++;
+                                currentRound = 1;
+                                score = 0; // إعادة تعيين النقاط للمستوى الجديد
+
+                                // تحديث الأزرار
+                                document.querySelectorAll('.level-btn').forEach((btn, index) => {
+                                    btn.classList.remove('active');
+                                    if (index + 1 === currentLevel) {
+                                        btn.classList.add('active');
+                                    }
+                                });
+
+                                updateDisplay();
+                                generateRound();
+                                showMessage(`🎮 مستوى جديد: ${levels[currentLevel].name} - اضغط السماعة!`);
+                            } else {
+                                // انتهت جميع المستويات - إعادة للمستوى الأول
+                                currentLevel = 1;
+                                currentRound = 1;
+                                score = 0;
+
+                                // تحديث الأزرار
+                                document.querySelectorAll('.level-btn').forEach((btn, index) => {
+                                    btn.classList.remove('active');
+                                    if (index === 0) {
+                                        btn.classList.add('active');
+                                    }
+                                });
+
+                                updateDisplay();
+                                generateRound();
+                                showMessage('🔄 أكملت جميع المستويات! نبدأ من جديد', 'success');
+                            }
+                        } else {
+                            // جولة جديدة في نفس المستوى
+                            currentRound++;
+                            generateRound();
+                            updateDisplay();
+                            showMessage(`الجولة ${currentRound} - اضغط على السماعة لسماع الصوت الجديد!`);
+                        }
+
+                        // إعادة تفعيل البطاقات
+                        allCards.forEach((card) => {
+                            card.style.pointerEvents = 'auto';
+                            card.classList.remove('correct', 'wrong');
+                        });
+                    }, 2000);
+                } else {
+                    // إجابة خاطئة
+                    cardElement.classList.add('wrong');
+
+                    showMessage(`❌ خطأ! الإجابة الصحيحة: ${currentAnswer}`, 'error');
+
+                    // إظهار الإجابة الصحيحة
+                    allCards.forEach((card) => {
+                        const cardText = card.querySelector('.card-text').textContent;
+                        if (cardText === currentAnswer) {
+                            card.classList.add('correct');
+                        }
+                    });
+
+                    // تشغيل صوت الخطأ
+                    setTimeout(() => {
+                        speak('حاول مرة أخرى', { pitch: 0.8, rate: 1.0 });
+                    }, 500);
+
+                    // انتقال تلقائي للجولة التالية حتى عند الخطأ
+                    setTimeout(() => {
+                        if (currentRound >= 5) {
+                            // انتهى المستوى - انتقال تلقائي للمستوى التالي
+                            if (currentLevel < 3) {
+                                currentLevel++;
+                                currentRound = 1;
+                                score = 0;
+
+                                // تحديث الأزرار
+                                document.querySelectorAll('.level-btn').forEach((btn, index) => {
+                                    btn.classList.remove('active');
+                                    if (index + 1 === currentLevel) {
+                                        btn.classList.add('active');
+                                    }
+                                });
+
+                                updateDisplay();
+                                generateRound();
+                                showMessage(`🎮 مستوى جديد: ${levels[currentLevel].name} - اضغط السماعة!`);
+                            } else {
+                                // انتهت جميع المستويات - إعادة للمستوى الأول
+                                currentLevel = 1;
+                                currentRound = 1;
+                                score = 0;
+
+                                // تحديث الأزرار
+                                document.querySelectorAll('.level-btn').forEach((btn, index) => {
+                                    btn.classList.remove('active');
+                                    if (index === 0) {
+                                        btn.classList.add('active');
+                                    }
+                                });
+
+                                updateDisplay();
+                                generateRound();
+                                showMessage('🔄 أكملت جميع المستويات! نبدأ من جديد', 'success');
+                            }
+                        } else {
+                            // جولة جديدة في نفس المستوى
+                            currentRound++;
+                            generateRound();
+                            updateDisplay();
+                            showMessage(`الجولة ${currentRound} - اضغط على السماعة لسماع الصوت الجديد!`);
+                        }
+
+                        // إعادة تفعيل البطاقات
+                        allCards.forEach((card) => {
+                            card.style.pointerEvents = 'auto';
+                            card.classList.remove('correct', 'wrong');
+                        });
+                    }, 2500);
+                }
+            }
+
+            // الجولة التالية - مبسطة (لن تستخدم كثيراً الآن)
+            function nextRound() {
+                if (currentRound >= 5) {
+                    // انتقال للمستوى التالي
+                    if (currentLevel < 3) {
+                        currentLevel++;
+                        currentRound = 1;
+                        score = 0;
+                        updateDisplay();
+                        generateRound();
+                        showMessage(`مستوى جديد: ${levels[currentLevel].name}`);
+                    } else {
+                        // إعادة للمستوى الأول
+                        currentLevel = 1;
+                        currentRound = 1;
+                        score = 0;
+                        updateDisplay();
+                        generateRound();
+                        showMessage('بداية جديدة!');
+                    }
+                } else {
+                    currentRound++;
+                    generateRound();
+                    updateDisplay();
+                    showMessage(`الجولة ${currentRound} - اضغط على السماعة!`);
+                }
+            }
+
+            // إظهار الرسائل
+            function showMessage(text, type = '') {
+                const message = document.getElementById('message');
+                message.textContent = text;
+                message.className = `message ${type}`;
+            }
+
+            // اختصارات لوحة المفاتيح
+            document.addEventListener('keydown', function (e) {
+                switch (e.key) {
+                    case ' ':
+                        e.preventDefault();
+                        playSound();
+                        break;
+                    case 't':
+                    case 'T':
+                        e.preventDefault();
+                        testSpeech();
+                        break;
+                }
+            });
+
+            // بدء اللعبة
+            window.onload = function () {
+                console.log('🎮 مرحباً بك في لعبة التركيز السمعي!');
+                generateRound();
+                showMessage('🎤 اضغط على "اختبار الصوت" أولاً للتأكد من عمل النظام!');
+            };
+        </script>
+    </body>
+</html>

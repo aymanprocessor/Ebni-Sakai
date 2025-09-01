@@ -1,0 +1,1012 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>لعبة التطابق البصري</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Arial', sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                color: white;
+            }
+
+            .game-container {
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                border-radius: 20px;
+                padding: 30px;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+                max-width: 900px;
+                width: 100%;
+                text-align: center;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+                margin-bottom: 20px;
+                background: linear-gradient(45deg, #ffd700, #ffa500);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            }
+
+            .instructions {
+                background: rgba(255, 255, 255, 0.15);
+                padding: 20px;
+                border-radius: 15px;
+                margin-bottom: 20px;
+                font-size: 1.2rem;
+                line-height: 1.6;
+                border: 2px solid rgba(255, 255, 255, 0.2);
+            }
+
+            .game-info {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 20px;
+                font-size: 1.2rem;
+                font-weight: bold;
+            }
+
+            .score,
+            .timer,
+            .level-display {
+                background: rgba(255, 255, 255, 0.2);
+                padding: 10px 20px;
+                border-radius: 15px;
+                backdrop-filter: blur(5px);
+            }
+
+            .game-area {
+                display: flex;
+                justify-content: space-between;
+                gap: 30px;
+                margin-bottom: 20px;
+                min-height: 400px;
+                align-items: center;
+            }
+
+            .left-side,
+            .right-side {
+                flex: 1;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 15px;
+                padding: 20px;
+                border: 3px dashed rgba(255, 255, 255, 0.3);
+            }
+
+            .left-side h3,
+            .right-side h3 {
+                margin-bottom: 15px;
+                font-size: 1.4rem;
+            }
+
+            .items-container {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                gap: 15px;
+                min-height: 300px;
+            }
+
+            .item {
+                background: white;
+                border-radius: 15px;
+                padding: 15px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 100px;
+                position: relative;
+                overflow: hidden;
+                border: 3px solid transparent;
+            }
+
+            .item:hover {
+                transform: translateY(-5px) scale(1.05);
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+                border-color: #ffd700;
+            }
+
+            .item.selected {
+                background: linear-gradient(45deg, #ffd700, #ffa500);
+                transform: scale(1.1);
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+                border-color: #ff6b6b;
+                animation: pulse 1s infinite;
+            }
+
+            .item.correct {
+                background: linear-gradient(45deg, #4ecdc4, #45b7af);
+                animation: correctMatch 1s ease-in-out;
+                pointer-events: none;
+                border-color: #4ecdc4;
+            }
+
+            .item.wrong {
+                background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+                animation: shake 0.5s ease-in-out;
+                border-color: #ff6b6b;
+            }
+
+            .item.hidden {
+                opacity: 0.3;
+                pointer-events: none;
+            }
+
+            @keyframes pulse {
+                0% {
+                    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+                }
+                50% {
+                    box-shadow: 0 0 30px rgba(255, 215, 0, 1);
+                }
+                100% {
+                    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+                }
+            }
+
+            @keyframes correctMatch {
+                0% {
+                    transform: scale(1);
+                }
+                25% {
+                    transform: scale(1.3) rotate(5deg);
+                }
+                50% {
+                    transform: scale(1.2) rotate(-5deg);
+                }
+                75% {
+                    transform: scale(1.25) rotate(5deg);
+                }
+                100% {
+                    transform: scale(1.15);
+                }
+            }
+
+            @keyframes shake {
+                0%,
+                100% {
+                    transform: translateX(0);
+                }
+                25% {
+                    transform: translateX(-10px);
+                }
+                75% {
+                    transform: translateX(10px);
+                }
+            }
+
+            .item-image {
+                font-size: 3rem;
+                filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.2));
+            }
+
+            .start-btn {
+                background: linear-gradient(45deg, #4ecdc4, #45b7af);
+                border: none;
+                padding: 15px 40px;
+                margin: 10px;
+                border-radius: 30px;
+                color: white;
+                font-size: 1.3rem;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                font-weight: bold;
+            }
+
+            .start-btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 15px 30px rgba(78, 205, 196, 0.4);
+            }
+
+            .feedback {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 4rem;
+                font-weight: bold;
+                z-index: 1000;
+                pointer-events: none;
+                opacity: 0;
+                transition: all 0.5s ease;
+            }
+
+            .feedback.show {
+                opacity: 1;
+                animation: feedbackPop 1.5s ease-in-out;
+            }
+
+            .feedback.correct {
+                color: #4ecdc4;
+                text-shadow: 0 0 20px rgba(78, 205, 196, 0.8);
+            }
+
+            .feedback.wrong {
+                color: #ff6b6b;
+                text-shadow: 0 0 20px rgba(255, 107, 107, 0.8);
+            }
+
+            @keyframes feedbackPop {
+                0% {
+                    transform: translate(-50%, -50%) scale(0.5);
+                    opacity: 0;
+                }
+                20% {
+                    transform: translate(-50%, -50%) scale(1.2);
+                    opacity: 1;
+                }
+                80% {
+                    transform: translate(-50%, -50%) scale(1);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translate(-50%, -50%) scale(0.8);
+                    opacity: 0;
+                }
+            }
+
+            .level-complete {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 2000;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.5s ease;
+            }
+
+            .level-complete.show {
+                opacity: 1;
+                pointer-events: all;
+            }
+
+            .level-complete-content {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border-radius: 20px;
+                padding: 40px;
+                text-align: center;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+                border: 3px solid #ffd700;
+            }
+
+            .level-complete-content h2 {
+                font-size: 3rem;
+                color: #ffd700;
+                margin-bottom: 20px;
+                animation: bounce 1s infinite;
+            }
+
+            .level-complete-content p {
+                font-size: 1.5rem;
+                margin-bottom: 30px;
+            }
+
+            .next-level-btn {
+                background: linear-gradient(45deg, #ffd700, #ffa500);
+                border: none;
+                padding: 15px 30px;
+                border-radius: 25px;
+                color: white;
+                font-size: 1.2rem;
+                cursor: pointer;
+                font-weight: bold;
+                transition: all 0.3s ease;
+            }
+
+            .next-level-btn:hover {
+                transform: scale(1.05);
+                box-shadow: 0 10px 20px rgba(255, 215, 0, 0.4);
+            }
+
+            @keyframes bounce {
+                0%,
+                100% {
+                    transform: translateY(0);
+                }
+                50% {
+                    transform: translateY(-10px);
+                }
+            }
+
+            .progress-bar {
+                width: 100%;
+                height: 10px;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 5px;
+                margin: 20px 0;
+                overflow: hidden;
+            }
+
+            .progress-fill {
+                height: 100%;
+                background: linear-gradient(45deg, #4ecdc4, #45b7af);
+                width: 0%;
+                transition: width 0.5s ease;
+            }
+
+            .celebration {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                z-index: 1500;
+            }
+
+            .confetti {
+                position: absolute;
+                width: 10px;
+                height: 10px;
+                background: #ffd700;
+                animation: confetti-fall 3s linear infinite;
+            }
+
+            @keyframes confetti-fall {
+                0% {
+                    transform: translateY(-100vh) rotate(0deg);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateY(100vh) rotate(720deg);
+                    opacity: 0;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .game-container {
+                    padding: 20px;
+                    margin: 10px;
+                }
+
+                h1 {
+                    font-size: 2rem;
+                }
+
+                .game-area {
+                    flex-direction: column;
+                    gap: 20px;
+                }
+
+                .items-container {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="game-container">
+            <h1>🎮 لعبة التطابق البصري 🎮</h1>
+
+            <div class="instructions">
+                <p><strong>طريقة اللعب:</strong> 🎯 اسحب العنصر من الجانب الأيسر إلى العنصر المطابق له في الجانب الأيمن!</p>
+                <p>🌟 ستنتقل تلقائياً للمستوى التالي عند إكمال جميع التطابقات!</p>
+                <p>🔊 <strong>تأكد من تفعيل الصوت للحصول على تجربة أفضل!</strong></p>
+                <p>✨ <strong>نصيحة:</strong> اقترب بالعنصر من المطابق له وسيلتصق تلقائياً!</p>
+            </div>
+
+            <div class="game-info">
+                <div class="level-display">المستوى: <span id="current-level">1</span></div>
+                <div class="score">النقاط: <span id="score">0</span></div>
+                <div class="timer">الوقت: <span id="timer">0</span>s</div>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+
+            <button class="start-btn" onclick="startGame()">🎯 بدء اللعبة مع الأصوات</button>
+
+            <div class="game-area" id="game-area">
+                <div class="left-side">
+                    <h3>🎯 اسحب من هنا</h3>
+                    <div class="items-container" id="left-items"></div>
+                </div>
+                <div class="right-side">
+                    <h3>🎪 أسقط هنا</h3>
+                    <div class="items-container" id="right-items"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- رسائل التشجيع -->
+        <div class="feedback" id="feedback"></div>
+
+        <!-- شاشة إكمال المستوى -->
+        <div class="level-complete" id="level-complete">
+            <div class="level-complete-content">
+                <h2>🎉 أحسنت! 🎉</h2>
+                <p id="level-complete-text">لقد أكملت المستوى بنجاح!</p>
+                <button class="next-level-btn" onclick="nextLevel()">المستوى التالي ⭐</button>
+            </div>
+        </div>
+
+        <!-- احتفالات -->
+        <div class="celebration" id="celebration"></div>
+
+        <script>
+            let currentLevel = 1;
+            let gameStarted = false;
+            let selectedItem = null;
+            let matchedPairs = 0;
+            let score = 0;
+            let timer = 0;
+            let timerInterval;
+            let totalPairs = 0;
+            let gameData = [];
+            let audioContext;
+            let soundsEnabled = true;
+
+            // بيانات البيجامات والأحذية
+            const allItems = [
+                { id: 'item1', emoji: '👟', name: 'حذاء أحمر', color: 'red' },
+                { id: 'item2', emoji: '🧡', name: 'حذاء برتقالي', color: 'orange' },
+                { id: 'item3', emoji: '💛', name: 'حذاء أصفر', color: 'yellow' },
+                { id: 'item4', emoji: '💚', name: 'حذاء أخضر', color: 'green' },
+                { id: 'item5', emoji: '💙', name: 'حذاء أزرق', color: 'blue' },
+                { id: 'item6', emoji: '💜', name: 'حذاء بنفسجي', color: 'purple' },
+                { id: 'item7', emoji: '💖', name: 'بيجامة قلوب', pattern: 'hearts' },
+                { id: 'item8', emoji: '⭐', name: 'بيجامة نجوم', pattern: 'stars' },
+                { id: 'item9', emoji: '🔵', name: 'بيجامة نقاط', pattern: 'dots' },
+                { id: 'item10', emoji: '🐵', name: 'بيجامة قردة', pattern: 'monkeys' },
+                { id: 'item11', emoji: '🌊', name: 'بيجامة أمواج', pattern: 'waves' },
+                { id: 'item12', emoji: '🌸', name: 'بيجامة زهور', pattern: 'flowers' }
+            ];
+
+            // إعداد الأصوات
+            function initAudio() {
+                try {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.log('الأصوات غير مدعومة في هذا المتصفح');
+                    soundsEnabled = false;
+                }
+            }
+
+            // إنشاء أصوات تشجيعية
+            function playSuccessSound() {
+                if (!soundsEnabled || !audioContext) return;
+
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                // نغمة تشجيعية صاعدة
+                oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+                oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
+                oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2); // G5
+
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+                oscillator.type = 'sine';
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+            }
+
+            // صوت الخطأ (بازر)
+            function playErrorSound() {
+                if (!soundsEnabled || !audioContext) return;
+
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                // صوت بازر منخفض
+                oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+                oscillator.frequency.setValueAtTime(150, audioContext.currentTime + 0.1);
+
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+                oscillator.type = 'sawtooth';
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            }
+
+            // صوت إكمال المستوى
+            function playLevelCompleteSound() {
+                if (!soundsEnabled || !audioContext) return;
+
+                const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
+
+                notes.forEach((frequency, index) => {
+                    setTimeout(() => {
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+
+                        oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+                        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+
+                        oscillator.type = 'sine';
+                        oscillator.start(audioContext.currentTime);
+                        oscillator.stop(audioContext.currentTime + 0.4);
+                    }, index * 150);
+                });
+            }
+
+            // صوت بدء اللعبة
+            function playStartSound() {
+                if (!soundsEnabled || !audioContext) return;
+
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // A4
+                oscillator.frequency.setValueAtTime(554.37, audioContext.currentTime + 0.2); // C#5
+                oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.4); // E5
+
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.6);
+
+                oscillator.type = 'triangle';
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.6);
+            }
+
+            const encouragementMessages = ['🎉 أحسنت! 🎉', '⭐ رائع جداً! ⭐', '🌟 ممتاز! 🌟', '🎯 دقيق! 🎯', '🏆 بطل! 🏆', '💫 مذهل! 💫', '🎪 عبقري! 🎪', '🌈 إبداع! 🌈'];
+
+            const wrongMessages = ['😅 حاول مرة أخرى', '🤔 فكر أكثر', '💪 لا تستسلم', '🎯 ركز أكثر'];
+
+            function startGame() {
+                // تفعيل الأصوات عند أول تفاعل من المستخدم
+                if (!audioContext) {
+                    initAudio();
+                }
+
+                gameStarted = true;
+                currentLevel = 1;
+                score = 0;
+                updateDisplay();
+                createLevel();
+                startTimer();
+                playStartSound();
+
+                document.querySelector('.start-btn').textContent = '🔄 إعادة البدء';
+            }
+
+            function createLevel() {
+                const itemsPerLevel = [3, 4, 5, 6];
+                const numPairs = itemsPerLevel[currentLevel - 1];
+                totalPairs = numPairs;
+                matchedPairs = 0;
+
+                // اختيار العناصر للمستوى الحالي
+                const selectedItems = allItems.slice(0, numPairs);
+                gameData = [...selectedItems];
+
+                createGameBoard();
+                updateProgress();
+            }
+
+            function createGameBoard() {
+                const leftContainer = document.getElementById('left-items');
+                const rightContainer = document.getElementById('right-items');
+
+                leftContainer.innerHTML = '';
+                rightContainer.innerHTML = '';
+
+                // خلط العناصر للجانب الأيمن
+                const rightItems = [...gameData].sort(() => Math.random() - 0.5);
+
+                // إنشاء العناصر في الجانب الأيسر
+                gameData.forEach((item, index) => {
+                    const leftElement = createItemElement(item, 'left', index);
+                    leftContainer.appendChild(leftElement);
+                });
+
+                // إنشاء العناصر في الجانب الأيمن
+                rightItems.forEach((item, index) => {
+                    const rightElement = createItemElement(item, 'right', index);
+                    rightContainer.appendChild(rightElement);
+                });
+            }
+
+            function createItemElement(item, side, index) {
+                const element = document.createElement('div');
+                element.className = 'item';
+                element.dataset.id = item.id;
+                element.dataset.side = side;
+                element.innerHTML = `<div class="item-image">${item.emoji}</div>`;
+
+                if (side === 'left') {
+                    element.draggable = true;
+                    element.addEventListener('dragstart', handleDragStart);
+                    element.addEventListener('dragend', handleDragEnd);
+                    element.addEventListener('click', handleLeftClick);
+                } else {
+                    element.addEventListener('dragover', handleDragOver);
+                    element.addEventListener('dragleave', handleDragLeave);
+                    element.addEventListener('drop', handleDrop);
+                    element.addEventListener('click', handleRightClick);
+                }
+
+                return element;
+            }
+
+            function handleDragEnd(e) {
+                e.target.classList.remove('selected');
+                e.target.style.transition = '';
+                e.target.style.position = '';
+                e.target.style.zIndex = '';
+                selectedItem = null;
+                clearProximityCheck();
+                removeHighlights();
+            }
+
+            function handleDragLeave(e) {
+                e.target.style.backgroundColor = '';
+                e.target.style.transform = '';
+                e.target.style.boxShadow = '';
+            }
+
+            // مراقبة القرب التلقائي
+            let proximityInterval;
+
+            function startProximityCheck() {
+                if (proximityInterval) clearInterval(proximityInterval);
+
+                proximityInterval = setInterval(() => {
+                    if (!selectedItem) return;
+
+                    const rightItems = document.querySelectorAll('[data-side="right"]:not(.hidden)');
+
+                    rightItems.forEach((rightItem) => {
+                        if (rightItem.dataset.id === selectedItem.id) {
+                            if (checkProximity(selectedItem.element, rightItem)) {
+                                // تفعيل الجذب المغناطيسي
+                                magneticSnap(selectedItem.element, rightItem);
+                                clearProximityCheck();
+                            }
+                        }
+                    });
+                }, 100);
+            }
+
+            function clearProximityCheck() {
+                if (proximityInterval) {
+                    clearInterval(proximityInterval);
+                    proximityInterval = null;
+                }
+            }
+
+            // إبراز العناصر المطابقة
+            function highlightMatchingItems() {
+                if (!selectedItem) return;
+
+                // إزالة الإبراز السابق
+                removeHighlights();
+
+                // إبراز العنصر المطابق في الجانب الأيمن
+                const rightItems = document.querySelectorAll('[data-side="right"]:not(.hidden)');
+                rightItems.forEach((item) => {
+                    if (item.dataset.id === selectedItem.id) {
+                        item.style.border = '3px dashed #FFD700';
+                        item.style.animation = 'pulse 1s infinite';
+                    }
+                });
+            }
+
+            function removeHighlights() {
+                const allItems = document.querySelectorAll('.item');
+                allItems.forEach((item) => {
+                    item.style.border = '';
+                    item.style.animation = '';
+                });
+            }
+
+            function handleDragStart(e) {
+                selectedItem = {
+                    element: e.target,
+                    id: e.target.dataset.id
+                };
+                e.target.classList.add('selected');
+
+                // بدء مراقبة القرب أثناء السحب
+                startProximityCheck();
+            }
+
+            function handleLeftClick(e) {
+                // إلغاء التحديد السابق
+                document.querySelectorAll('.item.selected').forEach((item) => {
+                    item.classList.remove('selected');
+                });
+
+                selectedItem = {
+                    element: e.target,
+                    id: e.target.dataset.id
+                };
+                e.target.classList.add('selected');
+
+                // تفعيل المساعدة البصرية للعناصر المطابقة
+                highlightMatchingItems();
+            }
+
+            function handleRightClick(e) {
+                if (selectedItem) {
+                    checkMatch(selectedItem, {
+                        element: e.target,
+                        id: e.target.dataset.id
+                    });
+                    removeHighlights();
+                }
+            }
+
+            function handleDragOver(e) {
+                e.preventDefault();
+                e.target.style.backgroundColor = 'rgba(255, 215, 0, 0.3)';
+
+                // التحقق من التطابق عند الاقتراب
+                if (selectedItem && selectedItem.id === e.target.dataset.id) {
+                    e.target.style.backgroundColor = 'rgba(78, 205, 196, 0.5)';
+                    e.target.style.transform = 'scale(1.1)';
+                    e.target.style.boxShadow = '0 0 20px rgba(78, 205, 196, 0.8)';
+                }
+            }
+
+            function handleDrop(e) {
+                e.preventDefault();
+                e.target.style.backgroundColor = '';
+                e.target.style.transform = '';
+                e.target.style.boxShadow = '';
+
+                if (selectedItem) {
+                    checkMatch(selectedItem, {
+                        element: e.target,
+                        id: e.target.dataset.id
+                    });
+                }
+            }
+
+            // دالة للتحقق من القرب التلقائي
+            function checkProximity(dragElement, dropElement) {
+                const dragRect = dragElement.getBoundingClientRect();
+                const dropRect = dropElement.getBoundingClientRect();
+
+                const dragCenterX = dragRect.left + dragRect.width / 2;
+                const dragCenterY = dragRect.top + dragRect.height / 2;
+                const dropCenterX = dropRect.left + dropRect.width / 2;
+                const dropCenterY = dropRect.top + dropRect.height / 2;
+
+                const distance = Math.sqrt(Math.pow(dragCenterX - dropCenterX, 2) + Math.pow(dragCenterY - dropCenterY, 2));
+
+                // المسافة المطلوبة للتطابق التلقائي (100 بكسل)
+                return distance < 100;
+            }
+
+            // دالة للجذب المغناطيسي
+            function magneticSnap(dragElement, dropElement) {
+                const dropRect = dropElement.getBoundingClientRect();
+
+                // تحريك العنصر المسحوب نحو الهدف
+                dragElement.style.transition = 'all 0.3s ease';
+                dragElement.style.position = 'fixed';
+                dragElement.style.left = dropRect.left + 'px';
+                dragElement.style.top = dropRect.top + 'px';
+                dragElement.style.zIndex = '1000';
+
+                // تفعيل التطابق بعد الحركة
+                setTimeout(() => {
+                    if (selectedItem) {
+                        checkMatch(selectedItem, {
+                            element: dropElement,
+                            id: dropElement.dataset.id
+                        });
+                    }
+                }, 300);
+            }
+
+            function checkMatch(leftItem, rightItem) {
+                if (leftItem.id === rightItem.id) {
+                    // تطابق صحيح!
+                    handleCorrectMatch(leftItem, rightItem);
+                } else {
+                    // تطابق خاطئ
+                    handleWrongMatch(leftItem, rightItem);
+                }
+            }
+
+            function handleCorrectMatch(leftItem, rightItem) {
+                // تشغيل صوت النجاح
+                playSuccessSound();
+
+                // إزالة الإبراز
+                removeHighlights();
+
+                // إضافة تأثيرات بصرية
+                leftItem.element.classList.remove('selected');
+                leftItem.element.classList.add('correct');
+                rightItem.element.classList.add('correct');
+
+                // تشغيل رسالة تشجيع
+                showFeedback(getRandomMessage(encouragementMessages), 'correct');
+
+                // إضافة احتفالات
+                createConfetti();
+
+                // تحديث النقاط
+                matchedPairs++;
+                score += 10;
+                updateDisplay();
+                updateProgress();
+
+                // إخفاء العناصر المطابقة بعد وقت قصير
+                setTimeout(() => {
+                    leftItem.element.classList.add('hidden');
+                    rightItem.element.classList.add('hidden');
+
+                    // التحقق من إكمال المستوى
+                    if (matchedPairs === totalPairs) {
+                        setTimeout(() => {
+                            completeLevel();
+                        }, 500);
+                    }
+                }, 1000);
+
+                selectedItem = null;
+            }
+
+            function handleWrongMatch(leftItem, rightItem) {
+                // تشغيل صوت الخطأ (بازر)
+                playErrorSound();
+
+                // إضافة تأثيرات خطأ
+                leftItem.element.classList.add('wrong');
+                rightItem.element.classList.add('wrong');
+
+                // رسالة خطأ
+                showFeedback(getRandomMessage(wrongMessages), 'wrong');
+
+                // خصم نقاط
+                score = Math.max(0, score - 2);
+                updateDisplay();
+
+                // إزالة التأثيرات بعد وقت قصير
+                setTimeout(() => {
+                    leftItem.element.classList.remove('selected', 'wrong');
+                    rightItem.element.classList.remove('wrong');
+                }, 1000);
+
+                selectedItem = null;
+            }
+
+            function showFeedback(message, type) {
+                const feedback = document.getElementById('feedback');
+                feedback.textContent = message;
+                feedback.className = `feedback show ${type}`;
+
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                }, 1500);
+            }
+
+            function createConfetti() {
+                const celebration = document.getElementById('celebration');
+                for (let i = 0; i < 10; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.backgroundColor = ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7AF', '#FFA500'][Math.floor(Math.random() * 5)];
+                    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                    celebration.appendChild(confetti);
+
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 3000);
+                }
+            }
+
+            function completeLevel() {
+                // تشغيل صوت إكمال المستوى
+                playLevelCompleteSound();
+
+                const levelComplete = document.getElementById('level-complete');
+                const levelText = document.getElementById('level-complete-text');
+
+                if (currentLevel === 4) {
+                    levelText.textContent = '🏆 تهانينا! لقد أكملت جميع المستويات! 🏆';
+                    document.querySelector('.next-level-btn').textContent = '🎉 اللعب من جديد';
+                } else {
+                    levelText.textContent = `🌟 لقد أكملت المستوى ${currentLevel} بنجاح! 🌟`;
+                }
+
+                levelComplete.classList.add('show');
+
+                // مكافأة زمنية
+                const timeBonus = Math.max(0, 20 - timer);
+                score += timeBonus;
+                updateDisplay();
+            }
+
+            function nextLevel() {
+                document.getElementById('level-complete').classList.remove('show');
+
+                if (currentLevel === 4) {
+                    // إعادة بدء اللعبة
+                    currentLevel = 1;
+                    score = 0;
+                    timer = 0;
+                } else {
+                    currentLevel++;
+                }
+
+                updateDisplay();
+                createLevel();
+            }
+
+            function startTimer() {
+                timer = 0;
+                clearInterval(timerInterval);
+                timerInterval = setInterval(() => {
+                    timer++;
+                    document.getElementById('timer').textContent = timer;
+                }, 1000);
+            }
+
+            function updateDisplay() {
+                document.getElementById('current-level').textContent = currentLevel;
+                document.getElementById('score').textContent = score;
+            }
+
+            function updateProgress() {
+                const progress = (matchedPairs / totalPairs) * 100;
+                document.getElementById('progress').style.width = progress + '%';
+            }
+
+            function getRandomMessage(messages) {
+                return messages[Math.floor(Math.random() * messages.length)];
+            }
+
+            // منع السحب الافتراضي على العناصر الأخرى
+            document.addEventListener('dragover', (e) => {
+                e.preventDefault();
+            });
+
+            // تهيئة اللعبة
+            updateDisplay();
+
+            // تفعيل الأصوات عند أول تفاعل
+            document.addEventListener(
+                'click',
+                () => {
+                    if (!audioContext) {
+                        initAudio();
+                    }
+                },
+                { once: true }
+            );
+        </script>
+    </body>
+</html>

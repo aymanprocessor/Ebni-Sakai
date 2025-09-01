@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>لعبة الشيء المختلف</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Arial', sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                direction: rtl;
+                color: white;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 20px;
+            }
+
+            .header {
+                text-align: center;
+                margin-bottom: 30px;
+            }
+
+            .title {
+                font-size: 3rem;
+                color: #ffd700;
+                margin-bottom: 10px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            }
+
+            .subtitle {
+                font-size: 1.2rem;
+                color: #e0e0e0;
+            }
+
+            .game-info {
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 15px;
+                padding: 20px;
+                margin-bottom: 30px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                min-width: 300px;
+                backdrop-filter: blur(10px);
+            }
+
+            .info-item {
+                text-align: center;
+                font-size: 1.1rem;
+                font-weight: bold;
+            }
+
+            .grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+                max-width: 600px;
+                margin-bottom: 30px;
+            }
+
+            .item {
+                background: white;
+                color: #333;
+                border-radius: 15px;
+                padding: 30px;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+                font-size: 4rem;
+                min-height: 150px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .item:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            }
+
+            .item-name {
+                font-size: 1rem;
+                margin-top: 10px;
+                color: #666;
+            }
+
+            .buttons {
+                display: flex;
+                gap: 15px;
+            }
+
+            .btn {
+                background: linear-gradient(45deg, #4caf50, #45a049);
+                color: white;
+                border: none;
+                padding: 15px 30px;
+                font-size: 1.1rem;
+                border-radius: 25px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            }
+
+            .btn-secondary {
+                background: linear-gradient(45deg, #2196f3, #1976d2);
+            }
+
+            .feedback {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0, 0, 0, 0.9);
+                color: white;
+                padding: 30px 50px;
+                border-radius: 15px;
+                font-size: 2rem;
+                font-weight: bold;
+                z-index: 1000;
+                display: none;
+                text-align: center;
+            }
+
+            .feedback.success {
+                background: rgba(76, 175, 80, 0.9);
+            }
+
+            .feedback.error {
+                background: rgba(244, 67, 54, 0.9);
+            }
+
+            .correct {
+                animation: correctPulse 1s ease-out;
+                border: 3px solid #4caf50;
+            }
+
+            .wrong {
+                animation: shake 0.6s ease-in-out;
+                border: 3px solid #f44336;
+            }
+
+            .highlight {
+                animation: highlight 1.2s ease-in-out;
+                border: 3px solid #ffd700;
+            }
+
+            @keyframes correctPulse {
+                0% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.1);
+                }
+                100% {
+                    transform: scale(1);
+                }
+            }
+
+            @keyframes shake {
+                0%,
+                100% {
+                    transform: translateX(0);
+                }
+                10%,
+                30%,
+                50%,
+                70%,
+                90% {
+                    transform: translateX(-5px);
+                }
+                20%,
+                40%,
+                60%,
+                80% {
+                    transform: translateX(5px);
+                }
+            }
+
+            @keyframes highlight {
+                0%,
+                100% {
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 0.7;
+                }
+            }
+
+            .hearts {
+                font-size: 1.5rem;
+            }
+
+            .heart.lost {
+                opacity: 0.3;
+            }
+
+            @media (max-width: 768px) {
+                .grid {
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 15px;
+                }
+
+                .item {
+                    font-size: 3rem;
+                    padding: 20px;
+                    min-height: 120px;
+                }
+
+                .title {
+                    font-size: 2rem;
+                }
+
+                .game-info {
+                    flex-direction: column;
+                    gap: 10px;
+                    min-width: auto;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1 class="title">🎯 لعبة الشيء المختلف</h1>
+            <p class="subtitle">ابحث عن العنصر المختلف في المجموعة</p>
+        </div>
+
+        <div class="game-info">
+            <div class="info-item">المستوى: <span id="level">1</span></div>
+            <div class="info-item">النقاط: <span id="score">0</span></div>
+            <div class="info-item">
+                <div class="hearts">
+                    <span id="heart1">❤️</span>
+                    <span id="heart2">❤️</span>
+                    <span id="heart3">❤️</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid" id="gameGrid">
+            <!-- سيتم ملء العناصر هنا -->
+        </div>
+
+        <div class="buttons">
+            <button class="btn" onclick="newGame()">🎮 لعبة جديدة</button>
+            <button class="btn btn-secondary" onclick="nextLevel()">⬆️ المستوى التالي</button>
+            <button class="btn btn-secondary" onclick="toggleSound()">🔊 الصوت</button>
+        </div>
+
+        <div id="feedback" class="feedback"></div>
+
+        <script>
+            // بيانات اللعبة
+            const gameData = {
+                kitchen: [
+                    { emoji: '🥄', name: 'ملعقة' },
+                    { emoji: '🔪', name: 'سكين' },
+                    { emoji: '🍳', name: 'مقلاة' },
+                    { emoji: '🥘', name: 'قدر' },
+                    { emoji: '🍽️', name: 'طبق' }
+                ],
+                school: [
+                    { emoji: '✏️', name: 'قلم' },
+                    { emoji: '📏', name: 'مسطرة' },
+                    { emoji: '📚', name: 'كتاب' },
+                    { emoji: '✂️', name: 'مقص' },
+                    { emoji: '🖍️', name: 'قلم تلوين' }
+                ],
+                fruit: [
+                    { emoji: '🍎', name: 'تفاحة' },
+                    { emoji: '🍌', name: 'موز' },
+                    { emoji: '🍊', name: 'برتقال' },
+                    { emoji: '🍇', name: 'عنب' },
+                    { emoji: '🍓', name: 'فراولة' }
+                ],
+                animals: [
+                    { emoji: '🐱', name: 'قطة' },
+                    { emoji: '🐕', name: 'كلب' },
+                    { emoji: '🦁', name: 'أسد' },
+                    { emoji: '🐘', name: 'فيل' },
+                    { emoji: '🐻', name: 'دب' }
+                ],
+                vehicles: [
+                    { emoji: '🚗', name: 'سيارة' },
+                    { emoji: '🚌', name: 'حافلة' },
+                    { emoji: '🚲', name: 'دراجة' },
+                    { emoji: '✈️', name: 'طائرة' },
+                    { emoji: '🚂', name: 'قطار' }
+                ]
+            };
+
+            // حالة اللعبة
+            let gameState = {
+                level: 1,
+                score: 0,
+                lives: 3,
+                soundEnabled: true,
+                correctIndex: -1,
+                isPlaying: false
+            };
+
+            // بدء لعبة جديدة
+            function newGame() {
+                gameState.level = 1;
+                gameState.score = 0;
+                gameState.lives = 3;
+                updateDisplay();
+                generateRound();
+            }
+
+            // توليد جولة جديدة
+            function generateRound() {
+                const categories = Object.keys(gameData);
+
+                // اختيار فئتين مختلفتين
+                const category1 = categories[Math.floor(Math.random() * categories.length)];
+                let category2;
+                do {
+                    category2 = categories[Math.floor(Math.random() * categories.length)];
+                } while (category2 === category1);
+
+                // اختيار العناصر
+                const items1 = gameData[category1];
+                const items2 = gameData[category2];
+
+                // تحديد عدد العناصر حسب المستوى
+                const gridSize = Math.min(6, 3 + gameState.level);
+
+                // إنشاء المصفوفة
+                const gameItems = [];
+                const correctIndex = Math.floor(Math.random() * gridSize);
+
+                for (let i = 0; i < gridSize; i++) {
+                    if (i === correctIndex) {
+                        // العنصر المختلف
+                        const item = items2[Math.floor(Math.random() * items2.length)];
+                        gameItems.push({ ...item, category: category2, isOdd: true });
+                    } else {
+                        // العناصر العادية
+                        const item = items1[Math.floor(Math.random() * items1.length)];
+                        gameItems.push({ ...item, category: category1, isOdd: false });
+                    }
+                }
+
+                gameState.correctIndex = correctIndex;
+                gameState.isPlaying = true;
+                displayGrid(gameItems);
+            }
+
+            // عرض الشبكة
+            function displayGrid(items) {
+                const grid = document.getElementById('gameGrid');
+                grid.innerHTML = '';
+
+                // تحديد عدد الأعمدة
+                const gridSize = items.length;
+                if (gridSize <= 4) {
+                    grid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+                } else if (gridSize <= 6) {
+                    grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+                } else {
+                    grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+                }
+
+                items.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'item';
+                    div.innerHTML = `
+                    ${item.emoji}
+                    <div class="item-name">${item.name}</div>
+                `;
+                    div.onclick = () => selectItem(index);
+                    grid.appendChild(div);
+                });
+            }
+
+            // اختيار عنصر
+            function selectItem(index) {
+                if (!gameState.isPlaying) return;
+
+                gameState.isPlaying = false;
+                const items = document.querySelectorAll('.item');
+                const selectedItem = items[index];
+
+                if (index === gameState.correctIndex) {
+                    // إجابة صحيحة
+                    selectedItem.classList.add('correct');
+                    gameState.score += 10;
+                    showFeedback('🎉 ممتاز! إجابة صحيحة!', 'success');
+                    playSound('correct');
+
+                    setTimeout(() => {
+                        generateRound();
+                    }, 1500);
+                } else {
+                    // إجابة خاطئة
+                    selectedItem.classList.add('wrong');
+                    gameState.lives--;
+                    showFeedback('❌ خطأ! حاول مرة أخرى', 'error');
+                    playSound('wrong');
+
+                    // إبراز الإجابة الصحيحة
+                    setTimeout(() => {
+                        items[gameState.correctIndex].classList.add('highlight');
+
+                        setTimeout(() => {
+                            if (gameState.lives <= 0) {
+                                showFeedback('💔 انتهت اللعبة! اضغط "لعبة جديدة"', 'error');
+                            } else {
+                                generateRound();
+                            }
+                        }, 2000);
+                    }, 1000);
+                }
+
+                updateDisplay();
+            }
+
+            // عرض رسالة
+            function showFeedback(message, type) {
+                const feedback = document.getElementById('feedback');
+                feedback.textContent = message;
+                feedback.className = `feedback ${type}`;
+                feedback.style.display = 'block';
+
+                setTimeout(() => {
+                    feedback.style.display = 'none';
+                }, 2000);
+            }
+
+            // تحديث العرض
+            function updateDisplay() {
+                document.getElementById('level').textContent = gameState.level;
+                document.getElementById('score').textContent = gameState.score;
+
+                // تحديث القلوب
+                for (let i = 1; i <= 3; i++) {
+                    const heart = document.getElementById(`heart${i}`);
+                    if (i <= gameState.lives) {
+                        heart.classList.remove('lost');
+                    } else {
+                        heart.classList.add('lost');
+                    }
+                }
+            }
+
+            // المستوى التالي
+            function nextLevel() {
+                gameState.level++;
+                generateRound();
+                showFeedback(`🆙 المستوى ${gameState.level}!`, 'success');
+            }
+
+            // تشغيل/إيقاف الصوت
+            function toggleSound() {
+                gameState.soundEnabled = !gameState.soundEnabled;
+                showFeedback(gameState.soundEnabled ? '🔊 تم تشغيل الصوت' : '🔇 تم إيقاف الصوت', 'success');
+            }
+
+            // تشغيل الصوت
+            function playSound(type) {
+                if (!gameState.soundEnabled) return;
+
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                if (type === 'correct') {
+                    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                } else if (type === 'wrong') {
+                    oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.5);
+                }
+            }
+
+            // بدء اللعبة عند تحميل الصفحة
+            window.onload = function () {
+                newGame();
+            };
+        </script>
+    </body>
+</html>

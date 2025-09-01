@@ -1,0 +1,923 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>لعبة زيادة مدة الانتباه البصري</title>
+        <style>
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: 'Arial', sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                padding: 20px;
+            }
+
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
+
+            .page {
+                display: none;
+                animation: fadeIn 0.5s ease-in-out;
+            }
+
+            .page.active {
+                display: block;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .header {
+                background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+                padding: 30px;
+                text-align: center;
+                color: #333;
+            }
+
+            .header h1 {
+                font-size: 2.5em;
+                margin-bottom: 10px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .header p {
+                font-size: 1.2em;
+                opacity: 0.8;
+            }
+
+            .objectives-container {
+                padding: 40px;
+            }
+
+            .objectives {
+                background: #e3f2fd;
+                padding: 30px;
+                border-radius: 15px;
+                border-right: 5px solid #2196f3;
+                margin-bottom: 30px;
+            }
+
+            .objectives h2 {
+                color: #1976d2;
+                margin-bottom: 20px;
+                font-size: 1.8em;
+                text-align: center;
+            }
+
+            .objectives ul {
+                list-style-type: none;
+                padding: 0;
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+                gap: 15px;
+            }
+
+            .objectives li {
+                background: white;
+                padding: 20px;
+                border-radius: 12px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+                position: relative;
+                padding-right: 60px;
+                transition: all 0.3s ease;
+            }
+
+            .objectives li:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            }
+
+            .objectives li::before {
+                content: '✓';
+                position: absolute;
+                right: 20px;
+                top: 50%;
+                transform: translateY(-50%);
+                background: #4caf50;
+                color: white;
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                font-size: 1.2em;
+            }
+
+            .level-selection {
+                text-align: center;
+                padding: 30px;
+                background: #f8f9fa;
+                border-radius: 20px;
+                margin-top: 20px;
+            }
+
+            .level-selection h3 {
+                font-size: 2em;
+                margin-bottom: 30px;
+                color: #333;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            }
+
+            .level-buttons {
+                display: flex;
+                gap: 30px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .level-card {
+                background: white;
+                border-radius: 20px;
+                padding: 30px;
+                width: 250px;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+                border: 3px solid transparent;
+            }
+
+            .level-card:hover {
+                transform: translateY(-10px);
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+                border-color: #4caf50;
+            }
+
+            .level-card.easy {
+                border-top: 5px solid #4caf50;
+            }
+
+            .level-card.medium {
+                border-top: 5px solid #ff9800;
+            }
+
+            .level-card.hard {
+                border-top: 5px solid #f44336;
+            }
+
+            .level-icon {
+                font-size: 3em;
+                margin-bottom: 15px;
+            }
+
+            .level-title {
+                font-size: 1.5em;
+                font-weight: bold;
+                margin-bottom: 10px;
+                color: #333;
+            }
+
+            .level-description {
+                color: #666;
+                font-size: 1em;
+                line-height: 1.4;
+            }
+
+            .game-controls {
+                padding: 20px;
+                background: #f8f9fa;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 20px;
+            }
+
+            .back-btn {
+                padding: 10px 20px;
+                background: #6c757d;
+                color: white;
+                border: none;
+                border-radius: 25px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .back-btn:hover {
+                background: #5a6268;
+                transform: translateY(-2px);
+            }
+
+            .score-board {
+                display: flex;
+                gap: 20px;
+                align-items: center;
+            }
+
+            .score-item {
+                background: white;
+                padding: 10px 20px;
+                border-radius: 15px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                font-weight: bold;
+            }
+
+            .game-area {
+                padding: 30px;
+                text-align: center;
+            }
+
+            .grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+                gap: 12px;
+                max-width: 950px;
+                margin: 20px auto;
+                padding: 25px;
+                background: #f8f9fa;
+                border-radius: 20px;
+                box-shadow: inset 0 4px 15px rgba(0, 0, 0, 0.1);
+                min-height: 350px;
+                align-content: start;
+                justify-items: center;
+            }
+
+            .item {
+                width: 60px;
+                height: 60px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2.2em;
+                border-radius: 12px;
+                background: white;
+                box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+                transition: all 0.3s ease;
+                cursor: pointer;
+                margin: 3px;
+            }
+
+            .item:hover {
+                transform: scale(1.1) rotate(5deg);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            }
+
+            .item.highlighted {
+                background: #ffeb3b;
+                transform: scale(1.05);
+            }
+
+            .counting-section {
+                margin-top: 30px;
+                padding: 20px;
+                background: #fff3cd;
+                border-radius: 15px;
+                border: 3px dashed #ffc107;
+            }
+
+            .counting-row {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 15px;
+                margin: 15px 0;
+                flex-wrap: wrap;
+            }
+
+            .target-item {
+                font-size: 3em;
+                padding: 10px;
+                background: white;
+                border-radius: 10px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .count-input {
+                width: 80px;
+                height: 60px;
+                text-align: center;
+                font-size: 2em;
+                border: 3px solid #007bff;
+                border-radius: 10px;
+                background: white;
+                font-weight: bold;
+            }
+
+            .check-btn {
+                padding: 15px 30px;
+                background: #28a745;
+                color: white;
+                border: none;
+                border-radius: 25px;
+                font-size: 1.2em;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                font-weight: bold;
+            }
+
+            .check-btn:hover {
+                background: #218838;
+                transform: translateY(-2px);
+            }
+
+            .result {
+                margin-top: 20px;
+                padding: 15px;
+                border-radius: 10px;
+                font-size: 1.3em;
+                font-weight: bold;
+                transition: all 0.3s ease;
+            }
+
+            .correct {
+                background: #d4edda;
+                color: #155724;
+                border: 2px solid #c3e6cb;
+            }
+
+            .incorrect {
+                background: #f8d7da;
+                color: #721c24;
+                border: 2px solid #f5c6cb;
+            }
+
+            .next-btn {
+                margin-top: 20px;
+                padding: 15px 30px;
+                background: #6f42c1;
+                color: white;
+                border: none;
+                border-radius: 25px;
+                font-size: 1.2em;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .next-btn:hover {
+                background: #5a32a3;
+            }
+
+            .celebration {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                z-index: 1000;
+            }
+
+            .confetti {
+                position: absolute;
+                width: 10px;
+                height: 10px;
+                background: #ff6b6b;
+                border-radius: 50%;
+                animation: fall 3s linear infinite;
+            }
+
+            @keyframes fall {
+                0% {
+                    transform: translateY(-100vh) rotate(0deg);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateY(100vh) rotate(360deg);
+                    opacity: 0;
+                }
+            }
+
+            .progress-bar {
+                width: 100%;
+                height: 10px;
+                background: #e0e0e0;
+                border-radius: 5px;
+                margin: 20px 0;
+                overflow: hidden;
+            }
+
+            .progress-fill {
+                height: 100%;
+                background: linear-gradient(90deg, #4caf50, #45a049);
+                width: 0%;
+                transition: width 0.5s ease;
+                border-radius: 5px;
+            }
+
+            @media (max-width: 768px) {
+                .header h1 {
+                    font-size: 2em;
+                }
+
+                .level-buttons {
+                    flex-direction: column;
+                    align-items: center;
+                }
+
+                .level-card {
+                    width: 100%;
+                    max-width: 300px;
+                }
+
+                .objectives ul {
+                    grid-template-columns: 1fr;
+                }
+
+                .grid {
+                    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+                    gap: 10px;
+                    padding: 20px;
+                }
+
+                .item {
+                    width: 50px;
+                    height: 50px;
+                    font-size: 2em;
+                }
+
+                .game-controls {
+                    flex-direction: column;
+                    gap: 15px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <!-- صفحة الأهداف والمستويات -->
+            <div id="homePage" class="page active">
+                <div class="header">
+                    <h1>🎯 لعبة زيادة مدة الانتباه البصري</h1>
+                    <p>اعثر على الأشياء واعدها بعناية!</p>
+                </div>
+
+                <div class="objectives-container">
+                    <div class="objectives">
+                        <h2>🎯 أهداف اللعبة التعليمية</h2>
+                        <ul>
+                            <li><strong>تطوير الانتباه البصري:</strong> زيادة قدرة الطفل على التركيز والانتباه للتفاصيل البصرية</li>
+                            <li><strong>تحسين المسح البصري:</strong> تعليم الطفل كيفية البحث المنظم في المجال البصري</li>
+                            <li><strong>تقوية مهارات العد:</strong> ممارسة العد والتعرف على الأرقام بطريقة تفاعلية</li>
+                            <li><strong>تنمية التمييز البصري:</strong> القدرة على التمييز بين الأشكال والألوان المختلفة</li>
+                            <li><strong>زيادة مدة التركيز:</strong> تدريب الطفل على الحفاظ على التركيز لفترات أطول</li>
+                            <li><strong>تطوير الذاكرة العاملة:</strong> تحسين قدرة الطفل على حفظ المعلومات أثناء العمل</li>
+                            <li><strong>بناء الثقة بالنفس:</strong> شعور الطفل بالإنجاز عند إكمال المهام بنجاح</li>
+                            <li><strong>تحسين التنسيق البصري الحركي:</strong> ربط ما يراه الطفل بحركاته وردود أفعاله</li>
+                        </ul>
+                    </div>
+
+                    <div class="level-selection">
+                        <h3>🎮 اختر المستوى المناسب لك</h3>
+                        <div class="level-buttons">
+                            <div class="level-card easy" onclick="startLevel(1)">
+                                <div class="level-icon">🌱</div>
+                                <div class="level-title">المستوى السهل</div>
+                                <div class="level-description">
+                                    3 مراحل متدرجة<br />
+                                    حيوانات بحرية ومزرعة<br />
+                                    مناسب للمبتدئين (12-24 عنصر)
+                                </div>
+                            </div>
+
+                            <div class="level-card medium" onclick="startLevel(2)">
+                                <div class="level-icon">🌳</div>
+                                <div class="level-title">المستوى المتوسط</div>
+                                <div class="level-description">
+                                    3 مراحل متدرجة<br />
+                                    حيوانات الغابة<br />
+                                    تحدي أكبر قليلاً (20-35 عنصر)
+                                </div>
+                            </div>
+
+                            <div class="level-card hard" onclick="startLevel(3)">
+                                <div class="level-icon">🏆</div>
+                                <div class="level-title">المستوى الصعب</div>
+                                <div class="level-description">
+                                    3 مراحل متدرجة<br />
+                                    وسائل النقل والفواكه<br />
+                                    للخبراء فقط! (25-45 عنصر)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- صفحة اللعبة -->
+            <div id="gamePage" class="page">
+                <div class="header">
+                    <h1>🎯 لعبة زيادة مدة الانتباه البصري</h1>
+                    <p id="gameTheme">اعثر على الأشياء واعدها بعناية!</p>
+                </div>
+
+                <div class="game-controls">
+                    <button class="back-btn" onclick="goHome()">⬅️ العودة للرئيسية</button>
+
+                    <div class="score-board">
+                        <div class="score-item">النقاط: <span id="score">0</span></div>
+                        <div class="score-item">المستوى: <span id="currentLevel">1</span></div>
+                        <div class="score-item">المرحلة: <span id="currentStage">1</span></div>
+                        <div class="score-item">الوقت: <span id="timer">0</span>s</div>
+                    </div>
+                </div>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+
+                <div class="game-area">
+                    <div class="grid" id="gameGrid"></div>
+
+                    <div class="counting-section">
+                        <h3>🔍 اعد الأشياء التالية:</h3>
+                        <div id="countingTasks"></div>
+                        <div id="result" class="result" style="display: none"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="celebration" id="celebration"></div>
+
+        <script>
+            let gameData = {
+                level: 1,
+                stage: 1,
+                score: 0,
+                currentItems: [],
+                targetCounts: {},
+                startTime: 0,
+                totalQuestions: 0,
+                correctAnswers: 0,
+                timerInterval: null
+            };
+
+            const themes = {
+                1: {
+                    name: 'حيوانات بحرية ومزرعة',
+                    items: ['🐋', '🐠', '🦆', '🐊'],
+                    stages: [
+                        { gridSize: 12, uniqueItems: 2, name: 'المرحلة الأولى - سهل جداً' },
+                        { gridSize: 18, uniqueItems: 3, name: 'المرحلة الثانية - سهل' },
+                        { gridSize: 24, uniqueItems: 3, name: 'المرحلة الثالثة - سهل متقدم' }
+                    ]
+                },
+                2: {
+                    name: 'حيوانات الغابة',
+                    items: ['🐵', '🐅', '🐘', '🦁'],
+                    stages: [
+                        { gridSize: 20, uniqueItems: 3, name: 'المرحلة الأولى - متوسط' },
+                        { gridSize: 28, uniqueItems: 4, name: 'المرحلة الثانية - متوسط' },
+                        { gridSize: 35, uniqueItems: 4, name: 'المرحلة الثالثة - متوسط متقدم' }
+                    ]
+                },
+                3: {
+                    name: 'وسائل النقل والفواكه',
+                    items: ['✈️', '🚢', '🚌', '🚑', '🍎', '🍌', '🍊', '🍋'],
+                    stages: [
+                        { gridSize: 25, uniqueItems: 4, name: 'المرحلة الأولى - صعب' },
+                        { gridSize: 35, uniqueItems: 5, name: 'المرحلة الثانية - صعب' },
+                        { gridSize: 45, uniqueItems: 6, name: 'المرحلة الثالثة - صعب جداً' }
+                    ]
+                }
+            };
+
+            function showPage(pageId) {
+                document.querySelectorAll('.page').forEach((page) => {
+                    page.classList.remove('active');
+                });
+                document.getElementById(pageId).classList.add('active');
+            }
+
+            function goHome() {
+                showPage('homePage');
+                if (gameData.timerInterval) {
+                    clearInterval(gameData.timerInterval);
+                    gameData.timerInterval = null;
+                }
+                // Reset game data
+                gameData = {
+                    level: 1,
+                    stage: 1,
+                    score: 0,
+                    currentItems: [],
+                    targetCounts: {},
+                    startTime: 0,
+                    totalQuestions: 0,
+                    correctAnswers: 0,
+                    timerInterval: null
+                };
+            }
+
+            function startLevel(level) {
+                gameData.level = level;
+                gameData.stage = 1; // Reset to first stage
+                showPage('gamePage');
+                generateGame();
+            }
+
+            function generateGame() {
+                console.log('Starting generateGame for level:', gameData.level, 'stage:', gameData.stage);
+                const theme = themes[gameData.level];
+                const currentStage = theme.stages[gameData.stage - 1];
+                console.log('Theme:', theme);
+                console.log('Current stage:', currentStage);
+
+                const grid = document.getElementById('gameGrid');
+                const countingTasks = document.getElementById('countingTasks');
+
+                if (!grid || !countingTasks) {
+                    console.error('Grid or counting tasks element not found!');
+                    return;
+                }
+
+                // Update theme title and stage info
+                document.getElementById('gameTheme').textContent = `${theme.name} - ${currentStage.name}`;
+                document.getElementById('currentLevel').textContent = gameData.level;
+                document.getElementById('currentStage').textContent = gameData.stage;
+
+                // Clear previous game
+                grid.innerHTML = '';
+                countingTasks.innerHTML = '';
+                document.getElementById('result').style.display = 'none';
+
+                // Generate random items for grid
+                gameData.currentItems = [];
+                gameData.targetCounts = {};
+
+                // Select random items for this stage
+                const selectedItems = theme.items.slice(0, currentStage.uniqueItems);
+                console.log('Selected items:', selectedItems);
+
+                // Generate grid items based on current stage
+                for (let i = 0; i < currentStage.gridSize; i++) {
+                    const randomItem = selectedItems[Math.floor(Math.random() * selectedItems.length)];
+                    gameData.currentItems.push(randomItem);
+                }
+                console.log('Generated items array:', gameData.currentItems);
+
+                // Count actual occurrences
+                selectedItems.forEach((item) => {
+                    gameData.targetCounts[item] = gameData.currentItems.filter((x) => x === item).length;
+                });
+                console.log('Target counts:', gameData.targetCounts);
+
+                // Shuffle the grid
+                gameData.currentItems.sort(() => Math.random() - 0.5);
+
+                // Create grid elements
+                console.log('Creating grid with', gameData.currentItems.length, 'items');
+                gameData.currentItems.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'item';
+                    div.textContent = item;
+                    div.onclick = () => highlightItem(div);
+                    div.setAttribute('data-index', index);
+                    grid.appendChild(div);
+                });
+
+                // Verify grid has items
+                setTimeout(() => {
+                    const gridItems = grid.querySelectorAll('.item');
+                    console.log('Grid now has', gridItems.length, 'items visible');
+                }, 100);
+
+                // Create counting tasks
+                selectedItems.forEach((item) => {
+                    const row = document.createElement('div');
+                    row.className = 'counting-row';
+
+                    row.innerHTML = `
+                    <span class="target-item">${item}</span>
+                    <span>=</span>
+                    <input type="number" class="count-input" data-item="${item}" min="0" max="50" oninput="checkAnswersAuto()">
+                `;
+
+                    countingTasks.appendChild(row);
+                });
+
+                gameData.startTime = Date.now();
+                gameData.totalQuestions = selectedItems.length;
+                updateTimer();
+            }
+
+            function highlightItem(element) {
+                element.classList.toggle('highlighted');
+                playSound('click');
+            }
+
+            function checkAnswers() {
+                const inputs = document.querySelectorAll('.count-input');
+                let correct = 0;
+                let total = 0;
+                let allFilled = true;
+
+                // Check if all inputs are filled
+                inputs.forEach((input) => {
+                    if (!input.value || input.value.trim() === '') {
+                        allFilled = false;
+                    }
+                });
+
+                if (!allFilled) {
+                    return; // Don't check until all answers are provided
+                }
+
+                inputs.forEach((input) => {
+                    const item = input.dataset.item;
+                    const userAnswer = parseInt(input.value) || 0;
+                    const correctAnswer = gameData.targetCounts[item];
+
+                    total++;
+                    if (userAnswer === correctAnswer) {
+                        correct++;
+                        input.style.borderColor = '#28a745';
+                        input.style.background = '#d4edda';
+                    } else {
+                        input.style.borderColor = '#dc3545';
+                        input.style.background = '#f8d7da';
+                    }
+                });
+
+                const resultDiv = document.getElementById('result');
+                const accuracy = Math.round((correct / total) * 100);
+
+                if (correct === total) {
+                    resultDiv.className = 'result correct';
+                    resultDiv.innerHTML = `🎉 ممتاز! جميع إجاباتك صحيحة! حصلت على ${accuracy}%`;
+                    gameData.score += gameData.level * 10;
+                    playSound('success');
+                    showCelebration();
+
+                    // Auto advance to next level after 3 seconds
+                    setTimeout(() => {
+                        nextLevel();
+                    }, 3000);
+                } else {
+                    resultDiv.className = 'result incorrect';
+                    resultDiv.innerHTML = `🔄 حاول مرة أخرى! إجاباتك الصحيحة: ${correct}/${total} (${accuracy}%)`;
+                    playSound('error');
+
+                    // Auto clear incorrect answers after 2 seconds
+                    setTimeout(() => {
+                        inputs.forEach((input) => {
+                            if (input.style.borderColor === 'rgb(220, 53, 69)') {
+                                // incorrect answers
+                                input.value = '';
+                                input.style.borderColor = '#007bff';
+                                input.style.background = 'white';
+                            }
+                        });
+                        resultDiv.style.display = 'none';
+                    }, 2000);
+                }
+
+                resultDiv.style.display = 'block';
+                document.getElementById('score').textContent = gameData.score;
+                updateProgress();
+            }
+
+            function nextLevel() {
+                const theme = themes[gameData.level];
+
+                if (gameData.stage < 3) {
+                    // Move to next stage within the same level
+                    gameData.stage++;
+                    generateGame();
+                } else if (gameData.level < 3) {
+                    // Move to next level, reset stage to 1
+                    gameData.level++;
+                    gameData.stage = 1;
+                    generateGame();
+                } else {
+                    // All levels and stages completed
+                    showCompletionMessage();
+                    goHome();
+                }
+            }
+
+            function updateTimer() {
+                if (gameData.timerInterval) {
+                    clearInterval(gameData.timerInterval);
+                }
+
+                gameData.timerInterval = setInterval(() => {
+                    const elapsed = Math.floor((Date.now() - gameData.startTime) / 1000);
+                    document.getElementById('timer').textContent = elapsed;
+                }, 1000);
+            }
+
+            function updateProgress() {
+                const progress = (gameData.score / 100) * 100;
+                document.getElementById('progressFill').style.width = Math.min(progress, 100) + '%';
+            }
+
+            function showCelebration() {
+                const celebration = document.getElementById('celebration');
+                celebration.innerHTML = '';
+
+                for (let i = 0; i < 50; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.animationDelay = Math.random() * 3 + 's';
+                    confetti.style.background = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b'][Math.floor(Math.random() * 5)];
+                    celebration.appendChild(confetti);
+                }
+
+                setTimeout(() => {
+                    celebration.innerHTML = '';
+                }, 3000);
+            }
+
+            function showCompletionMessage() {
+                alert(`🎊 مبروك! لقد أكملت جميع المستويات والمراحل بنجاح!\n\nإنجازك:\n- 3 مستويات كاملة\n- 9 مراحل متدرجة\n- نقاطك النهائية: ${gameData.score}\n\nأنت بطل حقيقي في التركيز والانتباه! 🏆🌟`);
+            }
+
+            function playSound(type) {
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    if (type === 'success') {
+                        // Glitter sound - multiple ascending tones
+                        const frequencies = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
+                        frequencies.forEach((freq, index) => {
+                            setTimeout(() => {
+                                const osc = audioContext.createOscillator();
+                                const gain = audioContext.createGain();
+                                osc.connect(gain);
+                                gain.connect(audioContext.destination);
+
+                                osc.frequency.setValueAtTime(freq, audioContext.currentTime);
+                                osc.type = 'sine';
+                                gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+                                gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+
+                                osc.start(audioContext.currentTime);
+                                osc.stop(audioContext.currentTime + 0.2);
+                            }, index * 100);
+                        });
+                    } else if (type === 'error') {
+                        // Buzzer sound - low frequency buzz
+                        oscillator.frequency.setValueAtTime(150, audioContext.currentTime);
+                        oscillator.type = 'sawtooth';
+
+                        // Create buzzing effect
+                        for (let i = 0; i < 3; i++) {
+                            setTimeout(() => {
+                                const osc = audioContext.createOscillator();
+                                const gain = audioContext.createGain();
+                                osc.connect(gain);
+                                gain.connect(audioContext.destination);
+
+                                osc.frequency.setValueAtTime(120 + i * 20, audioContext.currentTime);
+                                osc.type = 'sawtooth';
+                                gain.gain.setValueAtTime(0.15, audioContext.currentTime);
+                                gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+                                osc.start(audioContext.currentTime);
+                                osc.stop(audioContext.currentTime + 0.3);
+                            }, i * 200);
+                        }
+                    } else {
+                        // Click sound
+                        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                        oscillator.type = 'sine';
+                        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+                        oscillator.start(audioContext.currentTime);
+                        oscillator.stop(audioContext.currentTime + 0.1);
+                    }
+                } catch (e) {
+                    // Audio not supported, silently continue
+                }
+            }
+
+            function checkAnswersAuto() {
+                // This function is called every time an input changes
+                setTimeout(() => {
+                    checkAnswers();
+                }, 100); // Small delay to ensure the value is updated
+            }
+        </script>
+    </body>
+</html>

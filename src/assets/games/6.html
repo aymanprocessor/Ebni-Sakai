@@ -1,0 +1,1610 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>لعبة اكتشف الاختلاف</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                padding: 10px;
+            }
+
+            .game-container {
+                max-width: 1200px;
+                width: 100%;
+                text-align: center;
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+                margin-bottom: 20px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            }
+
+            .menu {
+                background: rgba(255, 255, 255, 0.1);
+                padding: 30px;
+                border-radius: 20px;
+                backdrop-filter: blur(10px);
+                margin-bottom: 20px;
+            }
+
+            .level-select {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+                margin: 20px 0;
+            }
+
+            .level-description {
+                font-size: 0.9rem;
+                color: #ecf0f1;
+                margin-top: 10px;
+                line-height: 1.4;
+            }
+
+            .level-card {
+                background: rgba(255, 255, 255, 0.1);
+                padding: 25px;
+                border-radius: 15px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                border: 2px solid transparent;
+            }
+
+            .level-card:hover {
+                background: rgba(255, 255, 255, 0.2);
+                transform: translateY(-5px);
+                border-color: rgba(255, 255, 255, 0.3);
+            }
+
+            .level-card.unlocked {
+                border-color: #38ef7d;
+            }
+
+            .level-card.locked {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            .game-area {
+                display: none;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 20px;
+                padding: 20px;
+                backdrop-filter: blur(10px);
+            }
+
+            .game-area.active {
+                display: block;
+            }
+
+            .game-stats {
+                display: flex;
+                justify-content: center;
+                gap: 20px;
+                margin-bottom: 20px;
+                flex-wrap: wrap;
+            }
+
+            .stat {
+                background: rgba(255, 255, 255, 0.1);
+                padding: 10px 20px;
+                border-radius: 10px;
+                font-weight: bold;
+            }
+
+            .images-container {
+                display: flex;
+                gap: 20px;
+                justify-content: center;
+                flex-wrap: wrap;
+                margin: 20px 0;
+            }
+
+            .image-box {
+                position: relative;
+                border: 3px solid #fff;
+                border-radius: 15px;
+                overflow: hidden;
+                background: white;
+            }
+
+            .game-image {
+                width: 350px;
+                height: 350px;
+                cursor: crosshair;
+                display: block;
+            }
+
+            .difference-marker {
+                position: absolute;
+                width: 40px;
+                height: 40px;
+                border: 3px solid #ff4444;
+                border-radius: 50%;
+                background: rgba(255, 68, 68, 0.3);
+                pointer-events: none;
+                animation: pulse 1s infinite;
+            }
+
+            .difference-marker.found {
+                border-color: #44ff44;
+                background: rgba(68, 255, 68, 0.5);
+                animation: none;
+            }
+
+            @keyframes pulse {
+                0% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+                50% {
+                    transform: scale(1.2);
+                    opacity: 0.7;
+                }
+                100% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+            }
+
+            button {
+                padding: 12px 25px;
+                border: none;
+                border-radius: 25px;
+                font-size: 1rem;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                color: white;
+                margin: 5px;
+            }
+
+            .btn-primary {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            }
+            .btn-success {
+                background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            }
+            .btn-warning {
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            }
+            .btn-info {
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            }
+
+            button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            }
+
+            button:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+            .message {
+                margin: 20px 0;
+                padding: 15px;
+                border-radius: 10px;
+                font-weight: bold;
+                min-height: 50px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .message.success {
+                background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            }
+            .message.error {
+                background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+            }
+            .message.info {
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            }
+
+            .progress-bar {
+                width: 100%;
+                height: 12px;
+                background: rgba(255, 255, 255, 0.3);
+                border-radius: 6px;
+                overflow: hidden;
+                margin: 15px 0;
+            }
+
+            .progress-fill {
+                height: 100%;
+                background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%);
+                transition: width 0.3s ease;
+                border-radius: 6px;
+            }
+
+            .celebration {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                z-index: 1000;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .celebration.show {
+                display: flex;
+            }
+
+            .celebration-content {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 40px;
+                border-radius: 20px;
+                text-align: center;
+                color: white;
+                animation: celebrationPop 0.5s ease;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            }
+
+            @keyframes celebrationPop {
+                0% {
+                    transform: scale(0.5);
+                    opacity: 0;
+                }
+                100% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+            }
+
+            @media (max-width: 768px) {
+                h1 {
+                    font-size: 2rem;
+                }
+                .game-image {
+                    width: 280px;
+                    height: 280px;
+                }
+                .images-container {
+                    flex-direction: column;
+                    align-items: center;
+                }
+                .game-stats {
+                    gap: 10px;
+                }
+                .stat {
+                    padding: 8px 15px;
+                    font-size: 0.9rem;
+                }
+            }
+
+            .hint-btn {
+                background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+                color: #333 !important;
+            }
+
+            .combo-display {
+                font-size: 1.5rem;
+                font-weight: bold;
+                color: #ffd700;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+                margin: 10px 0;
+                display: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="game-container">
+            <h1>🔍 لعبة اكتشف الاختلاف 🔍</h1>
+
+            <!-- Main Menu -->
+            <div id="mainMenu" class="menu">
+                <h2>اختر المستوى</h2>
+                <div class="level-select">
+                    <div class="level-card unlocked" onclick="startLevel(1)">
+                        <h3>المستوى الأول</h3>
+                        <p>مبتدئ - خطأ واحد لكل صفحة</p>
+                        <div class="level-description">
+                            📚 دب وكتاب • 🌸 زهرة ملونة • 🐱 قطة لطيفة<br />
+                            <strong>الأخطاء:</strong> تغيير الألوان فقط
+                        </div>
+                        <div>🔓 متاح</div>
+                    </div>
+                    <div class="level-card locked" id="level2Card">
+                        <h3>المستوى الثاني</h3>
+                        <p>متوسط - خطآن لكل صفحة</p>
+                        <div class="level-description">
+                            🚗 سيارة سريعة • 🏠 بيت جميل • 🌳 شجرة كبيرة<br />
+                            <strong>الأخطاء:</strong> حذف أجزاء من الصورة
+                        </div>
+                        <div>🔒 مقفل</div>
+                    </div>
+                    <div class="level-card locked" id="level3Card">
+                        <h3>المستوى الثالث</h3>
+                        <p>صعب - 3 أخطاء لكل صفحة</p>
+                        <div class="level-description">
+                            ⛵ قارب في البحر • 🤖 روبوت فضائي • 🏰 قلعة عظيمة<br />
+                            <strong>الأخطاء:</strong> تغيير ألوان + حذف أجزاء
+                        </div>
+                        <div>🔒 مقفل</div>
+                    </div>
+                </div>
+                <div>
+                    <button class="btn-info" onclick="showInstructions()">📖 التعليمات</button>
+                    <button class="btn-warning" onclick="resetProgress()">🔄 إعادة تعيين</button>
+                </div>
+            </div>
+
+            <!-- Game Area -->
+            <div id="gameArea" class="game-area">
+                <div>
+                    <h2 id="levelTitle">المستوى الأول</h2>
+                    <div class="game-stats">
+                        <div class="stat">الصفحة: <span id="currentPage">1</span>/3</div>
+                        <div class="stat">الوقت: <span id="timer">00:00</span></div>
+                        <div class="stat">النقاط: <span id="score">0</span></div>
+                        <div class="stat">الاختلافات: <span id="found">0</span>/<span id="total">0</span></div>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="combo-display" id="comboDisplay">🔥 رائع! +<span id="comboBonus">0</span> نقطة إضافية</div>
+
+                <div class="images-container">
+                    <div class="image-box">
+                        <canvas id="leftImage" class="game-image" width="350" height="350"></canvas>
+                    </div>
+                    <div class="image-box">
+                        <canvas id="rightImage" class="game-image" width="350" height="350"></canvas>
+                    </div>
+                </div>
+
+                <div id="gameMessage" class="message info">ابحث عن الاختلافات بين الصورتين واضغط عليها!</div>
+
+                <div>
+                    <button class="btn-primary" onclick="showMenu()">🏠 القائمة الرئيسية</button>
+                    <button class="hint-btn" onclick="useHint()" id="hintBtn">💡 تلميح (3)</button>
+                    <button class="btn-warning" onclick="restartLevel()">🔄 إعادة بدء</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Celebration Modal -->
+        <div id="celebration" class="celebration">
+            <div class="celebration-content">
+                <h2 id="celebrationTitle">🎉 أحسنت! 🎉</h2>
+                <p id="celebrationMessage">لقد أكملت هذا المستوى بنجاح!</p>
+                <div id="celebrationStats"></div>
+                <button class="btn-success" onclick="hideCelebration()">متابعة</button>
+            </div>
+        </div>
+
+        <script>
+            // Game State
+            let currentLevel = 1;
+            let currentPage = 1;
+            let foundDifferences = [];
+            let totalDifferences = 0;
+            let gameStartTime = 0;
+            let gameTimer = null;
+            let score = 0;
+            let combo = 0;
+            let hintsRemaining = 3;
+            let levelProgress = JSON.parse(localStorage.getItem('spotDiffProgress') || '{"1":false,"2":false,"3":false}');
+
+            // Audio Context
+            let audioContext = null;
+
+            // Initialize audio
+            function initAudio() {
+                if (!audioContext) {
+                    try {
+                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    } catch (e) {
+                        console.log('Audio not supported');
+                    }
+                }
+            }
+
+            // Play success sound
+            function playSuccessSound() {
+                initAudio();
+                if (!audioContext) return;
+
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
+                oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1);
+                oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2);
+
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+            }
+
+            // Play error sound
+            function playErrorSound() {
+                initAudio();
+                if (!audioContext) return;
+
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            }
+
+            // Game data with differences coordinates
+            const gameData = {
+                1: {
+                    // Level 1 - 1 difference per page (color changes only)
+                    1: { differences: [{ x: 175, y: 180, tolerance: 40 }] }, // Book color change
+                    2: { differences: [{ x: 175, y: 120, tolerance: 35 }] }, // Flower center color change
+                    3: { differences: [{ x: 175, y: 200, tolerance: 30 }] } // Cat color change
+                },
+                2: {
+                    // Level 2 - 2 differences per page (missing parts)
+                    1: {
+                        differences: [
+                            { x: 220, y: 250, tolerance: 25 },
+                            { x: 230, y: 202, tolerance: 15 }
+                        ]
+                    }, // Car: missing right wheel + door handle
+                    2: {
+                        differences: [
+                            { x: 127, y: 232, tolerance: 20 },
+                            { x: 212, y: 112, tolerance: 15 }
+                        ]
+                    }, // House: missing left window + chimney smoke
+                    3: {
+                        differences: [
+                            { x: 130, y: 155, tolerance: 25 },
+                            { x: 210, y: 250, tolerance: 12 }
+                        ]
+                    } // Tree: missing left branch + apple
+                },
+                3: {
+                    // Level 3 - 3 differences per page (mixed: color + missing parts)
+                    1: {
+                        differences: [
+                            { x: 210, y: 165, tolerance: 30 },
+                            { x: 185, y: 107, tolerance: 15 },
+                            { x: 280, y: 275, tolerance: 20 }
+                        ]
+                    }, // Boat: sail color + missing flag + missing anchor
+                    2: {
+                        differences: [
+                            { x: 175, y: 140, tolerance: 20 },
+                            { x: 120, y: 207, tolerance: 20 },
+                            { x: 175, y: 100, tolerance: 15 }
+                        ]
+                    }, // Robot: eye color + missing left arm + missing antenna
+                    3: {
+                        differences: [
+                            { x: 187, y: 77, tolerance: 15 },
+                            { x: 42, y: 200, tolerance: 40 },
+                            { x: 175, y: 250, tolerance: 25 }
+                        ]
+                    } // Castle: flag color + missing left tower (whole column) + missing gate
+                }
+            };
+
+            // Initialize game
+            function initGame() {
+                updateLevelCards();
+                document.getElementById('mainMenu').style.display = 'block';
+                document.getElementById('gameArea').style.display = 'none';
+            }
+
+            // Update level cards based on progress
+            function updateLevelCards() {
+                const level2Card = document.getElementById('level2Card');
+                const level3Card = document.getElementById('level3Card');
+
+                if (levelProgress['1']) {
+                    level2Card.classList.remove('locked');
+                    level2Card.classList.add('unlocked');
+                    level2Card.innerHTML = `<h3>المستوى الثاني</h3>
+                    <p>متوسط - خطآن لكل صفحة</p>
+                    <div class="level-description">
+                        🚗 سيارة سريعة • 🏠 بيت جميل • 🌳 شجرة كبيرة<br>
+                        <strong>الأخطاء:</strong> حذف أجزاء من الصورة
+                    </div>
+                    <div>🔓 متاح</div>`;
+                    level2Card.onclick = () => startLevel(2);
+                }
+
+                if (levelProgress['2']) {
+                    level3Card.classList.remove('locked');
+                    level3Card.classList.add('unlocked');
+                    level3Card.innerHTML = `<h3>المستوى الثالث</h3>
+                    <p>صعب - 3 أخطاء لكل صفحة</p>
+                    <div class="level-description">
+                        ⛵ قارب في البحر • 🤖 روبوت فضائي • 🏰 قلعة عظيمة<br>
+                        <strong>الأخطاء:</strong> تغيير ألوان + حذف أجزاء
+                    </div>
+                    <div>🔓 متاح</div>`;
+                    level3Card.onclick = () => startLevel(3);
+                }
+            }
+
+            // Start level
+            function startLevel(level) {
+                if (level > 1 && !levelProgress[String(level - 1)]) {
+                    showMessage('يجب إكمال المستوى السابق أولاً!', 'error');
+                    return;
+                }
+
+                currentLevel = level;
+                currentPage = 1;
+                foundDifferences = [];
+                score = 0;
+                combo = 0;
+                hintsRemaining = 3;
+
+                document.getElementById('mainMenu').style.display = 'none';
+                document.getElementById('gameArea').style.display = 'block';
+
+                updateLevelTitle();
+                loadPage();
+                startTimer();
+            }
+
+            // Update level title
+            function updateLevelTitle() {
+                const titles = {
+                    1: 'المستوى الأول - مبتدئ',
+                    2: 'المستوى الثاني - متوسط',
+                    3: 'المستوى الثالث - صعب'
+                };
+                document.getElementById('levelTitle').textContent = titles[currentLevel];
+            }
+
+            // Load current page
+            function loadPage() {
+                const pageData = gameData[currentLevel][currentPage];
+                totalDifferences = pageData.differences.length;
+                foundDifferences = [];
+
+                updateUI();
+                createGameImages();
+                showMessage('ابحث عن الاختلافات بين الصورتين!', 'info');
+            }
+
+            // Create game images
+            function createGameImages() {
+                const leftCanvas = document.getElementById('leftImage');
+                const rightCanvas = document.getElementById('rightImage');
+                const leftCtx = leftCanvas.getContext('2d');
+                const rightCtx = rightCanvas.getContext('2d');
+
+                // Clear canvases
+                leftCtx.clearRect(0, 0, 350, 350);
+                rightCtx.clearRect(0, 0, 350, 350);
+
+                // Draw content based on page
+                drawPageContent(leftCtx, rightCtx);
+
+                // Add click handlers
+                leftCanvas.onclick = (e) => handleImageClick(e, leftCanvas);
+                rightCanvas.onclick = (e) => handleImageClick(e, rightCanvas);
+            }
+
+            // Draw page content
+            function drawPageContent(leftCtx, rightCtx) {
+                if (currentLevel === 1) {
+                    // Level 1: Same 3 pages (Bear, Flower, Cat) with color differences only
+                    if (currentPage === 1) {
+                        drawBear(leftCtx, '#4a9c3a'); // Green book
+                        drawBear(rightCtx, '#8a4fbe'); // Purple book (difference)
+                    } else if (currentPage === 2) {
+                        drawFlowerNew(leftCtx, '#ffd700'); // Yellow center
+                        drawFlowerNew(rightCtx, '#ff6b6b'); // Red center (difference)
+                    } else if (currentPage === 3) {
+                        drawCat(leftCtx, '#333'); // Black cat
+                        drawCat(rightCtx, '#ff8c42'); // Orange cat (difference)
+                    }
+                } else if (currentLevel === 2) {
+                    // Level 2: Simplified versions with clear differences
+                    if (currentPage === 1) {
+                        drawSimpleCar(leftCtx, true); // Complete car
+                        drawSimpleCar(rightCtx, false); // Missing parts
+                    } else if (currentPage === 2) {
+                        drawSimpleHouse(leftCtx, true); // Complete house
+                        drawSimpleHouse(rightCtx, false); // Missing parts
+                    } else if (currentPage === 3) {
+                        drawSimpleTree(leftCtx, true); // Complete tree
+                        drawSimpleTree(rightCtx, false); // Missing parts
+                    }
+                } else if (currentLevel === 3) {
+                    // Level 3: Different designs with multiple differences
+                    if (currentPage === 1) {
+                        drawSimpleBoat(leftCtx, true); // Complete boat
+                        drawSimpleBoat(rightCtx, false); // Multiple differences
+                    } else if (currentPage === 2) {
+                        drawSimpleRobot(leftCtx, true); // Complete robot
+                        drawSimpleRobot(rightCtx, false); // Multiple differences
+                    } else if (currentPage === 3) {
+                        drawSimpleCastle(leftCtx, true); // Complete castle
+                        drawSimpleCastle(rightCtx, false); // Multiple differences
+                    }
+                }
+            }
+
+            // Draw flower (Level 1 - Page 2) - Renamed to avoid conflicts
+            function drawFlowerNew(ctx, centerColor) {
+                // Background
+                ctx.fillStyle = '#e8f5e8';
+                ctx.fillRect(0, 0, 350, 350);
+
+                // Stem
+                ctx.strokeStyle = '#4a7c59';
+                ctx.lineWidth = 8;
+                ctx.beginPath();
+                ctx.moveTo(175, 150);
+                ctx.lineTo(175, 300);
+                ctx.stroke();
+
+                // Leaves
+                ctx.fillStyle = '#4a7c59';
+                ctx.beginPath();
+                ctx.ellipse(155, 200, 12, 20, -0.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(195, 250, 12, 20, 0.5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Flower center (DIFFERENCE LOCATION)
+                ctx.fillStyle = centerColor;
+                ctx.beginPath();
+                ctx.arc(175, 120, 25, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Petals
+                ctx.fillStyle = '#fff';
+                const petalCount = 12;
+
+                for (let i = 0; i < petalCount; i++) {
+                    const angle = (i / petalCount) * Math.PI * 2;
+                    const x = 175 + Math.cos(angle) * 40;
+                    const y = 120 + Math.sin(angle) * 40;
+
+                    ctx.save();
+                    ctx.translate(x, y);
+                    ctx.rotate(angle);
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, 8, 20, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+
+            // Simple Car (Level 2 - Page 1)
+            function drawSimpleCar(ctx, complete) {
+                // Background
+                ctx.fillStyle = '#87ceeb';
+                ctx.fillRect(0, 0, 350, 350);
+
+                // Road
+                ctx.fillStyle = '#555';
+                ctx.fillRect(0, 250, 350, 100);
+
+                // Car body
+                ctx.fillStyle = '#ff4757';
+                ctx.fillRect(100, 180, 150, 60);
+                ctx.fillRect(120, 160, 110, 20);
+
+                // Windows
+                ctx.fillStyle = '#70a1ff';
+                ctx.fillRect(130, 165, 40, 15);
+                ctx.fillRect(180, 165, 40, 15);
+
+                // Left wheel (always present)
+                ctx.fillStyle = '#2f3542';
+                ctx.beginPath();
+                ctx.arc(130, 250, 20, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Right wheel (DIFFERENCE - missing in incomplete version)
+                if (complete) {
+                    ctx.beginPath();
+                    ctx.arc(220, 250, 20, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // Door handle (DIFFERENCE - missing in incomplete version)
+                if (complete) {
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(230, 200, 8, 4);
+                }
+
+                // Headlight
+                ctx.fillStyle = '#ffd700';
+                ctx.beginPath();
+                ctx.arc(250, 200, 8, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Simple House (Level 2 - Page 2)
+            function drawSimpleHouse(ctx, complete) {
+                // Background
+                ctx.fillStyle = '#87ceeb';
+                ctx.fillRect(0, 0, 350, 350);
+
+                // Ground
+                ctx.fillStyle = '#5fb85f';
+                ctx.fillRect(0, 280, 350, 70);
+
+                // House base
+                ctx.fillStyle = '#ffa502';
+                ctx.fillRect(100, 200, 150, 80);
+
+                // Roof
+                ctx.fillStyle = '#ff4757';
+                ctx.beginPath();
+                ctx.moveTo(90, 200);
+                ctx.lineTo(175, 130);
+                ctx.lineTo(260, 200);
+                ctx.closePath();
+                ctx.fill();
+
+                // Door
+                ctx.fillStyle = '#8b4513';
+                ctx.fillRect(150, 220, 30, 60);
+
+                // Left window (DIFFERENCE - missing in incomplete version)
+                if (complete) {
+                    ctx.fillStyle = '#70a1ff';
+                    ctx.fillRect(115, 220, 25, 25);
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(115, 220, 25, 25);
+                }
+
+                // Right window (always present)
+                ctx.fillStyle = '#70a1ff';
+                ctx.fillRect(210, 220, 25, 25);
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(210, 220, 25, 25);
+
+                // Chimney
+                ctx.fillStyle = '#8b4513';
+                ctx.fillRect(200, 140, 20, 60);
+
+                // Chimney smoke (DIFFERENCE - missing in incomplete version)
+                if (complete) {
+                    ctx.fillStyle = '#ddd';
+                    ctx.beginPath();
+                    ctx.arc(210, 120, 8, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(215, 105, 6, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // Simple Tree (Level 2 - Page 3)
+            function drawSimpleTree(ctx, complete) {
+                // Background
+                ctx.fillStyle = '#87ceeb';
+                ctx.fillRect(0, 0, 350, 350);
+
+                // Ground
+                ctx.fillStyle = '#5fb85f';
+                ctx.fillRect(0, 280, 350, 70);
+
+                // Tree trunk
+                ctx.fillStyle = '#8b4513';
+                ctx.fillRect(160, 200, 30, 80);
+
+                // Main tree crown
+                ctx.fillStyle = '#228b22';
+                ctx.beginPath();
+                ctx.arc(175, 180, 50, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Left branch (DIFFERENCE - missing in incomplete version)
+                if (complete) {
+                    ctx.fillStyle = '#8b4513';
+                    ctx.fillRect(120, 155, 40, 8);
+                    ctx.fillStyle = '#228b22';
+                    ctx.beginPath();
+                    ctx.arc(110, 150, 15, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // Right branch (always present)
+                ctx.fillStyle = '#8b4513';
+                ctx.fillRect(190, 165, 35, 8);
+                ctx.fillStyle = '#228b22';
+                ctx.beginPath();
+                ctx.arc(235, 160, 12, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Apple (DIFFERENCE - missing in incomplete version)
+                if (complete) {
+                    ctx.fillStyle = '#ff4757';
+                    ctx.beginPath();
+                    ctx.arc(210, 250, 8, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // Simple Boat (Level 3 - Page 1)
+            function drawSimpleBoat(ctx, complete) {
+                // Background
+                ctx.fillStyle = '#87ceeb';
+                ctx.fillRect(0, 0, 350, 350);
+
+                // Water
+                ctx.fillStyle = '#4a90e2';
+                ctx.fillRect(0, 200, 350, 150);
+
+                // Boat hull
+                ctx.fillStyle = '#8b4513';
+                ctx.beginPath();
+                ctx.moveTo(100, 250);
+                ctx.lineTo(250, 250);
+                ctx.lineTo(230, 280);
+                ctx.lineTo(120, 280);
+                ctx.closePath();
+                ctx.fill();
+
+                // Mast
+                ctx.strokeStyle = '#8b4513';
+                ctx.lineWidth = 6;
+                ctx.beginPath();
+                ctx.moveTo(175, 250);
+                ctx.lineTo(175, 120);
+                ctx.stroke();
+
+                // Sail (DIFFERENCE - color change)
+                if (complete) {
+                    ctx.fillStyle = '#fff'; // White sail
+                } else {
+                    ctx.fillStyle = '#ff4757'; // Red sail
+                }
+                ctx.beginPath();
+                ctx.moveTo(180, 130);
+                ctx.lineTo(180, 200);
+                ctx.lineTo(240, 180);
+                ctx.lineTo(240, 150);
+                ctx.closePath();
+                ctx.fill();
+
+                // Flag (DIFFERENCE - missing in incomplete version)
+                if (complete) {
+                    ctx.fillStyle = '#ff4757';
+                    ctx.fillRect(175, 100, 20, 15);
+                }
+
+                // Anchor (DIFFERENCE - missing in incomplete version)
+                if (complete) {
+                    ctx.strokeStyle = '#555';
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.moveTo(280, 260);
+                    ctx.lineTo(280, 290);
+                    ctx.moveTo(270, 280);
+                    ctx.lineTo(290, 280);
+                    ctx.stroke();
+                }
+            }
+
+            // Simple Robot (Level 3 - Page 2)
+            function drawSimpleRobot(ctx, complete) {
+                // Background
+                ctx.fillStyle = '#2c3e50';
+                ctx.fillRect(0, 0, 350, 350);
+
+                // Robot body
+                ctx.fillStyle = '#95a5a6';
+                ctx.fillRect(140, 180, 70, 90);
+
+                // Robot head
+                ctx.fillRect(150, 120, 50, 60);
+
+                // Eyes (DIFFERENCE - color change)
+                if (complete) {
+                    ctx.fillStyle = '#3498db'; // Blue eyes
+                } else {
+                    ctx.fillStyle = '#e74c3c'; // Red eyes
+                }
+                ctx.beginPath();
+                ctx.arc(165, 140, 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(185, 140, 8, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Mouth
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(175, 160, 10, 0, Math.PI);
+                ctx.stroke();
+
+                // Left arm (DIFFERENCE - missing in incomplete version)
+                if (complete) {
+                    ctx.fillStyle = '#95a5a6';
+                    ctx.fillRect(100, 200, 40, 15);
+                    ctx.beginPath();
+                    ctx.arc(120, 207, 8, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // Right arm (always present)
+                ctx.fillStyle = '#95a5a6';
+                ctx.fillRect(210, 200, 40, 15);
+                ctx.beginPath();
+                ctx.arc(230, 207, 8, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Legs
+                ctx.fillRect(150, 270, 15, 40);
+                ctx.fillRect(185, 270, 15, 40);
+
+                // Antenna (DIFFERENCE - missing in incomplete version)
+                if (complete) {
+                    ctx.strokeStyle = '#95a5a6';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(175, 120);
+                    ctx.lineTo(175, 100);
+                    ctx.stroke();
+                    ctx.fillStyle = '#e74c3c';
+                    ctx.beginPath();
+                    ctx.arc(175, 100, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // Simple Castle (Level 3 - Page 3)
+            function drawSimpleCastle(ctx, complete) {
+                // Background
+                ctx.fillStyle = '#87ceeb';
+                ctx.fillRect(0, 0, 350, 350);
+
+                // Ground
+                ctx.fillStyle = '#5fb85f';
+                ctx.fillRect(0, 280, 350, 70);
+
+                // Main castle wall
+                ctx.fillStyle = '#95a5a6';
+                ctx.fillRect(80, 150, 190, 130);
+
+                // Castle towers
+                ctx.fillRect(70, 120, 30, 160);
+                ctx.fillRect(250, 120, 30, 160);
+
+                // Left tower (DIFFERENCE - missing in incomplete version)
+                if (complete) {
+                    ctx.fillRect(30, 140, 25, 140);
+                    ctx.fillStyle = '#e74c3c';
+                    ctx.beginPath();
+                    ctx.moveTo(25, 140);
+                    ctx.lineTo(42, 110);
+                    ctx.lineTo(60, 140);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+
+                // Tower roofs
+                ctx.fillStyle = '#e74c3c';
+                ctx.beginPath();
+                ctx.moveTo(65, 120);
+                ctx.lineTo(85, 90);
+                ctx.lineTo(105, 120);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.moveTo(245, 120);
+                ctx.lineTo(265, 90);
+                ctx.lineTo(285, 120);
+                ctx.closePath();
+                ctx.fill();
+
+                // Main gate (DIFFERENCE - missing in incomplete version)
+                if (complete) {
+                    ctx.fillStyle = '#8b4513';
+                    ctx.fillRect(160, 220, 30, 60);
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(160, 220, 30, 60);
+                }
+
+                // Windows
+                ctx.fillStyle = '#34495e';
+                [
+                    [90, 180],
+                    [120, 160],
+                    [200, 160],
+                    [230, 180],
+                    [260, 160]
+                ].forEach(([x, y]) => {
+                    ctx.fillRect(x, y, 12, 15);
+                });
+
+                // Flag (DIFFERENCE - color change)
+                ctx.strokeStyle = '#8b4513';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(175, 100);
+                ctx.lineTo(175, 70);
+                ctx.stroke();
+
+                if (complete) {
+                    ctx.fillStyle = '#3498db'; // Blue flag
+                } else {
+                    ctx.fillStyle = '#e74c3c'; // Red flag
+                }
+                ctx.fillRect(175, 70, 25, 15);
+            }
+
+            // Draw bear
+            function drawBear(ctx, bookColor) {
+                // Background
+                ctx.fillStyle = '#f0f8ff';
+                ctx.fillRect(0, 0, 350, 350);
+
+                // Bear body
+                ctx.fillStyle = '#d2b48c';
+                ctx.beginPath();
+                ctx.arc(175, 200, 60, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Bear head
+                ctx.beginPath();
+                ctx.arc(175, 120, 45, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Ears
+                ctx.beginPath();
+                ctx.arc(150, 95, 20, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(200, 95, 20, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Face
+                ctx.fillStyle = '#ffeaa7';
+                ctx.beginPath();
+                ctx.arc(175, 130, 15, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Eyes
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.arc(165, 115, 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(185, 115, 3, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Nose
+                ctx.beginPath();
+                ctx.arc(175, 125, 2, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Book
+                ctx.fillStyle = bookColor;
+                ctx.fillRect(150, 170, 50, 40);
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(150, 170, 50, 40);
+            }
+
+            // Draw flower
+            function drawFlower(ctx, size) {
+                // Background
+                ctx.fillStyle = '#e8f5e8';
+                ctx.fillRect(0, 0, 350, 350);
+
+                // Stem
+                ctx.strokeStyle = '#4a7c59';
+                ctx.lineWidth = 8;
+                ctx.beginPath();
+                ctx.moveTo(175, 150);
+                ctx.lineTo(175, 300);
+                ctx.stroke();
+
+                // Leaves
+                ctx.fillStyle = '#4a7c59';
+                ctx.beginPath();
+                ctx.ellipse(155, 200, 12, 20, -0.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(195, 250, 12, 20, 0.5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Flower center
+                const centerSize = 25 * size;
+                ctx.fillStyle = '#ffd700';
+                ctx.beginPath();
+                ctx.arc(175, 120, centerSize, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Petals
+                ctx.fillStyle = '#fff';
+                const petalCount = 12;
+                const petalRadius = 40 * size;
+
+                for (let i = 0; i < petalCount; i++) {
+                    const angle = (i / petalCount) * Math.PI * 2;
+                    const x = 175 + Math.cos(angle) * petalRadius;
+                    const y = 120 + Math.sin(angle) * petalRadius;
+
+                    ctx.save();
+                    ctx.translate(x, y);
+                    ctx.rotate(angle);
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, 8 * size, 20 * size, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+
+            // Draw cat
+            function drawCat(ctx, catColor) {
+                // Background
+                ctx.fillStyle = '#faf0e6';
+                ctx.fillRect(0, 0, 350, 350);
+
+                // Scratching post
+                ctx.fillStyle = '#deb887';
+                ctx.fillRect(200, 50, 60, 250);
+
+                // Base
+                ctx.fillRect(180, 280, 100, 20);
+
+                // Cat body
+                ctx.fillStyle = catColor;
+                ctx.beginPath();
+                ctx.ellipse(150, 200, 35, 60, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Cat head
+                ctx.beginPath();
+                ctx.arc(140, 140, 30, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Ears
+                ctx.beginPath();
+                ctx.moveTo(125, 125);
+                ctx.lineTo(120, 105);
+                ctx.lineTo(135, 115);
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.moveTo(155, 125);
+                ctx.lineTo(160, 105);
+                ctx.lineTo(145, 115);
+                ctx.fill();
+
+                // Tail
+                ctx.beginPath();
+                ctx.arc(180, 160, 8, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Eyes
+                ctx.fillStyle = '#32cd32';
+                ctx.beginPath();
+                ctx.arc(135, 135, 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(145, 135, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Handle image click
+            function handleImageClick(event, canvas) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+
+                const x = (event.clientX - rect.left) * scaleX;
+                const y = (event.clientY - rect.top) * scaleY;
+
+                checkDifference(x, y);
+            }
+
+            // Check if click is on a difference
+            function checkDifference(x, y) {
+                const pageData = gameData[currentLevel][currentPage];
+                let found = false;
+
+                for (let i = 0; i < pageData.differences.length; i++) {
+                    const diff = pageData.differences[i];
+
+                    if (foundDifferences.includes(i)) continue;
+
+                    const distance = Math.sqrt((x - diff.x) ** 2 + (y - diff.y) ** 2);
+
+                    if (distance <= diff.tolerance) {
+                        foundDifferences.push(i);
+                        found = true;
+
+                        // Add visual marker
+                        addDifferenceMarker(diff.x, diff.y);
+
+                        playSuccessSound();
+                        combo++;
+
+                        const basePoints = 100;
+                        const comboBonus = combo > 1 ? (combo - 1) * 50 : 0;
+                        const totalPoints = basePoints + comboBonus;
+                        score += totalPoints;
+
+                        if (comboBonus > 0) {
+                            showComboMessage(comboBonus);
+                        }
+
+                        showMessage(`رائع! +${totalPoints} نقطة`, 'success');
+
+                        if (foundDifferences.length === totalDifferences) {
+                            setTimeout(() => completeLevel(), 1000);
+                        }
+
+                        updateUI();
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    playErrorSound();
+                    combo = 0;
+                    score = Math.max(0, score - 25);
+                    showMessage('ليس هنا! -25 نقطة', 'error');
+                    updateUI();
+                }
+            }
+
+            // Add visual difference marker
+            function addDifferenceMarker(x, y) {
+                // تم إلغاء إضافة الدوائر الخضراء لتجنب إرباك الطفل
+                // الآن سيتم الانتقال مباشرة دون علامات بصرية
+            }
+
+            // Show combo message
+            function showComboMessage(bonus) {
+                const comboDisplay = document.getElementById('comboDisplay');
+                const comboBonus = document.getElementById('comboBonus');
+
+                comboBonus.textContent = bonus;
+                comboDisplay.style.display = 'block';
+
+                setTimeout(() => {
+                    comboDisplay.style.display = 'none';
+                }, 2000);
+            }
+
+            // Complete level
+            function completeLevel() {
+                if (currentPage < 3) {
+                    showMessage('رائع! انتقال للصفحة التالية...', 'success');
+                    // انتقال تلقائي بعد ثانية واحدة
+                    setTimeout(() => {
+                        currentPage++;
+                        loadPage();
+                    }, 1000);
+                } else {
+                    // Level completed
+                    stopTimer();
+                    levelProgress[String(currentLevel)] = true;
+                    localStorage.setItem('spotDiffProgress', JSON.stringify(levelProgress));
+
+                    showCelebration();
+                    updateLevelCards();
+                }
+            }
+
+            // Next page
+            function nextPage() {
+                if (currentPage < 3) {
+                    currentPage++;
+                    loadPage();
+                }
+            }
+
+            // Update UI
+            function updateUI() {
+                document.getElementById('currentPage').textContent = currentPage;
+                document.getElementById('score').textContent = score;
+                document.getElementById('found').textContent = foundDifferences.length;
+                document.getElementById('total').textContent = totalDifferences;
+                document.getElementById('hintBtn').textContent = `💡 تلميح (${hintsRemaining})`;
+
+                const progress = (foundDifferences.length / totalDifferences) * 100;
+                document.getElementById('progressFill').style.width = `${progress}%`;
+            }
+
+            // Show message
+            function showMessage(text, type) {
+                const messageEl = document.getElementById('gameMessage');
+                messageEl.textContent = text;
+                messageEl.className = `message ${type}`;
+            }
+
+            // Start timer
+            function startTimer() {
+                gameStartTime = Date.now();
+                gameTimer = setInterval(updateTimer, 1000);
+            }
+
+            // Stop timer
+            function stopTimer() {
+                if (gameTimer) {
+                    clearInterval(gameTimer);
+                    gameTimer = null;
+                }
+            }
+
+            // Update timer
+            function updateTimer() {
+                const elapsed = Date.now() - gameStartTime;
+                const minutes = Math.floor(elapsed / 60000);
+                const seconds = Math.floor((elapsed % 60000) / 1000);
+                document.getElementById('timer').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+
+            // Use hint
+            function useHint() {
+                if (hintsRemaining <= 0) {
+                    showMessage('لا توجد تلميحات متبقية!', 'error');
+                    return;
+                }
+
+                const pageData = gameData[currentLevel][currentPage];
+                const remainingDiffs = pageData.differences.filter((_, index) => !foundDifferences.includes(index));
+
+                if (remainingDiffs.length === 0) return;
+
+                const randomDiff = remainingDiffs[Math.floor(Math.random() * remainingDiffs.length)];
+
+                // إظهار تلميح بصري مؤقت بدون دوائر خضراء
+                const leftBox = document.querySelector('.image-box:first-child');
+                const rightBox = document.querySelector('.image-box:last-child');
+
+                [leftBox, rightBox].forEach((box) => {
+                    const hint = document.createElement('div');
+                    hint.style.position = 'absolute';
+                    hint.style.left = `${randomDiff.x - 25}px`;
+                    hint.style.top = `${randomDiff.y - 25}px`;
+                    hint.style.width = '50px';
+                    hint.style.height = '50px';
+                    hint.style.border = '3px solid #ffd700';
+                    hint.style.borderRadius = '50%';
+                    hint.style.background = 'rgba(255, 215, 0, 0.2)';
+                    hint.style.animation = 'pulse 1s infinite';
+                    hint.style.pointerEvents = 'none';
+                    box.appendChild(hint);
+
+                    setTimeout(() => hint.remove(), 3000);
+                });
+
+                hintsRemaining--;
+                score = Math.max(0, score - 50);
+                showMessage('تلميح مستخدم! -50 نقطة', 'info');
+                updateUI();
+            }
+
+            // Show celebration
+            function showCelebration() {
+                const elapsed = Date.now() - gameStartTime;
+                const minutes = Math.floor(elapsed / 60000);
+                const seconds = Math.floor((elapsed % 60000) / 1000);
+                const timeText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                document.getElementById('celebrationTitle').textContent = currentLevel === 3 ? '🎊 تهانينا! أكملت جميع المستويات! 🎊' : '🎉 أحسنت! أكملت هذا المستوى! 🎉';
+
+                document.getElementById('celebrationMessage').innerHTML = `لقد أكملت المستوى ${currentLevel} بنجاح!<br>تم فتح المستوى التالي.`;
+
+                document.getElementById('celebrationStats').innerHTML = `<p><strong>الوقت المستغرق:</strong> ${timeText}</p>
+                 <p><strong>النقاط النهائية:</strong> ${score}</p>
+                 <p><strong>التلميحات المستخدمة:</strong> ${3 - hintsRemaining}</p>`;
+
+                document.getElementById('celebration').classList.add('show');
+
+                // Play celebration sound
+                setTimeout(() => {
+                    const oscillator = audioContext?.createOscillator();
+                    if (oscillator) {
+                        const gainNode = audioContext.createGain();
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+
+                        const notes = [523, 659, 784, 1047];
+                        notes.forEach((freq, i) => {
+                            setTimeout(() => {
+                                oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+                            }, i * 200);
+                        });
+
+                        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.5);
+                        oscillator.start();
+                        oscillator.stop(audioContext.currentTime + 1.5);
+                    }
+                }, 500);
+            }
+
+            // Hide celebration
+            function hideCelebration() {
+                document.getElementById('celebration').classList.remove('show');
+                showMenu();
+            }
+
+            // Show menu
+            function showMenu() {
+                stopTimer();
+                document.getElementById('mainMenu').style.display = 'block';
+                document.getElementById('gameArea').style.display = 'none';
+
+                // Clear markers
+                document.querySelectorAll('.difference-marker').forEach((marker) => marker.remove());
+            }
+
+            // Restart level
+            function restartLevel() {
+                currentPage = 1;
+                foundDifferences = [];
+                score = 0;
+                combo = 0;
+                hintsRemaining = 3;
+                stopTimer();
+                loadPage();
+                startTimer();
+            }
+
+            // Reset progress
+            function resetProgress() {
+                if (confirm('هل أنت متأكد من إعادة تعيين جميع التقدم؟')) {
+                    levelProgress = { 1: false, 2: false, 3: false };
+                    localStorage.setItem('spotDiffProgress', JSON.stringify(levelProgress));
+                    updateLevelCards();
+                    showMessage('تم إعادة تعيين التقدم!', 'info');
+                }
+            }
+
+            // Show instructions
+            function showInstructions() {
+                const instructions = `
+📖 تعليمات اللعبة:
+
+🎯 الهدف: اعثر على جميع الاختلافات بين الصورتين
+
+🎮 كيفية اللعب:
+• اضغط على الاختلاف في أي من الصورتين
+• كل اختلاف صحيح يمنحك 100 نقطة
+• التسلسل يمنح نقاط إضافية
+• الأخطاء تقلل 25 نقطة
+
+⭐ المستويات:
+• المستوى 1: خطأ واحد لكل صفحة (تغيير ألوان)
+  📚 دب وكتاب • 🌸 زهرة • 🐱 قطة
+
+• المستوى 2: خطآن لكل صفحة (حذف أجزاء)
+  🚗 سيارة • 🏠 بيت • 🌳 شجرة
+
+• المستوى 3: 3 أخطاء لكل صفحة (مختلط)
+  ⛵ قارب • 🤖 روبوت • 🏰 قلعة
+
+💡 التلميحات:
+• لديك 3 تلميحات لكل مستوى
+• التلميح يكلف 50 نقطة
+• يظهر لك موقع أحد الاختلافات
+
+⌨️ اختصارات لوحة المفاتيح:
+• H = استخدام تلميح
+• R = إعادة بدء المستوى
+• Escape = العودة للقائمة الرئيسية
+• ← = الانتقال للصفحة التالية
+
+🏆 إكمال المستوى:
+• اعثر على جميع الاختلافات في 3 صفحات
+• أكمل المستوى لفتح التالي
+
+حظ سعيد! 🍀
+            `;
+                alert(instructions);
+            }
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (document.getElementById('gameArea').style.display === 'none') return;
+
+                switch (e.key) {
+                    case 'h':
+                    case 'H':
+                        useHint();
+                        break;
+                    case 'r':
+                    case 'R':
+                        restartLevel();
+                        break;
+                    case 'Escape':
+                        showMenu();
+                        break;
+                    case 'ArrowRight':
+                        // تم إزالة الانتقال اليدوي - الآن تلقائي
+                        break;
+                }
+            });
+
+            // Touch support for mobile
+            function addTouchSupport() {
+                const canvases = document.querySelectorAll('.game-image');
+                canvases.forEach((canvas) => {
+                    canvas.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        const touch = e.touches[0];
+                        const mouseEvent = new MouseEvent('click', {
+                            clientX: touch.clientX,
+                            clientY: touch.clientY
+                        });
+                        canvas.dispatchEvent(mouseEvent);
+                    });
+                });
+            }
+
+            // Initialize on page load
+            document.addEventListener('DOMContentLoaded', () => {
+                initGame();
+                addTouchSupport();
+
+                // Enable audio on first user interaction
+                document.addEventListener('click', initAudio, { once: true });
+                document.addEventListener('touchstart', initAudio, { once: true });
+            });
+
+            // Handle page visibility change (pause game when tab not active)
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden && gameTimer) {
+                    stopTimer();
+                } else if (!document.hidden && document.getElementById('gameArea').style.display !== 'none') {
+                    startTimer();
+                }
+            });
+
+            // Auto-save progress
+            window.addEventListener('beforeunload', () => {
+                localStorage.setItem('spotDiffProgress', JSON.stringify(levelProgress));
+            });
+        </script>
+    </body>
+</html>

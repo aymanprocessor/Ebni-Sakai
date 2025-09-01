@@ -21,6 +21,77 @@ export const routes: Routes = [
     },
 
     {
+        path: 'game',
+        component: AppLayout,
+        children: [
+            {
+                path: '1',
+                loadComponent: () => import('./app/pages/games/c1/c1.component').then((m) => m.C1Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '2',
+                loadComponent: () => import('./app/pages/games/c2/c2.component').then((m) => m.C2Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '3',
+                loadComponent: () => import('./app/pages/games/c3/c3.component').then((m) => m.C3Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '4',
+                loadComponent: () => import('./app/pages/games/c4/c4.component').then((m) => m.C4Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '5',
+                loadComponent: () => import('./app/pages/games/c5/c5.component').then((m) => m.C5Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '6',
+                loadComponent: () => import('./app/pages/games/c6/c6.component').then((m) => m.C6Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '7',
+                loadComponent: () => import('./app/pages/games/c7/c7.component').then((m) => m.C7Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '8',
+                loadComponent: () => import('./app/pages/games/c8/c8.component').then((m) => m.C8Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '9',
+                loadComponent: () => import('./app/pages/games/c9/c9.component').then((m) => m.C9Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '10',
+                loadComponent: () => import('./app/pages/games/c10/c10.component').then((m) => m.C10Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '11',
+                loadComponent: () => import('./app/pages/games/c11/c11.component').then((m) => m.C11Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '12',
+                loadComponent: () => import('./app/pages/games/c12/c12.component').then((m) => m.C12Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '13',
+                loadComponent: () => import('./app/pages/games/c13/c13.component').then((m) => m.C13Component),
+                canActivate: [authGuard]
+            }
+        ]
+    },
+    {
         path: 'app',
         component: AppLayout,
         children: [
