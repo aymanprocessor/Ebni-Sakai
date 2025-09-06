@@ -88,6 +88,191 @@ export const routes: Routes = [
                 path: '13',
                 loadComponent: () => import('./app/pages/games/c13/c13.component').then((m) => m.C13Component),
                 canActivate: [authGuard]
+            },
+            {
+                path: '14',
+                loadComponent: () => import('./app/pages/games/c14/c14.component').then((m) => m.C14Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '15',
+                loadComponent: () => import('./app/pages/games/c15/c15.component').then((m) => m.C15Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '16',
+                loadComponent: () => import('./app/pages/games/c16/c16.component').then((m) => m.C16Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '17',
+                loadComponent: () => import('./app/pages/games/c17/c17.component').then((m) => m.C17Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '18',
+                loadComponent: () => import('./app/pages/games/c18/c18.component').then((m) => m.C18Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '19',
+                loadComponent: () => import('./app/pages/games/c19/c19.component').then((m) => m.C19Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '20',
+                loadComponent: () => import('./app/pages/games/c20/c20.component').then((m) => m.C20Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '21',
+                loadComponent: () => import('./app/pages/games/c21/c21.component').then((m) => m.C21Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '22',
+                loadComponent: () => import('./app/pages/games/c22/c22.component').then((m) => m.C22Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '23',
+                loadComponent: () => import('./app/pages/games/c23/c23.component').then((m) => m.C23Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '24',
+                loadComponent: () => import('./app/pages/games/c24/c24.component').then((m) => m.C24Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '25',
+                loadComponent: () => import('./app/pages/games/c25/c25.component').then((m) => m.C25Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '26',
+                loadComponent: () => import('./app/pages/games/c26/c26.component').then((m) => m.C26Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '27',
+                loadComponent: () => import('./app/pages/games/c27/c27.component').then((m) => m.C27Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '28',
+                loadComponent: () => import('./app/pages/games/c28/c28.component').then((m) => m.C28Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '29',
+                loadComponent: () => import('./app/pages/games/c29/c29.component').then((m) => m.C29Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '30',
+                loadComponent: () => import('./app/pages/games/c30/c30.component').then((m) => m.C30Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '31',
+                loadComponent: () => import('./app/pages/games/c31/c31.component').then((m) => m.C31Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '32',
+                loadComponent: () => import('./app/pages/games/c32/c32.component').then((m) => m.C32Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '33',
+                loadComponent: () => import('./app/pages/games/c33/c33.component').then((m) => m.C33Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '34',
+                loadComponent: () => import('./app/pages/games/c34/c34.component').then((m) => m.C34Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '35',
+                loadComponent: () => import('./app/pages/games/c35/c35.component').then((m) => m.C35Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '36',
+                loadComponent: () => import('./app/pages/games/c36/c36.component').then((m) => m.C36Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '37',
+                loadComponent: () => import('./app/pages/games/c37/c37.component').then((m) => m.C37Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '38',
+                loadComponent: () => import('./app/pages/games/c38/c38.component').then((m) => m.C38Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '39',
+                loadComponent: () => import('./app/pages/games/c39/c39.component').then((m) => m.C39Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '40',
+                loadComponent: () => import('./app/pages/games/c40/c40.component').then((m) => m.C40Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '41',
+                loadComponent: () => import('./app/pages/games/c41/c41.component').then((m) => m.C41Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '42',
+                loadComponent: () => import('./app/pages/games/c42/c42.component').then((m) => m.C42Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '43',
+                loadComponent: () => import('./app/pages/games/c43/c43.component').then((m) => m.C43Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '44',
+                loadComponent: () => import('./app/pages/games/c44/c44.component').then((m) => m.C44Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '45',
+                loadComponent: () => import('./app/pages/games/c45/c45.component').then((m) => m.C45Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '46',
+                loadComponent: () => import('./app/pages/games/c46/c46.component').then((m) => m.C46Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '47',
+                loadComponent: () => import('./app/pages/games/c47/c47.component').then((m) => m.C47Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '48',
+                loadComponent: () => import('./app/pages/games/c48/c48.component').then((m) => m.C48Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '49',
+                loadComponent: () => import('./app/pages/games/c49/c49.component').then((m) => m.C49Component),
+                canActivate: [authGuard]
+            },
+            {
+                path: '50',
+                loadComponent: () => import('./app/pages/games/c50/c50.component').then((m) => m.C50Component),
+                canActivate: [authGuard]
             }
         ]
     },

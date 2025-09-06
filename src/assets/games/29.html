@@ -1,0 +1,1388 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>إدراك بصري لثبات الشكل</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Noto Naskh Arabic', 'Amiri', 'Scheherazade', Arial, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 20px;
+                color: #333;
+            }
+
+            .game-header {
+                background: white;
+                border-radius: 15px;
+                padding: 20px;
+                margin-bottom: 20px;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+                text-align: center;
+                width: 100%;
+                max-width: 700px;
+            }
+
+            .game-title {
+                font-size: 2.2em;
+                color: #4a5568;
+                margin-bottom: 10px;
+                font-weight: bold;
+            }
+
+            .level-info {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 1.2em;
+                color: #666;
+            }
+
+            .score {
+                background: #48bb78;
+                color: white;
+                padding: 8px 16px;
+                border-radius: 20px;
+                font-weight: bold;
+            }
+
+            .game-grid {
+                background: white;
+                border-radius: 15px;
+                padding: 20px;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+                margin-bottom: 20px;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .grid-container {
+                display: grid;
+                gap: 3px;
+                justify-content: center;
+                background: #f7fafc;
+                padding: 15px;
+                border-radius: 10px;
+            }
+
+            .grid-cell {
+                background: white;
+                border: 2px solid #e2e8f0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                border-radius: 6px;
+                min-height: 60px;
+                user-select: none;
+                position: relative;
+            }
+
+            .grid-cell:hover {
+                background: #f0f8ff;
+                transform: scale(1.02);
+                box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .grid-cell.clicked {
+                background: #e6fffa !important;
+                border: 3px solid #319795 !important;
+                box-shadow: 0 0 10px rgba(49, 151, 149, 0.5) !important;
+            }
+
+            .grid-cell.clicked .char {
+                color: #2c7a7b !important;
+                font-weight: 900 !important;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3) !important;
+            }
+
+            .char {
+                font-weight: bold;
+                pointer-events: none;
+                text-align: center;
+                line-height: 1;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            }
+
+            .click-counter {
+                position: absolute;
+                top: 5px;
+                left: 5px;
+                background: #319795;
+                color: white;
+                border-radius: 50%;
+                width: 18px;
+                height: 18px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.75em;
+                font-weight: bold;
+                z-index: 5;
+                animation: pop-in 0.3s ease-out;
+            }
+
+            @keyframes pop-in {
+                0% {
+                    transform: scale(0);
+                    opacity: 0;
+                }
+                50% {
+                    transform: scale(1.3);
+                }
+                100% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+            }
+
+            .controls {
+                background: white;
+                border-radius: 15px;
+                padding: 25px;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+                width: 100%;
+                max-width: 700px;
+                margin-bottom: 20px;
+            }
+
+            .task-description {
+                font-size: 1.3em;
+                color: #2d3748;
+                margin-bottom: 20px;
+                text-align: center;
+                font-weight: bold;
+                background: #e6fffa;
+                padding: 15px;
+                border-radius: 10px;
+                border: 2px solid #38b2ac;
+            }
+
+            .level-hint {
+                text-align: center;
+                font-size: 1em;
+                color: #4a5568;
+                margin-bottom: 20px;
+                padding: 12px;
+                background: #f0f8ff;
+                border-radius: 8px;
+                border: 1px solid #bee3f8;
+            }
+
+            .counting-controls {
+                text-align: center;
+                margin: 15px 0;
+                padding: 15px;
+                background: #f0f8ff;
+                border-radius: 10px;
+                border: 2px solid #bee3f8;
+            }
+
+            .counting-info {
+                font-size: 1.1em;
+                color: #2d3748;
+                font-weight: bold;
+                margin-bottom: 10px;
+            }
+
+            .reset-clicks-btn {
+                background: #fd7e14;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 6px;
+                font-size: 0.9em;
+                cursor: pointer;
+                font-weight: bold;
+                transition: all 0.3s ease;
+            }
+
+            .reset-clicks-btn:hover {
+                background: #e8590c;
+                transform: translateY(-2px);
+            }
+
+            .input-group {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+                justify-content: center;
+                align-items: center;
+                margin-bottom: 25px;
+                padding: 15px;
+                background: #f8fafc;
+                border-radius: 10px;
+            }
+
+            .input-item {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                background: white;
+                padding: 12px 20px;
+                border-radius: 10px;
+                border: 2px solid #e2e8f0;
+                min-width: 120px;
+                justify-content: center;
+            }
+
+            .target-char {
+                font-size: 2em;
+                font-weight: bold;
+                color: #2d3748;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            }
+
+            .equals-sign {
+                font-size: 1.5em;
+                font-weight: bold;
+                color: #4a5568;
+                margin: 0 8px;
+            }
+
+            .count-input {
+                width: 70px;
+                padding: 10px;
+                border: 2px solid #e2e8f0;
+                border-radius: 6px;
+                text-align: center;
+                font-size: 1.3em;
+                font-weight: bold;
+                background: white;
+            }
+
+            .count-input:focus {
+                outline: none;
+                border-color: #4299e1;
+                box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+            }
+
+            .count-input.correct {
+                border-color: #48bb78;
+                background-color: #c6f6d5;
+            }
+
+            .count-input.incorrect {
+                border-color: #e53e3e;
+                background-color: #fed7d7;
+            }
+
+            .button-group {
+                display: flex;
+                gap: 15px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .btn {
+                padding: 15px 30px;
+                border: none;
+                border-radius: 10px;
+                font-size: 1.1em;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                font-family: inherit;
+                min-width: 120px;
+            }
+
+            .btn-primary {
+                background: #4299e1;
+                color: white;
+            }
+
+            .btn-primary:hover:not(:disabled) {
+                background: #3182ce;
+                transform: translateY(-3px);
+                box-shadow: 0 6px 15px rgba(66, 153, 225, 0.4);
+            }
+
+            .btn-primary:disabled {
+                background: #cbd5e0;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+            .btn-secondary {
+                background: #68d391;
+                color: white;
+            }
+
+            .btn-secondary:hover {
+                background: #48bb78;
+                transform: translateY(-3px);
+                box-shadow: 0 6px 15px rgba(104, 211, 145, 0.4);
+            }
+
+            .btn-outline {
+                background: transparent;
+                color: #4299e1;
+                border: 2px solid #4299e1;
+            }
+
+            .btn-outline:hover {
+                background: #4299e1;
+                color: white;
+                transform: translateY(-3px);
+            }
+
+            .btn-hint {
+                background: #ed8936;
+                color: white;
+                font-size: 1em;
+            }
+
+            .btn-hint:hover {
+                background: #dd6b20;
+                transform: translateY(-3px);
+            }
+
+            .feedback {
+                text-align: center;
+                padding: 15px;
+                border-radius: 10px;
+                margin: 15px 0;
+                font-weight: bold;
+                font-size: 1.1em;
+                transition: all 0.3s ease;
+            }
+
+            .feedback.success {
+                background: #c6f6d5;
+                color: #2f855a;
+                border: 2px solid #48bb78;
+            }
+
+            .feedback.error {
+                background: #fed7d7;
+                color: #c53030;
+                border: 2px solid #e53e3e;
+            }
+
+            .target-highlight {
+                background: linear-gradient(45deg, #ffd700, #ffed4e) !important;
+                border: 3px solid #f56500 !important;
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.8) !important;
+                animation: pulse-glow 1.2s ease-in-out infinite !important;
+                z-index: 10 !important;
+            }
+
+            .count-indicator {
+                position: absolute;
+                top: -8px;
+                right: -8px;
+                background: #e53e3e;
+                color: white;
+                border-radius: 50%;
+                width: 24px;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.9em;
+                font-weight: bold;
+                z-index: 11;
+                animation: bounce-in 0.6s ease-out;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            }
+
+            @keyframes pulse-glow {
+                0%,
+                100% {
+                    transform: scale(1);
+                    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+                }
+                50% {
+                    transform: scale(1.08);
+                    box-shadow: 0 0 30px rgba(255, 215, 0, 1);
+                }
+            }
+
+            @keyframes bounce-in {
+                0% {
+                    transform: scale(0) rotate(0deg);
+                    opacity: 0;
+                }
+                50% {
+                    transform: scale(1.4) rotate(180deg);
+                }
+                100% {
+                    transform: scale(1) rotate(360deg);
+                    opacity: 1;
+                }
+            }
+
+            .shake {
+                animation: shake 0.6s ease-in-out;
+            }
+
+            @keyframes shake {
+                0%,
+                100% {
+                    transform: translateX(0);
+                }
+                10%,
+                30%,
+                50%,
+                70%,
+                90% {
+                    transform: translateX(-10px);
+                }
+                20%,
+                40%,
+                60%,
+                80% {
+                    transform: translateX(10px);
+                }
+            }
+
+            .confetti {
+                position: absolute;
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                animation: confetti-fall 1.5s ease-out forwards;
+                pointer-events: none;
+            }
+
+            @keyframes confetti-fall {
+                0% {
+                    opacity: 1;
+                    transform: translateY(-30px) rotate(0deg) scale(1);
+                }
+                100% {
+                    opacity: 0;
+                    transform: translateY(200px) rotate(720deg) scale(0.3);
+                }
+            }
+
+            .completion-screen {
+                text-align: center;
+                background: white;
+                border-radius: 15px;
+                padding: 50px;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+                max-width: 600px;
+            }
+
+            .completion-title {
+                font-size: 3em;
+                color: #48bb78;
+                margin-bottom: 25px;
+            }
+
+            .mute-button {
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                background: rgba(255, 255, 255, 0.95);
+                border: none;
+                border-radius: 50%;
+                width: 55px;
+                height: 55px;
+                cursor: pointer;
+                font-size: 1.3em;
+                z-index: 1000;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .mute-button:hover {
+                background: white;
+                transform: scale(1.15);
+            }
+
+            .hidden {
+                display: none !important;
+            }
+
+            @media (max-width: 768px) {
+                .game-title {
+                    font-size: 1.6em;
+                }
+
+                .input-group {
+                    flex-direction: column;
+                    gap: 15px;
+                }
+
+                .input-item {
+                    min-width: 200px;
+                }
+
+                .button-group {
+                    flex-direction: column;
+                    gap: 10px;
+                }
+
+                .btn {
+                    width: 100%;
+                    padding: 12px 20px;
+                }
+
+                .grid-cell {
+                    min-height: 45px;
+                }
+
+                .target-char {
+                    font-size: 1.5em;
+                }
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                * {
+                    animation-duration: 0.01ms !important;
+                    animation-iteration-count: 1 !important;
+                    transition-duration: 0.01ms !important;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <button class="mute-button" id="muteButton" aria-label="كتم/تفعيل الصوت">🔊</button>
+
+        <div id="gameScreen">
+            <div class="game-header">
+                <h1 class="game-title">إدراك بصري لثبات الشكل</h1>
+                <div class="level-info">
+                    <span id="levelDisplay">المستوى 1/10</span>
+                    <div class="score">النقاط: <span id="scoreDisplay">0</span></div>
+                </div>
+            </div>
+
+            <div class="game-grid" id="gameGrid">
+                <div class="grid-container" id="gridContainer"></div>
+            </div>
+
+            <div class="controls">
+                <div class="task-description" id="taskDescription"></div>
+                <div class="level-hint">ابحث عن الأشكال المختلفة - نفس الحرف أو الرقم بألوان وأحجام مختلفة</div>
+                <div class="input-group" id="inputGroup"></div>
+                <div class="feedback" id="feedback" style="display: none"></div>
+                <div class="button-group">
+                    <button class="btn btn-primary" id="checkButton" disabled>تحقق من الإجابة</button>
+                    <button class="btn btn-secondary hidden" id="nextButton">المستوى التالي</button>
+                    <button class="btn btn-hint" id="hintButton">تلميح</button>
+                    <button class="btn btn-outline" id="resetButton">إعادة المستوى</button>
+                    <button class="btn btn-outline" id="backButton">المستوى السابق</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="completionScreen" class="completion-screen hidden">
+            <div class="completion-title">🎉 تهانينا! 🎉</div>
+            <p style="font-size: 1.6em; margin-bottom: 25px">لقد أكملت جميع المستويات بنجاح!</p>
+            <div style="font-size: 1.3em; margin-bottom: 35px">النقاط الإجمالية: <span class="score" id="finalScore">0</span></div>
+            <button class="btn btn-primary" id="playAgainButton">إعادة اللعب من البداية</button>
+        </div>
+
+        <script>
+            // إعدادات اللعبة
+            const LEVELS = [
+                { grid: [6, 6], targets: [{ char: 'ن', lang: 'ar', count: 3 }], distractorLevel: 'low' },
+                { grid: [6, 6], targets: [{ char: '1', lang: 'en_digit', count: 4 }], distractorLevel: 'low' },
+                { grid: [6, 6], targets: [{ char: 'A', lang: 'en_letter', count: 2 }], distractorLevel: 'low' },
+                {
+                    grid: [8, 8],
+                    targets: [
+                        { char: 'ن', lang: 'ar', count: 4 },
+                        { char: '1', lang: 'en_digit', count: 3 }
+                    ],
+                    distractorLevel: 'mid'
+                },
+                {
+                    grid: [8, 8],
+                    targets: [
+                        { char: 'س', lang: 'ar', count: 5 },
+                        { char: '3', lang: 'en_digit', count: 4 }
+                    ],
+                    distractorLevel: 'mid'
+                },
+                {
+                    grid: [8, 8],
+                    targets: [
+                        { char: 'T', lang: 'en_letter', count: 3 },
+                        { char: '7', lang: 'en_digit', count: 3 }
+                    ],
+                    distractorLevel: 'mid'
+                },
+                {
+                    grid: [10, 10],
+                    targets: [
+                        { char: 'ن', lang: 'ar', count: 6 },
+                        { char: '1', lang: 'en_digit', count: 5 },
+                        { char: 'E', lang: 'en_letter', count: 4 }
+                    ],
+                    distractorLevel: 'high'
+                },
+                {
+                    grid: [10, 10],
+                    targets: [
+                        { char: 'ل', lang: 'ar', count: 5 },
+                        { char: '2', lang: 'en_digit', count: 4 },
+                        { char: 'M', lang: 'en_letter', count: 3 }
+                    ],
+                    distractorLevel: 'high'
+                },
+                {
+                    grid: [12, 12],
+                    targets: [
+                        { char: 'ر', lang: 'ar', count: 7 },
+                        { char: '5', lang: 'en_digit', count: 6 },
+                        { char: 'N', lang: 'en_letter', count: 5 },
+                        { char: '0', lang: 'en_digit', count: 4 }
+                    ],
+                    distractorLevel: 'max'
+                },
+                {
+                    grid: [12, 12],
+                    targets: [
+                        { char: 'ن', lang: 'ar', count: 8 },
+                        { char: '1', lang: 'en_digit', count: 7 },
+                        { char: 'A', lang: 'en_letter', count: 6 },
+                        { char: '3', lang: 'en_digit', count: 5 }
+                    ],
+                    distractorLevel: 'max'
+                }
+            ];
+
+            const COLORS = ['#1a73e8', '#e91e63', '#ffa000', '#43a047', '#6a1b9a', '#f44336', '#2196f3', '#4caf50', '#9c27b0', '#ff5722'];
+            const ARABIC_FONTS = ['"Noto Naskh Arabic"', '"Amiri"', '"Scheherazade"', 'serif'];
+            const ENGLISH_FONTS = ['Arial', '"Trebuchet MS"', '"Courier New"', 'sans-serif', 'monospace'];
+
+            const DISTRACTORS = {
+                ar: {
+                    ن: ['ف', 'ت', 'ب', 'ي', 'م', 'ث', 'ج', 'ح', 'خ', 'د'],
+                    س: ['ش', 'ص', 'ض', 'ع', 'غ', 'ق', 'ك', 'ل', 'م'],
+                    ل: ['ك', 'ي', 'م', 'ن', 'ه', 'و', 'ف', 'ق'],
+                    ر: ['ز', 'د', 'ذ', 'و', 'ا', 'ب', 'ت']
+                },
+                en_digit: {
+                    1: ['7', '0', '8', '9', '4', '2', '6', '5'],
+                    2: ['3', '5', '6', '8', '9', '0', '4', '7'],
+                    3: ['8', '9', '2', '5', '6', '0', '4'],
+                    5: ['6', '8', '9', '3', '2', '0', '4'],
+                    7: ['1', '4', '9', '0', '2', '6'],
+                    0: ['8', '9', '6', '3', '4', '5']
+                },
+                en_letter: {
+                    A: ['H', 'N', 'M', 'W', 'V', 'Y', 'K', 'X'],
+                    T: ['I', 'L', 'F', 'E', 'P', 'Y', 'J'],
+                    E: ['F', 'P', 'B', 'R', 'H', 'K'],
+                    M: ['N', 'H', 'W', 'A', 'K', 'V'],
+                    N: ['M', 'H', 'A', 'K', 'Z', 'W']
+                }
+            };
+
+            // متغيرات اللعبة
+            let currentLevel = 0;
+            let score = 0;
+            let audioContext;
+            let isMuted = false;
+            let isAudioEnabled = false;
+            let gameData = null;
+
+            // عناصر DOM
+            const gameScreen = document.getElementById('gameScreen');
+            const completionScreen = document.getElementById('completionScreen');
+            const levelDisplay = document.getElementById('levelDisplay');
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const gridContainer = document.getElementById('gridContainer');
+            const taskDescription = document.getElementById('taskDescription');
+            const inputGroup = document.getElementById('inputGroup');
+            const feedback = document.getElementById('feedback');
+            const checkButton = document.getElementById('checkButton');
+            const nextButton = document.getElementById('nextButton');
+            const hintButton = document.getElementById('hintButton');
+            const resetButton = document.getElementById('resetButton');
+            const backButton = document.getElementById('backButton');
+            const muteButton = document.getElementById('muteButton');
+            const finalScore = document.getElementById('finalScore');
+            const playAgainButton = document.getElementById('playAgainButton');
+
+            // تهيئة الصوت
+            function initAudio() {
+                try {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.warn('Web Audio API غير مدعوم');
+                    audioContext = null;
+                }
+            }
+
+            async function enableAudio() {
+                if (audioContext && audioContext.state === 'suspended') {
+                    try {
+                        await audioContext.resume();
+                        isAudioEnabled = true;
+                    } catch (e) {
+                        console.warn('فشل في تفعيل الصوت');
+                    }
+                }
+            }
+
+            function playSuccessSound() {
+                if (isMuted || !audioContext || !isAudioEnabled) return;
+
+                try {
+                    const now = audioContext.currentTime;
+                    const frequencies = [523.25, 659.25, 783.99];
+
+                    frequencies.forEach((freq, i) => {
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+
+                        oscillator.frequency.setValueAtTime(freq, now);
+                        oscillator.type = 'sine';
+
+                        gainNode.gain.setValueAtTime(0, now);
+                        gainNode.gain.linearRampToValueAtTime(0.2, now + 0.05);
+                        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+
+                        oscillator.start(now + i * 0.1);
+                        oscillator.stop(now + 0.9);
+                    });
+                } catch (e) {
+                    console.warn('خطأ في تشغيل صوت النجاح');
+                }
+            }
+
+            function playErrorSound() {
+                if (isMuted || !audioContext || !isAudioEnabled) return;
+
+                try {
+                    const now = audioContext.currentTime;
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.type = 'sawtooth';
+                    oscillator.frequency.setValueAtTime(150, now);
+                    oscillator.frequency.linearRampToValueAtTime(100, now + 0.25);
+
+                    gainNode.gain.setValueAtTime(0, now);
+                    gainNode.gain.linearRampToValueAtTime(0.25, now + 0.01);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+                    oscillator.start(now);
+                    oscillator.stop(now + 0.25);
+                } catch (e) {
+                    console.warn('خطأ في تشغيل صوت الخطأ');
+                }
+            }
+
+            function playHoverSound() {
+                if (isMuted || !audioContext || !isAudioEnabled) return;
+
+                try {
+                    const now = audioContext.currentTime;
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.value = 600;
+                    oscillator.type = 'sine';
+                    gainNode.gain.value = 0.05;
+
+                    oscillator.start(now);
+                    oscillator.stop(now + 0.1);
+                } catch (e) {
+                    console.warn('خطأ في صوت الـ hover');
+                }
+            }
+
+            function createConfetti() {
+                const container = document.querySelector('.game-grid');
+                const colors = ['#ffd700', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#a8e6cf', '#ff8a80'];
+
+                for (let i = 0; i < 40; i++) {
+                    setTimeout(() => {
+                        const confetti = document.createElement('div');
+                        confetti.className = 'confetti';
+                        confetti.style.left = Math.random() * (container.offsetWidth - 10) + 'px';
+                        confetti.style.top = Math.random() * 40 + 'px';
+                        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                        confetti.style.animationDelay = Math.random() * 0.4 + 's';
+                        confetti.style.animationDuration = 1 + Math.random() * 0.5 + 's';
+
+                        container.appendChild(confetti);
+
+                        setTimeout(() => {
+                            if (confetti.parentNode) {
+                                confetti.remove();
+                            }
+                        }, 1800);
+                    }, i * 40);
+                }
+            }
+
+            function getDistractors(char, lang, level) {
+                const distractors = DISTRACTORS[lang] && DISTRACTORS[lang][char] ? [...DISTRACTORS[lang][char]] : [];
+
+                const allChars = {
+                    ar: ['ا', 'ب', 'ت', 'ث', 'ج', 'ح', 'خ', 'د', 'ذ', 'ر', 'ز', 'س', 'ش', 'ص', 'ض', 'ط', 'ظ', 'ع', 'غ', 'ف', 'ق', 'ك', 'ل', 'م', 'ن', 'ه', 'و', 'ي'],
+                    en_digit: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
+                    en_letter: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+                };
+
+                const additionalChars = allChars[lang] ? allChars[lang].filter((c) => c !== char && !distractors.includes(c)) : [];
+                const numDistractors = level === 'low' ? 6 : level === 'mid' ? 8 : level === 'high' ? 10 : 15;
+
+                while (distractors.length < numDistractors && additionalChars.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * additionalChars.length);
+                    distractors.push(additionalChars.splice(randomIndex, 1)[0]);
+                }
+
+                return distractors;
+            }
+
+            function getFontFamily(lang) {
+                if (lang === 'ar') {
+                    return ARABIC_FONTS[Math.floor(Math.random() * ARABIC_FONTS.length)];
+                } else {
+                    return ENGLISH_FONTS[Math.floor(Math.random() * ENGLISH_FONTS.length)];
+                }
+            }
+
+            function createCharElement(char, lang) {
+                const element = document.createElement('div');
+                element.className = 'char';
+                element.textContent = char;
+                element.setAttribute('data-char', char);
+                element.setAttribute('aria-label', lang === 'ar' ? `حرف ${char}` : lang === 'en_digit' ? `الرقم ${char}` : `الحرف ${char}`);
+
+                const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+                const size = Math.floor(Math.random() * 20) + 20;
+                const rotation = Math.floor(Math.random() * 21) - 10;
+                const fontFamily = getFontFamily(lang);
+
+                element.style.color = color;
+                element.style.fontSize = size + 'px';
+                element.style.transform = `rotate(${rotation}deg)`;
+                element.style.fontFamily = fontFamily;
+
+                return element;
+            }
+
+            function generateGrid(level) {
+                const [rows, cols] = level.grid;
+                const totalCells = rows * cols;
+
+                gridContainer.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+                gridContainer.innerHTML = '';
+
+                gameData = {
+                    targets: level.targets.map((target) => ({
+                        ...target,
+                        actualCount: target.count
+                    })),
+                    grid: []
+                };
+
+                const grid = new Array(totalCells).fill(null);
+
+                // وضع الأهداف
+                level.targets.forEach((target) => {
+                    for (let i = 0; i < target.count; i++) {
+                        let position;
+                        do {
+                            position = Math.floor(Math.random() * totalCells);
+                        } while (grid[position] !== null);
+
+                        grid[position] = { char: target.char, lang: target.lang, isTarget: true };
+                    }
+                });
+
+                // إنشاء المشتتات
+                const allDistractors = [];
+                level.targets.forEach((target) => {
+                    const distractors = getDistractors(target.char, target.lang, level.distractorLevel);
+                    allDistractors.push(...distractors.filter((d) => d !== target.char).map((d) => ({ char: d, lang: target.lang, isTarget: false })));
+                });
+
+                const mixedChars = [
+                    { char: 'د', lang: 'ar' },
+                    { char: 'ك', lang: 'ar' },
+                    { char: 'ه', lang: 'ar' },
+                    { char: 'B', lang: 'en_letter' },
+                    { char: 'C', lang: 'en_letter' },
+                    { char: '4', lang: 'en_digit' },
+                    { char: '6', lang: 'en_digit' }
+                ];
+
+                const targetChars = level.targets.map((t) => t.char);
+                const filteredDistractors = [...allDistractors.filter((d) => !targetChars.includes(d.char)), ...mixedChars.filter((c) => !targetChars.includes(c.char))];
+
+                // ملء المواضع الفارغة
+                for (let i = 0; i < totalCells; i++) {
+                    if (grid[i] === null) {
+                        if (filteredDistractors.length > 0) {
+                            const randomIndex = Math.floor(Math.random() * filteredDistractors.length);
+                            grid[i] = { ...filteredDistractors[randomIndex] };
+                        } else {
+                            grid[i] = { char: 'ا', lang: 'ar', isTarget: false };
+                        }
+                    }
+                }
+
+                // إنشاء العناصر مع النقر للعد
+                grid.forEach((cell, index) => {
+                    const gridCell = document.createElement('div');
+                    gridCell.className = 'grid-cell';
+                    gridCell.tabIndex = 0;
+                    gridCell.setAttribute('data-index', index);
+                    gridCell.setAttribute('data-char', cell.char);
+                    gridCell.setAttribute('data-click-count', '0');
+
+                    const charElement = createCharElement(cell.char, cell.lang);
+                    gridCell.appendChild(charElement);
+
+                    gridCell.addEventListener('click', () => {
+                        toggleCellClick(gridCell);
+                    });
+
+                    gridCell.addEventListener('mouseenter', () => {
+                        playHoverSound();
+                    });
+
+                    gridContainer.appendChild(gridCell);
+                });
+
+                gameData.grid = grid;
+
+                // تحقق نهائي
+                level.targets.forEach((target) => {
+                    const actualCount = document.querySelectorAll(`[data-char="${target.char}"]`).length;
+                    console.log(`التحقق: ${target.char} مطلوب=${target.count}, موجود=${actualCount}`);
+                });
+            }
+
+            function toggleCellClick(cell) {
+                const isClicked = cell.classList.contains('clicked');
+
+                if (isClicked) {
+                    cell.classList.remove('clicked');
+                    const counter = cell.querySelector('.click-counter');
+                    if (counter) counter.remove();
+                    playHoverSound();
+                } else {
+                    cell.classList.add('clicked');
+                    const char = cell.getAttribute('data-char');
+                    const sameCharCells = document.querySelectorAll(`[data-char="${char}"].clicked`);
+                    const clickCount = sameCharCells.length;
+
+                    const counter = document.createElement('div');
+                    counter.className = 'click-counter';
+                    counter.textContent = clickCount;
+                    cell.appendChild(counter);
+
+                    playSuccessSound();
+                }
+
+                updateClickCounts();
+            }
+
+            function updateClickCounts() {
+                const level = LEVELS[currentLevel];
+                const inputs = document.querySelectorAll('.count-input');
+
+                level.targets.forEach((target, index) => {
+                    const clickedCells = document.querySelectorAll(`[data-char="${target.char}"].clicked`);
+                    inputs[index].value = clickedCells.length;
+                });
+
+                checkInputs();
+            }
+
+            window.resetAllClicks = function () {
+                const clickedCells = document.querySelectorAll('.grid-cell.clicked');
+                clickedCells.forEach((cell) => {
+                    cell.classList.remove('clicked');
+                    const counter = cell.querySelector('.click-counter');
+                    if (counter) counter.remove();
+                });
+
+                const inputs = document.querySelectorAll('.count-input');
+                inputs.forEach((input) => (input.value = ''));
+
+                checkInputs();
+                clearInputStyles();
+                playHoverSound();
+            };
+
+            function clearAllClicks() {
+                const clickedCells = document.querySelectorAll('.grid-cell.clicked');
+                clickedCells.forEach((cell) => {
+                    cell.classList.remove('clicked');
+                    const counter = cell.querySelector('.click-counter');
+                    if (counter) counter.remove();
+                });
+            }
+
+            function createInputInterface(targets) {
+                inputGroup.innerHTML = '';
+
+                const description = targets
+                    .map((target) => {
+                        const displayName = target.lang === 'ar' ? `حرف (${target.char})` : target.lang === 'en_digit' ? `رقم (${target.char})` : `حرف (${target.char})`;
+                        return `كم ${displayName}؟`;
+                    })
+                    .join(' و ');
+
+                taskDescription.innerHTML = `<strong>المهمة:</strong> ${description}`;
+
+                // أدوات العد
+                const countingControls = document.createElement('div');
+                countingControls.className = 'counting-controls';
+                countingControls.innerHTML = `
+                <div class="counting-info">اضغط على المربعات لعدها وتلوينها</div>
+                <button class="reset-clicks-btn" onclick="resetAllClicks()">إعادة تعيين الألوان</button>
+            `;
+
+                targets.forEach((target, index) => {
+                    const inputItem = document.createElement('div');
+                    inputItem.className = 'input-item';
+
+                    const targetChar = document.createElement('span');
+                    targetChar.className = 'target-char';
+                    targetChar.textContent = target.char;
+
+                    const equalsSign = document.createElement('span');
+                    equalsSign.className = 'equals-sign';
+                    equalsSign.textContent = '=';
+
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.className = 'count-input';
+                    input.min = '0';
+                    input.max = '99';
+                    input.id = `input-${index}`;
+                    input.placeholder = '؟';
+                    input.setAttribute('aria-label', `عدد ${target.char}`);
+
+                    input.addEventListener('input', () => {
+                        checkInputs();
+                        clearInputStyles();
+                    });
+
+                    input.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter' && !checkButton.disabled) {
+                            checkAnswers();
+                        }
+                    });
+
+                    inputItem.appendChild(targetChar);
+                    inputItem.appendChild(equalsSign);
+                    inputItem.appendChild(input);
+                    inputGroup.appendChild(inputItem);
+                });
+
+                inputGroup.insertBefore(countingControls, inputGroup.firstChild);
+
+                setTimeout(() => {
+                    const firstInput = document.querySelector('.count-input');
+                    if (firstInput) firstInput.focus();
+                }, 200);
+            }
+
+            function checkInputs() {
+                const inputs = document.querySelectorAll('.count-input');
+                const allFilled = Array.from(inputs).every((input) => input.value.trim() !== '' && parseInt(input.value) >= 0);
+                checkButton.disabled = !allFilled;
+            }
+
+            function clearInputStyles() {
+                const inputs = document.querySelectorAll('.count-input');
+                inputs.forEach((input) => {
+                    input.classList.remove('correct', 'incorrect');
+                });
+            }
+
+            function highlightTargets(targets, show = true) {
+                document.querySelectorAll('.grid-cell').forEach((cell) => {
+                    cell.classList.remove('target-highlight');
+                    const existingCount = cell.querySelector('.count-indicator');
+                    if (existingCount) existingCount.remove();
+                });
+
+                if (!show) return;
+
+                targets.forEach((target) => {
+                    const targetCells = document.querySelectorAll(`[data-char="${target.char}"]`);
+                    let count = 0;
+
+                    targetCells.forEach((cell) => {
+                        count++;
+                        cell.classList.add('target-highlight');
+
+                        const countIndicator = document.createElement('div');
+                        countIndicator.className = 'count-indicator';
+                        countIndicator.textContent = count;
+                        cell.appendChild(countIndicator);
+                    });
+                });
+            }
+
+            function checkAnswers() {
+                enableAudio();
+
+                const level = LEVELS[currentLevel];
+                const inputs = document.querySelectorAll('.count-input');
+                let allCorrect = true;
+                let feedbackMessage = '';
+                const results = [];
+
+                level.targets.forEach((target, index) => {
+                    const userAnswer = parseInt(inputs[index].value) || 0;
+                    const actualCount = gameData.targets.find((t) => t.char === target.char)?.actualCount || target.count;
+
+                    const isCorrect = userAnswer === actualCount;
+                    results.push({
+                        char: target.char,
+                        userAnswer,
+                        actualCount,
+                        correct: isCorrect
+                    });
+
+                    if (isCorrect) {
+                        inputs[index].classList.add('correct');
+                    } else {
+                        inputs[index].classList.add('incorrect');
+                        allCorrect = false;
+                        feedbackMessage += `${target.char}: كتبت ${userAnswer} والصحيح ${actualCount}، `;
+                    }
+                });
+
+                if (allCorrect) {
+                    playSuccessSound();
+                    createConfetti();
+
+                    score += 15;
+                    scoreDisplay.textContent = score;
+
+                    feedback.className = 'feedback success';
+                    const correctAnswers = results.map((r) => `${r.char}=${r.actualCount}`).join(' ، ');
+                    feedback.innerHTML = `ممتاز! جميع الإجابات صحيحة!<br>${correctAnswers}`;
+                    feedback.style.display = 'block';
+
+                    checkButton.classList.add('hidden');
+                    nextButton.classList.remove('hidden');
+                    hintButton.disabled = true;
+
+                    inputs.forEach((input) => (input.disabled = true));
+
+                    setTimeout(() => {
+                        if (!nextButton.classList.contains('hidden')) {
+                            nextLevel();
+                        }
+                    }, 2500);
+                } else {
+                    playErrorSound();
+
+                    const gameGrid = document.querySelector('.game-grid');
+                    gameGrid.classList.add('shake');
+                    setTimeout(() => gameGrid.classList.remove('shake'), 600);
+
+                    feedback.className = 'feedback error';
+                    feedback.innerHTML = `هناك أخطاء:<br>${feedbackMessage.slice(0, -2)}<br>انظر للتلميحات الذهبية!`;
+                    feedback.style.display = 'block';
+
+                    highlightTargets(level.targets, true);
+
+                    setTimeout(() => {
+                        highlightTargets(level.targets, false);
+                        clearInputStyles();
+                        feedback.style.display = 'none';
+                    }, 4000);
+                }
+            }
+
+            function showHint() {
+                const level = LEVELS[currentLevel];
+                highlightTargets(level.targets, true);
+                playHoverSound();
+
+                setTimeout(() => {
+                    highlightTargets(level.targets, false);
+                }, 2500);
+            }
+
+            function nextLevel() {
+                currentLevel++;
+
+                if (currentLevel >= LEVELS.length) {
+                    showCompletionScreen();
+                    return;
+                }
+
+                loadLevel();
+            }
+
+            function loadLevel() {
+                const level = LEVELS[currentLevel];
+
+                levelDisplay.textContent = `المستوى ${currentLevel + 1}/10`;
+
+                generateGrid(level);
+                createInputInterface(level.targets);
+
+                feedback.style.display = 'none';
+                checkButton.classList.remove('hidden');
+                nextButton.classList.add('hidden');
+                checkButton.disabled = true;
+                hintButton.disabled = false;
+
+                backButton.disabled = currentLevel === 0;
+                backButton.style.opacity = currentLevel === 0 ? '0.5' : '1';
+
+                highlightTargets(level.targets, false);
+                clearAllClicks();
+
+                setTimeout(() => {
+                    const inputs = document.querySelectorAll('.count-input');
+                    inputs.forEach((input) => {
+                        input.disabled = false;
+                        input.classList.remove('correct', 'incorrect');
+                        input.value = '';
+                    });
+                }, 100);
+            }
+
+            function showCompletionScreen() {
+                gameScreen.classList.add('hidden');
+                completionScreen.classList.remove('hidden');
+                finalScore.textContent = score;
+
+                setTimeout(() => {
+                    playSuccessSound();
+                    setTimeout(() => playSuccessSound(), 400);
+                }, 600);
+            }
+
+            function restartGame() {
+                currentLevel = 0;
+                score = 0;
+                scoreDisplay.textContent = score;
+
+                gameScreen.classList.remove('hidden');
+                completionScreen.classList.add('hidden');
+
+                loadLevel();
+            }
+
+            function previousLevel() {
+                if (currentLevel > 0) {
+                    currentLevel--;
+                    loadLevel();
+                }
+            }
+
+            function resetCurrentLevel() {
+                loadLevel();
+            }
+
+            function toggleMute() {
+                isMuted = !isMuted;
+                muteButton.textContent = isMuted ? '🔇' : '🔊';
+                muteButton.setAttribute('aria-label', isMuted ? 'تفعيل الصوت' : 'كتم الصوت');
+            }
+
+            // معالجة الأحداث
+            checkButton.addEventListener('click', checkAnswers);
+            nextButton.addEventListener('click', nextLevel);
+            hintButton.addEventListener('click', showHint);
+            resetButton.addEventListener('click', resetCurrentLevel);
+            backButton.addEventListener('click', previousLevel);
+            muteButton.addEventListener('click', toggleMute);
+            playAgainButton.addEventListener('click', restartGame);
+
+            // دعم لوحة المفاتيح
+            document.addEventListener('keydown', (e) => {
+                enableAudio();
+
+                switch (e.key) {
+                    case 'Enter':
+                        if (!checkButton.disabled && !checkButton.classList.contains('hidden')) {
+                            checkAnswers();
+                        } else if (!nextButton.classList.contains('hidden')) {
+                            nextLevel();
+                        }
+                        break;
+                    case ' ':
+                        e.preventDefault();
+                        const focusedCell = document.activeElement;
+                        if (focusedCell && focusedCell.classList.contains('grid-cell')) {
+                            toggleCellClick(focusedCell);
+                        } else {
+                            toggleMute();
+                        }
+                        break;
+                    case 'c':
+                    case 'C':
+                        resetAllClicks();
+                        break;
+                    case 'h':
+                    case 'H':
+                        if (!hintButton.disabled) {
+                            showHint();
+                        }
+                        break;
+                    case 'ArrowLeft':
+                        if (currentLevel > 0) {
+                            previousLevel();
+                        }
+                        break;
+                    case 'ArrowRight':
+                        if (!nextButton.classList.contains('hidden')) {
+                            nextLevel();
+                        }
+                        break;
+                }
+            });
+
+            // تهيئة اللعبة
+            document.addEventListener('DOMContentLoaded', () => {
+                initAudio();
+                loadLevel();
+
+                const enableAudioEvents = ['click', 'touchstart', 'keydown'];
+                const enableAudioHandler = () => {
+                    enableAudio();
+                    enableAudioEvents.forEach((event) => {
+                        document.removeEventListener(event, enableAudioHandler);
+                    });
+                };
+
+                enableAudioEvents.forEach((event) => {
+                    document.addEventListener(event, enableAudioHandler, { once: true });
+                });
+            });
+
+            window.addEventListener('beforeunload', () => {
+                if (audioContext && audioContext.state !== 'closed') {
+                    audioContext.close();
+                }
+            });
+
+            console.log('تم تحميل لعبة إدراك بصري لثبات الشكل بنجاح!');
+        </script>
+    </body>
+</html>

@@ -1,10 +1,618 @@
 <!doctype html>
-<html lang="en">
+<html lang="ar" dir="rtl">
     <head>
         <meta charset="UTF-8" />
-        <title>Game 20</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>لعبة العلاقات بين الأشياء</title>
+        <style>
+            body {
+                font-family: 'Arial', sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                margin: 0;
+                padding: 20px;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .container {
+                max-width: 600px;
+                background: white;
+                border-radius: 20px;
+                padding: 30px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                text-align: center;
+            }
+
+            h1 {
+                color: #4a5568;
+                margin-bottom: 10px;
+                font-size: 2em;
+            }
+
+            .subtitle {
+                color: #718096;
+                margin-bottom: 30px;
+                font-size: 1.1em;
+            }
+
+            .score-bar {
+                background: #f0fff4;
+                border: 2px solid #68d391;
+                border-radius: 10px;
+                padding: 15px;
+                margin: 20px 0;
+                font-size: 1.2em;
+                color: #22543d;
+            }
+
+            .stars-container {
+                margin: 20px 0;
+                font-size: 2.5em;
+                line-height: 1.2;
+            }
+
+            .star {
+                display: inline-block;
+                margin: 0 3px;
+                opacity: 0.2;
+                transition: all 0.5s ease;
+                transform: scale(0.8);
+            }
+
+            .star.earned {
+                opacity: 1;
+                transform: scale(1);
+                animation: starGlow 0.8s ease-out;
+            }
+
+            @keyframes starGlow {
+                0% {
+                    transform: scale(0.8);
+                    opacity: 0.2;
+                }
+                50% {
+                    transform: scale(1.3);
+                    opacity: 1;
+                }
+                100% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+            }
+
+            .main-item {
+                background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+                border: 3px solid #2196f3;
+                border-radius: 15px;
+                padding: 40px;
+                margin: 30px 0;
+                font-size: 1.8em;
+                font-weight: bold;
+                color: #1565c0;
+                min-height: 80px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+            }
+
+            .main-emoji {
+                font-size: 1.2em;
+                margin-bottom: 10px;
+            }
+
+            .main-sentence {
+                font-size: 0.7em;
+                color: #1976d2;
+                margin-top: 5px;
+            }
+
+            .choices {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+                margin: 30px 0;
+            }
+
+            .choice {
+                background: #f8f9fa;
+                border: 2px solid #e9ecef;
+                border-radius: 12px;
+                padding: 25px 15px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                font-size: 1.2em;
+                min-height: 70px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .choice:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+                border-color: #2196f3;
+                background: #e3f2fd;
+            }
+
+            .choice.correct {
+                background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%);
+                border-color: #4caf50;
+                color: #1b5e20;
+                animation: correctPulse 0.6s ease-out;
+            }
+
+            .choice.incorrect {
+                background: linear-gradient(135deg, #ffcdd2 0%, #ef9a9a 100%);
+                border-color: #f44336;
+                color: #b71c1c;
+                animation: shake 0.5s ease-out;
+            }
+
+            @keyframes correctPulse {
+                0% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.1);
+                    box-shadow: 0 0 20px rgba(76, 175, 80, 0.6);
+                }
+                100% {
+                    transform: scale(1.05);
+                }
+            }
+
+            @keyframes shake {
+                0%,
+                100% {
+                    transform: translateX(0);
+                }
+                25% {
+                    transform: translateX(-5px);
+                }
+                75% {
+                    transform: translateX(5px);
+                }
+            }
+
+            .feedback {
+                margin: 25px 0;
+                padding: 20px;
+                border-radius: 12px;
+                font-weight: bold;
+                font-size: 1.1em;
+                min-height: 25px;
+                transition: all 0.3s ease;
+            }
+
+            .feedback.correct {
+                background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%);
+                color: #1b5e20;
+                border: 2px solid #4caf50;
+            }
+
+            .feedback.incorrect {
+                background: linear-gradient(135deg, #ffcdd2 0%, #ef9a9a 100%);
+                color: #b71c1c;
+                border: 2px solid #f44336;
+            }
+
+            .restart-btn {
+                background: linear-gradient(135deg, #66bb6a 0%, #4caf50 100%);
+                color: white;
+                border: none;
+                padding: 15px 30px;
+                border-radius: 10px;
+                cursor: pointer;
+                font-size: 1.1em;
+                font-weight: bold;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+                display: none;
+            }
+
+            .restart-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+            }
+
+            .final-results {
+                background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+                border: 2px solid #ff9800;
+                border-radius: 15px;
+                padding: 25px;
+                margin: 20px 0;
+                font-size: 1.2em;
+                color: #e65100;
+            }
+        </style>
     </head>
     <body>
-        <!-- Game 20 content goes here -->
+        <div class="container">
+            <h1>🧩 لعبة العلاقات بين الأشياء</h1>
+            <p class="subtitle">اختر الشيء الذي له علاقة مع الشيء الرئيسي</p>
+
+            <div class="score-bar">السؤال: <span id="questionNum">1</span> من <span id="totalQuestions">17</span></div>
+
+            <div class="stars-container" id="starsContainer">⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐</div>
+
+            <div class="main-item" id="mainItem">
+                <div class="main-emoji">🥛 حليب</div>
+                <div class="main-sentence">يأتي الحليب من ...</div>
+            </div>
+
+            <div class="choices" id="choices">
+                <div class="choice" data-answer="0">🐄 بقرة</div>
+                <div class="choice" data-answer="1">🌳 شجرة</div>
+                <div class="choice" data-answer="2">🚗 سيارة</div>
+            </div>
+
+            <div class="feedback" id="feedback"></div>
+
+            <button class="restart-btn" id="restartBtn" onclick="restartGame()">🔄 إعادة بدء اللعبة</button>
+        </div>
+
+        <script>
+            // Game variables
+            let currentQuestion = 0;
+            let stars = 0;
+            let answered = false;
+            let audioContext = null;
+
+            // Questions array with emojis and incomplete sentences - Extended to 17 questions
+            const questions = [
+                {
+                    main: '🥛 حليب',
+                    sentence: 'يأتي الحليب من ...',
+                    choices: ['🐄 بقرة', '🌳 شجرة', '🚗 سيارة'],
+                    correct: 0,
+                    explanation: 'البقرة تنتج الحليب'
+                },
+                {
+                    main: '🔑 مفاتيح',
+                    sentence: 'يفتح المفتاح ...',
+                    choices: ['🐠 سمكة', '🚪 باب', '🎁 هدية'],
+                    correct: 1,
+                    explanation: 'المفاتيح تفتح الأبواب'
+                },
+                {
+                    main: '🌧️ مطر',
+                    sentence: 'تمطر السماء لسقي ...',
+                    choices: ['🔥 نار', '🌱 نبات', '📱 هاتف'],
+                    correct: 1,
+                    explanation: 'النباتات تحتاج للمطر لتنمو'
+                },
+                {
+                    main: '👓 نظارات',
+                    sentence: 'نلبس النظارات على ...',
+                    choices: ['👁️ عيون', '👃 أنف', '👂 أذن'],
+                    correct: 0,
+                    explanation: 'النظارات توضع على العيون'
+                },
+                {
+                    main: '🚑 إسعاف',
+                    sentence: 'تذهب سيارة الإسعاف إلى ...',
+                    choices: ['🏥 مستشفى', '🏪 متجر', '🏠 منزل'],
+                    correct: 0,
+                    explanation: 'الإسعاف يذهب للمستشفى'
+                },
+                {
+                    main: '🎒 حقيبة مدرسية',
+                    sentence: 'نحمل في الحقيبة المدرسية ...',
+                    choices: ['🪨 حجر', '📚 كتب', '🍎 تفاح'],
+                    correct: 1,
+                    explanation: 'الحقيبة المدرسية تحمل الكتب'
+                },
+                {
+                    main: '🕯️ شموع',
+                    sentence: 'نضع الشموع على ...',
+                    choices: ['🎂 كعكة', '🌿 نعناع', '⚽ كرة'],
+                    correct: 0,
+                    explanation: 'الشموع توضع على الكعك في أعياد الميلاد'
+                },
+                {
+                    main: '🍊 برتقال',
+                    sentence: 'نصنع من البرتقال ...',
+                    choices: ['🥤 عصير', '🧊 ثلج', '🔧 مفتاح ربط'],
+                    correct: 0,
+                    explanation: 'البرتقال يُعصر لصنع العصير'
+                },
+                {
+                    main: '🥕 جزر',
+                    sentence: 'يحب الجزر حيوان ...',
+                    choices: ['🐰 أرنب', '🦁 أسد', '🐧 بطريق'],
+                    correct: 0,
+                    explanation: 'الأرانب تأكل الجزر'
+                },
+                {
+                    main: '🪺 عش طائر',
+                    sentence: 'يعيش في العش ...',
+                    choices: ['🐭 فأر', '🐝 نحلة', '🐦 طائر'],
+                    correct: 2,
+                    explanation: 'الطيور تبني الأعشاش وتعيش فيها'
+                },
+                {
+                    main: '🔥 كبريت',
+                    sentence: 'نشعل بالكبريت ...',
+                    choices: ['🌱 نبات', '🍦 آيس كريم', '🕯️ شمعة'],
+                    correct: 2,
+                    explanation: 'الكبريت يستخدم لإشعال الشموع'
+                },
+                {
+                    main: '🎣 صنارة صيد',
+                    sentence: 'نصطاد بالصنارة ...',
+                    choices: ['🐟 سمك', '🍞 خبز', '🕷️ عنكبوت'],
+                    correct: 0,
+                    explanation: 'الصنارة تستخدم لصيد السمك'
+                },
+                {
+                    main: '💡 مصباح',
+                    sentence: 'يضيء المصباح بواسطة ...',
+                    choices: ['💡 لمبة', '🎈 بالون', '🧨 مفرقعة'],
+                    correct: 0,
+                    explanation: 'المصباح يحتوي على لمبة للإضاءة'
+                },
+                {
+                    main: '👙 ملابس سباحة',
+                    sentence: 'نلبس ملابس السباحة في ...',
+                    choices: ['🏊 حوض سباحة', '🤸 جمباز', '🏀 كرة سلة'],
+                    correct: 0,
+                    explanation: 'ملابس السباحة تُلبس في حوض السباحة'
+                },
+                {
+                    main: '💧 ماء',
+                    sentence: 'يخرج الماء من ...',
+                    choices: ['📦 صندوق', '🚰 حنفية', '🌀 مروحة'],
+                    correct: 1,
+                    explanation: 'الماء يخرج من الحنفية'
+                },
+                {
+                    main: '💰 نقود',
+                    sentence: 'نحفظ النقود في ...',
+                    choices: ['🧊 ثلاجة', '👛 محفظة', '🍲 قدر'],
+                    correct: 1,
+                    explanation: 'النقود تُحفظ في المحفظة'
+                },
+                {
+                    main: '☂️ مظلة',
+                    sentence: 'نستخدم المظلة عند ...',
+                    choices: ['🍲 طبخ', '☁️ مطر', '🚣 قارب'],
+                    correct: 1,
+                    explanation: 'المظلة تحمينا من المطر'
+                }
+            ];
+
+            // Audio functions
+            function initAudio() {
+                try {
+                    if (!audioContext) {
+                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    }
+                    if (audioContext.state === 'suspended') {
+                        audioContext.resume();
+                    }
+                } catch (error) {
+                    console.log('Audio not supported');
+                }
+            }
+
+            function playJoyfulGlitterSound() {
+                try {
+                    initAudio();
+
+                    // Create a joyful ascending melody with sparkles
+                    const notes = [
+                        { freq: 523, time: 0, duration: 0.2 }, // C5
+                        { freq: 659, time: 0.1, duration: 0.2 }, // E5
+                        { freq: 784, time: 0.2, duration: 0.2 }, // G5
+                        { freq: 1047, time: 0.3, duration: 0.3 } // C6
+                    ];
+
+                    notes.forEach((note) => {
+                        const osc = audioContext.createOscillator();
+                        const gain = audioContext.createGain();
+
+                        osc.frequency.setValueAtTime(note.freq, audioContext.currentTime + note.time);
+                        osc.type = 'sine';
+
+                        gain.gain.setValueAtTime(0, audioContext.currentTime + note.time);
+                        gain.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + note.time + 0.05);
+                        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + note.time + note.duration);
+
+                        osc.connect(gain);
+                        gain.connect(audioContext.destination);
+
+                        osc.start(audioContext.currentTime + note.time);
+                        osc.stop(audioContext.currentTime + note.time + note.duration);
+                    });
+
+                    // Add sparkly high-frequency glitter
+                    const sparkle = audioContext.createOscillator();
+                    const sparkleGain = audioContext.createGain();
+
+                    sparkle.frequency.setValueAtTime(2000, audioContext.currentTime);
+                    sparkle.frequency.exponentialRampToValueAtTime(3500, audioContext.currentTime + 0.5);
+                    sparkle.type = 'triangle';
+
+                    sparkleGain.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    sparkleGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.7);
+
+                    sparkle.connect(sparkleGain);
+                    sparkleGain.connect(audioContext.destination);
+
+                    sparkle.start(audioContext.currentTime);
+                    sparkle.stop(audioContext.currentTime + 0.7);
+                } catch (error) {
+                    console.log('Could not play glitter sound');
+                }
+            }
+
+            function playBuzzSound() {
+                try {
+                    initAudio();
+
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+
+                    osc.frequency.setValueAtTime(150, audioContext.currentTime);
+                    osc.frequency.linearRampToValueAtTime(100, audioContext.currentTime + 0.5);
+                    osc.type = 'sawtooth';
+
+                    gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+
+                    osc.start(audioContext.currentTime);
+                    osc.stop(audioContext.currentTime + 0.5);
+                } catch (error) {
+                    console.log('Could not play buzz sound');
+                }
+            }
+
+            // Game functions
+            function displayQuestion() {
+                const question = questions[currentQuestion];
+
+                const mainItem = document.getElementById('mainItem');
+                mainItem.innerHTML = `
+                <div class="main-emoji">${question.main}</div>
+                <div class="main-sentence">${question.sentence}</div>
+            `;
+
+                document.getElementById('questionNum').textContent = currentQuestion + 1;
+                document.getElementById('totalQuestions').textContent = questions.length;
+
+                const choicesContainer = document.getElementById('choices');
+                choicesContainer.innerHTML = '';
+
+                question.choices.forEach((choice, index) => {
+                    const choiceElement = document.createElement('div');
+                    choiceElement.className = 'choice';
+                    choiceElement.textContent = choice;
+                    choiceElement.setAttribute('data-answer', index);
+                    choiceElement.addEventListener('click', () => handleAnswer(index, choiceElement));
+                    choicesContainer.appendChild(choiceElement);
+                });
+
+                // Reset state
+                answered = false;
+                document.getElementById('feedback').textContent = '';
+                document.getElementById('feedback').className = 'feedback';
+                document.getElementById('restartBtn').style.display = 'none';
+            }
+
+            function addStar() {
+                stars++;
+                const starsContainer = document.getElementById('starsContainer');
+                const starElements = starsContainer.children;
+
+                if (starElements[stars - 1]) {
+                    starElements[stars - 1].classList.add('earned');
+                }
+            }
+
+            function handleAnswer(answerIndex, element) {
+                if (answered) return;
+
+                answered = true;
+                const question = questions[currentQuestion];
+                const choices = document.querySelectorAll('.choice');
+                const feedback = document.getElementById('feedback');
+
+                // Mark correct and incorrect answers
+                choices.forEach((choice, index) => {
+                    choice.style.pointerEvents = 'none'; // Disable further clicks
+                    if (index === question.correct) {
+                        choice.classList.add('correct');
+                    } else if (index === answerIndex && answerIndex !== question.correct) {
+                        choice.classList.add('incorrect');
+                    }
+                });
+
+                if (answerIndex === question.correct) {
+                    addStar();
+                    feedback.textContent = `✅ ${question.explanation}`;
+                    feedback.className = 'feedback correct';
+                    playJoyfulGlitterSound();
+                } else {
+                    feedback.textContent = `❌ ${question.explanation}`;
+                    feedback.className = 'feedback incorrect';
+                    playBuzzSound();
+                }
+
+                // Auto advance after 1.5 seconds
+                setTimeout(() => {
+                    if (currentQuestion < questions.length - 1) {
+                        currentQuestion++;
+                        displayQuestion();
+                    } else {
+                        showFinalResults();
+                    }
+                }, 1500);
+            }
+
+            function showFinalResults() {
+                const feedback = document.getElementById('feedback');
+                let performance = '';
+                let emoji = '';
+
+                if (stars === questions.length) {
+                    performance = 'مذهل! حصلت على جميع النجوم!';
+                    emoji = '🎉';
+                } else if (stars >= questions.length * 0.8) {
+                    performance = 'أداء ممتاز!';
+                    emoji = '👏';
+                } else if (stars >= questions.length * 0.6) {
+                    performance = 'أداء جيد!';
+                    emoji = '👍';
+                } else {
+                    performance = 'يمكنك تحسين أدائك أكثر!';
+                    emoji = '💪';
+                }
+
+                feedback.innerHTML = `
+                <div class="final-results">
+                    <div style="font-size: 1.4em; margin-bottom: 15px;">${emoji} ${performance}</div>
+                    <div style="margin-bottom: 10px;">⭐ النجوم المكتسبة: ${stars} من ${questions.length}</div>
+                    <div>📊 النسبة: ${Math.round((stars / questions.length) * 100)}%</div>
+                </div>
+            `;
+
+                document.getElementById('restartBtn').style.display = 'inline-block';
+            }
+
+            function updateStarsDisplay() {
+                const starsContainer = document.getElementById('starsContainer');
+                starsContainer.innerHTML = '';
+
+                for (let i = 0; i < questions.length; i++) {
+                    const star = document.createElement('span');
+                    star.className = 'star';
+                    star.textContent = '⭐';
+                    if (i < stars) {
+                        star.classList.add('earned');
+                    }
+                    starsContainer.appendChild(star);
+                }
+            }
+
+            function restartGame() {
+                currentQuestion = 0;
+                stars = 0;
+                updateStarsDisplay();
+                displayQuestion();
+            }
+
+            // Initialize game
+            updateStarsDisplay();
+            displayQuestion();
+        </script>
     </body>
 </html>

@@ -1,10 +1,659 @@
 <!doctype html>
-<html lang="en">
+<html lang="ar" dir="rtl">
     <head>
         <meta charset="UTF-8" />
-        <title>Game 14</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>لعبة الإدراك البصري - KidsSkills</title>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Cairo', sans-serif;
+                background: #f0f2f5;
+                min-height: 100vh;
+                padding: 20px;
+            }
+
+            .game-container {
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                padding: 30px;
+                max-width: 800px;
+                margin: 0 auto;
+                text-align: center;
+                border: 3px solid #e9ecef;
+            }
+
+            .header {
+                border-bottom: 3px solid #667eea;
+                padding-bottom: 20px;
+                margin-bottom: 25px;
+            }
+
+            .logo {
+                color: #667eea;
+                font-size: 32px;
+                font-weight: 700;
+                margin-bottom: 10px;
+            }
+
+            .title {
+                color: #2c3e50;
+                font-size: 28px;
+                font-weight: 600;
+                margin-bottom: 10px;
+            }
+
+            .subtitle {
+                color: #7f8c8d;
+                font-size: 16px;
+                margin-bottom: 20px;
+            }
+
+            .stats {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                background: #f8f9fa;
+                padding: 15px 20px;
+                border-radius: 10px;
+                margin-bottom: 20px;
+                border: 2px solid #e9ecef;
+            }
+
+            .stat {
+                font-weight: 600;
+                color: #495057;
+                font-size: 16px;
+            }
+
+            .stars {
+                font-size: 24px;
+            }
+
+            .level-info {
+                background: linear-gradient(45deg, #ff6b6b, #feca57);
+                color: white;
+                padding: 15px;
+                border-radius: 10px;
+                margin-bottom: 20px;
+                font-weight: 600;
+                font-size: 18px;
+            }
+
+            .progress {
+                background: #e9ecef;
+                height: 10px;
+                border-radius: 5px;
+                margin-bottom: 25px;
+                overflow: hidden;
+            }
+
+            .progress-bar {
+                height: 100%;
+                background: linear-gradient(90deg, #667eea, #764ba2);
+                transition: width 0.5s ease;
+                border-radius: 5px;
+            }
+
+            .encrypted-image {
+                width: 250px;
+                height: 250px;
+                margin: 0 auto 30px;
+                border: 3px solid #dee2e6;
+                border-radius: 15px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #f8f9fa;
+                font-size: 100px;
+                position: relative;
+            }
+
+            .pixelated {
+                filter: blur(10px) contrast(1.3);
+                transform: scale(1.2);
+            }
+
+            .choices {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 15px;
+                margin-bottom: 25px;
+                max-width: 600px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .choice {
+                background: white;
+                border: 3px solid #dee2e6;
+                border-radius: 15px;
+                padding: 20px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                font-size: 60px;
+                height: 120px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .choice:hover {
+                transform: translateY(-5px);
+                border-color: #667eea;
+                box-shadow: 0 10px 20px rgba(102, 126, 234, 0.2);
+            }
+
+            .choice.correct {
+                border-color: #28a745;
+                background: #d4edda;
+                animation: correct-bounce 0.6s ease;
+            }
+
+            .choice.wrong {
+                border-color: #dc3545;
+                background: #f8d7da;
+                animation: shake 0.5s ease;
+            }
+
+            @keyframes correct-bounce {
+                0%,
+                100% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.1);
+                }
+            }
+
+            @keyframes shake {
+                0%,
+                100% {
+                    transform: translateX(0);
+                }
+                25% {
+                    transform: translateX(-5px);
+                }
+                75% {
+                    transform: translateX(5px);
+                }
+            }
+
+            .message {
+                font-size: 18px;
+                font-weight: 600;
+                margin: 20px 0;
+                padding: 15px;
+                border-radius: 10px;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+
+            .message.success {
+                background: #d4edda;
+                color: #155724;
+                border: 2px solid #28a745;
+                opacity: 1;
+            }
+
+            .message.error {
+                background: #f8d7da;
+                color: #721c24;
+                border: 2px solid #dc3545;
+                opacity: 1;
+            }
+
+            .benefits-list {
+                text-align: right;
+                margin: 20px 0;
+            }
+
+            .benefit {
+                background: #f8f9fa;
+                margin: 10px 0;
+                padding: 15px;
+                border-radius: 10px;
+                border-right: 4px solid #667eea;
+            }
+
+            .benefit strong {
+                color: #667eea;
+                display: block;
+                margin-bottom: 5px;
+            }
+
+            .btn {
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                color: white;
+                border: none;
+                padding: 15px 30px;
+                border-radius: 25px;
+                font-size: 18px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: transform 0.3s ease;
+                margin: 10px;
+            }
+
+            .btn:hover {
+                transform: translateY(-2px);
+            }
+
+            .hidden {
+                display: none;
+            }
+
+            .celebration {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                z-index: 1000;
+            }
+
+            .confetti {
+                position: absolute;
+                width: 10px;
+                height: 10px;
+                background: #ff6b6b;
+                border-radius: 50%;
+                animation: fall 3s linear infinite;
+            }
+
+            @keyframes fall {
+                0% {
+                    transform: translateY(-100vh) rotate(0deg);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateY(100vh) rotate(360deg);
+                    opacity: 0;
+                }
+            }
+        </style>
     </head>
     <body>
-        <!-- Game 14 content goes here -->
+        <div class="game-container">
+            <!-- شاشة البداية -->
+            <div id="intro-screen">
+                <div class="header">
+                    <div class="logo">🎯 KidsSkills</div>
+                    <h1 class="title">لعبة الإدراك البصري</h1>
+                    <p class="subtitle">طور مهارات الإدراك البصري من خلال التعرف على الأشكال المُشفرة</p>
+                </div>
+
+                <div style="font-size: 80px; margin: 30px 0">🧠👁️🎯</div>
+
+                <button class="btn" onclick="showBenefits()">ابدأ اللعبة 🚀</button>
+            </div>
+
+            <!-- شاشة الفوائد -->
+            <div id="benefits-screen" class="hidden">
+                <div class="header">
+                    <div class="logo">🎯 KidsSkills</div>
+                    <h2 class="title">🌟 فوائد لعبة الإدراك البصري</h2>
+                </div>
+
+                <div class="benefits-list">
+                    <div class="benefit">
+                        <strong>🧠 تحسين التركيز والانتباه</strong>
+                        تساعد على زيادة مدة التركيز وتطوير الانتباه الانتقائي لدى الطفل
+                    </div>
+                    <div class="benefit">
+                        <strong>👁️ تقوية الإدراك البصري</strong>
+                        تعزز القدرة على التمييز البصري والتعرف على الأشكال والأنماط
+                    </div>
+                    <div class="benefit">
+                        <strong>🧩 تطوير مهارات حل المشاكل</strong>
+                        تحفز التفكير المنطقي والتحليلي لحل التحديات البصرية
+                    </div>
+                    <div class="benefit">
+                        <strong>⚡ تحسين سرعة المعالجة</strong>
+                        تزيد من سرعة استيعاب وتحليل المعلومات البصرية
+                    </div>
+                    <div class="benefit">
+                        <strong>🎯 تعزيز الثقة بالنفس</strong>
+                        تبني الثقة من خلال النجاح المتدرج والتحفيز الإيجابي
+                    </div>
+                </div>
+
+                <button class="btn" onclick="startGame()">ابدأ المستوى الأول 🎮</button>
+            </div>
+
+            <!-- شاشة اللعبة -->
+            <div id="game-screen" class="hidden">
+                <div class="header">
+                    <div class="logo">🎯 KidsSkills</div>
+                    <h1 class="title">لعبة الإدراك البصري</h1>
+                </div>
+
+                <div class="stats">
+                    <div class="stat">المستوى: <span id="level">1</span></div>
+                    <div class="stat">الصفحة: <span id="page">1</span> / 5</div>
+                    <div class="stat stars" id="stars">⭐⭐⭐</div>
+                </div>
+
+                <div id="level-info" class="level-info">المستوى 1: الفواكه والأشكال الهندسية 🍎🔴</div>
+
+                <div class="progress">
+                    <div id="progress-bar" class="progress-bar" style="width: 11%"></div>
+                </div>
+
+                <div class="encrypted-image">
+                    <div id="shape" class="pixelated">🍎</div>
+                </div>
+
+                <div id="choices" class="choices">
+                    <!-- سيتم ملؤها بواسطة JavaScript -->
+                </div>
+
+                <div id="message" class="message"></div>
+            </div>
+
+            <div id="celebration" class="celebration hidden"></div>
+        </div>
+
+        <script>
+            // بيانات اللعبة
+            const gameData = {
+                level1: {
+                    name: 'الفواكه والأشكال الهندسية 🍎🔴',
+                    pages: [
+                        { correct: '🍎', choices: ['🍎', '🍌', '🔴'] },
+                        { correct: '🔵', choices: ['🔵', '🔺', '🟡'] },
+                        { correct: '🍊', choices: ['🍊', '🍇', '⬜'] },
+                        { correct: '🍌', choices: ['🍌', '🍎', '🟢'] },
+                        { correct: '🔺', choices: ['🔺', '🔵', '🍇'] }
+                    ]
+                },
+                level2: {
+                    name: 'الحيوانات بأنواعها 🐱🦁',
+                    pages: [
+                        { correct: '🐱', choices: ['🐱', '🐶', '🐰', '🦊'] },
+                        { correct: '🐘', choices: ['🐘', '🦁', '🐯', '🦓', '🐸'] },
+                        { correct: '🐦', choices: ['🐦', '🦋', '🐛', '🐠', '🐢'] },
+                        { correct: '🦁', choices: ['🦁', '🐯', '🐘', '🦓', '🐱'] },
+                        { correct: '🐰', choices: ['🐰', '🐶', '🦊', '🐱', '🐹'] }
+                    ]
+                },
+                level3: {
+                    name: 'الأدوات اليومية 🏠✏️',
+                    pages: [
+                        { correct: '✏️', choices: ['✏️', '📚', '🖊️', '📐', '🖍️', '📝'] },
+                        { correct: '🚗', choices: ['🚗', '🚌', '🚲', '✈️', '🚢', '🚁', '🏍️'] },
+                        { correct: '🏠', choices: ['🏠', '🏢', '🏰', '⛪', '🏫', '🏥', '🏦', '🏪'] },
+                        { correct: '📚', choices: ['📚', '✏️', '🖊️', '📐', '🖍️', '📝', '📖', '📒'] },
+                        { correct: '🚲', choices: ['🚲', '🚗', '🚌', '✈️', '🚢', '🚁', '🏍️', '🛴'] }
+                    ]
+                }
+            };
+
+            let currentLevel = 1;
+            let currentPage = 1;
+            let stars = 3;
+            let completedQuestions = 0;
+            let totalQuestions = 9;
+            let isAnswering = false;
+
+            // العناصر
+            const introScreen = document.getElementById('intro-screen');
+            const benefitsScreen = document.getElementById('benefits-screen');
+            const gameScreen = document.getElementById('game-screen');
+            const levelElement = document.getElementById('level');
+            const pageElement = document.getElementById('page');
+            const starsElement = document.getElementById('stars');
+            const levelInfoElement = document.getElementById('level-info');
+            const progressBar = document.getElementById('progress-bar');
+            const shapeElement = document.getElementById('shape');
+            const choicesElement = document.getElementById('choices');
+            const messageElement = document.getElementById('message');
+            const celebrationElement = document.getElementById('celebration');
+
+            function showBenefits() {
+                introScreen.classList.add('hidden');
+                benefitsScreen.classList.remove('hidden');
+            }
+
+            function startGame() {
+                benefitsScreen.classList.add('hidden');
+                gameScreen.classList.remove('hidden');
+                loadQuestion();
+            }
+
+            function loadQuestion() {
+                const levelData = gameData[`level${currentLevel}`];
+                const pageData = levelData.pages[currentPage - 1];
+
+                isAnswering = false;
+
+                // تحديث المعلومات
+                levelElement.textContent = currentLevel;
+                pageElement.textContent = currentPage;
+                levelInfoElement.textContent = `المستوى ${currentLevel}: ${levelData.name}`;
+                updateStars();
+
+                // تحديث شريط التقدم
+                const progress = (completedQuestions / totalQuestions) * 100;
+                progressBar.style.width = progress + '%';
+
+                // تحديث الشكل
+                shapeElement.textContent = pageData.correct;
+
+                // إنشاء الاختيارات
+                choicesElement.innerHTML = '';
+                const shuffledChoices = [...pageData.choices].sort(() => Math.random() - 0.5);
+
+                shuffledChoices.forEach((choice) => {
+                    const choiceElement = document.createElement('div');
+                    choiceElement.className = 'choice';
+                    choiceElement.textContent = choice;
+                    choiceElement.onclick = () => selectChoice(choice, pageData.correct);
+                    choicesElement.appendChild(choiceElement);
+                });
+
+                // إخفاء الرسالة
+                messageElement.className = 'message';
+                messageElement.textContent = '';
+            }
+
+            function selectChoice(selected, correct) {
+                if (isAnswering) return;
+                isAnswering = true;
+
+                const choices = document.querySelectorAll('.choice');
+
+                if (selected === correct) {
+                    // إجابة صحيحة
+                    choices.forEach((choice) => {
+                        if (choice.textContent === selected) {
+                            choice.classList.add('correct');
+                        }
+                        choice.style.pointerEvents = 'none';
+                    });
+
+                    messageElement.className = 'message success';
+                    messageElement.textContent = '🎉 ممتاز! إجابة صحيحة!';
+
+                    playSuccessSound();
+                    createConfetti();
+                    completedQuestions++;
+
+                    setTimeout(() => {
+                        nextQuestion();
+                    }, 2000);
+                } else {
+                    // إجابة خاطئة
+                    choices.forEach((choice) => {
+                        if (choice.textContent === selected) {
+                            choice.classList.add('wrong');
+                        }
+                        if (choice.textContent === correct) {
+                            setTimeout(() => {
+                                choice.style.border = '3px solid #28a745';
+                                choice.style.background = '#d4edda';
+                            }, 1000);
+                        }
+                    });
+
+                    messageElement.className = 'message error';
+                    messageElement.textContent = '❌ حاول مرة أخرى!';
+
+                    playErrorSound();
+
+                    if (stars > 1) {
+                        stars--;
+                        updateStars();
+                    }
+
+                    setTimeout(() => {
+                        choices.forEach((choice) => {
+                            choice.classList.remove('wrong');
+                            choice.style.pointerEvents = 'auto';
+                            choice.style.border = '3px solid #dee2e6';
+                            choice.style.background = 'white';
+                        });
+                        messageElement.className = 'message';
+                        messageElement.textContent = '';
+                        isAnswering = false;
+                    }, 3000);
+                }
+            }
+
+            function updateStars() {
+                starsElement.textContent = '⭐'.repeat(stars);
+            }
+
+            function nextQuestion() {
+                if (currentPage < 3) {
+                    currentPage++;
+                } else if (currentLevel < 3) {
+                    currentLevel++;
+                    currentPage = 1;
+                    stars = Math.min(stars + 1, 3);
+                } else {
+                    showGameComplete();
+                    return;
+                }
+
+                loadQuestion();
+            }
+
+            function showGameComplete() {
+                gameScreen.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <div class="logo">🎯 KidsSkills</div>
+                    <h1 style="color: #28a745; font-size: 48px; margin: 20px 0;">🎉 مبروك!</h1>
+                    <p style="font-size: 24px; margin-bottom: 20px; color: #2c3e50;">لقد أكملت جميع المستويات بنجاح!</p>
+                    <div style="font-size: 80px; margin: 30px 0;">${'⭐'.repeat(stars)}</div>
+                    <p style="font-size: 20px; color: #495057; margin-bottom: 30px;">حصلت على ${stars} نجوم من أصل 3</p>
+                    <div style="font-size: 60px; margin: 20px 0;">🏆🎯🌟</div>
+                    <button class="btn" onclick="location.reload()">العب مرة أخرى 🎮</button>
+                </div>
+            `;
+                createMegaConfetti();
+            }
+
+            function playSuccessSound() {
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
+                    oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1);
+                    oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2);
+
+                    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.01);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.5);
+                } catch (e) {
+                    console.log('Audio not supported');
+                }
+            }
+
+            function playErrorSound() {
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+
+                    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.01);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                } catch (e) {
+                    console.log('Audio not supported');
+                }
+            }
+
+            function createConfetti() {
+                celebrationElement.classList.remove('hidden');
+
+                const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#28a745'];
+
+                for (let i = 0; i < 20; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 2 + 's';
+                    confetti.style.animationDuration = Math.random() * 2 + 2 + 's';
+
+                    celebrationElement.appendChild(confetti);
+                }
+
+                setTimeout(() => {
+                    celebrationElement.innerHTML = '';
+                    celebrationElement.classList.add('hidden');
+                }, 3000);
+            }
+
+            function createMegaConfetti() {
+                celebrationElement.classList.remove('hidden');
+
+                const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#28a745', '#fd79a8'];
+
+                for (let i = 0; i < 100; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 3 + 's';
+                    confetti.style.animationDuration = Math.random() * 3 + 3 + 's';
+                    confetti.style.width = Math.random() * 15 + 5 + 'px';
+                    confetti.style.height = confetti.style.width;
+
+                    celebrationElement.appendChild(confetti);
+                }
+
+                setTimeout(() => {
+                    celebrationElement.innerHTML = '';
+                    celebrationElement.classList.add('hidden');
+                }, 5000);
+            }
+        </script>
     </body>
 </html>

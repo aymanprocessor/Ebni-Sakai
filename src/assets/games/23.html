@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>لعبة الإغلاق البصري</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Arial', sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                padding: 20px;
+            }
+
+            .game-container {
+                max-width: 1000px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
+
+            .header {
+                background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+                padding: 20px;
+                text-align: center;
+                color: white;
+            }
+
+            .header h1 {
+                font-size: 2.5em;
+                margin-bottom: 10px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            }
+
+            .level-selector {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+                padding: 30px;
+                background: #f8f9fa;
+            }
+
+            .level-card {
+                background: white;
+                border-radius: 15px;
+                padding: 20px;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+                border: 3px solid transparent;
+            }
+
+            .level-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                border-color: #007bff;
+            }
+
+            .level-card.easy {
+                border-color: #28a745;
+            }
+
+            .level-card.medium {
+                border-color: #ffc107;
+            }
+
+            .level-card.hard {
+                border-color: #dc3545;
+            }
+
+            .level-title {
+                font-size: 1.8em;
+                margin-bottom: 10px;
+                font-weight: bold;
+            }
+
+            .level-description {
+                color: #6c757d;
+                font-size: 1.1em;
+            }
+
+            .score-board {
+                display: flex;
+                justify-content: space-around;
+                padding: 20px;
+                background: #f8f9fa;
+                border-bottom: 3px solid #e9ecef;
+            }
+
+            .score-item {
+                text-align: center;
+                padding: 10px 20px;
+                background: white;
+                border-radius: 15px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .score-item h3 {
+                color: #495057;
+                margin-bottom: 5px;
+            }
+
+            .score-value {
+                font-size: 2em;
+                font-weight: bold;
+                color: #28a745;
+            }
+
+            .game-area {
+                padding: 30px;
+                text-align: center;
+            }
+
+            .question-counter {
+                font-size: 1.5em;
+                color: #6c757d;
+                margin-bottom: 20px;
+            }
+
+            .incomplete-shape {
+                width: 300px;
+                height: 300px;
+                margin: 0 auto 30px;
+                border: 3px dashed #007bff;
+                border-radius: 15px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #f8f9ff;
+                position: relative;
+            }
+
+            .shape-display {
+                font-size: 8em;
+                color: #007bff;
+            }
+
+            .options-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 15px;
+                margin: 30px 0;
+                max-width: 600px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .option-btn {
+                padding: 20px;
+                font-size: 3em;
+                background: linear-gradient(145deg, #ffffff, #f0f0f0);
+                border: 2px solid #dee2e6;
+                border-radius: 15px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .option-btn:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                border-color: #007bff;
+            }
+
+            .option-btn.correct {
+                background: linear-gradient(145deg, #d4edda, #c3e6cb);
+                border-color: #28a745;
+                animation: glitter 0.8s ease-in-out;
+            }
+
+            .option-btn.incorrect {
+                background: linear-gradient(145deg, #f8d7da, #f1b0b7);
+                border-color: #dc3545;
+                animation: shake 0.5s ease-in-out;
+            }
+
+            .back-btn {
+                background: linear-gradient(45deg, #6c757d, #495057);
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                font-size: 1em;
+                border-radius: 20px;
+                cursor: pointer;
+                margin-bottom: 20px;
+                transition: all 0.3s ease;
+            }
+
+            .back-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+            }
+
+            .result-display {
+                margin-top: 30px;
+                padding: 20px;
+                border-radius: 15px;
+                font-size: 1.2em;
+            }
+
+            .success {
+                background: linear-gradient(145deg, #d4edda, #c3e6cb);
+                color: #155724;
+                border: 2px solid #28a745;
+            }
+
+            .failure {
+                background: linear-gradient(145deg, #f8d7da, #f1b0b7);
+                color: #721c24;
+                border: 2px solid #dc3545;
+            }
+
+            .restart-btn {
+                background: linear-gradient(45deg, #6f42c1, #e83e8c);
+                color: white;
+                border: none;
+                padding: 15px 30px;
+                font-size: 1.2em;
+                border-radius: 25px;
+                cursor: pointer;
+                margin-top: 20px;
+                transition: all 0.3s ease;
+            }
+
+            .progress-bar {
+                width: 100%;
+                height: 10px;
+                background: #e9ecef;
+                border-radius: 5px;
+                overflow: hidden;
+                margin-bottom: 20px;
+            }
+
+            .progress-fill {
+                height: 100%;
+                background: linear-gradient(90deg, #28a745, #20c997);
+                border-radius: 5px;
+                transition: width 0.3s ease;
+            }
+
+            .hint-text {
+                color: #6c757d;
+                font-style: italic;
+                margin-bottom: 20px;
+                font-size: 1.3em;
+            }
+
+            .glitter-particle {
+                position: absolute;
+                width: 8px;
+                height: 8px;
+                background: #ffd700;
+                border-radius: 50%;
+                pointer-events: none;
+                animation: sparkle 1s ease-out forwards;
+            }
+
+            @keyframes glitter {
+                0%,
+                100% {
+                    transform: scale(1);
+                }
+                25% {
+                    transform: scale(1.1) rotate(5deg);
+                }
+                50% {
+                    transform: scale(1.15) rotate(-5deg);
+                }
+                75% {
+                    transform: scale(1.05) rotate(3deg);
+                }
+            }
+
+            @keyframes sparkle {
+                0% {
+                    opacity: 1;
+                    transform: translateY(0) scale(0);
+                }
+                50% {
+                    opacity: 1;
+                    transform: translateY(-50px) scale(1);
+                }
+                100% {
+                    opacity: 0;
+                    transform: translateY(-100px) scale(0);
+                }
+            }
+
+            @keyframes shake {
+                0%,
+                100% {
+                    transform: translateX(0);
+                }
+                25% {
+                    transform: translateX(-5px);
+                }
+                75% {
+                    transform: translateX(5px);
+                }
+            }
+
+            .hidden {
+                display: none !important;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="game-container">
+            <div class="header">
+                <h1>🧩 لعبة الإغلاق البصري</h1>
+                <p>ابحث عن الحرف أو الرقم المماثل</p>
+            </div>
+
+            <!-- شاشة اختيار المستوى -->
+            <div id="levelSelector" class="level-selector">
+                <div class="level-card easy" onclick="startLevel(1)">
+                    <div class="level-title" style="color: #28a745">⭐ مستوى سهل</div>
+                    <div class="level-description">أحرف عربية بسيطة</div>
+                </div>
+                <div class="level-card medium" onclick="startLevel(2)">
+                    <div class="level-title" style="color: #ffc107">⭐⭐ مستوى متوسط</div>
+                    <div class="level-description">أحرف إنجليزية وأرقام</div>
+                </div>
+                <div class="level-card hard" onclick="startLevel(3)">
+                    <div class="level-title" style="color: #dc3545">⭐⭐⭐ مستوى صعب</div>
+                    <div class="level-description">أشكال معقدة ورموز</div>
+                </div>
+            </div>
+
+            <!-- شاشة اللعبة -->
+            <div id="gameScreen" class="hidden">
+                <div class="score-board">
+                    <div class="score-item">
+                        <h3>المستوى</h3>
+                        <div class="score-value" id="currentLevel">1</div>
+                    </div>
+                    <div class="score-item">
+                        <h3>النتيجة</h3>
+                        <div class="score-value" id="score">0</div>
+                    </div>
+                    <div class="score-item">
+                        <h3>الصحيح</h3>
+                        <div class="score-value" id="correct">0/5</div>
+                    </div>
+                </div>
+
+                <div class="game-area">
+                    <button class="back-btn" onclick="backToLevels()">← العودة للمستويات</button>
+
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+                    </div>
+
+                    <div class="question-counter" id="questionCounter">السؤال 1 من 5</div>
+
+                    <div class="hint-text" id="hintText">انظر إلى الشكل واختر المماثل له</div>
+
+                    <div class="incomplete-shape">
+                        <div class="shape-display" id="incompleteShape">A</div>
+                    </div>
+
+                    <div class="options-grid" id="optionsGrid">
+                        <!-- سيتم إنشاء الخيارات هنا -->
+                    </div>
+
+                    <div class="result-display" id="resultDisplay" style="display: none"></div>
+                    <button class="restart-btn" id="restartBtn" onclick="restartLevel()" style="display: none">إعادة المستوى</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // أصوات اللعبة
+            const sounds = {
+                success: () => {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                    // تأثير صوت الجليتر
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 0.1);
+                    oscillator.frequency.exponentialRampToValueAtTime(1000, audioContext.currentTime + 0.2);
+
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                },
+
+                failure: () => {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                    // صوت الباز
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
+                    oscillator.frequency.linearRampToValueAtTime(200, audioContext.currentTime + 0.5);
+
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.5);
+                }
+            };
+
+            // بيانات المستويات
+            const gameLevels = {
+                1: [
+                    // مستوى سهل - أحرف عربية
+                    { target: 'أ', options: ['أ', 'إ', 'آ', 'ا'], correct: 0 },
+                    { target: 'ب', options: ['ب', 'ت', 'ث', 'ن'], correct: 0 },
+                    { target: 'د', options: ['ذ', 'د', 'ر', 'ز'], correct: 1 },
+                    { target: 'س', options: ['ش', 'س', 'ص', 'ض'], correct: 1 },
+                    { target: 'ع', options: ['غ', 'ف', 'ع', 'ق'], correct: 2 }
+                ],
+                2: [
+                    // مستوى متوسط - أحرف إنجليزية وأرقام
+                    { target: 'A', options: ['A', 'H', 'M', 'V'], correct: 0 },
+                    { target: 'B', options: ['D', 'B', 'P', 'R'], correct: 1 },
+                    { target: '8', options: ['3', '6', '8', '9'], correct: 2 },
+                    { target: '4', options: ['4', '7', '1', 'A'], correct: 0 },
+                    { target: 'O', options: ['Q', 'O', 'D', 'C'], correct: 1 }
+                ],
+                3: [
+                    // مستوى صعب - رموز وأشكال معقدة
+                    { target: '♠', options: ['♠', '♣', '♥', '♦'], correct: 0 },
+                    { target: '★', options: ['☆', '★', '✦', '✧'], correct: 1 },
+                    { target: '◆', options: ['◇', '◈', '◆', '◊'], correct: 2 },
+                    { target: '●', options: ['●', '○', '◯', '◉'], correct: 0 },
+                    { target: '▲', options: ['△', '▲', '▼', '▽'], correct: 1 }
+                ]
+            };
+
+            let currentLevel = 1;
+            let currentQuestion = 0;
+            let score = 0;
+            let correctAnswers = 0;
+
+            function createGlitterEffect(element) {
+                const rect = element.getBoundingClientRect();
+                const particles = 20;
+
+                for (let i = 0; i < particles; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'glitter-particle';
+
+                    const colors = ['#ffd700', '#ffed4e', '#fff200', '#ffaa00'];
+                    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+
+                    particle.style.left = `${rect.left + Math.random() * rect.width}px`;
+                    particle.style.top = `${rect.top + Math.random() * rect.height}px`;
+                    particle.style.animationDelay = `${Math.random() * 0.3}s`;
+
+                    document.body.appendChild(particle);
+
+                    setTimeout(() => {
+                        particle.remove();
+                    }, 1000);
+                }
+            }
+
+            function startLevel(level) {
+                currentLevel = level;
+                currentQuestion = 0;
+                score = 0;
+                correctAnswers = 0;
+
+                document.getElementById('levelSelector').classList.add('hidden');
+                document.getElementById('gameScreen').classList.remove('hidden');
+
+                updateDisplay();
+                displayQuestion();
+            }
+
+            function backToLevels() {
+                document.getElementById('gameScreen').classList.add('hidden');
+                document.getElementById('levelSelector').classList.remove('hidden');
+            }
+
+            function updateDisplay() {
+                document.getElementById('currentLevel').textContent = currentLevel;
+                document.getElementById('score').textContent = score;
+                document.getElementById('correct').textContent = `${correctAnswers}/5`;
+            }
+
+            function displayQuestion() {
+                if (currentQuestion >= 5) {
+                    endLevel();
+                    return;
+                }
+
+                const questionData = gameLevels[currentLevel][currentQuestion];
+                const optionsGrid = document.getElementById('optionsGrid');
+                const questionCounter = document.getElementById('questionCounter');
+                const progressBar = document.getElementById('progressBar');
+
+                questionCounter.textContent = `السؤال ${currentQuestion + 1} من 5`;
+                progressBar.style.width = `${(currentQuestion / 5) * 100}%`;
+
+                document.getElementById('incompleteShape').textContent = questionData.target;
+
+                // إنشاء الخيارات
+                optionsGrid.innerHTML = '';
+                questionData.options.forEach((option, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.textContent = option;
+                    btn.onclick = () => selectAnswer(btn, index === questionData.correct);
+                    optionsGrid.appendChild(btn);
+                });
+
+                document.getElementById('resultDisplay').style.display = 'none';
+            }
+
+            function selectAnswer(selectedBtn, isCorrect) {
+                // منع النقر على أزرار أخرى
+                const allBtns = document.querySelectorAll('.option-btn');
+                allBtns.forEach((btn) => (btn.onclick = null));
+
+                if (isCorrect) {
+                    selectedBtn.classList.add('correct');
+                    score += 20;
+                    correctAnswers++;
+
+                    // تأثيرات النجاح
+                    sounds.success();
+                    createGlitterEffect(selectedBtn);
+
+                    updateDisplay();
+
+                    // الانتقال المباشر للسؤال التالي
+                    setTimeout(() => {
+                        currentQuestion++;
+                        displayQuestion();
+                    }, 1000);
+                } else {
+                    selectedBtn.classList.add('incorrect');
+                    sounds.failure();
+
+                    // إظهار الإجابة الصحيحة
+                    const correctAnswer = gameLevels[currentLevel][currentQuestion].correct;
+                    allBtns[correctAnswer].classList.add('correct');
+
+                    setTimeout(() => {
+                        currentQuestion++;
+                        displayQuestion();
+                    }, 2000);
+                }
+            }
+
+            function endLevel() {
+                const resultDisplay = document.getElementById('resultDisplay');
+                const restartBtn = document.getElementById('restartBtn');
+                const progressBar = document.getElementById('progressBar');
+
+                progressBar.style.width = '100%';
+
+                const successRate = (correctAnswers / 5) * 100;
+                const passed = correctAnswers >= 4; // معيار النجاح: 4/5
+
+                let resultMessage = '';
+                let resultClass = '';
+
+                if (passed) {
+                    resultClass = 'success';
+                    resultMessage = `
+                    🎉 مبروك! أكملت المستوى ${currentLevel} بنجاح! 🎉
+                    <br><br>
+                    📊 النتيجة: ${correctAnswers}/5 (${successRate.toFixed(1)}%)
+                    <br>
+                    ⭐ النقاط: ${score} نقطة
+                `;
+
+                    if (currentLevel < 3) {
+                        resultMessage += `<br><br>🚀 الانتقال للمستوى التالي...`;
+
+                        // الانتقال التلقائي للمستوى التالي
+                        setTimeout(() => {
+                            startLevel(currentLevel + 1);
+                        }, 2000);
+                    } else {
+                        resultMessage += `<br><br>🏆 تهانينا! أكملت جميع المستويات!`;
+                    }
+                } else {
+                    resultClass = 'failure';
+                    resultMessage = `
+                    😔 لم تحقق المطلوب هذه المرة
+                    <br><br>
+                    📊 النتيجة: ${correctAnswers}/5 (${successRate.toFixed(1)}%)
+                    <br>
+                    🎯 المطلوب: 4/5 على الأقل
+                    <br>
+                    💪 حاول مرة أخرى!
+                `;
+
+                    restartBtn.style.display = 'inline-block';
+
+                    // إخفاء منطقة اللعبة
+                    document.getElementById('incompleteShape').style.display = 'none';
+                    document.getElementById('optionsGrid').style.display = 'none';
+                    document.getElementById('hintText').style.display = 'none';
+                }
+
+                resultDisplay.className = `result-display ${resultClass}`;
+                resultDisplay.innerHTML = resultMessage;
+                resultDisplay.style.display = 'block';
+            }
+
+            function restartLevel() {
+                currentQuestion = 0;
+                score = 0;
+                correctAnswers = 0;
+
+                updateDisplay();
+
+                // إظهار عناصر اللعبة مرة أخرى
+                document.getElementById('incompleteShape').style.display = 'flex';
+                document.getElementById('optionsGrid').style.display = 'grid';
+                document.getElementById('hintText').style.display = 'block';
+
+                // إخفاء النتائج
+                document.getElementById('resultDisplay').style.display = 'none';
+                document.getElementById('restartBtn').style.display = 'none';
+
+                displayQuestion();
+            }
+
+            // بدء اللعبة
+            window.onload = function () {
+                // إظهار شاشة اختيار المستوى
+                document.getElementById('levelSelector').classList.remove('hidden');
+            };
+        </script>
+    </body>
+</html>

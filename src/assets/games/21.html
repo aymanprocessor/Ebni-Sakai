@@ -1,0 +1,1135 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>لعبة مطابقة الأشكال والظلال</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: 'Arial', sans-serif;
+            }
+
+            body {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 20px;
+                overflow-x: hidden;
+            }
+
+            .header {
+                text-align: center;
+                color: white;
+                margin-bottom: 20px;
+            }
+
+            .header h1 {
+                font-size: 2.5em;
+                margin-bottom: 10px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            }
+
+            .score-container {
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                background: white;
+                padding: 15px;
+                border-radius: 15px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                z-index: 100;
+            }
+
+            .score {
+                font-size: 1.2em;
+                color: #333;
+                margin: 5px 0;
+                font-weight: bold;
+            }
+
+            .nav-buttons {
+                display: flex;
+                gap: 10px;
+                margin-bottom: 20px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .nav-btn {
+                padding: 10px 15px;
+                background: #4caf50;
+                color: white;
+                border: none;
+                border-radius: 25px;
+                cursor: pointer;
+                font-size: 14px;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            }
+
+            .nav-btn:hover {
+                background: #45a049;
+                transform: translateY(-2px);
+            }
+
+            .nav-btn.active {
+                background: #ff6b6b;
+                transform: scale(1.1);
+            }
+
+            .game-container {
+                background: white;
+                border-radius: 20px;
+                padding: 30px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                width: 100%;
+                max-width: 1200px;
+                min-height: 500px;
+            }
+
+            .page {
+                display: none;
+                text-align: center;
+            }
+
+            .page.active {
+                display: block;
+            }
+
+            .page-title {
+                font-size: 2em;
+                color: #333;
+                margin-bottom: 30px;
+                padding: 15px;
+                background: linear-gradient(45deg, #ffd700, #ffa500);
+                border-radius: 15px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+
+            .drag-drop-container {
+                display: flex;
+                justify-content: space-around;
+                align-items: flex-start;
+                gap: 20px;
+                margin-top: 30px;
+            }
+
+            .shapes-column,
+            .shadows-column {
+                flex: 1;
+                min-height: 400px;
+                padding: 20px;
+                border: 3px dashed #ddd;
+                border-radius: 15px;
+                background: #f9f9f9;
+            }
+
+            .shapes-column h3,
+            .shadows-column h3 {
+                font-size: 1.5em;
+                color: #333;
+                margin-bottom: 20px;
+                padding: 10px;
+                background: #e3f2fd;
+                border-radius: 10px;
+            }
+
+            .shape-item {
+                width: 80px;
+                height: 80px;
+                margin: 15px;
+                cursor: grab;
+                transition: all 0.3s ease;
+                border-radius: 10px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 24px;
+                background: white;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                border: 2px solid #4caf50;
+                user-select: none;
+                touch-action: none;
+                position: relative;
+                z-index: 1;
+            }
+
+            .shape-item:hover {
+                transform: scale(1.1);
+                box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            }
+
+            .shape-item:active {
+                cursor: grabbing;
+            }
+
+            .shape-item.dragging {
+                opacity: 0.9;
+                transform: scale(1.2) rotate(3deg);
+                z-index: 1000;
+                pointer-events: none;
+                position: fixed;
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+                border: 3px solid #ff6b6b;
+                transition: none;
+            }
+
+            .shape-item.dragging::after {
+                content: '';
+                position: absolute;
+                top: -10px;
+                left: -10px;
+                right: -10px;
+                bottom: -10px;
+                border: 2px dashed #ff6b6b;
+                border-radius: 15px;
+                animation: rotateBorder 2s linear infinite;
+            }
+
+            .shadow-slot {
+                width: 90px;
+                height: 90px;
+                margin: 15px;
+                border: 3px dashed #666;
+                border-radius: 10px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                background: #333;
+                color: #666;
+                font-size: 20px;
+                position: relative;
+                transition: all 0.3s ease;
+                filter: brightness(0.3) contrast(1.5);
+                opacity: 0.8;
+            }
+
+            .shadow-slot:hover {
+                border-color: #4caf50;
+                box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+            }
+
+            .shadow-slot.drop-hover {
+                border-color: #4caf50;
+                background: #e8f5e8;
+                transform: scale(1.05);
+                box-shadow: 0 0 20px rgba(76, 175, 80, 0.6);
+                transition: all 0.2s ease;
+            }
+
+            .shadow-slot.correct {
+                border-color: #4caf50 !important;
+                background: white !important;
+                animation: successPulse 0.6s ease-in-out;
+                box-shadow: 0 0 25px rgba(76, 175, 80, 0.8);
+                filter: none !important;
+                opacity: 1 !important;
+            }
+
+            .shadow-slot.wrong {
+                border-color: #f44336;
+                animation: shake 0.5s ease-in-out;
+            }
+
+            .cursor-connection {
+                position: fixed;
+                width: 6px;
+                height: 6px;
+                background: #ff6b6b;
+                border-radius: 50%;
+                z-index: 999;
+                pointer-events: none;
+                box-shadow: 0 0 15px #ff6b6b;
+                transition: none;
+                animation: pulseCursor 1s ease-in-out infinite alternate;
+            }
+
+            .success-message {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: #4caf50;
+                color: white;
+                padding: 20px 40px;
+                border-radius: 15px;
+                font-size: 1.5em;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                display: none;
+                z-index: 200;
+            }
+
+            @keyframes rotateBorder {
+                0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+
+            @keyframes pulseCursor {
+                0% {
+                    transform: scale(1);
+                    box-shadow: 0 0 10px #ff6b6b;
+                }
+                100% {
+                    transform: scale(1.5);
+                    box-shadow:
+                        0 0 20px #ff6b6b,
+                        0 0 30px #ff6b6b;
+                }
+            }
+
+            @keyframes successPulse {
+                0% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.15);
+                    box-shadow: 0 0 30px rgba(76, 175, 80, 1);
+                }
+                100% {
+                    transform: scale(1);
+                }
+            }
+
+            @keyframes sparkleEffect {
+                0% {
+                    transform: scale(0) rotate(0deg);
+                    opacity: 1;
+                }
+                50% {
+                    transform: scale(1.2) rotate(180deg);
+                    opacity: 1;
+                }
+                100% {
+                    transform: scale(0) rotate(360deg);
+                    opacity: 0;
+                }
+            }
+
+            @keyframes pulse {
+                0%,
+                100% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.1);
+                }
+            }
+
+            @keyframes shake {
+                0%,
+                100% {
+                    transform: translateX(0);
+                }
+                25% {
+                    transform: translateX(-5px);
+                }
+                75% {
+                    transform: translateX(5px);
+                }
+            }
+
+            @media (max-width: 768px) {
+                .drag-drop-container {
+                    flex-direction: column;
+                    align-items: center;
+                }
+
+                .shape-item {
+                    width: 60px;
+                    height: 60px;
+                    font-size: 20px;
+                }
+
+                .shadow-slot {
+                    width: 70px;
+                    height: 70px;
+                    font-size: 16px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="score-container">
+            <div class="score">النتيجة: <span id="score">0</span></div>
+            <div class="score">المستوى: <span id="currentLevel">1</span>/10</div>
+        </div>
+
+        <div class="header">
+            <h1>🎮 لعبة مطابقة الأشكال والظلال 🎮</h1>
+            <p>اسحب الأشكال إلى ظلالها الصحيحة!</p>
+        </div>
+
+        <div class="nav-buttons">
+            <button class="nav-btn active" onclick="showPage(1)">1. أشكال هندسية 2D</button>
+            <button class="nav-btn" onclick="showPage(2)">2. أشكال هندسية 3D</button>
+            <button class="nav-btn" onclick="showPage(3)">3. الفاكهة</button>
+            <button class="nav-btn" onclick="showPage(4)">4. الخضروات</button>
+            <button class="nav-btn" onclick="showPage(5)">5. أدوات المائدة</button>
+            <button class="nav-btn" onclick="showPage(6)">6. حيوانات المزرعة</button>
+            <button class="nav-btn" onclick="showPage(7)">7. حيوانات الغابة</button>
+            <button class="nav-btn" onclick="showPage(8)">8. حيوانات البحر</button>
+            <button class="nav-btn" onclick="showPage(9)">9. الملابس</button>
+            <button class="nav-btn" onclick="showPage(10)">10. الحشرات</button>
+        </div>
+
+        <div class="game-container">
+            <!-- Page 1: 2D Shapes -->
+            <div id="page1" class="page active">
+                <div class="page-title">🔺 الأشكال الهندسية ثنائية الأبعاد 🔵</div>
+                <div class="drag-drop-container">
+                    <div class="shapes-column">
+                        <h3>الأشكال</h3>
+                        <div class="shape-item" data-shape="circle">🔵</div>
+                        <div class="shape-item" data-shape="square">🟦</div>
+                        <div class="shape-item" data-shape="triangle">🔺</div>
+                        <div class="shape-item" data-shape="heart">❤️</div>
+                        <div class="shape-item" data-shape="star">⭐</div>
+                    </div>
+                    <div class="shadows-column">
+                        <h3>الظلال</h3>
+                        <div class="shadow-slot" data-target="star">⭐</div>
+                        <div class="shadow-slot" data-target="circle">🔵</div>
+                        <div class="shadow-slot" data-target="heart">❤️</div>
+                        <div class="shadow-slot" data-target="square">🟦</div>
+                        <div class="shadow-slot" data-target="triangle">🔺</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 2: 3D Shapes -->
+            <div id="page2" class="page">
+                <div class="page-title">📦 الأشكال الهندسية ثلاثية الأبعاد 🎲</div>
+                <div class="drag-drop-container">
+                    <div class="shapes-column">
+                        <h3>الأشكال</h3>
+                        <div class="shape-item" data-shape="cube">📦</div>
+                        <div class="shape-item" data-shape="sphere">⚽</div>
+                        <div class="shape-item" data-shape="cylinder">🥫</div>
+                        <div class="shape-item" data-shape="cone">🍦</div>
+                        <div class="shape-item" data-shape="pyramid">🔺</div>
+                    </div>
+                    <div class="shadows-column">
+                        <h3>الظلال</h3>
+                        <div class="shadow-slot" data-target="sphere">⚽</div>
+                        <div class="shadow-slot" data-target="cube">📦</div>
+                        <div class="shadow-slot" data-target="pyramid">🔺</div>
+                        <div class="shadow-slot" data-target="cone">🍦</div>
+                        <div class="shadow-slot" data-target="cylinder">🥫</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 3: Fruits -->
+            <div id="page3" class="page">
+                <div class="page-title">🍎 الفاكهة اللذيذة 🍊</div>
+                <div class="drag-drop-container">
+                    <div class="shapes-column">
+                        <h3>الفاكهة</h3>
+                        <div class="shape-item" data-shape="apple">🍎</div>
+                        <div class="shape-item" data-shape="banana">🍌</div>
+                        <div class="shape-item" data-shape="orange">🍊</div>
+                        <div class="shape-item" data-shape="grape">🍇</div>
+                        <div class="shape-item" data-shape="strawberry">🍓</div>
+                    </div>
+                    <div class="shadows-column">
+                        <h3>الظلال</h3>
+                        <div class="shadow-slot" data-target="banana">🍌</div>
+                        <div class="shadow-slot" data-target="strawberry">🍓</div>
+                        <div class="shadow-slot" data-target="apple">🍎</div>
+                        <div class="shadow-slot" data-target="orange">🍊</div>
+                        <div class="shadow-slot" data-target="grape">🍇</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 4: Vegetables -->
+            <div id="page4" class="page">
+                <div class="page-title">🥕 الخضروات الطازجة 🥬</div>
+                <div class="drag-drop-container">
+                    <div class="shapes-column">
+                        <h3>الخضروات</h3>
+                        <div class="shape-item" data-shape="carrot">🥕</div>
+                        <div class="shape-item" data-shape="tomato">🍅</div>
+                        <div class="shape-item" data-shape="lettuce">🥬</div>
+                        <div class="shape-item" data-shape="pepper">🫑</div>
+                        <div class="shape-item" data-shape="onion">🧅</div>
+                    </div>
+                    <div class="shadows-column">
+                        <h3>الظلال</h3>
+                        <div class="shadow-slot" data-target="lettuce">🥬</div>
+                        <div class="shadow-slot" data-target="onion">🧅</div>
+                        <div class="shadow-slot" data-target="carrot">🥕</div>
+                        <div class="shadow-slot" data-target="pepper">🫑</div>
+                        <div class="shadow-slot" data-target="tomato">🍅</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 5: Kitchen Items -->
+            <div id="page5" class="page">
+                <div class="page-title">🍽️ أدوات المائدة والطعام 🥄</div>
+                <div class="drag-drop-container">
+                    <div class="shapes-column">
+                        <h3>الأدوات</h3>
+                        <div class="shape-item" data-shape="plate">🍽️</div>
+                        <div class="shape-item" data-shape="cup">☕</div>
+                        <div class="shape-item" data-shape="spoon">🥄</div>
+                        <div class="shape-item" data-shape="fork">🍴</div>
+                        <div class="shape-item" data-shape="knife">🔪</div>
+                    </div>
+                    <div class="shadows-column">
+                        <h3>الظلال</h3>
+                        <div class="shadow-slot" data-target="fork">🍴</div>
+                        <div class="shadow-slot" data-target="plate">🍽️</div>
+                        <div class="shadow-slot" data-target="knife">🔪</div>
+                        <div class="shadow-slot" data-target="cup">☕</div>
+                        <div class="shadow-slot" data-target="spoon">🥄</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 6: Farm Animals -->
+            <div id="page6" class="page">
+                <div class="page-title">🐄 حيوانات المزرعة 🐷</div>
+                <div class="drag-drop-container">
+                    <div class="shapes-column">
+                        <h3>الحيوانات</h3>
+                        <div class="shape-item" data-shape="cow">🐄</div>
+                        <div class="shape-item" data-shape="pig">🐷</div>
+                        <div class="shape-item" data-shape="chicken">🐔</div>
+                        <div class="shape-item" data-shape="sheep">🐑</div>
+                        <div class="shape-item" data-shape="horse">🐴</div>
+                    </div>
+                    <div class="shadows-column">
+                        <h3>الظلال</h3>
+                        <div class="shadow-slot" data-target="sheep">🐑</div>
+                        <div class="shadow-slot" data-target="horse">🐴</div>
+                        <div class="shadow-slot" data-target="cow">🐄</div>
+                        <div class="shadow-slot" data-target="pig">🐷</div>
+                        <div class="shadow-slot" data-target="chicken">🐔</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 7: Forest Animals -->
+            <div id="page7" class="page">
+                <div class="page-title">🦁 حيوانات الغابة 🐻</div>
+                <div class="drag-drop-container">
+                    <div class="shapes-column">
+                        <h3>الحيوانات</h3>
+                        <div class="shape-item" data-shape="lion">🦁</div>
+                        <div class="shape-item" data-shape="bear">🐻</div>
+                        <div class="shape-item" data-shape="elephant">🐘</div>
+                        <div class="shape-item" data-shape="monkey">🐵</div>
+                        <div class="shape-item" data-shape="tiger">🐯</div>
+                    </div>
+                    <div class="shadows-column">
+                        <h3>الظلال</h3>
+                        <div class="shadow-slot" data-target="monkey">🐵</div>
+                        <div class="shadow-slot" data-target="lion">🦁</div>
+                        <div class="shadow-slot" data-target="tiger">🐯</div>
+                        <div class="shadow-slot" data-target="elephant">🐘</div>
+                        <div class="shadow-slot" data-target="bear">🐻</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 8: Sea Animals -->
+            <div id="page8" class="page">
+                <div class="page-title">🐟 حيوانات البحر 🐙</div>
+                <div class="drag-drop-container">
+                    <div class="shapes-column">
+                        <h3>الحيوانات</h3>
+                        <div class="shape-item" data-shape="fish">🐟</div>
+                        <div class="shape-item" data-shape="octopus">🐙</div>
+                        <div class="shape-item" data-shape="whale">🐋</div>
+                        <div class="shape-item" data-shape="dolphin">🐬</div>
+                        <div class="shape-item" data-shape="shark">🦈</div>
+                    </div>
+                    <div class="shadows-column">
+                        <h3>الظلال</h3>
+                        <div class="shadow-slot" data-target="whale">🐋</div>
+                        <div class="shadow-slot" data-target="fish">🐟</div>
+                        <div class="shadow-slot" data-target="shark">🦈</div>
+                        <div class="shadow-slot" data-target="octopus">🐙</div>
+                        <div class="shadow-slot" data-target="dolphin">🐬</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 9: Clothes -->
+            <div id="page9" class="page">
+                <div class="page-title">👕 الملابس 👗</div>
+                <div class="drag-drop-container">
+                    <div class="shapes-column">
+                        <h3>الملابس</h3>
+                        <div class="shape-item" data-shape="shirt">👕</div>
+                        <div class="shape-item" data-shape="dress">👗</div>
+                        <div class="shape-item" data-shape="pants">👖</div>
+                        <div class="shape-item" data-shape="shoe">👟</div>
+                        <div class="shape-item" data-shape="hat">👒</div>
+                    </div>
+                    <div class="shadows-column">
+                        <h3>الظلال</h3>
+                        <div class="shadow-slot" data-target="hat">👒</div>
+                        <div class="shadow-slot" data-target="pants">👖</div>
+                        <div class="shadow-slot" data-target="dress">👗</div>
+                        <div class="shadow-slot" data-target="shirt">👕</div>
+                        <div class="shadow-slot" data-target="shoe">👟</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 10: Insects -->
+            <div id="page10" class="page">
+                <div class="page-title">🐛 الحشرات 🦋</div>
+                <div class="drag-drop-container">
+                    <div class="shapes-column">
+                        <h3>الحشرات</h3>
+                        <div class="shape-item" data-shape="butterfly">🦋</div>
+                        <div class="shape-item" data-shape="bee">🐝</div>
+                        <div class="shape-item" data-shape="ant">🐜</div>
+                        <div class="shape-item" data-shape="spider">🕷️</div>
+                        <div class="shape-item" data-shape="ladybug">🐞</div>
+                    </div>
+                    <div class="shadows-column">
+                        <h3>الظلال</h3>
+                        <div class="shadow-slot" data-target="spider">🕷️</div>
+                        <div class="shadow-slot" data-target="butterfly">🦋</div>
+                        <div class="shadow-slot" data-target="ladybug">🐞</div>
+                        <div class="shadow-slot" data-target="ant">🐜</div>
+                        <div class="shadow-slot" data-target="bee">🐝</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="success-message" id="successMessage">🎉 أحسنت! لقد أكملت المستوى! 🎉</div>
+
+        <script>
+            // Game Variables
+            let currentPage = 1;
+            let score = 0;
+            let correctMatches = 0;
+            let isDragging = false;
+            let draggedElement = null;
+            let audioContext = null;
+
+            // Initialize Audio Context
+            function initAudio() {
+                if (!audioContext) {
+                    try {
+                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    } catch (e) {
+                        console.log('Audio not supported');
+                    }
+                }
+            }
+
+            // Sound Functions
+            function playSuccessSound() {
+                if (!audioContext) return;
+
+                try {
+                    const notes = [523.25, 659.25, 783.99, 1046.5];
+                    let time = audioContext.currentTime;
+
+                    notes.forEach((frequency, index) => {
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+
+                        oscillator.frequency.setValueAtTime(frequency, time);
+                        oscillator.type = 'sine';
+
+                        gainNode.gain.setValueAtTime(0, time);
+                        gainNode.gain.linearRampToValueAtTime(0.3, time + 0.01);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, time + 0.3);
+
+                        oscillator.start(time);
+                        oscillator.stop(time + 0.3);
+
+                        time += 0.1;
+                    });
+                } catch (e) {
+                    console.log('Sound error:', e);
+                }
+            }
+
+            function playErrorSound() {
+                if (!audioContext) return;
+
+                try {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.type = 'square';
+                    oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.5);
+
+                    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.01);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.5);
+                } catch (e) {
+                    console.log('Sound error:', e);
+                }
+            }
+
+            // Utility Functions
+            function getEventPos(e) {
+                if (e.touches && e.touches[0]) {
+                    return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                }
+                return { x: e.clientX, y: e.clientY };
+            }
+
+            function updateScore() {
+                const scoreElement = document.getElementById('score');
+                if (scoreElement) {
+                    scoreElement.textContent = score;
+                }
+            }
+
+            function showSuccessMessage() {
+                const message = document.getElementById('successMessage');
+                if (message) {
+                    message.style.display = 'block';
+                    setTimeout(() => {
+                        message.style.display = 'none';
+                    }, 2000);
+                }
+            }
+
+            // Cursor Connection Functions
+            function createCursorConnection() {
+                removeCursorConnection();
+                const connectionDiv = document.createElement('div');
+                connectionDiv.className = 'cursor-connection';
+                document.body.appendChild(connectionDiv);
+            }
+
+            function updateCursorConnection(pos) {
+                const connection = document.querySelector('.cursor-connection');
+                if (connection && pos) {
+                    connection.style.left = pos.x - 3 + 'px';
+                    connection.style.top = pos.y - 3 + 'px';
+                }
+            }
+
+            function removeCursorConnection() {
+                const connection = document.querySelector('.cursor-connection');
+                if (connection) {
+                    connection.remove();
+                }
+            }
+
+            function createSuccessEffect(element) {
+                const sparkle = document.createElement('div');
+                sparkle.innerHTML = '✨';
+                sparkle.style.cssText = `
+                position: absolute;
+                top: -10px;
+                right: -10px;
+                font-size: 20px;
+                animation: sparkleEffect 1s ease-out forwards;
+                pointer-events: none;
+                z-index: 1001;
+            `;
+
+                element.style.position = 'relative';
+                element.appendChild(sparkle);
+
+                setTimeout(() => {
+                    if (sparkle && sparkle.parentNode) {
+                        sparkle.parentNode.removeChild(sparkle);
+                    }
+                }, 1000);
+            }
+
+            // Page Navigation
+            function showPage(pageNum) {
+                document.querySelectorAll('.page').forEach((page) => {
+                    page.classList.remove('active');
+                });
+
+                document.querySelectorAll('.nav-btn').forEach((btn) => {
+                    btn.classList.remove('active');
+                });
+
+                const targetPage = document.getElementById(`page${pageNum}`);
+                const targetBtn = document.querySelectorAll('.nav-btn')[pageNum - 1];
+
+                if (targetPage) targetPage.classList.add('active');
+                if (targetBtn) targetBtn.classList.add('active');
+
+                currentPage = pageNum;
+                const levelElement = document.getElementById('currentLevel');
+                if (levelElement) {
+                    levelElement.textContent = pageNum;
+                }
+
+                resetGame();
+            }
+
+            function resetGame() {
+                correctMatches = 0;
+
+                if (isDragging && draggedElement) {
+                    resetElementStyles();
+                }
+
+                isDragging = false;
+                draggedElement = null;
+
+                removeCursorConnection();
+
+                // Reset shadow slots
+                document.querySelectorAll('.shadow-slot').forEach((slot) => {
+                    slot.classList.remove('correct', 'wrong', 'drop-hover');
+                    slot.removeAttribute('style');
+
+                    // Remove sparkle effects
+                    const sparkles = slot.querySelectorAll('div');
+                    sparkles.forEach((sparkle) => {
+                        if (sparkle.innerHTML === '✨') {
+                            sparkle.remove();
+                        }
+                    });
+
+                    // Restore original shadow with filter
+                    const target = slot.getAttribute('data-target');
+                    if (target) {
+                        slot.style.background = '#333';
+                        slot.style.color = '#666';
+                        slot.style.filter = 'brightness(0.3) contrast(1.5)';
+                        slot.style.opacity = '0.8';
+                        slot.style.border = '3px dashed #666';
+                        slot.style.borderRadius = '10px';
+                        slot.style.display = 'inline-flex';
+                        slot.style.alignItems = 'center';
+                        slot.style.justifyContent = 'center';
+                        slot.style.fontSize = '20px';
+                    }
+                });
+
+                // Reset shape items
+                document.querySelectorAll('.shape-item').forEach((item) => {
+                    item.classList.remove('dragging');
+                    item.removeAttribute('style');
+                    item.style.display = '';
+                });
+            }
+
+            function resetElementStyles() {
+                if (draggedElement) {
+                    draggedElement.classList.remove('dragging');
+                    draggedElement.removeAttribute('style');
+                    draggedElement.style.display = '';
+                    isDragging = false;
+                    draggedElement = null;
+                }
+            }
+
+            // Drag Functions
+            function updateDragPosition(pos) {
+                if (!draggedElement || !pos) return;
+
+                const centerX = pos.x - draggedElement.offsetWidth / 2;
+                const centerY = pos.y - draggedElement.offsetHeight / 2;
+
+                draggedElement.style.left = centerX + 'px';
+                draggedElement.style.top = centerY + 'px';
+                draggedElement.style.transform = 'scale(1.2) rotate(3deg)';
+            }
+
+            function handleDragStart(e) {
+                if (isDragging) return;
+
+                e.preventDefault();
+                e.stopPropagation();
+
+                initAudio();
+
+                const pos = getEventPos(e);
+
+                isDragging = true;
+                draggedElement = e.target;
+
+                const rect = draggedElement.getBoundingClientRect();
+                draggedElement.originalRect = {
+                    left: rect.left,
+                    top: rect.top,
+                    width: rect.width,
+                    height: rect.height
+                };
+
+                draggedElement.classList.add('dragging');
+                draggedElement.style.position = 'fixed';
+                draggedElement.style.zIndex = '1000';
+                draggedElement.style.pointerEvents = 'none';
+
+                updateDragPosition(pos);
+                createCursorConnection();
+            }
+
+            function handleDragMove(e) {
+                if (!isDragging || !draggedElement) return;
+
+                e.preventDefault();
+                e.stopPropagation();
+
+                const pos = getEventPos(e);
+                updateDragPosition(pos);
+                updateCursorConnection(pos);
+
+                draggedElement.style.pointerEvents = 'none';
+                const elementBelow = document.elementFromPoint(pos.x, pos.y);
+                draggedElement.style.pointerEvents = 'auto';
+
+                document.querySelectorAll('.shadow-slot').forEach((slot) => {
+                    slot.classList.remove('drop-hover');
+                    slot.style.borderColor = '';
+                    slot.style.backgroundColor = '';
+                });
+
+                if (elementBelow && elementBelow.classList.contains('shadow-slot') && !elementBelow.classList.contains('correct')) {
+                    const draggedShape = draggedElement.getAttribute('data-shape');
+                    const targetShadow = elementBelow.getAttribute('data-target');
+
+                    if (draggedShape === targetShadow) {
+                        elementBelow.classList.add('drop-hover');
+                        elementBelow.style.borderColor = '#4CAF50';
+                        elementBelow.style.backgroundColor = '#E8F5E8';
+                    } else {
+                        elementBelow.style.borderColor = '#f44336';
+                        elementBelow.style.backgroundColor = '#FFEBEE';
+                    }
+                }
+            }
+
+            function handleDragEnd(e) {
+                if (!isDragging || !draggedElement) return;
+
+                try {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const pos = getEventPos(e);
+
+                    removeCursorConnection();
+
+                    draggedElement.style.pointerEvents = 'none';
+                    const elementBelow = document.elementFromPoint(pos.x, pos.y);
+                    draggedElement.style.pointerEvents = 'auto';
+
+                    document.querySelectorAll('.shadow-slot').forEach((slot) => {
+                        slot.classList.remove('drop-hover');
+                        slot.style.borderColor = '';
+                        slot.style.backgroundColor = '';
+                    });
+
+                    if (elementBelow && elementBelow.classList.contains('shadow-slot') && !elementBelow.classList.contains('correct')) {
+                        const draggedShape = draggedElement.getAttribute('data-shape');
+                        const targetShadow = elementBelow.getAttribute('data-target');
+
+                        if (draggedShape === targetShadow) {
+                            handleCorrectMatch(elementBelow);
+                        } else {
+                            handleWrongMatch(elementBelow);
+                        }
+                    } else {
+                        returnToOriginalPosition();
+                    }
+                } catch (error) {
+                    console.error('Drag end error:', error);
+                    resetElementStyles();
+                }
+            }
+
+            function handleCorrectMatch(shadowSlot) {
+                try {
+                    shadowSlot.classList.add('correct');
+                    score += 10;
+                    correctMatches++;
+                    updateScore();
+
+                    playSuccessSound();
+
+                    const originalContent = draggedElement.innerHTML;
+
+                    animateToTarget(draggedElement, shadowSlot, () => {
+                        try {
+                            shadowSlot.innerHTML = originalContent;
+                            shadowSlot.style.background = 'white';
+                            shadowSlot.style.color = 'inherit';
+                            shadowSlot.style.filter = 'none';
+                            shadowSlot.style.opacity = '1';
+                            shadowSlot.style.border = '3px solid #4CAF50';
+                            shadowSlot.style.borderRadius = '10px';
+                            shadowSlot.style.fontSize = '24px';
+                            shadowSlot.style.display = 'inline-flex';
+                            shadowSlot.style.alignItems = 'center';
+                            shadowSlot.style.justifyContent = 'center';
+
+                            draggedElement.style.display = 'none';
+
+                            isDragging = false;
+                            draggedElement = null;
+
+                            shadowSlot.style.animation = 'successPulse 0.6s ease-in-out';
+                            createSuccessEffect(shadowSlot);
+
+                            if (correctMatches === 5) {
+                                setTimeout(() => {
+                                    showSuccessMessage();
+                                    if (currentPage < 10) {
+                                        setTimeout(() => showPage(currentPage + 1), 2000);
+                                    }
+                                }, 500);
+                            }
+                        } catch (error) {
+                            console.error('Success callback error:', error);
+                            resetElementStyles();
+                        }
+                    });
+                } catch (error) {
+                    console.error('Correct match error:', error);
+                    resetElementStyles();
+                }
+            }
+
+            function handleWrongMatch(shadowSlot) {
+                try {
+                    shadowSlot.classList.add('wrong');
+
+                    playErrorSound();
+
+                    setTimeout(() => {
+                        shadowSlot.classList.remove('wrong');
+                    }, 1000);
+
+                    returnToOriginalPosition();
+                } catch (error) {
+                    console.error('Wrong match error:', error);
+                    resetElementStyles();
+                }
+            }
+
+            function animateToTarget(element, target, callback) {
+                if (!element || !target) return;
+
+                try {
+                    const targetRect = target.getBoundingClientRect();
+                    const targetCenterX = targetRect.left + targetRect.width / 2 - element.offsetWidth / 2;
+                    const targetCenterY = targetRect.top + targetRect.height / 2 - element.offsetHeight / 2;
+
+                    element.style.transition = 'all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                    element.style.left = targetCenterX + 'px';
+                    element.style.top = targetCenterY + 'px';
+                    element.style.transform = 'scale(1.1) rotate(0deg)';
+
+                    setTimeout(() => {
+                        if (element) {
+                            element.style.transition = 'all 0.3s ease-out';
+                            element.style.transform = 'scale(0.9)';
+                            element.style.opacity = '0.7';
+
+                            setTimeout(() => {
+                                if (element && callback) {
+                                    callback();
+                                }
+                            }, 300);
+                        }
+                    }, 500);
+                } catch (error) {
+                    console.error('Animation error:', error);
+                    if (callback) callback();
+                }
+            }
+
+            function returnToOriginalPosition() {
+                if (!draggedElement) return;
+
+                try {
+                    const originalRect = draggedElement.originalRect;
+                    if (originalRect) {
+                        draggedElement.style.transition = 'all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+                        draggedElement.style.left = originalRect.left + 'px';
+                        draggedElement.style.top = originalRect.top + 'px';
+                        draggedElement.style.transform = 'scale(1.1)';
+
+                        setTimeout(() => {
+                            if (draggedElement) {
+                                draggedElement.style.animation = 'shake 0.5s ease-in-out';
+                            }
+                        }, 100);
+
+                        setTimeout(() => {
+                            resetElementStyles();
+                        }, 900);
+                    } else {
+                        resetElementStyles();
+                    }
+                } catch (error) {
+                    console.error('Return position error:', error);
+                    resetElementStyles();
+                }
+            }
+
+            // Initialize Game
+            document.addEventListener('DOMContentLoaded', function () {
+                try {
+                    updateScore();
+
+                    document.querySelectorAll('.shape-item').forEach((item) => {
+                        item.addEventListener('mousedown', handleDragStart);
+                        item.addEventListener('touchstart', handleDragStart, { passive: false });
+                        item.addEventListener('contextmenu', (e) => e.preventDefault());
+                    });
+
+                    document.addEventListener('mousemove', handleDragMove);
+                    document.addEventListener('touchmove', handleDragMove, { passive: false });
+                    document.addEventListener('mouseup', handleDragEnd);
+                    document.addEventListener('touchend', handleDragEnd);
+
+                    document.addEventListener('selectstart', (e) => {
+                        if (isDragging) e.preventDefault();
+                    });
+
+                    document.addEventListener(
+                        'touchmove',
+                        function (e) {
+                            if (isDragging) {
+                                e.preventDefault();
+                            }
+                        },
+                        { passive: false }
+                    );
+
+                    // Enable audio on first user interaction
+                    document.addEventListener('click', initAudio, { once: true });
+                    document.addEventListener('touchstart', initAudio, { once: true });
+                } catch (error) {
+                    console.error('Initialization error:', error);
+                }
+            });
+        </script>
+    </body>
+</html>

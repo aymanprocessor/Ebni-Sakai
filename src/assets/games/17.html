@@ -1,10 +1,1453 @@
 <!doctype html>
-<html lang="en">
+<html lang="ar" dir="rtl">
     <head>
         <meta charset="UTF-8" />
-        <title>Game 17</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>لعبة تصنيف أثاث المنزل</title>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
+
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Tajawal', Arial, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                overflow-x: hidden;
+            }
+
+            .game-container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 20px;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .header {
+                background: rgba(255, 255, 255, 0.95);
+                border-radius: 20px;
+                padding: 20px;
+                margin-bottom: 20px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .title {
+                font-size: 2.5rem;
+                color: #333;
+                font-weight: 700;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .house-icon {
+                width: 3rem;
+                height: 3rem;
+                background: linear-gradient(45deg, #8b4513, #d2691e);
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 1.5rem;
+                font-weight: bold;
+            }
+
+            .stars-counter {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                background: linear-gradient(45deg, #ffd700, #ffed4e);
+                padding: 15px 25px;
+                border-radius: 25px;
+                box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+                transition: all 0.3s ease;
+            }
+
+            .star-icon {
+                width: 2rem;
+                height: 2rem;
+                background: #ff6b35;
+                clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            }
+
+            .page-info {
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 25px;
+                font-size: 1.2rem;
+                font-weight: 700;
+            }
+
+            .game-area {
+                flex: 1;
+                display: flex;
+                gap: 30px;
+                align-items: center;
+                justify-content: center;
+                flex-wrap: wrap;
+                min-height: 400px;
+            }
+
+            .furniture-items {
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+                background: rgba(255, 255, 255, 0.9);
+                padding: 30px;
+                border-radius: 20px;
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+                min-width: 250px;
+            }
+
+            .furniture-item {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                background: white;
+                padding: 15px;
+                border-radius: 15px;
+                cursor: grab;
+                transition: all 0.3s ease;
+                border: 3px solid transparent;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+                user-select: none;
+            }
+
+            .furniture-item:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                border-color: #667eea;
+            }
+
+            .furniture-item.dragging {
+                opacity: 0.7;
+                transform: rotate(5deg) scale(1.1);
+                cursor: grabbing;
+                z-index: 1000;
+            }
+
+            .furniture-item.used {
+                opacity: 0.3;
+                pointer-events: none;
+                transform: scale(0.95);
+            }
+
+            .furniture-icon {
+                width: 60px;
+                height: 60px;
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+                overflow: hidden;
+                flex-shrink: 0;
+            }
+
+            .furniture-name {
+                font-size: 1.2rem;
+                font-weight: 600;
+                color: #333;
+            }
+
+            .drop-zone {
+                width: 350px;
+                height: 280px;
+                border: 4px dashed #667eea;
+                border-radius: 20px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                position: relative;
+                transition: all 0.3s ease;
+                background: rgba(255, 255, 255, 0.9);
+                animation: pulse-border 2s infinite;
+            }
+
+            @keyframes pulse-border {
+                0%,
+                100% {
+                    border-color: #667eea;
+                }
+                50% {
+                    border-color: #764ba2;
+                }
+            }
+
+            .drop-zone.drag-over {
+                border-color: #4caf50 !important;
+                background: rgba(76, 175, 80, 0.1);
+                transform: scale(1.05);
+                box-shadow: 0 0 30px rgba(76, 175, 80, 0.3);
+            }
+
+            .room-title {
+                font-size: 2rem;
+                font-weight: 700;
+                margin-bottom: 15px;
+                text-align: center;
+            }
+
+            .room-instruction {
+                font-size: 1.1rem;
+                text-align: center;
+                color: #666;
+                padding: 0 20px;
+            }
+
+            .kitchen {
+                color: #e74c3c;
+            }
+            .living {
+                color: #3498db;
+            }
+            .bedroom {
+                color: #9b59b6;
+            }
+            .dining {
+                color: #e67e22;
+            }
+            .kids {
+                color: #f39c12;
+            }
+            .bathroom {
+                color: #1abc9c;
+            }
+
+            .controls {
+                display: flex;
+                gap: 15px;
+                justify-content: center;
+                margin-top: 20px;
+            }
+
+            .btn {
+                padding: 15px 30px;
+                border: none;
+                border-radius: 25px;
+                font-size: 1.1rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .btn-reset {
+                background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+                color: white;
+            }
+
+            .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .celebration {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(45deg, #ffd700, #ffed4e);
+                padding: 30px;
+                border-radius: 20px;
+                text-align: center;
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: #333;
+                z-index: 2000;
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+                display: none;
+                animation: celebration-bounce 0.5s ease;
+            }
+
+            @keyframes celebration-bounce {
+                0% {
+                    transform: translate(-50%, -50%) scale(0);
+                }
+                50% {
+                    transform: translate(-50%, -50%) scale(1.2);
+                }
+                100% {
+                    transform: translate(-50%, -50%) scale(1);
+                }
+            }
+
+            .star-animation {
+                position: fixed;
+                font-size: 2rem;
+                color: #ffd700;
+                pointer-events: none;
+                animation: star-fly 1s ease-out forwards;
+                z-index: 1500;
+            }
+
+            @keyframes star-fly {
+                0% {
+                    opacity: 1;
+                    transform: scale(0) rotate(0deg);
+                }
+                50% {
+                    opacity: 1;
+                    transform: scale(1.5) rotate(180deg);
+                }
+                100% {
+                    opacity: 0;
+                    transform: scale(0.5) rotate(360deg) translateY(-100px);
+                }
+            }
+
+            @keyframes encouragement-bounce {
+                0% {
+                    opacity: 0;
+                    transform: translate(-50%, -50%) scale(0.5);
+                }
+                20% {
+                    opacity: 1;
+                    transform: translate(-50%, -50%) scale(1.2);
+                }
+                40% {
+                    transform: translate(-50%, -50%) scale(0.9);
+                }
+                60% {
+                    transform: translate(-50%, -50%) scale(1.1);
+                }
+                80% {
+                    transform: translate(-50%, -50%) scale(0.95);
+                }
+                100% {
+                    opacity: 1;
+                    transform: translate(-50%, -50%) scale(1);
+                }
+            }
+
+            .confetti {
+                position: fixed;
+                width: 8px;
+                height: 8px;
+                z-index: 1000;
+                animation: confetti-fall 3s linear infinite;
+            }
+
+            @keyframes confetti-fall {
+                0% {
+                    transform: translateY(-100vh) rotate(0deg);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateY(100vh) rotate(360deg);
+                    opacity: 0;
+                }
+            }
+
+            /* رسوم CSS للأثاث */
+            .fridge {
+                background: linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 100%);
+                border: 2px solid #6c757d;
+            }
+            .fridge::before {
+                content: '';
+                position: absolute;
+                width: 40px;
+                height: 20px;
+                background: #dee2e6;
+                border: 1px solid #adb5bd;
+                top: 8px;
+                border-radius: 2px;
+            }
+            .fridge::after {
+                content: '';
+                position: absolute;
+                width: 40px;
+                height: 25px;
+                background: #dee2e6;
+                border: 1px solid #adb5bd;
+                bottom: 8px;
+                border-radius: 2px;
+            }
+
+            .stove {
+                background: linear-gradient(to bottom, #343a40 0%, #495057 100%);
+                border: 2px solid #212529;
+            }
+            .stove::before {
+                content: '';
+                position: absolute;
+                width: 15px;
+                height: 15px;
+                background: radial-gradient(circle, #dc3545 0%, #721c24 100%);
+                border-radius: 50%;
+                top: 15px;
+                left: 10px;
+                border: 2px solid #495057;
+            }
+            .stove::after {
+                content: '';
+                position: absolute;
+                width: 15px;
+                height: 15px;
+                background: radial-gradient(circle, #dc3545 0%, #721c24 100%);
+                border-radius: 50%;
+                top: 15px;
+                right: 10px;
+                border: 2px solid #495057;
+            }
+
+            .sink {
+                background: linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 100%);
+                border: 2px solid #6c757d;
+            }
+            .sink::before {
+                content: '';
+                position: absolute;
+                width: 45px;
+                height: 25px;
+                background: #dee2e6;
+                border: 1px solid #adb5bd;
+                bottom: 8px;
+                border-radius: 50%;
+            }
+            .sink::after {
+                content: '';
+                position: absolute;
+                width: 4px;
+                height: 20px;
+                background: #6c757d;
+                top: 5px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            .cabinet {
+                background: linear-gradient(to bottom, #8b4513 0%, #654321 100%);
+                border: 2px solid #5d2f0a;
+            }
+            .cabinet::before {
+                content: '';
+                position: absolute;
+                width: 20px;
+                height: 40px;
+                background: #a0522d;
+                border: 1px solid #654321;
+                left: 5px;
+                top: 10px;
+                border-radius: 2px;
+            }
+            .cabinet::after {
+                content: '';
+                position: absolute;
+                width: 20px;
+                height: 40px;
+                background: #a0522d;
+                border: 1px solid #654321;
+                right: 5px;
+                top: 10px;
+                border-radius: 2px;
+            }
+
+            .sofa {
+                background: linear-gradient(to bottom, #6f42c1 0%, #5a2a9a 100%);
+                border: 2px solid #4a1c7d;
+            }
+            .sofa::before {
+                content: '';
+                position: absolute;
+                width: 50px;
+                height: 15px;
+                background: #8a63d2;
+                bottom: 15px;
+                border-radius: 10px;
+            }
+            .sofa::after {
+                content: '';
+                position: absolute;
+                width: 50px;
+                height: 10px;
+                background: #7952cc;
+                top: 8px;
+                border-radius: 5px;
+            }
+
+            .tv {
+                background: linear-gradient(to bottom, #2c3e50 0%, #34495e 100%);
+                border: 2px solid #1a252f;
+            }
+            .tv::before {
+                content: '';
+                position: absolute;
+                width: 45px;
+                height: 30px;
+                background: #000;
+                border: 2px solid #34495e;
+                top: 8px;
+                border-radius: 3px;
+            }
+            .tv::after {
+                content: '';
+                position: absolute;
+                width: 8px;
+                height: 8px;
+                background: #6c757d;
+                bottom: 5px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            .table {
+                background: linear-gradient(to bottom, #8b4513 0%, #654321 100%);
+                border: 2px solid #5d2f0a;
+            }
+            .table::before {
+                content: '';
+                position: absolute;
+                width: 50px;
+                height: 8px;
+                background: #a0522d;
+                top: 20px;
+                border-radius: 25px;
+            }
+            .table::after {
+                content: '';
+                position: absolute;
+                width: 4px;
+                height: 25px;
+                background: #654321;
+                bottom: 5px;
+                left: 10px;
+            }
+
+            .carpet {
+                background: linear-gradient(45deg, #dc3545 0%, #c82333 50%, #a71e2a 100%);
+                border: 2px solid #721c24;
+            }
+            .carpet::before {
+                content: '';
+                position: absolute;
+                width: 40px;
+                height: 40px;
+                background: radial-gradient(circle, #bd2130 0%, #a71e2a 100%);
+                border-radius: 50%;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+            .bed {
+                background: linear-gradient(to bottom, #6f42c1 0%, #5a2a9a 100%);
+                border: 2px solid #4a1c7d;
+            }
+            .bed::before {
+                content: '';
+                position: absolute;
+                width: 50px;
+                height: 12px;
+                background: #8a63d2;
+                top: 8px;
+                border-radius: 5px;
+            }
+            .bed::after {
+                content: '';
+                position: absolute;
+                width: 45px;
+                height: 20px;
+                background: #f8f9fa;
+                bottom: 12px;
+                left: 50%;
+                transform: translateX(-50%);
+                border-radius: 3px;
+            }
+
+            .mirror {
+                background: linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 100%);
+                border: 3px solid #6c757d;
+                border-radius: 50%;
+            }
+            .mirror::before {
+                content: '';
+                position: absolute;
+                width: 30px;
+                height: 30px;
+                background: radial-gradient(circle at 30% 30%, #fff 0%, #dee2e6 100%);
+                border-radius: 50%;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+            .chair {
+                background: linear-gradient(to bottom, #8b4513 0%, #654321 100%);
+                border: 2px solid #5d2f0a;
+            }
+            .chair::before {
+                content: '';
+                position: absolute;
+                width: 40px;
+                height: 25px;
+                background: #a0522d;
+                top: 5px;
+                border-radius: 3px;
+            }
+            .chair::after {
+                content: '';
+                position: absolute;
+                width: 35px;
+                height: 8px;
+                background: #654321;
+                bottom: 15px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            .bathtub {
+                background: linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 100%);
+                border: 2px solid #6c757d;
+            }
+            .bathtub::before {
+                content: '';
+                position: absolute;
+                width: 45px;
+                height: 20px;
+                background: #dee2e6;
+                bottom: 8px;
+                border-radius: 25px;
+            }
+            .bathtub::after {
+                content: '';
+                position: absolute;
+                width: 6px;
+                height: 6px;
+                background: #17a2b8;
+                top: 10px;
+                right: 8px;
+                border-radius: 50%;
+            }
+
+            .toilet {
+                background: linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 100%);
+                border: 2px solid #6c757d;
+            }
+            .toilet::before {
+                content: '';
+                position: absolute;
+                width: 35px;
+                height: 25px;
+                background: #dee2e6;
+                bottom: 8px;
+                border-radius: 50%;
+            }
+            .toilet::after {
+                content: '';
+                position: absolute;
+                width: 30px;
+                height: 20px;
+                background: #e9ecef;
+                top: 8px;
+                border-radius: 15px 15px 5px 5px;
+            }
+
+            .washbasin {
+                background: linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 100%);
+                border: 2px solid #6c757d;
+            }
+            .washbasin::before {
+                content: '';
+                position: absolute;
+                width: 40px;
+                height: 15px;
+                background: #dee2e6;
+                bottom: 12px;
+                border-radius: 50%;
+            }
+            .washbasin::after {
+                content: '';
+                position: absolute;
+                width: 4px;
+                height: 15px;
+                background: #6c757d;
+                top: 8px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            .chandelier {
+                background: linear-gradient(to bottom, #ffd700 0%, #e6c200 100%);
+                border: 2px solid #cc9900;
+            }
+            .chandelier::before {
+                content: '';
+                position: absolute;
+                width: 20px;
+                height: 20px;
+                background: radial-gradient(circle, #fff 0%, #f8f9fa 100%);
+                border-radius: 50%;
+                top: 25px;
+                left: 10px;
+            }
+            .chandelier::after {
+                content: '';
+                position: absolute;
+                width: 20px;
+                height: 20px;
+                background: radial-gradient(circle, #fff 0%, #f8f9fa 100%);
+                border-radius: 50%;
+                top: 25px;
+                right: 10px;
+            }
+
+            .toys {
+                background: linear-gradient(45deg, #ff6b6b 0%, #4ecdc4 50%, #45b7d1 100%);
+                border: 2px solid #2d3436;
+            }
+            .toys::before {
+                content: '';
+                position: absolute;
+                width: 15px;
+                height: 15px;
+                background: #ffd93d;
+                border-radius: 50%;
+                top: 8px;
+                left: 8px;
+            }
+            .toys::after {
+                content: '';
+                position: absolute;
+                width: 20px;
+                height: 12px;
+                background: #6bcf7f;
+                bottom: 8px;
+                right: 8px;
+                border-radius: 3px;
+            }
+
+            .desk {
+                background: linear-gradient(to bottom, #8b4513 0%, #654321 100%);
+                border: 2px solid #5d2f0a;
+            }
+            .desk::before {
+                content: '';
+                position: absolute;
+                width: 50px;
+                height: 6px;
+                background: #a0522d;
+                top: 15px;
+            }
+            .desk::after {
+                content: '';
+                position: absolute;
+                width: 25px;
+                height: 20px;
+                background: #654321;
+                bottom: 8px;
+                left: 8px;
+                border-radius: 2px;
+            }
+
+            @media (max-width: 768px) {
+                .title {
+                    font-size: 1.8rem;
+                }
+
+                .game-area {
+                    flex-direction: column;
+                    gap: 20px;
+                }
+
+                .drop-zone {
+                    width: 280px;
+                    height: 220px;
+                }
+
+                .furniture-items {
+                    width: 100%;
+                    max-width: 300px;
+                }
+
+                .header {
+                    flex-direction: column;
+                    text-align: center;
+                }
+            }
+        </style>
     </head>
     <body>
-        <!-- Game 17 content goes here -->
+        <div class="game-container">
+            <div class="header">
+                <h1 class="title">
+                    <svg viewBox="0 0 60 60" style="width: 3rem; height: 3rem; margin-left: 10px">
+                        <rect x="8" y="20" width="44" height="30" fill="#8b4513" stroke="#654321" stroke-width="2" rx="3" />
+                        <polygon points="8,20 30,8 52,20" fill="#d2691e" />
+                        <rect x="22" y="30" width="10" height="15" fill="#654321" />
+                        <rect x="24" y="32" width="6" height="10" fill="#f39c12" />
+                        <rect x="36" y="25" width="8" height="8" fill="#74b9ff" />
+                        <rect x="38" y="27" width="4" height="4" fill="#fff" opacity="0.8" />
+                        <circle cx="15" cy="45" r="2" fill="#2ecc71" />
+                        <circle cx="45" cy="45" r="2" fill="#e74c3c" />
+                        <rect x="29" y="45" width="2" height="5" fill="#654321" />
+                    </svg>
+                    لعبة تصنيف أثاث المنزل
+                </h1>
+                <div class="stars-counter">
+                    <svg viewBox="0 0 24 24" style="width: 2rem; height: 2rem; fill: #ff6b35">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                    </svg>
+                    <span id="star-count">0</span>
+                    <span>/</span>
+                    <span>4</span>
+                </div>
+                <div class="page-info">الغرفة <span id="current-page">1</span> من <span>6</span></div>
+            </div>
+
+            <div class="game-area">
+                <div class="furniture-items" id="furniture-items">
+                    <!-- سيتم إضافة عناصر الأثاث هنا بواسطة JavaScript -->
+                </div>
+
+                <div class="drop-zone" id="drop-zone">
+                    <div class="room-title" id="room-title">صندوق المطبخ</div>
+                    <div class="room-instruction" id="room-instruction">اسحب وضع أثاث المطبخ هنا</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-reset" onclick="resetCurrentRoom()">
+                    <svg viewBox="0 0 24 24" style="width: 1.2rem; height: 1.2rem; fill: currentColor; margin-left: 5px">
+                        <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    إعادة تعيين
+                </button>
+            </div>
+        </div>
+
+        <div class="celebration" id="celebration">
+            <svg viewBox="0 0 24 24" style="width: 3rem; height: 3rem; fill: #ff6b35; margin: 0 10px">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+            أحسنت! انتقل للغرفة التالية
+            <svg viewBox="0 0 24 24" style="width: 3rem; height: 3rem; fill: #ff6b35; margin: 0 10px">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+        </div>
+
+        <script>
+            // بيانات اللعبة
+            const gameData = {
+                rooms: [
+                    {
+                        name: 'المطبخ',
+                        color: 'kitchen',
+                        furniture: [
+                            { name: 'ثلاجة', iconClass: 'fridge' },
+                            { name: 'موقد', iconClass: 'stove' },
+                            { name: 'حوض', iconClass: 'sink' },
+                            { name: 'خزانة', iconClass: 'cabinet' }
+                        ]
+                    },
+                    {
+                        name: 'غرفة المعيشة',
+                        color: 'living',
+                        furniture: [
+                            { name: 'أريكة', iconClass: 'sofa' },
+                            { name: 'تلفزيون', iconClass: 'tv' },
+                            { name: 'طاولة قهوة', iconClass: 'table' },
+                            { name: 'سجادة', iconClass: 'carpet' }
+                        ]
+                    },
+                    {
+                        name: 'غرفة النوم',
+                        color: 'bedroom',
+                        furniture: [
+                            { name: 'سرير', iconClass: 'bed' },
+                            { name: 'خزانة ملابس', iconClass: 'cabinet' },
+                            { name: 'مرآة', iconClass: 'mirror' },
+                            { name: 'منضدة', iconClass: 'table' }
+                        ]
+                    },
+                    {
+                        name: 'غرفة السفرة',
+                        color: 'dining',
+                        furniture: [
+                            { name: 'طاولة طعام', iconClass: 'table' },
+                            { name: 'كراسي', iconClass: 'chair' },
+                            { name: 'خزانة أطباق', iconClass: 'cabinet' },
+                            { name: 'ثريا', iconClass: 'chandelier' }
+                        ]
+                    },
+                    {
+                        name: 'غرفة الأطفال',
+                        color: 'kids',
+                        furniture: [
+                            { name: 'سرير أطفال', iconClass: 'bed' },
+                            { name: 'خزانة ألعاب', iconClass: 'toys' },
+                            { name: 'مكتب', iconClass: 'desk' },
+                            { name: 'كرسي صغير', iconClass: 'chair' }
+                        ]
+                    },
+                    {
+                        name: 'الحمام',
+                        color: 'bathroom',
+                        furniture: [
+                            { name: 'حوض استحمام', iconClass: 'bathtub' },
+                            { name: 'مرحاض', iconClass: 'toilet' },
+                            { name: 'مغسلة', iconClass: 'washbasin' },
+                            { name: 'مرآة حمام', iconClass: 'mirror' }
+                        ]
+                    }
+                ]
+            };
+
+            // متغيرات اللعبة
+            let currentRoomIndex = 0;
+            let starsCollected = 0;
+            let draggedElement = null;
+
+            // رسائل التشجيع
+            const encouragementMessages = ['رائع! استمر!', 'أحسنت!', 'ممتاز!', 'عمل جيد!', 'مذهل!', 'أنت بطل!'];
+
+            // تهيئة اللعبة
+            function initGame() {
+                console.log('بدء تهيئة اللعبة...');
+                loadRoom(currentRoomIndex);
+                updateUI();
+                setupEventListeners();
+                console.log('تم تهيئة اللعبة بنجاح');
+            }
+
+            // إعداد مستمعي الأحداث
+            function setupEventListeners() {
+                const dropZone = document.getElementById('drop-zone');
+
+                dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('drag-over');
+                });
+
+                dropZone.addEventListener('dragleave', (e) => {
+                    if (!dropZone.contains(e.relatedTarget)) {
+                        dropZone.classList.remove('drag-over');
+                    }
+                });
+
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('drag-over');
+
+                    if (draggedElement && !draggedElement.classList.contains('used')) {
+                        handleDrop();
+                    }
+                });
+
+                // دعم الأجهزة المحمولة
+                let touchItem = null;
+
+                document.addEventListener('touchstart', (e) => {
+                    const furnitureItem = e.target.closest('.furniture-item');
+                    if (furnitureItem && !furnitureItem.classList.contains('used')) {
+                        touchItem = furnitureItem;
+                        draggedElement = furnitureItem;
+                        furnitureItem.classList.add('dragging');
+                    }
+                });
+
+                document.addEventListener(
+                    'touchmove',
+                    (e) => {
+                        e.preventDefault();
+                    },
+                    { passive: false }
+                );
+
+                document.addEventListener('touchend', (e) => {
+                    if (touchItem) {
+                        const touch = e.changedTouches[0];
+                        const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+
+                        if (elementBelow && elementBelow.closest('#drop-zone')) {
+                            handleDrop();
+                        }
+
+                        touchItem.classList.remove('dragging');
+                        touchItem = null;
+                        draggedElement = null;
+                    }
+                });
+            }
+
+            // تحميل غرفة جديدة
+            function loadRoom(roomIndex) {
+                console.log(`تحميل الغرفة: ${roomIndex + 1}`);
+                const room = gameData.rooms[roomIndex];
+                const furnitureContainer = document.getElementById('furniture-items');
+                const dropZone = document.getElementById('drop-zone');
+                const roomTitle = document.getElementById('room-title');
+                const roomInstruction = document.getElementById('room-instruction');
+
+                // تحديث عنوان الغرفة
+                roomTitle.textContent = `صندوق ${room.name}`;
+                roomTitle.className = `room-title ${room.color}`;
+                roomInstruction.textContent = `اسحب وضع أثاث ${room.name} هنا`;
+
+                // تحديث لون منطقة الإسقاط
+                dropZone.style.borderColor = getColorByClass(room.color);
+
+                // إزالة العناصر السابقة
+                furnitureContainer.innerHTML = '';
+
+                // إضافة عناصر الأثاث الجديدة
+                room.furniture.forEach((item, index) => {
+                    const furnitureElement = createFurnitureElement(item, index);
+                    furnitureContainer.appendChild(furnitureElement);
+                });
+
+                // إعادة تعيين العداد
+                starsCollected = 0;
+                updateStarCounter();
+            }
+
+            // إنشاء عنصر أثاث
+            function createFurnitureElement(item, index) {
+                const element = document.createElement('div');
+                element.className = 'furniture-item';
+                element.draggable = true;
+                element.dataset.index = index;
+
+                element.innerHTML = `
+                <div class="furniture-icon ${item.iconClass}"></div>
+                <div class="furniture-name">${item.name}</div>
+            `;
+
+                // إضافة مستمعي السحب
+                element.addEventListener('dragstart', (e) => {
+                    draggedElement = element;
+                    element.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+
+                element.addEventListener('dragend', () => {
+                    element.classList.remove('dragging');
+                    if (!element.classList.contains('used')) {
+                        draggedElement = null;
+                    }
+                });
+
+                return element;
+            }
+
+            // معالجة الإسقاط
+            function handleDrop() {
+                console.log('معالجة الإسقاط...');
+                if (!draggedElement || draggedElement.classList.contains('used')) {
+                    return;
+                }
+
+                draggedElement.classList.add('used');
+                starsCollected++;
+
+                console.log(`النجوم المجمعة: ${starsCollected}/4`);
+
+                // تشغيل التأثيرات
+                playSuccessSound();
+                createStarAnimation();
+                showEncouragement();
+                updateStarCounterWithAnimation();
+                addGlowEffect();
+
+                // فحص اكتمال الغرفة
+                if (starsCollected === 4) {
+                    console.log('تم إكمال الغرفة!');
+                    setTimeout(() => {
+                        completeRoom();
+                    }, 500);
+                }
+
+                draggedElement = null;
+            }
+
+            // إنشاء تأثير النجمة المتحركة
+            function createStarAnimation() {
+                const star = document.createElement('div');
+                star.className = 'star-animation';
+                star.innerHTML = `
+                <svg viewBox="0 0 24 24" style="width: 2rem; height: 2rem; fill: #ffd700;">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+            `;
+                star.style.left = Math.random() * (window.innerWidth - 100) + 'px';
+                star.style.top = Math.random() * (window.innerHeight - 100) + 'px';
+
+                document.body.appendChild(star);
+
+                setTimeout(() => {
+                    if (document.body.contains(star)) {
+                        document.body.removeChild(star);
+                    }
+                }, 1000);
+            }
+
+            // عرض رسالة تشجيعية
+            function showEncouragement() {
+                const message = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
+
+                const messageElement = document.createElement('div');
+                messageElement.style.cssText = `
+                position: fixed;
+                top: 25%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(45deg, #4CAF50, #45a049);
+                color: white;
+                padding: 15px 30px;
+                border-radius: 20px;
+                font-size: 1.5rem;
+                font-weight: 700;
+                z-index: 2500;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                animation: encouragement-bounce 1.2s ease-out;
+                pointer-events: none;
+                text-align: center;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            `;
+
+                messageElement.innerHTML = `
+                <svg viewBox="0 0 24 24" style="width: 2rem; height: 2rem; fill: currentColor;">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                ${message}
+                <svg viewBox="0 0 24 24" style="width: 2rem; height: 2rem; fill: currentColor;">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+            `;
+
+                document.body.appendChild(messageElement);
+
+                setTimeout(() => {
+                    if (document.body.contains(messageElement)) {
+                        messageElement.style.opacity = '0';
+                        messageElement.style.transform = 'translate(-50%, -50%) scale(0.5)';
+                        setTimeout(() => {
+                            if (document.body.contains(messageElement)) {
+                                document.body.removeChild(messageElement);
+                            }
+                        }, 300);
+                    }
+                }, 1000);
+            }
+
+            // تشغيل صوت النجاح
+            function playSuccessSound() {
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
+                    oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1);
+                    oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2);
+
+                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                } catch (e) {
+                    console.log('الصوت غير مدعوم');
+                }
+            }
+
+            // تحديث عداد النجوم مع تأثير
+            function updateStarCounterWithAnimation() {
+                const starCount = document.getElementById('star-count');
+                const starsCounter = document.querySelector('.stars-counter');
+
+                starCount.textContent = starsCollected;
+
+                starsCounter.style.transform = 'scale(1.2)';
+                starsCounter.style.boxShadow = '0 10px 30px rgba(255,215,0,0.6)';
+
+                setTimeout(() => {
+                    starsCounter.style.transform = 'scale(1)';
+                    starsCounter.style.boxShadow = '0 5px 15px rgba(255,215,0,0.3)';
+                }, 300);
+            }
+
+            // إضافة تأثير توهج للمربع
+            function addGlowEffect() {
+                const dropZone = document.getElementById('drop-zone');
+
+                dropZone.style.borderColor = '#4CAF50';
+                dropZone.style.boxShadow = '0 0 30px rgba(76, 175, 80, 0.6)';
+                dropZone.style.background = 'rgba(76, 175, 80, 0.1)';
+
+                setTimeout(() => {
+                    const room = gameData.rooms[currentRoomIndex];
+                    dropZone.style.borderColor = getColorByClass(room.color);
+                    dropZone.style.boxShadow = 'none';
+                    dropZone.style.background = 'rgba(255, 255, 255, 0.9)';
+                }, 800);
+            }
+
+            // تحديث عداد النجوم
+            function updateStarCounter() {
+                document.getElementById('star-count').textContent = starsCollected;
+            }
+
+            // إكمال الغرفة
+            function completeRoom() {
+                console.log('احتفال إكمال الغرفة');
+
+                // إضافة تأثيرات احتفالية
+                createConfetti();
+                playCompletionSound();
+
+                // عرض رسالة احتفال سريعة
+                const celebration = document.getElementById('celebration');
+                celebration.innerHTML = `
+                <svg viewBox="0 0 24 24" style="width: 3rem; height: 3rem; fill: #ff6b35; margin: 0 10px;">
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                    <div style="font-size: 2rem; margin-bottom: 15px;">ممتاز!</div>
+                    <div style="font-size: 1.3rem;">أكملت غرفة ${gameData.rooms[currentRoomIndex].name}!</div>
+                </div>
+                <svg viewBox="0 0 24 24" style="width: 3rem; height: 3rem; fill: #ff6b35; margin: 0 10px;">
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            `;
+                celebration.style.display = 'block';
+
+                setTimeout(() => {
+                    celebration.style.display = 'none';
+
+                    // الانتقال للغرفة التالية
+                    if (currentRoomIndex < gameData.rooms.length - 1) {
+                        nextRoom();
+                    } else {
+                        showFinalCelebration();
+                    }
+                }, 1500);
+            }
+
+            // تشغيل صوت الإكمال
+            function playCompletionSound() {
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const notes = [523.25, 659.25, 783.99, 1046.5];
+
+                    notes.forEach((frequency, index) => {
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+
+                        oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime + index * 0.15);
+                        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime + index * 0.15);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + index * 0.15 + 0.2);
+
+                        oscillator.start(audioContext.currentTime + index * 0.15);
+                        oscillator.stop(audioContext.currentTime + index * 0.15 + 0.2);
+                    });
+                } catch (e) {
+                    console.log('الصوت غير مدعوم');
+                }
+            }
+
+            // إنشاء تأثير الكونفيتي
+            function createConfetti() {
+                const colors = ['#ffd700', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57'];
+
+                for (let i = 0; i < 30; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * window.innerWidth + 'px';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 2 + 's';
+
+                    document.body.appendChild(confetti);
+
+                    setTimeout(() => {
+                        if (document.body.contains(confetti)) {
+                            document.body.removeChild(confetti);
+                        }
+                    }, 3000);
+                }
+            }
+
+            // الانتقال للغرفة التالية
+            function nextRoom() {
+                console.log('الانتقال للغرفة التالية');
+                currentRoomIndex++;
+
+                if (currentRoomIndex >= gameData.rooms.length) {
+                    currentRoomIndex = 0;
+                }
+
+                loadRoom(currentRoomIndex);
+                updateUI();
+            }
+
+            // عرض احتفال نهاية اللعبة
+            function showFinalCelebration() {
+                console.log('احتفال نهاية اللعبة');
+                const celebration = document.getElementById('celebration');
+                celebration.innerHTML = `
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                    <svg viewBox="0 0 24 24" style="width: 4rem; height: 4rem; fill: #ffd700;">
+                        <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                    </svg>
+                    <div style="font-size: 3rem; margin-bottom: 20px;">مبروك!</div>
+                    <div style="font-size: 1.8rem; margin-bottom: 15px;">أنت بطل حقيقي!</div>
+                    <div style="font-size: 1.3rem; margin-bottom: 20px;">لقد أكملت جميع الغرف الست بنجاح</div>
+                    <div style="font-size: 1.1rem; color: #666; margin-bottom: 20px; display: flex; align-items: center; gap: 5px;">
+                        جمعت 24 نجمة من 24!
+                        <svg viewBox="0 0 24 24" style="width: 1.5rem; height: 1.5rem; fill: #ffd700;">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                    </div>
+                    <button onclick="restartGame()" style="
+                        background: linear-gradient(45deg, #667eea, #764ba2);
+                        color: white;
+                        border: none;
+                        padding: 15px 30px;
+                        border-radius: 25px;
+                        font-size: 1.2rem;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                    " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                        <svg viewBox="0 0 24 24" style="width: 1.2rem; height: 1.2rem; fill: currentColor;">
+                            <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        العب مرة أخرى
+                    </button>
+                </div>
+            `;
+                celebration.style.display = 'block';
+
+                // تأثيرات احتفالية مكثفة
+                createMegaConfetti();
+                playVictorySound();
+            }
+
+            // كونفيتي مكثف للنهاية
+            function createMegaConfetti() {
+                const colors = ['#ffd700', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
+
+                for (let i = 0; i < 80; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * window.innerWidth + 'px';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 4 + 's';
+                    confetti.style.width = Math.random() * 6 + 4 + 'px';
+                    confetti.style.height = confetti.style.width;
+
+                    document.body.appendChild(confetti);
+
+                    setTimeout(() => {
+                        if (document.body.contains(confetti)) {
+                            document.body.removeChild(confetti);
+                        }
+                    }, 4000);
+                }
+            }
+
+            // صوت النصر
+            function playVictorySound() {
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const melody = [
+                        { freq: 523.25, time: 0 },
+                        { freq: 659.25, time: 0.2 },
+                        { freq: 783.99, time: 0.4 },
+                        { freq: 1046.5, time: 0.6 },
+                        { freq: 783.99, time: 0.8 },
+                        { freq: 1046.5, time: 1.0 }
+                    ];
+
+                    melody.forEach((note) => {
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+
+                        oscillator.frequency.setValueAtTime(note.freq, audioContext.currentTime + note.time);
+                        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime + note.time);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + note.time + 0.3);
+
+                        oscillator.start(audioContext.currentTime + note.time);
+                        oscillator.stop(audioContext.currentTime + note.time + 0.3);
+                    });
+                } catch (e) {
+                    console.log('الصوت غير مدعوم');
+                }
+            }
+
+            // إعادة بدء اللعبة
+            function restartGame() {
+                console.log('إعادة بدء اللعبة');
+                currentRoomIndex = 0;
+                starsCollected = 0;
+
+                const celebration = document.getElementById('celebration');
+                celebration.style.display = 'none';
+
+                loadRoom(currentRoomIndex);
+                updateUI();
+            }
+
+            // إعادة تعيين الغرفة الحالية
+            function resetCurrentRoom() {
+                console.log('إعادة تعيين الغرفة الحالية');
+                loadRoom(currentRoomIndex);
+            }
+
+            // تحديث واجهة المستخدم
+            function updateUI() {
+                document.getElementById('current-page').textContent = currentRoomIndex + 1;
+            }
+
+            // الحصول على اللون حسب الفئة
+            function getColorByClass(colorClass) {
+                const colorMap = {
+                    kitchen: '#e74c3c',
+                    living: '#3498db',
+                    bedroom: '#9b59b6',
+                    dining: '#e67e22',
+                    kids: '#f39c12',
+                    bathroom: '#1abc9c'
+                };
+                return colorMap[colorClass] || '#667eea';
+            }
+
+            // بدء اللعبة عند تحميل الصفحة
+            document.addEventListener('DOMContentLoaded', () => {
+                console.log('تحميل الصفحة مكتمل، بدء اللعبة...');
+                initGame();
+            });
+        </script>
     </body>
 </html>

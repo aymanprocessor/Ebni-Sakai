@@ -1,0 +1,860 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>لعبة الشكل والأرضية - الإدراك البصري</title>
+        <style>
+            body {
+                font-family: 'Comic Sans MS', cursive;
+                background: linear-gradient(135deg, #ffe5b4, #ffcccb, #e0e6ff);
+                margin: 0;
+                padding: 20px;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .game-container {
+                max-width: 900px;
+                width: 100%;
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                padding: 30px;
+                text-align: center;
+            }
+
+            .header {
+                background: linear-gradient(45deg, #ffd700, #ffa500);
+                color: white;
+                padding: 20px;
+                border-radius: 15px;
+                margin-bottom: 30px;
+            }
+
+            .level-info {
+                font-size: 24px;
+                font-weight: bold;
+                margin-bottom: 10px;
+                color: #4a90e2;
+            }
+
+            .main-area {
+                border: 5px solid #4a90e2;
+                border-radius: 15px;
+                padding: 20px;
+                margin-bottom: 30px;
+                background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+                min-height: 300px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .shapes-container {
+                position: relative;
+                width: 100%;
+                height: 250px;
+                background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.1) 10px, rgba(255, 255, 255, 0.1) 20px);
+            }
+
+            .shape {
+                position: absolute;
+                transition: all 0.3s ease;
+            }
+
+            .options-container {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 20px;
+                margin-top: 30px;
+            }
+
+            .option-item {
+                background: white;
+                border: 3px solid #e0e0e0;
+                border-radius: 15px;
+                padding: 20px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 100px;
+                position: relative;
+            }
+
+            .option-item:hover {
+                border-color: #4a90e2;
+                transform: scale(1.05);
+            }
+
+            .option-item.correct {
+                border-color: #28a745;
+                background: linear-gradient(45deg, #d4edda, #c3e6cb);
+                box-shadow: 0 0 20px rgba(40, 167, 69, 0.5);
+                transform: scale(1.05);
+            }
+
+            .option-item.wrong {
+                border-color: #dc3545;
+                background: linear-gradient(45deg, #f8d7da, #f1b0b7);
+                box-shadow: 0 0 20px rgba(220, 53, 69, 0.5);
+            }
+
+            .checkmark {
+                position: absolute;
+                top: 5px;
+                right: 5px;
+                width: 30px;
+                height: 30px;
+                background: linear-gradient(45deg, #28a745, #20c997);
+                border-radius: 50%;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: bold;
+                font-size: 16px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+                animation: checkmarkPop 0.5s ease;
+            }
+
+            @keyframes checkmarkPop {
+                0% {
+                    transform: scale(0) rotate(0deg);
+                }
+                50% {
+                    transform: scale(1.3) rotate(180deg);
+                }
+                100% {
+                    transform: scale(1) rotate(360deg);
+                }
+            }
+
+            .timer {
+                background: #ffe5b4;
+                padding: 15px;
+                border-radius: 10px;
+                margin-bottom: 20px;
+                font-size: 20px;
+                font-weight: bold;
+                color: #ff6b35;
+            }
+
+            .stars-display {
+                margin: 20px 0;
+                font-size: 30px;
+            }
+
+            .star {
+                color: #ffd700;
+                margin: 0 5px;
+                display: inline-block;
+                transform: scale(0);
+                animation: starPop 0.5s ease forwards;
+            }
+
+            @keyframes starPop {
+                to {
+                    transform: scale(1);
+                }
+            }
+
+            @keyframes glitter {
+                0%,
+                100% {
+                    transform: scale(1) rotate(0deg);
+                }
+                50% {
+                    transform: scale(1.2) rotate(10deg);
+                }
+            }
+
+            .glitter-effect {
+                animation: glitter 0.8s ease-in-out;
+            }
+
+            .button {
+                background: linear-gradient(45deg, #4a90e2, #357abd);
+                color: white;
+                border: none;
+                padding: 15px 30px;
+                border-radius: 25px;
+                font-size: 18px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                margin: 10px;
+            }
+
+            .button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .congratulations {
+                background: linear-gradient(45deg, #28a745, #20c997);
+                color: white;
+                padding: 30px;
+                border-radius: 20px;
+                margin: 20px 0;
+                font-size: 24px;
+                animation: bounce 1s ease-in-out infinite alternate;
+            }
+
+            @keyframes bounce {
+                0% {
+                    transform: translateY(0px);
+                }
+                100% {
+                    transform: translateY(-10px);
+                }
+            }
+
+            .hidden {
+                display: none;
+            }
+
+            /* الأشكال الهندسية */
+            .circle {
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                background: #ff6b6b;
+            }
+
+            .square {
+                width: 60px;
+                height: 60px;
+                background: #4ecdc4;
+            }
+
+            .triangle {
+                width: 0;
+                height: 0;
+                border-left: 30px solid transparent;
+                border-right: 30px solid transparent;
+                border-bottom: 52px solid #45b7d1;
+            }
+
+            .rectangle {
+                width: 80px;
+                height: 50px;
+                background: #96ceb4;
+            }
+
+            .diamond {
+                width: 50px;
+                height: 50px;
+                background: #ffeaa7;
+                transform: rotate(45deg);
+            }
+
+            /* الحيوانات - أيقونات بسيطة */
+            .animal {
+                font-size: 50px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* الأشياء اليومية - أيقونات بسيطة */
+            .daily-item {
+                font-size: 50px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="game-container">
+            <div class="header">
+                <h1>🌟 لعبة الشكل والأرضية 🌟</h1>
+                <p>ابحث عن الأشكال المخفية واختر الصحيح منها!</p>
+            </div>
+
+            <div class="timer">⏰ الوقت: <span id="timeDisplay">0</span> ثانية</div>
+
+            <div class="level-info">المستوى <span id="currentLevel">1</span> - الصفحة <span id="currentPage">1</span></div>
+
+            <div class="stars-display">النجوم المكتسبة: <span id="starsContainer"></span></div>
+
+            <div class="main-area" id="mainArea">
+                <div class="shapes-container" id="shapesContainer">
+                    <!-- الأشكال ستظهر هنا -->
+                </div>
+            </div>
+
+            <div class="options-container" id="optionsContainer">
+                <!-- الخيارات ستظهر هنا -->
+            </div>
+
+            <div id="congratulationsScreen" class="hidden">
+                <div class="congratulations">
+                    🎉 تهانينا! لقد أكملت جميع المستويات! 🎉
+                    <br /><br />
+                    لقد حصلت على <span id="totalStars"></span> نجمة! <br /><br />
+                    أنت بطل حقيقي في الإدراك البصري!
+                </div>
+                <button class="button" onclick="restartGame()">🔄 ابدأ من جديد</button>
+            </div>
+
+            <div style="margin-top: 20px">
+                <button class="button" onclick="nextLevel()" id="nextButton" style="display: none">▶️ المستوى التالي</button>
+                <button class="button" onclick="restartGame()">🔄 ابدأ من جديد</button>
+            </div>
+        </div>
+
+        <script>
+            let currentLevel = 1;
+            let currentPage = 1;
+            let totalStars = 0;
+            let startTime = Date.now();
+            let gameCompleted = false;
+
+            // تعريف المستويات والصفحات
+            const levels = {
+                1: {
+                    // الأشكال الهندسية
+                    name: 'الأشكال الهندسية',
+                    pages: [
+                        {
+                            shapes: [
+                                { type: 'circle', x: 120, y: 80, opacity: 0.7 },
+                                { type: 'square', x: 150, y: 90, opacity: 0.6 }
+                            ],
+                            options: ['circle', 'triangle', 'square'],
+                            correct: ['circle', 'square']
+                        },
+                        {
+                            shapes: [
+                                { type: 'triangle', x: 100, y: 70, opacity: 0.8 },
+                                { type: 'rectangle', x: 130, y: 85, opacity: 0.6 },
+                                { type: 'circle', x: 160, y: 90, opacity: 0.7 }
+                            ],
+                            options: ['circle', 'triangle', 'diamond', 'rectangle'],
+                            correct: ['circle', 'triangle', 'rectangle']
+                        },
+                        {
+                            shapes: [
+                                { type: 'diamond', x: 90, y: 60, opacity: 0.7 },
+                                { type: 'square', x: 125, y: 75, opacity: 0.6 },
+                                { type: 'triangle', x: 140, y: 95, opacity: 0.8 },
+                                { type: 'circle', x: 170, y: 80, opacity: 0.5 }
+                            ],
+                            options: ['circle', 'square', 'triangle', 'diamond', 'rectangle'],
+                            correct: ['circle', 'square', 'triangle', 'diamond']
+                        },
+                        {
+                            shapes: [
+                                { type: 'rectangle', x: 80, y: 70, opacity: 0.6 },
+                                { type: 'diamond', x: 120, y: 60, opacity: 0.7 },
+                                { type: 'circle', x: 110, y: 90, opacity: 0.5 },
+                                { type: 'square', x: 150, y: 85, opacity: 0.6 },
+                                { type: 'triangle', x: 170, y: 75, opacity: 0.8 }
+                            ],
+                            options: ['circle', 'square', 'triangle', 'diamond', 'rectangle'],
+                            correct: ['circle', 'square', 'triangle', 'diamond', 'rectangle']
+                        },
+                        {
+                            shapes: [
+                                { type: 'circle', x: 70, y: 50, opacity: 0.4 },
+                                { type: 'triangle', x: 95, y: 70, opacity: 0.7 },
+                                { type: 'square', x: 120, y: 60, opacity: 0.5 },
+                                { type: 'diamond', x: 140, y: 80, opacity: 0.6 },
+                                { type: 'rectangle', x: 110, y: 100, opacity: 0.5 },
+                                { type: 'circle', x: 160, y: 65, opacity: 0.6 },
+                                { type: 'triangle', x: 185, y: 85, opacity: 0.7 }
+                            ],
+                            options: ['circle', 'square', 'triangle', 'diamond', 'rectangle'],
+                            correct: ['circle', 'square', 'triangle', 'diamond', 'rectangle']
+                        }
+                    ]
+                },
+                2: {
+                    // الحيوانات
+                    name: 'الحيوانات',
+                    pages: [
+                        {
+                            shapes: [
+                                { type: 'animal', content: '🐱', x: 110, y: 70, opacity: 0.8 },
+                                { type: 'animal', content: '🐶', x: 140, y: 85, opacity: 0.7 }
+                            ],
+                            options: ['🐱', '🐸', '🐶'],
+                            correct: ['🐱', '🐶']
+                        },
+                        {
+                            shapes: [
+                                { type: 'animal', content: '🐸', x: 95, y: 65, opacity: 0.7 },
+                                { type: 'animal', content: '🐰', x: 125, y: 80, opacity: 0.6 },
+                                { type: 'animal', content: '🐱', x: 155, y: 75, opacity: 0.8 }
+                            ],
+                            options: ['🐱', '🐸', '🐯', '🐰'],
+                            correct: ['🐱', '🐸', '🐰']
+                        },
+                        {
+                            shapes: [
+                                { type: 'animal', content: '🐯', x: 85, y: 60, opacity: 0.6 },
+                                { type: 'animal', content: '🐶', x: 115, y: 75, opacity: 0.7 },
+                                { type: 'animal', content: '🐸', x: 130, y: 90, opacity: 0.5 },
+                                { type: 'animal', content: '🐱', x: 160, y: 70, opacity: 0.8 }
+                            ],
+                            options: ['🐱', '🐶', '🐸', '🐯', '🐰'],
+                            correct: ['🐱', '🐶', '🐸', '🐯']
+                        },
+                        {
+                            shapes: [
+                                { type: 'animal', content: '🐰', x: 80, y: 55, opacity: 0.6 },
+                                { type: 'animal', content: '🐯', x: 105, y: 75, opacity: 0.7 },
+                                { type: 'animal', content: '🐱', x: 125, y: 65, opacity: 0.5 },
+                                { type: 'animal', content: '🐶', x: 150, y: 85, opacity: 0.6 },
+                                { type: 'animal', content: '🐸', x: 170, y: 70, opacity: 0.8 }
+                            ],
+                            options: ['🐱', '🐶', '🐸', '🐯', '🐰'],
+                            correct: ['🐱', '🐶', '🐸', '🐯', '🐰']
+                        },
+                        {
+                            shapes: [
+                                { type: 'animal', content: '🐱', x: 70, y: 50, opacity: 0.4 },
+                                { type: 'animal', content: '🐸', x: 90, y: 70, opacity: 0.6 },
+                                { type: 'animal', content: '🐶', x: 110, y: 60, opacity: 0.5 },
+                                { type: 'animal', content: '🐯', x: 130, y: 80, opacity: 0.7 },
+                                { type: 'animal', content: '🐰', x: 150, y: 65, opacity: 0.5 },
+                                { type: 'animal', content: '🐱', x: 170, y: 85, opacity: 0.6 },
+                                { type: 'animal', content: '🐸', x: 190, y: 55, opacity: 0.7 }
+                            ],
+                            options: ['🐱', '🐶', '🐸', '🐯', '🐰'],
+                            correct: ['🐱', '🐶', '🐸', '🐯', '🐰']
+                        }
+                    ]
+                },
+                3: {
+                    // الأشياء اليومية
+                    name: 'الأشياء اليومية',
+                    pages: [
+                        {
+                            shapes: [
+                                { type: 'daily-item', content: '⚽', x: 115, y: 75, opacity: 0.8 },
+                                { type: 'daily-item', content: '🍎', x: 145, y: 85, opacity: 0.6 }
+                            ],
+                            options: ['⚽', '🚗', '🍎'],
+                            correct: ['⚽', '🍎']
+                        },
+                        {
+                            shapes: [
+                                { type: 'daily-item', content: '🚗', x: 100, y: 65, opacity: 0.7 },
+                                { type: 'daily-item', content: '📚', x: 130, y: 80, opacity: 0.5 },
+                                { type: 'daily-item', content: '⚽', x: 155, y: 70, opacity: 0.8 }
+                            ],
+                            options: ['⚽', '🚗', '🏠', '📚'],
+                            correct: ['⚽', '🚗', '📚']
+                        },
+                        {
+                            shapes: [
+                                { type: 'daily-item', content: '🏠', x: 90, y: 60, opacity: 0.6 },
+                                { type: 'daily-item', content: '🍎', x: 120, y: 75, opacity: 0.7 },
+                                { type: 'daily-item', content: '🚗', x: 135, y: 90, opacity: 0.5 },
+                                { type: 'daily-item', content: '⚽', x: 165, y: 70, opacity: 0.8 }
+                            ],
+                            options: ['⚽', '🍎', '🚗', '🏠', '📚'],
+                            correct: ['⚽', '🍎', '🚗', '🏠']
+                        },
+                        {
+                            shapes: [
+                                { type: 'daily-item', content: '📚', x: 85, y: 55, opacity: 0.6 },
+                                { type: 'daily-item', content: '🏠', x: 110, y: 75, opacity: 0.5 },
+                                { type: 'daily-item', content: '⚽', x: 130, y: 65, opacity: 0.7 },
+                                { type: 'daily-item', content: '🍎', x: 155, y: 85, opacity: 0.6 },
+                                { type: 'daily-item', content: '🚗', x: 175, y: 70, opacity: 0.8 }
+                            ],
+                            options: ['⚽', '🍎', '🚗', '🏠', '📚'],
+                            correct: ['⚽', '🍎', '🚗', '🏠', '📚']
+                        },
+                        {
+                            shapes: [
+                                { type: 'daily-item', content: '⚽', x: 75, y: 50, opacity: 0.4 },
+                                { type: 'daily-item', content: '🚗', x: 95, y: 70, opacity: 0.6 },
+                                { type: 'daily-item', content: '🍎', x: 115, y: 60, opacity: 0.5 },
+                                { type: 'daily-item', content: '🏠', x: 135, y: 80, opacity: 0.7 },
+                                { type: 'daily-item', content: '📚', x: 155, y: 65, opacity: 0.5 },
+                                { type: 'daily-item', content: '⚽', x: 175, y: 85, opacity: 0.6 },
+                                { type: 'daily-item', content: '🍎', x: 195, y: 55, opacity: 0.7 }
+                            ],
+                            options: ['⚽', '🍎', '🚗', '🏠', '📚'],
+                            correct: ['⚽', '🍎', '🚗', '🏠', '📚']
+                        }
+                    ]
+                }
+            };
+
+            // أصوات اللعبة
+            function playSuccessSound() {
+                // إنشاء صوت النجاح (جليتر)
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                // تسلسل نغمات صاعدة للجليتر
+                const frequencies = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
+                frequencies.forEach((freq, index) => {
+                    setTimeout(() => {
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+
+                        oscillator.frequency.value = freq;
+                        oscillator.type = 'sine';
+
+                        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+                        oscillator.start(audioContext.currentTime);
+                        oscillator.stop(audioContext.currentTime + 0.3);
+                    }, index * 100);
+                });
+            }
+
+            function playErrorSound() {
+                // إنشاء صوت الخطأ (باز)
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                // نغمة منخفضة للخطأ
+                oscillator.frequency.setValueAtTime(150, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(80, audioContext.currentTime + 0.5);
+                oscillator.type = 'sawtooth';
+
+                gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+            }
+
+            function updateTimer() {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                document.getElementById('timeDisplay').textContent = elapsed;
+            }
+
+            function addStar() {
+                totalStars++;
+                const starsContainer = document.getElementById('starsContainer');
+                const star = document.createElement('span');
+                star.className = 'star';
+                star.textContent = '⭐';
+
+                // تأثير ظهور النجمة
+                star.style.transform = 'scale(0)';
+                starsContainer.appendChild(star);
+
+                // تحريك النجمة مع الصوت
+                setTimeout(() => {
+                    star.style.transform = 'scale(1)';
+                    star.style.transition = 'transform 0.5s ease';
+                }, 100);
+            }
+
+            // تأثيرات بصرية محسنة للنجاح
+            function createGlitterEffect(element) {
+                // إنشاء جزيئات متلألئة
+                for (let i = 0; i < 8; i++) {
+                    const sparkle = document.createElement('div');
+                    sparkle.style.position = 'absolute';
+                    sparkle.style.width = '6px';
+                    sparkle.style.height = '6px';
+                    sparkle.style.backgroundColor = '#FFD700';
+                    sparkle.style.borderRadius = '50%';
+                    sparkle.style.pointerEvents = 'none';
+                    sparkle.style.zIndex = '1000';
+
+                    const rect = element.getBoundingClientRect();
+                    sparkle.style.left = rect.left + Math.random() * rect.width + 'px';
+                    sparkle.style.top = rect.top + Math.random() * rect.height + 'px';
+
+                    document.body.appendChild(sparkle);
+
+                    // تحريك الجزيئات
+                    sparkle.animate(
+                        [
+                            { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+                            { transform: `translate(${(Math.random() - 0.5) * 100}px, ${(Math.random() - 0.5) * 100}px) scale(0)`, opacity: 0 }
+                        ],
+                        {
+                            duration: 1000,
+                            easing: 'ease-out'
+                        }
+                    ).onfinish = () => sparkle.remove();
+                }
+            }
+
+            function createShape(shapeData) {
+                const shape = document.createElement('div');
+                shape.style.position = 'absolute';
+                shape.style.left = shapeData.x + 'px';
+                shape.style.top = shapeData.y + 'px';
+                shape.style.opacity = shapeData.opacity || 1;
+                shape.style.zIndex = Math.floor(shapeData.opacity * 100);
+
+                if (shapeData.type === 'animal' || shapeData.type === 'daily-item') {
+                    shape.className = shapeData.type;
+                    shape.textContent = shapeData.content;
+                } else {
+                    shape.className = 'shape ' + shapeData.type;
+                }
+
+                return shape;
+            }
+
+            function loadLevel() {
+                if (currentLevel > 3) {
+                    showCongratulations();
+                    return;
+                }
+
+                const levelData = levels[currentLevel];
+                const pageData = levelData.pages[currentPage - 1];
+
+                document.getElementById('currentLevel').textContent = currentLevel;
+                document.getElementById('currentPage').textContent = currentPage;
+
+                // مسح المنطقة الرئيسية
+                const shapesContainer = document.getElementById('shapesContainer');
+                shapesContainer.innerHTML = '';
+
+                // إضافة الأشكال
+                pageData.shapes.forEach((shapeData) => {
+                    const shape = createShape(shapeData);
+                    shapesContainer.appendChild(shape);
+                });
+
+                // إنشاء الخيارات
+                const optionsContainer = document.getElementById('optionsContainer');
+                optionsContainer.innerHTML = '';
+
+                pageData.options.forEach((option) => {
+                    const optionElement = document.createElement('div');
+                    optionElement.className = 'option-item';
+                    optionElement.onclick = () => selectOption(optionElement, option, pageData.correct);
+
+                    if (currentLevel === 1) {
+                        // أشكال هندسية
+                        const shapeDiv = document.createElement('div');
+                        shapeDiv.className = 'shape ' + option;
+                        optionElement.appendChild(shapeDiv);
+                    } else {
+                        // حيوانات أو أشياء يومية
+                        optionElement.textContent = option;
+                        optionElement.style.fontSize = '40px';
+                    }
+
+                    const checkmark = document.createElement('div');
+                    checkmark.className = 'checkmark';
+                    checkmark.textContent = '✓';
+                    optionElement.appendChild(checkmark);
+
+                    optionsContainer.appendChild(optionElement);
+                });
+
+                startTime = Date.now();
+                const timer = setInterval(updateTimer, 1000);
+
+                // حفظ المؤقت للتنظيف لاحقاً
+                window.currentTimer = timer;
+            }
+
+            function selectOption(element, option, correctAnswers) {
+                if (element.classList.contains('correct') || element.classList.contains('wrong')) {
+                    return; // منع النقر المتعدد
+                }
+
+                const isCorrect = correctAnswers.includes(option);
+
+                if (isCorrect) {
+                    element.classList.add('correct');
+                    element.querySelector('.checkmark').style.display = 'flex';
+
+                    // تأثيرات النجاح المحسنة
+                    element.classList.add('glitter-effect');
+                    createGlitterEffect(element);
+                    playSuccessSound();
+                    addStar();
+
+                    // اهتزاز بسيط للعنصر الصحيح
+                    element.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.1)' }, { transform: 'scale(1)' }], {
+                        duration: 300,
+                        easing: 'ease-in-out'
+                    });
+
+                    // التحقق من اكتمال جميع الإجابات الصحيحة
+                    const correctSelected = document.querySelectorAll('.option-item.correct').length;
+                    if (correctSelected === correctAnswers.length) {
+                        // تأثير احتفالي إضافي عند إكمال المستوى
+                        setTimeout(() => {
+                            showCompletionCelebration();
+                            setTimeout(() => {
+                                nextPage();
+                            }, 1000);
+                        }, 800);
+                    }
+                } else {
+                    element.classList.add('wrong');
+                    playErrorSound();
+
+                    // اهتزاز للإجابة الخاطئة
+                    element.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-10px)' }, { transform: 'translateX(10px)' }, { transform: 'translateX(-10px)' }, { transform: 'translateX(0)' }], {
+                        duration: 500,
+                        easing: 'ease-in-out'
+                    });
+
+                    setTimeout(() => {
+                        element.classList.remove('wrong');
+                    }, 1500);
+                }
+            }
+
+            // احتفال إكمال الصفحة
+            function showCompletionCelebration() {
+                const mainArea = document.getElementById('mainArea');
+
+                // إنشاء مطر من النجوم
+                for (let i = 0; i < 15; i++) {
+                    const star = document.createElement('div');
+                    star.textContent = '⭐';
+                    star.style.position = 'absolute';
+                    star.style.fontSize = '20px';
+                    star.style.left = Math.random() * 100 + '%';
+                    star.style.top = '-20px';
+                    star.style.pointerEvents = 'none';
+                    star.style.zIndex = '1000';
+
+                    mainArea.appendChild(star);
+
+                    star.animate(
+                        [
+                            { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+                            { transform: 'translateY(400px) rotate(720deg)', opacity: 0 }
+                        ],
+                        {
+                            duration: 2000 + Math.random() * 1000,
+                            easing: 'ease-in'
+                        }
+                    ).onfinish = () => star.remove();
+                }
+            }
+
+            function nextPage() {
+                clearInterval(window.currentTimer);
+
+                if (currentPage < 5) {
+                    currentPage++;
+                    loadLevel();
+                } else if (currentLevel < 3) {
+                    showLevelComplete();
+                } else {
+                    showCongratulations();
+                }
+            }
+
+            function nextLevel() {
+                currentLevel++;
+                currentPage = 1;
+                document.getElementById('nextButton').style.display = 'none';
+                loadLevel();
+            }
+
+            function showLevelComplete() {
+                // إنشاء رسالة التهنئة مع النجوم المكتسبة
+                const currentStars = document.querySelectorAll('.star').length;
+                const congratsDiv = document.createElement('div');
+                congratsDiv.className = 'congratulations';
+                congratsDiv.innerHTML = `
+                🎉 أحسنت! لقد أكملت المستوى ${currentLevel}! 🎉
+                <br><br>
+                لقد حصلت على ${currentStars} نجمة حتى الآن!
+                <br><br>
+                ⭐⭐⭐⭐⭐
+            `;
+
+                // إنشاء تأثيرات الاحتفال
+                createLevelCompleteCelebration();
+
+                document.querySelector('.game-container').insertBefore(congratsDiv, document.getElementById('congratulationsScreen'));
+                document.getElementById('nextButton').style.display = 'inline-block';
+
+                setTimeout(() => {
+                    congratsDiv.remove();
+                }, 4000);
+            }
+
+            function createLevelCompleteCelebration() {
+                // إنشاء تأثير الألعاب النارية
+                const container = document.querySelector('.game-container');
+
+                for (let i = 0; i < 20; i++) {
+                    const firework = document.createElement('div');
+                    firework.textContent = ['🎆', '✨', '⭐', '🌟'][Math.floor(Math.random() * 4)];
+                    firework.style.position = 'fixed';
+                    firework.style.fontSize = '25px';
+                    firework.style.left = Math.random() * window.innerWidth + 'px';
+                    firework.style.top = Math.random() * window.innerHeight + 'px';
+                    firework.style.pointerEvents = 'none';
+                    firework.style.zIndex = '10000';
+
+                    document.body.appendChild(firework);
+
+                    firework.animate(
+                        [
+                            { transform: 'scale(0) rotate(0deg)', opacity: 1 },
+                            { transform: 'scale(1.5) rotate(720deg)', opacity: 0 }
+                        ],
+                        {
+                            duration: 2000,
+                            easing: 'ease-out'
+                        }
+                    ).onfinish = () => firework.remove();
+                }
+            }
+
+            function showCongratulations() {
+                document.getElementById('totalStars').textContent = totalStars;
+                document.getElementById('congratulationsScreen').classList.remove('hidden');
+                clearInterval(window.currentTimer);
+                gameCompleted = true;
+            }
+
+            function restartGame() {
+                currentLevel = 1;
+                currentPage = 1;
+                totalStars = 0;
+                gameCompleted = false;
+
+                document.getElementById('starsContainer').innerHTML = '';
+                document.getElementById('congratulationsScreen').classList.add('hidden');
+                document.getElementById('nextButton').style.display = 'none';
+
+                // إزالة أي رسائل تهنئة مؤقتة
+                document.querySelectorAll('.congratulations').forEach((el) => {
+                    if (!el.parentElement.id) el.remove();
+                });
+
+                clearInterval(window.currentTimer);
+                loadLevel();
+            }
+
+            // بدء اللعبة
+            window.onload = function () {
+                loadLevel();
+            };
+        </script>
+    </body>
+</html>

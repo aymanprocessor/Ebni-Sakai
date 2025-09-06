@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>لعبة "اسمع - نفّذ"</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Arial', sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 20px;
+                color: white;
+            }
+
+            .game-header {
+                text-align: center;
+                margin-bottom: 30px;
+            }
+
+            .game-title {
+                font-size: 2.5rem;
+                color: #fff;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+                margin-bottom: 10px;
+            }
+
+            .level-indicator {
+                background: rgba(255, 255, 255, 0.2);
+                padding: 15px 25px;
+                border-radius: 25px;
+                backdrop-filter: blur(10px);
+                margin-bottom: 20px;
+                font-size: 1.1rem;
+                font-weight: bold;
+            }
+
+            .instructor-panel {
+                background: rgba(255, 255, 255, 0.15);
+                backdrop-filter: blur(10px);
+                border-radius: 15px;
+                padding: 20px;
+                margin-bottom: 20px;
+                width: 100%;
+                max-width: 800px;
+            }
+
+            .current-instruction {
+                font-size: 1.2rem;
+                font-weight: bold;
+                text-align: center;
+                color: #fff;
+                margin-bottom: 15px;
+            }
+
+            .instructor-controls {
+                display: flex;
+                gap: 15px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                border: none;
+                border-radius: 25px;
+                cursor: pointer;
+                font-size: 1rem;
+                font-weight: bold;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .btn-primary {
+                background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+                color: white;
+            }
+
+            .btn-secondary {
+                background: linear-gradient(45deg, #4ecdc4, #44a08d);
+                color: white;
+            }
+
+            .btn-success {
+                background: linear-gradient(45deg, #56ab2f, #a8e6cf);
+                color: white;
+            }
+
+            .btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            }
+
+            .game-area {
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                border-radius: 20px;
+                padding: 30px;
+                width: 100%;
+                max-width: 800px;
+                min-height: 400px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                position: relative;
+            }
+
+            .shapes-container {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+                justify-content: center;
+                margin-bottom: 30px;
+            }
+
+            .shape {
+                width: 80px;
+                height: 80px;
+                border-radius: 15px;
+                cursor: grab;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.2rem;
+                font-weight: bold;
+                color: white;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+                user-select: none;
+            }
+
+            .shape:hover {
+                transform: scale(1.1);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            }
+
+            .shape.dragging {
+                cursor: grabbing;
+                transform: rotate(5deg) scale(1.1);
+                z-index: 1000;
+            }
+
+            .red {
+                background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+                color: white;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            }
+            .blue {
+                background: linear-gradient(45deg, #2196f3, #1976d2);
+                color: white;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            }
+            .green {
+                background: linear-gradient(45deg, #4caf50, #2e7d32);
+                color: white;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            }
+            .yellow {
+                background: linear-gradient(45deg, #ffeb3b, #f57c00);
+                color: #333;
+                text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+            }
+            .purple {
+                background: linear-gradient(45deg, #9c27b0, #6a1b9a);
+                color: white;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            }
+            .orange {
+                background: linear-gradient(45deg, #ff9800, #e65100);
+                color: white;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            }
+
+            .targets-container {
+                display: flex;
+                gap: 20px;
+                justify-content: center;
+                margin-top: 30px;
+                flex-wrap: wrap;
+            }
+
+            .target-box {
+                width: 100px;
+                height: 100px;
+                border: 3px dashed rgba(255, 255, 255, 0.5);
+                border-radius: 15px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.9rem;
+                color: rgba(255, 255, 255, 0.8);
+                transition: all 0.3s ease;
+                background: rgba(255, 255, 255, 0.05);
+            }
+
+            .target-box.active {
+                border-color: #ffd93d;
+                background: rgba(255, 217, 61, 0.2);
+                box-shadow: 0 0 20px rgba(255, 217, 61, 0.5);
+            }
+
+            .target-box.filled {
+                border-color: #4ecdc4;
+                background: rgba(78, 205, 196, 0.1);
+                font-weight: bold;
+                font-size: 1rem;
+            }
+
+            .progress-bar {
+                width: 100%;
+                height: 20px;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 10px;
+                margin-top: 20px;
+                overflow: hidden;
+            }
+
+            .progress-fill {
+                height: 100%;
+                background: linear-gradient(90deg, #4ecdc4, #44a08d);
+                width: 0%;
+                transition: width 0.5s ease;
+                border-radius: 10px;
+            }
+
+            .stars-display {
+                display: flex;
+                gap: 10px;
+                margin-top: 15px;
+            }
+
+            .star {
+                font-size: 2rem;
+                color: #ffd93d;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+                opacity: 0.3;
+                transition: all 0.5s ease;
+            }
+
+            .star.earned {
+                opacity: 1;
+                animation: starPulse 0.6s ease-in-out;
+            }
+
+            @keyframes starPulse {
+                0% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.3);
+                }
+                100% {
+                    transform: scale(1);
+                }
+            }
+
+            .level-complete {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(45deg, #4ecdc4, #44a08d);
+                padding: 40px;
+                border-radius: 20px;
+                text-align: center;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                z-index: 2000;
+                display: none;
+            }
+
+            .level-complete h2 {
+                font-size: 2rem;
+                margin-bottom: 20px;
+                color: white;
+            }
+
+            .celebration {
+                font-size: 3rem;
+                margin-bottom: 20px;
+            }
+
+            .step-counter {
+                background: rgba(255, 255, 255, 0.2);
+                padding: 10px 15px;
+                border-radius: 15px;
+                margin-bottom: 20px;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="game-header">
+            <h1 class="game-title">🎮 لعبة "اسمع - نفّذ" 🎮</h1>
+            <div class="level-indicator">
+                <span id="levelDisplay">المستوى 1: مبتدئ - خطوتان</span>
+            </div>
+        </div>
+
+        <div class="instructor-panel">
+            <div class="current-instruction" id="currentInstruction">اضغط على "تعليمات جديدة" لبدء التحدي</div>
+            <div class="step-counter" id="stepCounter">الخطوات المطلوبة: 0</div>
+            <div class="instructor-controls">
+                <button class="btn btn-primary" onclick="generateNewInstructions()">🔊 تعليمات جديدة</button>
+                <button class="btn btn-secondary" onclick="repeatInstructions()">🔁 إعادة التعليمات</button>
+                <button class="btn btn-success" onclick="nextLevel()">⬆️ المستوى التالي</button>
+                <button class="btn btn-secondary" onclick="resetGame()">🔄 إعادة تشغيل</button>
+                <button class="btn btn-primary" onclick="showLevelSelector()" style="background: linear-gradient(45deg, #9c27b0, #6a1b9a)">📊 اختيار المستوى</button>
+            </div>
+        </div>
+
+        <div class="game-area">
+            <div class="shapes-container" id="shapesContainer">
+                <!-- الأشكال ستُضاف هنا تلقائياً -->
+            </div>
+
+            <div class="targets-container" id="targetsContainer">
+                <!-- أماكن الوضع ستُضاف هنا تلقائياً -->
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div class="stars-display" id="starsDisplay">
+                <span class="star">⭐</span>
+                <span class="star">⭐</span>
+                <span class="star">⭐</span>
+            </div>
+        </div>
+
+        <div class="level-complete" id="levelCompleteModal">
+            <div class="celebration">🎉🎊✨</div>
+            <h2>أحسنت! مستوى مكتمل!</h2>
+            <div class="stars-display">
+                <span class="star earned">⭐</span>
+                <span class="star earned">⭐</span>
+                <span class="star earned">⭐</span>
+            </div>
+            <button class="btn btn-primary" onclick="proceedToNextLevel()" style="margin-top: 20px">المستوى التالي</button>
+        </div>
+
+        <div class="level-complete" id="levelSelectorModal" style="display: none">
+            <div class="celebration">📊</div>
+            <h2>اختر المستوى المطلوب</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px">
+                <button class="btn btn-primary" onclick="jumpToLevel(1)">1️⃣ مبتدئ</button>
+                <button class="btn btn-primary" onclick="jumpToLevel(2)">2️⃣ سهل</button>
+                <button class="btn btn-primary" onclick="jumpToLevel(3)">3️⃣ متوسط</button>
+                <button class="btn btn-primary" onclick="jumpToLevel(4)">4️⃣ متقدم</button>
+                <button class="btn btn-primary" onclick="jumpToLevel(5)">5️⃣ صعب</button>
+                <button class="btn btn-primary" onclick="jumpToLevel(6)">6️⃣ خبير</button>
+                <button class="btn btn-primary" onclick="jumpToLevel(7)">7️⃣ بطل</button>
+            </div>
+            <button class="btn btn-secondary" onclick="closeLevelSelector()" style="margin-top: 20px">إلغاء</button>
+        </div>
+
+        <script>
+            // متغيرات اللعبة
+            let currentLevel = 1;
+            let currentSteps = [];
+            let completedSteps = 0;
+            let totalSteps = 2;
+            let starsEarned = 0;
+            let gameInProgress = false;
+
+            // الألوان والأشكال المتاحة
+            const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange'];
+            const colorNames = {
+                red: 'أحمر',
+                blue: 'أزرق',
+                green: 'أخضر',
+                yellow: 'أصفر',
+                purple: 'بنفسجي',
+                orange: 'برتقالي'
+            };
+
+            // تعليمات لكل مستوى - 7 مستويات متدرجة
+            const levelInstructions = {
+                1: 2, // خطوتان - سهل جداً
+                2: 3, // 3 خطوات - سهل
+                3: 4, // 4 خطوات - متوسط
+                4: 5, // 5 خطوات - متوسط صعب
+                5: 6, // 6 خطوات - صعب
+                6: 7, // 7 خطوات - صعب جداً
+                7: 8 // 8 خطوات - خبير
+            };
+
+            const levelNames = {
+                1: 'مبتدئ - خطوتان',
+                2: 'سهل - ثلاث خطوات',
+                3: 'متوسط - أربع خطوات',
+                4: 'متقدم - خمس خطوات',
+                5: 'صعب - ست خطوات',
+                6: 'خبير - سبع خطوات',
+                7: 'بطل - ثماني خطوات'
+            };
+
+            // إنشاء الأصوات
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            let speechSynthesis = window.speechSynthesis;
+            let arabicVoice = null;
+
+            // البحث عن صوت عربي
+            function setupVoice() {
+                const voices = speechSynthesis.getVoices();
+                arabicVoice = voices.find((voice) => voice.lang.includes('ar') || voice.name.includes('Arabic') || voice.name.includes('عربي')) || voices[0]; // استخدام الصوت الأول كبديل
+            }
+
+            // إعداد الصوت عند تحميل الأصوات
+            speechSynthesis.onvoiceschanged = setupVoice;
+            setupVoice();
+
+            // تشغيل الأصوات
+            function playSound(type) {
+                try {
+                    if (type === 'success') {
+                        // صوت النجاح - نغمة مرتفعة
+                        playTone(800, 200);
+                        setTimeout(() => playTone(1000, 200), 100);
+                        document.body.style.filter = 'brightness(1.2)';
+                        setTimeout(() => {
+                            document.body.style.filter = 'brightness(1)';
+                        }, 200);
+                    } else if (type === 'error') {
+                        // صوت خطأ - نغمة منخفضة
+                        playTone(200, 500);
+                        document.body.style.filter = 'hue-rotate(180deg)';
+                        setTimeout(() => {
+                            document.body.style.filter = 'none';
+                        }, 300);
+                    } else if (type === 'click') {
+                        // صوت نقرة - نغمة قصيرة
+                        playTone(600, 100);
+                    }
+                } catch (e) {
+                    console.log('تعذر تشغيل الصوت:', e);
+                }
+            }
+
+            // تشغيل نغمة
+            function playTone(frequency, duration) {
+                try {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+                    oscillator.type = 'sine';
+
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
+
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + duration / 1000);
+                } catch (e) {
+                    console.log('تعذر تشغيل النغمة:', e);
+                }
+            }
+
+            // قراءة النص بالصوت
+            function speakText(text) {
+                try {
+                    // إيقاف أي كلام سابق
+                    speechSynthesis.cancel();
+
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.voice = arabicVoice;
+                    utterance.rate = 0.8; // سرعة أبطأ للأطفال
+                    utterance.pitch = 1.2; // نبرة أعلى قليلاً
+                    utterance.volume = 0.8;
+
+                    speechSynthesis.speak(utterance);
+                } catch (e) {
+                    console.log('تعذر قراءة النص:', e);
+                }
+            }
+
+            // إنشاء الأشكال
+            function createShapes() {
+                const container = document.getElementById('shapesContainer');
+                container.innerHTML = '';
+
+                colors.forEach((color) => {
+                    const shape = document.createElement('div');
+                    shape.className = `shape ${color}`;
+                    shape.draggable = true;
+                    shape.textContent = colorNames[color];
+                    shape.dataset.color = color;
+
+                    // إضافة أحداث السحب والإفلات
+                    shape.addEventListener('dragstart', handleDragStart);
+                    shape.addEventListener('dragend', handleDragEnd);
+                    shape.addEventListener('click', () => playSound('click'));
+
+                    container.appendChild(shape);
+                });
+            }
+
+            // إنشاء أماكن الوضع
+            function createTargets() {
+                const container = document.getElementById('targetsContainer');
+                container.innerHTML = '';
+
+                for (let i = 0; i < totalSteps; i++) {
+                    const target = document.createElement('div');
+                    target.className = 'target-box';
+                    target.textContent = `الخطوة ${i + 1}`;
+                    target.dataset.step = i;
+
+                    // إضافة أحداث الإفلات
+                    target.addEventListener('dragover', handleDragOver);
+                    target.addEventListener('drop', handleDrop);
+
+                    // إزالة كلاسات الألوان السابقة
+                    target.classList.remove('red', 'blue', 'green', 'yellow', 'purple', 'orange', 'filled');
+
+                    container.appendChild(target);
+                }
+            }
+
+            // التعامل مع بدء السحب
+            function handleDragStart(e) {
+                e.dataTransfer.setData('text/plain', e.target.dataset.color);
+                e.target.classList.add('dragging');
+                playSound('click');
+            }
+
+            // التعامل مع انتهاء السحب
+            function handleDragEnd(e) {
+                e.target.classList.remove('dragging');
+            }
+
+            // التعامل مع السحب فوق الهدف
+            function handleDragOver(e) {
+                e.preventDefault();
+                e.target.classList.add('active');
+            }
+
+            // التعامل مع الإفلات
+            function handleDrop(e) {
+                e.preventDefault();
+                e.target.classList.remove('active');
+
+                if (!gameInProgress) return;
+
+                const draggedColor = e.dataTransfer.getData('text/plain');
+                const stepIndex = parseInt(e.target.dataset.step);
+                const expectedColor = currentSteps[stepIndex];
+
+                if (draggedColor === expectedColor && stepIndex === completedSteps) {
+                    // إجابة صحيحة
+                    e.target.classList.add('filled');
+                    e.target.textContent = colorNames[draggedColor];
+                    e.target.classList.add(draggedColor); // إضافة كلاس اللون
+                    e.target.style.color = draggedColor === 'yellow' ? '#333' : 'white';
+                    e.target.style.textShadow = draggedColor === 'yellow' ? '1px 1px 2px rgba(255,255,255,0.8)' : '2px 2px 4px rgba(0,0,0,0.7)';
+
+                    completedSteps++;
+                    updateProgress();
+                    playSound('success');
+                    earnStar();
+
+                    if (completedSteps === totalSteps) {
+                        completeLevel();
+                    } else {
+                        // قراءة الخطوة التالية
+                        const nextStep = completedSteps;
+                        const nextColor = currentSteps[nextStep];
+                        setTimeout(() => {
+                            speakText(`الآن المس اللون ${colorNames[nextColor]}`);
+                        }, 800);
+                    }
+                } else {
+                    // إجابة خاطئة
+                    playSound('error');
+                    e.target.style.animation = 'shake 0.5s ease-in-out';
+                    setTimeout(() => {
+                        e.target.style.animation = '';
+                    }, 500);
+                }
+            }
+
+            // توليد تعليمات جديدة
+            function generateNewInstructions() {
+                totalSteps = levelInstructions[currentLevel];
+                currentSteps = [];
+                completedSteps = 0;
+                gameInProgress = true;
+
+                // توليد خطوات عشوائية
+                for (let i = 0; i < totalSteps; i++) {
+                    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                    currentSteps.push(randomColor);
+                }
+
+                // عرض التعليمات
+                const instructionText = currentSteps.map((color, index) => `${index + 1}. المس اللون ${colorNames[color]}`).join(' ثم ');
+
+                document.getElementById('currentInstruction').textContent = instructionText;
+                document.getElementById('stepCounter').textContent = `الخطوات المطلوبة: ${totalSteps}`;
+
+                // قراءة التعليمات بالصوت
+                const speechText = currentSteps.map((color, index) => `الخطوة ${index + 1}: المس اللون ${colorNames[color]}`).join('. ');
+
+                setTimeout(() => {
+                    speakText(`استمع جيداً. ${speechText}`);
+                }, 500);
+
+                // إعادة إنشاء الأهداف
+                createTargets();
+                updateProgress();
+                resetStars();
+                playSound('click');
+            }
+
+            // إعادة التعليمات
+            function repeatInstructions() {
+                if (currentSteps.length > 0) {
+                    const instructionText = currentSteps.map((color, index) => `${index + 1}. المس اللون ${colorNames[color]}`).join(' ثم ');
+
+                    document.getElementById('currentInstruction').textContent = instructionText;
+
+                    // قراءة التعليمات بالصوت مرة أخرى
+                    const speechText = currentSteps.map((color, index) => `الخطوة ${index + 1}: المس اللون ${colorNames[color]}`).join('. ');
+
+                    speakText(`إعادة التعليمات. ${speechText}`);
+                    playSound('click');
+                }
+            }
+
+            // تحديث شريط التقدم
+            function updateProgress() {
+                const progress = (completedSteps / totalSteps) * 100;
+                document.getElementById('progressFill').style.width = `${progress}%`;
+            }
+
+            // كسب نجمة
+            function earnStar() {
+                const stars = document.querySelectorAll('#starsDisplay .star');
+                if (starsEarned < stars.length) {
+                    stars[starsEarned].classList.add('earned');
+                    starsEarned++;
+                }
+            }
+
+            // إعادة تعيين النجوم
+            function resetStars() {
+                const stars = document.querySelectorAll('#starsDisplay .star');
+                stars.forEach((star) => star.classList.remove('earned'));
+                starsEarned = 0;
+            }
+
+            // إكمال المستوى
+            function completeLevel() {
+                gameInProgress = false;
+                document.getElementById('levelCompleteModal').style.display = 'block';
+                playSound('success');
+
+                // قراءة رسالة التهنئة
+                setTimeout(() => {
+                    speakText('أحسنت! لقد أكملت المستوى بنجاح!');
+                }, 1000);
+
+                // تأثير الاحتفال
+                setTimeout(() => {
+                    document.body.style.background = 'linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%)';
+                    setTimeout(() => {
+                        document.body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                    }, 1000);
+                }, 500);
+            }
+
+            // الانتقال للمستوى التالي
+            function nextLevel() {
+                if (currentLevel < 7) {
+                    currentLevel++;
+                    document.getElementById('levelDisplay').textContent = `المستوى ${currentLevel}: ${levelNames[currentLevel]}`;
+                    document.getElementById('currentInstruction').textContent = 'اضغط على "تعليمات جديدة" لبدء التحدي';
+                    resetStars();
+                    playSound('click');
+
+                    // إعلان المستوى الجديد بالصوت
+                    setTimeout(() => {
+                        speakText(`المستوى ${currentLevel}: ${levelNames[currentLevel]}. اضغط على تعليمات جديدة للبدء`);
+                    }, 500);
+                } else {
+                    // إنهاء جميع المستويات
+                    document.getElementById('currentInstruction').textContent = '🎉 تهانينا! أكملت جميع المستويات! أنت بطل حقيقي! 🎉';
+                    setTimeout(() => {
+                        speakText('تهانينا! لقد أكملت جميع المستويات بنجاح! أنت بطل حقيقي في لعبة اسمع ونفذ!');
+                    }, 500);
+                }
+            }
+
+            // الانتقال للمستوى التالي (من المودال)
+            function proceedToNextLevel() {
+                document.getElementById('levelCompleteModal').style.display = 'none';
+                nextLevel();
+            }
+
+            // إعادة تشغيل اللعبة
+            function resetGame() {
+                currentLevel = 1;
+                totalSteps = 2;
+                completedSteps = 0;
+                currentSteps = [];
+                gameInProgress = false;
+
+                document.getElementById('levelDisplay').textContent = 'المستوى 1: مبتدئ - خطوتان';
+                document.getElementById('currentInstruction').textContent = 'اضغط على "تعليمات جديدة" لبدء التحدي';
+                document.getElementById('stepCounter').textContent = 'الخطوات المطلوبة: 0';
+                document.getElementById('levelCompleteModal').style.display = 'none';
+
+                createTargets();
+                updateProgress();
+                resetStars();
+                playSound('click');
+
+                // إعلان إعادة التشغيل
+                setTimeout(() => {
+                    speakText('تم إعادة تشغيل اللعبة. ابدأ من المستوى الأول');
+                }, 500);
+            }
+
+            // تفعيل الصوت عند أول تفاعل
+            function initializeAudio() {
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+            }
+
+            // إضافة مستمع للتفاعل الأول
+            document.addEventListener('click', initializeAudio, { once: true });
+            document.addEventListener('touchstart', initializeAudio, { once: true });
+
+            // وظائف اختيار المستوى
+            function showLevelSelector() {
+                document.getElementById('levelSelectorModal').style.display = 'block';
+                playSound('click');
+            }
+
+            function closeLevelSelector() {
+                document.getElementById('levelSelectorModal').style.display = 'none';
+                playSound('click');
+            }
+
+            function jumpToLevel(level) {
+                currentLevel = level;
+                totalSteps = levelInstructions[currentLevel];
+                completedSteps = 0;
+                currentSteps = [];
+                gameInProgress = false;
+
+                document.getElementById('levelDisplay').textContent = `المستوى ${currentLevel}: ${levelNames[currentLevel]}`;
+                document.getElementById('currentInstruction').textContent = 'اضغط على "تعليمات جديدة" لبدء التحدي';
+                document.getElementById('stepCounter').textContent = 'الخطوات المطلوبة: 0';
+                document.getElementById('levelSelectorModal').style.display = 'none';
+
+                createTargets();
+                updateProgress();
+                resetStars();
+                playSound('click');
+
+                setTimeout(() => {
+                    speakText(`تم الانتقال إلى المستوى ${currentLevel}: ${levelNames[currentLevel]}`);
+                }, 500);
+            }
+
+            // تأثير الاهتزاز للأخطاء
+            const shakeStyle = document.createElement('style');
+            shakeStyle.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-5px); }
+                75% { transform: translateX(5px); }
+            }
+        `;
+            document.head.appendChild(shakeStyle);
+
+            // تهيئة اللعبة
+            document.addEventListener('DOMContentLoaded', function () {
+                createShapes();
+                createTargets();
+                updateProgress();
+            });
+        </script>
+    </body>
+</html>

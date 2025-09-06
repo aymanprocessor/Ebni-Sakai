@@ -1,0 +1,854 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>لعبة التتبع والرسم للأطفال</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Cairo', 'Comic Sans MS', sans-serif;
+                background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+                min-height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 10px;
+            }
+
+            .game-container {
+                background: rgba(255, 255, 255, 0.98);
+                border-radius: 25px;
+                padding: 25px;
+                max-width: 900px;
+                width: 100%;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                border: 4px solid #fff;
+            }
+
+            .header {
+                text-align: center;
+                margin-bottom: 25px;
+            }
+
+            .title {
+                font-size: 2.3rem;
+                color: #2d3436;
+                margin-bottom: 15px;
+                font-weight: bold;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            }
+
+            .stats {
+                display: flex;
+                justify-content: center;
+                gap: 20px;
+                margin-bottom: 20px;
+                flex-wrap: wrap;
+            }
+
+            .stat-item {
+                background: linear-gradient(45deg, #00b894, #00a085);
+                color: white;
+                padding: 12px 24px;
+                border-radius: 20px;
+                font-weight: bold;
+                font-size: 1.1rem;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                min-width: 120px;
+                text-align: center;
+            }
+
+            .progress-section {
+                background: #f8f9fa;
+                border-radius: 15px;
+                padding: 15px;
+                margin: 20px 0;
+                border: 2px solid #e9ecef;
+            }
+
+            .progress-bar {
+                background: #e9ecef;
+                height: 12px;
+                border-radius: 6px;
+                overflow: hidden;
+                margin-bottom: 8px;
+            }
+
+            .progress-fill {
+                background: linear-gradient(90deg, #00b894, #74b9ff);
+                height: 100%;
+                width: 0%;
+                transition: width 0.5s ease;
+            }
+
+            .progress-text {
+                text-align: center;
+                font-weight: bold;
+                color: #636e72;
+            }
+
+            .drawing-area {
+                background: #fff;
+                border: 3px dashed #ddd;
+                border-radius: 20px;
+                margin: 25px auto;
+                position: relative;
+                width: 100%;
+                max-width: 600px;
+                height: 400px;
+                box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
+            }
+
+            .drawing-canvas {
+                width: 100%;
+                height: 100%;
+                border-radius: 17px;
+                cursor: crosshair;
+            }
+
+            .dot {
+                position: absolute;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                color: white;
+                font-size: 12px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                z-index: 10;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            }
+
+            .dot:hover {
+                transform: scale(1.3);
+            }
+
+            .dot.active {
+                animation: dotPulse 1s ease-in-out infinite;
+                transform: scale(1.2);
+                box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+                border: 3px solid #ffd700;
+            }
+
+            .dot.completed {
+                background: #00b894 !important;
+                animation: dotSuccess 0.6s ease;
+            }
+
+            .dot.current {
+                background: #ff6b6b !important;
+                border: 3px solid #ffd700;
+                box-shadow: 0 0 20px rgba(255, 107, 107, 0.6);
+            }
+
+            @keyframes dotPulse {
+                0%,
+                100% {
+                    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+                    transform: scale(1.2);
+                }
+                50% {
+                    box-shadow: 0 0 25px rgba(255, 215, 0, 1);
+                    transform: scale(1.4);
+                }
+            }
+
+            @keyframes dotSuccess {
+                0% {
+                    transform: scale(1.2);
+                }
+                50% {
+                    transform: scale(1.5) rotate(180deg);
+                }
+                100% {
+                    transform: scale(1.2) rotate(360deg);
+                }
+            }
+
+            .message-box {
+                text-align: center;
+                font-size: 1.3rem;
+                font-weight: bold;
+                color: #636e72;
+                margin: 20px 0;
+                padding: 15px;
+                background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+                border-radius: 15px;
+                border: 2px solid #dee2e6;
+                min-height: 50px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .controls {
+                text-align: center;
+                margin: 25px 0;
+            }
+
+            .game-button {
+                background: linear-gradient(45deg, #74b9ff, #0984e3);
+                border: none;
+                color: white;
+                padding: 16px 32px;
+                font-size: 1.2rem;
+                border-radius: 25px;
+                cursor: pointer;
+                margin: 0 10px;
+                transition: all 0.3s ease;
+                font-weight: bold;
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+                font-family: inherit;
+            }
+
+            .game-button:hover:not(:disabled) {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            }
+
+            .game-button:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+            .game-button.reset {
+                background: linear-gradient(45deg, #fd79a8, #e84393);
+            }
+
+            .success-popup {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(45deg, #00b894, #00a085);
+                color: white;
+                padding: 30px;
+                border-radius: 20px;
+                font-size: 1.5rem;
+                font-weight: bold;
+                text-align: center;
+                z-index: 1000;
+                box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+                animation: popupShow 0.5s ease;
+            }
+
+            @keyframes popupShow {
+                0% {
+                    transform: translate(-50%, -50%) scale(0.5);
+                    opacity: 0;
+                }
+                100% {
+                    transform: translate(-50%, -50%) scale(1);
+                    opacity: 1;
+                }
+            }
+
+            .confetti-piece {
+                position: absolute;
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                animation: confettiAnimation 3s ease-out forwards;
+            }
+
+            @keyframes confettiAnimation {
+                0% {
+                    transform: translateY(0) rotate(0deg);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateY(100vh) rotate(720deg);
+                    opacity: 0;
+                }
+            }
+
+            @keyframes errorShake {
+                0%,
+                100% {
+                    transform: translateX(0);
+                }
+                20% {
+                    transform: translateX(-8px);
+                }
+                40% {
+                    transform: translateX(8px);
+                }
+                60% {
+                    transform: translateX(-5px);
+                }
+                80% {
+                    transform: translateX(5px);
+                }
+            }
+
+            @media (max-width: 600px) {
+                .game-container {
+                    padding: 15px;
+                    margin: 5px;
+                }
+
+                .title {
+                    font-size: 1.8rem;
+                }
+
+                .drawing-area {
+                    height: 300px;
+                }
+
+                .dot {
+                    width: 24px;
+                    height: 24px;
+                    font-size: 14px;
+                }
+
+                .game-button {
+                    padding: 14px 24px;
+                    font-size: 1rem;
+                    margin: 5px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="game-container">
+            <div class="header">
+                <h1 class="title">🎨 لعبة الأشكال الهندسية 🎨</h1>
+
+                <div class="stats">
+                    <div class="stat-item">الشكل: <span id="shapeNum">1</span> / 10</div>
+                    <div class="stat-item">النجوم: <span id="starCount">0</span> ⭐</div>
+                </div>
+            </div>
+
+            <div class="progress-section">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="gameProgress"></div>
+                </div>
+                <div class="progress-text" id="progressInfo">الأشكال الهندسية</div>
+            </div>
+
+            <div class="message-box" id="gameMsg">مرحباً! اضغط "ابدأ الرسم" لتبدأ رحلة الإبداع! ✏️</div>
+
+            <div class="drawing-area">
+                <canvas class="drawing-canvas" id="drawingCanvas"></canvas>
+            </div>
+
+            <div class="controls">
+                <button class="game-button" id="startDrawing" onclick="beginShape()">✏️ ابدأ الرسم</button>
+                <button class="game-button reset" id="restartGame" onclick="restartFromBeginning()">🔄 من البداية</button>
+            </div>
+        </div>
+
+        <script>
+            // حالة اللعبة المبسطة
+            const gameData = {
+                currentShape: 1,
+                totalStars: 0,
+                canvas: null,
+                ctx: null,
+                dots: [],
+                currentDot: 0,
+                isActive: false,
+                audioCtx: null,
+                completedDots: []
+            };
+
+            // الأشكال الهندسية الأساسية للمستوى الواحد
+            const geometricShapes = [
+                {
+                    name: 'مثلث',
+                    points: [
+                        [300, 140],
+                        [240, 240],
+                        [360, 240]
+                    ]
+                },
+                {
+                    name: 'مربع',
+                    points: [
+                        [240, 160],
+                        [360, 160],
+                        [360, 240],
+                        [240, 240]
+                    ]
+                },
+                {
+                    name: 'مستطيل',
+                    points: [
+                        [220, 180],
+                        [380, 180],
+                        [380, 240],
+                        [220, 240]
+                    ]
+                },
+                {
+                    name: 'معين',
+                    points: [
+                        [300, 140],
+                        [360, 200],
+                        [300, 260],
+                        [240, 200]
+                    ]
+                },
+                {
+                    name: 'دائرة',
+                    points: [
+                        [300, 140],
+                        [340, 150],
+                        [370, 180],
+                        [380, 220],
+                        [370, 260],
+                        [340, 290],
+                        [300, 300],
+                        [260, 290],
+                        [230, 260],
+                        [220, 220],
+                        [230, 180],
+                        [260, 150]
+                    ]
+                },
+                {
+                    name: 'خماسي',
+                    points: [
+                        [300, 130],
+                        [360, 160],
+                        [340, 230],
+                        [260, 230],
+                        [240, 160]
+                    ]
+                },
+                {
+                    name: 'سداسي',
+                    points: [
+                        [300, 130],
+                        [350, 160],
+                        [350, 220],
+                        [300, 250],
+                        [250, 220],
+                        [250, 160]
+                    ]
+                },
+                {
+                    name: 'نجمة',
+                    points: [
+                        [300, 120],
+                        [310, 150],
+                        [340, 150],
+                        [320, 175],
+                        [330, 205],
+                        [300, 190],
+                        [270, 205],
+                        [280, 175],
+                        [260, 150],
+                        [290, 150]
+                    ]
+                },
+                {
+                    name: 'قلب',
+                    points: [
+                        [300, 160],
+                        [280, 140],
+                        [260, 140],
+                        [240, 160],
+                        [240, 180],
+                        [300, 240],
+                        [360, 180],
+                        [360, 160],
+                        [340, 140],
+                        [320, 140]
+                    ]
+                },
+                {
+                    name: 'سهم',
+                    points: [
+                        [300, 120],
+                        [340, 160],
+                        [320, 160],
+                        [320, 240],
+                        [280, 240],
+                        [280, 160],
+                        [260, 160]
+                    ]
+                }
+            ];
+
+            // الحصول على الشكل الحالي
+            function getCurrentShape() {
+                return geometricShapes[gameData.currentShape - 1];
+            }
+
+            // إعداد الصوت
+            function initializeAudio() {
+                try {
+                    if (!gameData.audioCtx && (window.AudioContext || window.webkitAudioContext)) {
+                        gameData.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    }
+                    if (gameData.audioCtx?.state === 'suspended') {
+                        gameData.audioCtx.resume();
+                    }
+                } catch (e) {
+                    console.log('الصوت غير متاح');
+                }
+            }
+
+            // تشغيل الأصوات
+            function playSound(type) {
+                if (!gameData.audioCtx) return;
+
+                try {
+                    if (type === 'correct') {
+                        // صوت جليتر للنجاح
+                        const frequencies = [523, 659, 784, 1047];
+                        frequencies.forEach((freq, index) => {
+                            setTimeout(() => {
+                                const osc = gameData.audioCtx.createOscillator();
+                                const gain = gameData.audioCtx.createGain();
+                                osc.connect(gain);
+                                gain.connect(gameData.audioCtx.destination);
+                                osc.frequency.value = freq;
+                                osc.type = 'sine';
+                                gain.gain.setValueAtTime(0.1, gameData.audioCtx.currentTime);
+                                gain.gain.exponentialRampToValueAtTime(0.01, gameData.audioCtx.currentTime + 0.3);
+                                osc.start();
+                                osc.stop(gameData.audioCtx.currentTime + 0.3);
+                            }, index * 100);
+                        });
+                    } else if (type === 'wrong') {
+                        // صوت باز للخطأ
+                        const osc = gameData.audioCtx.createOscillator();
+                        const gain = gameData.audioCtx.createGain();
+                        osc.connect(gain);
+                        gain.connect(gameData.audioCtx.destination);
+                        osc.frequency.setValueAtTime(180, gameData.audioCtx.currentTime);
+                        osc.frequency.exponentialRampToValueAtTime(90, gameData.audioCtx.currentTime + 0.4);
+                        osc.type = 'sawtooth';
+                        gain.gain.setValueAtTime(0.08, gameData.audioCtx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, gameData.audioCtx.currentTime + 0.4);
+                        osc.start();
+                        osc.stop(gameData.audioCtx.currentTime + 0.4);
+                    } else if (type === 'complete') {
+                        // صوت إكمال الشكل
+                        const melody = [523, 659, 784, 1047, 1319];
+                        melody.forEach((freq, index) => {
+                            setTimeout(() => {
+                                const osc = gameData.audioCtx.createOscillator();
+                                const gain = gameData.audioCtx.createGain();
+                                osc.connect(gain);
+                                gain.connect(gameData.audioCtx.destination);
+                                osc.frequency.value = freq;
+                                osc.type = 'triangle';
+                                gain.gain.setValueAtTime(0.08, gameData.audioCtx.currentTime);
+                                gain.gain.exponentialRampToValueAtTime(0.01, gameData.audioCtx.currentTime + 0.4);
+                                osc.start();
+                                osc.stop(gameData.audioCtx.currentTime + 0.4);
+                            }, index * 150);
+                        });
+                    }
+                } catch (e) {
+                    console.log('خطأ في الصوت');
+                }
+            }
+
+            // إعداد Canvas
+            function setupCanvas() {
+                gameData.canvas = document.getElementById('drawingCanvas');
+                gameData.ctx = gameData.canvas.getContext('2d');
+
+                // ضبط حجم Canvas
+                const container = gameData.canvas.parentElement;
+                gameData.canvas.width = container.offsetWidth;
+                gameData.canvas.height = container.offsetHeight;
+
+                // إعدادات الرسم
+                gameData.ctx.strokeStyle = '#ff6b6b';
+                gameData.ctx.lineWidth = 4;
+                gameData.ctx.lineCap = 'round';
+                gameData.ctx.lineJoin = 'round';
+            }
+
+            // إنشاء النقاط
+            function createDots() {
+                const shape = getCurrentShape();
+                const container = document.querySelector('.drawing-area');
+
+                // إزالة النقاط السابقة
+                container.querySelectorAll('.dot').forEach((dot) => dot.remove());
+
+                gameData.dots = [];
+                gameData.currentDot = 0;
+                gameData.completedDots = [];
+
+                shape.points.forEach((point, index) => {
+                    const dot = document.createElement('div');
+                    dot.className = 'dot';
+                    dot.id = `dot_${index}`;
+                    dot.style.left = point[0] - 10 + 'px';
+                    dot.style.top = point[1] - 10 + 'px';
+                    dot.style.backgroundColor = index === 0 ? '#ff6b6b' : '#74b9ff';
+                    dot.textContent = index + 1;
+
+                    if (index === 0) {
+                        dot.classList.add('current', 'active');
+                    }
+
+                    dot.onclick = () => selectDot(index);
+                    container.appendChild(dot);
+
+                    gameData.dots.push({
+                        element: dot,
+                        x: point[0],
+                        y: point[1],
+                        index: index
+                    });
+                });
+            }
+
+            // اختيار النقطة
+            function selectDot(dotIndex) {
+                if (!gameData.isActive) return;
+
+                if (dotIndex === gameData.currentDot) {
+                    // إجابة صحيحة
+                    playSound('correct');
+
+                    const dot = document.getElementById(`dot_${dotIndex}`);
+                    dot.classList.add('completed');
+                    dot.classList.remove('current', 'active');
+
+                    gameData.completedDots.push(dotIndex);
+
+                    // رسم خط إلى النقطة
+                    if (gameData.currentDot > 0) {
+                        drawLineToPoint(gameData.dots[dotIndex]);
+                    } else {
+                        // بداية الرسم
+                        gameData.ctx.beginPath();
+                        gameData.ctx.moveTo(gameData.dots[0].x, gameData.dots[0].y);
+                    }
+
+                    gameData.currentDot++;
+
+                    if (gameData.currentDot < gameData.dots.length) {
+                        // تنشيط النقطة التالية
+                        const nextDot = document.getElementById(`dot_${gameData.currentDot}`);
+                        nextDot.classList.add('current', 'active');
+                        nextDot.style.backgroundColor = '#ff6b6b';
+
+                        updateGameMessage(`ممتاز! الآن اضغط على النقطة رقم ${gameData.currentDot + 1} 🎯`);
+                    } else {
+                        // اكتمل الشكل
+                        completeShape();
+                    }
+                } else {
+                    // إجابة خاطئة
+                    playSound('wrong');
+                    const dot = document.getElementById(`dot_${dotIndex}`);
+                    dot.style.animation = 'errorShake 0.6s ease';
+
+                    setTimeout(() => {
+                        dot.style.animation = '';
+                    }, 600);
+
+                    updateGameMessage('😊 حاول مرة أخرى! اضغط على النقطة الصحيحة ✨');
+                }
+            }
+
+            // رسم خط بين النقاط
+            function drawLineToPoint(targetDot) {
+                gameData.ctx.lineTo(targetDot.x, targetDot.y);
+                gameData.ctx.stroke();
+            }
+
+            // إكمال الشكل
+            function completeShape() {
+                gameData.isActive = false;
+                gameData.totalStars++;
+
+                // إغلاق الشكل بالعودة للنقطة الأولى
+                const firstDot = gameData.dots[0];
+                gameData.ctx.lineTo(firstDot.x, firstDot.y);
+                gameData.ctx.stroke();
+
+                // تأثيرات النجاح
+                playSound('complete');
+                showSuccessAnimation();
+                createConfettiEffect();
+
+                setTimeout(() => {
+                    moveToNext();
+                }, 2500);
+            }
+
+            // عرض رسالة النجاح
+            function showSuccessAnimation() {
+                const shape = getCurrentShape();
+                const popup = document.createElement('div');
+                popup.className = 'success-popup';
+                popup.innerHTML = `🎉 رائع! أكملت رسم ${shape.name}! 🏆`;
+                document.body.appendChild(popup);
+
+                setTimeout(() => {
+                    if (popup.parentNode) {
+                        popup.remove();
+                    }
+                }, 2500);
+            }
+
+            // الانتقال للشكل التالي
+            function moveToNext() {
+                if (gameData.currentShape < 10) {
+                    gameData.currentShape++;
+                    const nextShape = getCurrentShape();
+                    updateGameMessage(`🎨 مستعد لرسم ${nextShape.name}؟`);
+                    document.getElementById('startDrawing').textContent = '➡️ الشكل التالي';
+                } else {
+                    // انتهاء اللعبة
+                    updateGameMessage('👑 مبروك! أكملت جميع الأشكال الهندسية! أنت رسام محترف! 👑');
+                    document.getElementById('startDrawing').textContent = '🎮 ابدأ من جديد';
+                    gameData.currentShape = 1;
+                    updateGameDisplay();
+                    document.getElementById('startDrawing').disabled = false;
+                    return;
+                }
+
+                updateGameDisplay();
+                document.getElementById('startDrawing').disabled = false;
+            }
+
+            // بدء رسم الشكل
+            function beginShape() {
+                // إعادة تعيين حالة الرسم
+                gameData.currentDot = 0;
+                gameData.isActive = true;
+                gameData.completedDots = [];
+
+                // مسح Canvas
+                gameData.ctx.clearRect(0, 0, gameData.canvas.width, gameData.canvas.height);
+
+                // إنشاء النقاط الجديدة
+                createDots();
+
+                const shape = getCurrentShape();
+                updateGameMessage(`🎯 ارسم ${shape.name} - ابدأ بالضغط على النقطة رقم 1!`);
+
+                document.getElementById('startDrawing').disabled = true;
+            }
+
+            // تحديث رسالة اللعبة
+            function updateGameMessage(text) {
+                document.getElementById('gameMsg').textContent = text;
+            }
+
+            // تحديث عرض البيانات
+            function updateGameDisplay() {
+                document.getElementById('shapeNum').textContent = gameData.currentShape;
+                document.getElementById('starCount').textContent = gameData.totalStars;
+
+                const totalProgress = ((gameData.currentShape - 1) / 10) * 100;
+                document.getElementById('gameProgress').style.width = Math.min(100, totalProgress) + '%';
+
+                document.getElementById('progressInfo').textContent = `الأشكال الهندسية - الشكل ${gameData.currentShape}`;
+            }
+
+            // إنشاء تأثير الكونفيتي
+            function createConfettiEffect() {
+                const colors = ['#ff6b6b', '#74b9ff', '#00b894', '#fdcb6e', '#e17055', '#a29bfe'];
+
+                for (let i = 0; i < 25; i++) {
+                    setTimeout(() => {
+                        const confetti = document.createElement('div');
+                        confetti.className = 'confetti-piece';
+                        confetti.style.position = 'fixed';
+                        confetti.style.left = Math.random() * window.innerWidth + 'px';
+                        confetti.style.top = '-10px';
+                        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                        confetti.style.animationDelay = Math.random() * 500 + 'ms';
+                        confetti.style.zIndex = '999';
+                        confetti.style.pointerEvents = 'none';
+
+                        document.body.appendChild(confetti);
+
+                        setTimeout(() => {
+                            if (confetti.parentNode) {
+                                confetti.remove();
+                            }
+                        }, 3000);
+                    }, i * 50);
+                }
+            }
+
+            // إعادة تشغيل اللعبة
+            function restartFromBeginning() {
+                // إعادة تعيين كاملة
+                gameData.currentShape = 1;
+                gameData.totalStars = 0;
+                gameData.currentDot = 0;
+                gameData.isActive = false;
+                gameData.completedDots = [];
+
+                // تنظيف الواجهة
+                document
+                    .querySelector('.drawing-area')
+                    .querySelectorAll('.dot')
+                    .forEach((dot) => dot.remove());
+
+                if (gameData.ctx) {
+                    gameData.ctx.clearRect(0, 0, gameData.canvas.width, gameData.canvas.height);
+                }
+
+                // إزالة رسائل النجاح
+                document.querySelectorAll('.success-popup').forEach((popup) => {
+                    if (popup.parentNode) {
+                        popup.remove();
+                    }
+                });
+
+                updateGameMessage('مرحباً! اضغط "ابدأ الرسم" لتبدأ رحلة الإبداع! ✏️');
+                document.getElementById('startDrawing').disabled = false;
+                document.getElementById('startDrawing').textContent = '✏️ ابدأ الرسم';
+
+                updateGameDisplay();
+            }
+
+            // تهيئة اللعبة عند التحميل
+            function initializeGame() {
+                setupCanvas();
+                updateGameDisplay();
+                initializeAudio();
+            }
+
+            // معالجة تغيير حجم الشاشة
+            function handleResize() {
+                if (gameData.canvas && gameData.ctx) {
+                    const container = gameData.canvas.parentElement;
+                    gameData.canvas.width = container.offsetWidth;
+                    gameData.canvas.height = container.offsetHeight;
+                }
+            }
+
+            // تفعيل الصوت عند أول تفاعل
+            document.addEventListener('click', initializeAudio, { once: true });
+            document.addEventListener('touchstart', initializeAudio, { once: true });
+
+            // تهيئة عند تحميل الصفحة
+            window.addEventListener('load', initializeGame);
+            window.addEventListener('resize', handleResize);
+
+            // معالجة الأخطاء
+            window.addEventListener('error', function (e) {
+                console.log('خطأ في اللعبة:', e.message);
+            });
+        </script>
+    </body>
+</html>

@@ -1,10 +1,969 @@
 <!doctype html>
-<html lang="en">
+<html dir="rtl" lang="ar">
     <head>
         <meta charset="UTF-8" />
-        <title>Game 15</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>لعبة التصنيف التفاعلية</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Arial', sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 20px;
+            }
+
+            .game-container {
+                background: white;
+                border-radius: 20px;
+                padding: 30px;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+                max-width: 1000px;
+                width: 100%;
+                text-align: center;
+            }
+
+            .header {
+                margin-bottom: 30px;
+            }
+
+            .game-title {
+                color: #4a5568;
+                font-size: 2.5em;
+                margin-bottom: 10px;
+                font-weight: bold;
+            }
+
+            .level-selector {
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+
+            .level-btn {
+                padding: 12px 25px;
+                border: none;
+                border-radius: 25px;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                background: #e2e8f0;
+                color: #4a5568;
+            }
+
+            .level-btn.active {
+                background: #4299e1;
+                color: white;
+                transform: scale(1.05);
+            }
+
+            .page-selector {
+                display: flex;
+                justify-content: center;
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+
+            .page-btn {
+                width: 40px;
+                height: 40px;
+                border: none;
+                border-radius: 50%;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                background: #f7fafc;
+                color: #4a5568;
+                border: 2px solid #e2e8f0;
+            }
+
+            .page-btn.active {
+                background: #48bb78;
+                color: white;
+                border-color: #48bb78;
+                transform: scale(1.1);
+            }
+
+            .instructions {
+                background: #f0fff4;
+                border: 2px solid #48bb78;
+                border-radius: 15px;
+                padding: 20px;
+                margin-bottom: 30px;
+                font-size: 1.3em;
+                color: #2d3748;
+                font-weight: 600;
+            }
+
+            .game-area {
+                display: flex;
+                flex-direction: column;
+                gap: 30px;
+                align-items: center;
+            }
+
+            .items-container {
+                background: #f8f9fa;
+                border: 3px dashed #cbd5e0;
+                border-radius: 15px;
+                padding: 20px;
+                min-height: 120px;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .sorting-boxes {
+                display: flex;
+                justify-content: center;
+                gap: 20px;
+                flex-wrap: wrap;
+            }
+
+            .sorting-box {
+                width: 180px;
+                height: 200px;
+                border: 3px dashed #cbd5e0;
+                border-radius: 15px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                transition: all 0.3s ease;
+                background: #f8f9fa;
+                position: relative;
+                overflow: hidden;
+                padding: 10px;
+            }
+
+            .sorting-box-header {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin-bottom: 10px;
+                flex-shrink: 0;
+            }
+
+            .sorting-box-content {
+                flex: 1;
+                width: 100%;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-items: flex-start;
+                gap: 5px;
+                overflow-y: auto;
+                padding: 5px;
+                border-radius: 8px;
+                background: rgba(255, 255, 255, 0.5);
+            }
+
+            .sorting-box-content::-webkit-scrollbar {
+                width: 4px;
+            }
+
+            .sorting-box-content::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 2px;
+            }
+
+            .sorting-box-content::-webkit-scrollbar-thumb {
+                background: #cbd5e0;
+                border-radius: 2px;
+            }
+
+            .sorting-box .item {
+                width: 45px;
+                height: 45px;
+                font-size: 30px;
+                margin: 2px;
+                flex-shrink: 0;
+            }
+
+            .sorting-box .item.size-small {
+                width: 35px;
+                height: 35px;
+                font-size: 20px;
+            }
+
+            .sorting-box .item.size-medium {
+                width: 45px;
+                height: 45px;
+                font-size: 30px;
+            }
+
+            .sorting-box .item.size-large {
+                width: 55px;
+                height: 55px;
+                font-size: 35px;
+            }
+
+            .sorting-box.drag-over {
+                border-color: #4299e1;
+                background: #ebf8ff;
+                transform: scale(1.05);
+            }
+
+            .sorting-box.correct {
+                border-color: #48bb78;
+                background: #f0fff4;
+            }
+
+            .box-label {
+                font-size: 14px;
+                font-weight: bold;
+                color: #4a5568;
+                margin-top: 5px;
+                text-align: center;
+            }
+
+            .box-icon {
+                font-size: 40px;
+                margin-bottom: 5px;
+            }
+
+            .item {
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 24px;
+                border: 3px solid rgba(255, 255, 255, 0.8);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                user-select: none;
+            }
+
+            .item:hover {
+                transform: scale(1.1);
+                cursor: grab;
+            }
+
+            .item.dragging {
+                opacity: 0.5;
+                transform: rotate(5deg) scale(1.1);
+                cursor: grabbing;
+            }
+
+            .item.square {
+                border-radius: 10px;
+            }
+
+            .item.triangle {
+                border-radius: 0;
+                clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            }
+
+            .progress-bar {
+                width: 100%;
+                height: 20px;
+                background: #e2e8f0;
+                border-radius: 10px;
+                margin: 20px 0;
+                overflow: hidden;
+            }
+
+            .progress-fill {
+                height: 100%;
+                background: linear-gradient(90deg, #48bb78, #68d391);
+                width: 0%;
+                transition: width 0.5s ease;
+            }
+
+            .success-message {
+                background: linear-gradient(135deg, #48bb78, #68d391);
+                color: white;
+                padding: 20px;
+                border-radius: 15px;
+                font-size: 1.5em;
+                font-weight: bold;
+                margin: 20px 0;
+                display: none;
+                animation: bounce 0.6s ease;
+                position: relative;
+            }
+
+            .success-message::after {
+                content: 'الانتقال للمستوى التالي خلال ثانيتين...';
+                display: block;
+                font-size: 0.8em;
+                margin-top: 10px;
+                opacity: 0.9;
+            }
+
+            @keyframes bounce {
+                0%,
+                20%,
+                53%,
+                80%,
+                100% {
+                    transform: translate3d(0, 0, 0);
+                }
+                40%,
+                43% {
+                    transform: translate3d(0, -15px, 0);
+                }
+                70% {
+                    transform: translate3d(0, -7px, 0);
+                }
+                90% {
+                    transform: translate3d(0, -2px, 0);
+                }
+            }
+
+            .next-btn {
+                background: linear-gradient(135deg, #4299e1, #63b3ed);
+                color: white;
+                border: none;
+                padding: 15px 30px;
+                border-radius: 25px;
+                font-size: 18px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: none;
+                margin: 20px 0;
+            }
+
+            .next-btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 10px 20px rgba(66, 153, 225, 0.3);
+            }
+
+            .item.diamond {
+                border-radius: 0;
+                transform: rotate(45deg);
+            }
+
+            .item.hexagon {
+                border-radius: 0;
+                clip-path: polygon(30% 0%, 70% 0%, 100% 50%, 70% 100%, 30% 100%, 0% 50%);
+            }
+
+            .item.oval {
+                border-radius: 50px/70px;
+            }
+
+            .item.cross {
+                border-radius: 0;
+                clip-path: polygon(40% 0%, 60% 0%, 60% 40%, 100% 40%, 100% 60%, 60% 60%, 60% 100%, 40% 100%, 40% 60%, 0% 60%, 0% 40%, 40% 40%);
+            }
+
+            .item.star {
+                border-radius: 0;
+                clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            }
+
+            .item.heart {
+                border-radius: 0;
+                clip-path: path('M12,21.35l-1.45-1.32C5.4,15.36,2,12.28,2,8.5 C2,5.42,4.42,3,7.5,3c1.74,0,3.41,0.81,4.5,2.09C13.09,3.81,14.76,3,16.5,3 C19.58,3,22,5.42,22,8.5c0,3.78-3.4,6.86-8.55,11.54L12,21.35z');
+                transform: scale(0.15);
+            }
+
+            .size-small {
+                width: 50px;
+                height: 50px;
+            }
+            .size-medium {
+                width: 70px;
+                height: 70px;
+            }
+            .size-large {
+                width: 90px;
+                height: 90px;
+            }
+        </style>
     </head>
     <body>
-        <!-- Game 15 content goes here -->
+        <div class="game-container">
+            <div class="header">
+                <h1 class="game-title">🎮 لعبة التصنيف التفاعلية</h1>
+
+                <div class="level-selector">
+                    <button class="level-btn active" data-level="colors">الألوان 🌈</button>
+                    <button class="level-btn" data-level="sizes">الأحجام 📏</button>
+                    <button class="level-btn" data-level="shapes">الأشكال 🔷</button>
+                </div>
+
+                <div class="page-selector">
+                    <button class="page-btn active" data-page="1">1</button>
+                    <button class="page-btn" data-page="2">2</button>
+                    <button class="page-btn" data-page="3">3</button>
+                </div>
+            </div>
+
+            <div class="instructions" id="instructions">اسحب كل عنصر إلى المربع المناسب له حسب لونه ✨</div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div class="game-area">
+                <div class="items-container" id="itemsContainer">
+                    <!-- العناصر ستظهر هنا -->
+                </div>
+
+                <div class="sorting-boxes" id="sortingBoxes">
+                    <!-- صناديق التصنيف ستظهر هنا -->
+                </div>
+            </div>
+
+            <div class="success-message" id="successMessage">🎉 أحسنت! لقد أكملت المستوى بنجاح!</div>
+
+            <button class="next-btn" id="nextBtn">المستوى التالي ➡️</button>
+        </div>
+
+        <script>
+            class SortingGame {
+                constructor() {
+                    this.currentLevel = 'colors';
+                    this.currentPage = 1;
+                    this.correctPlacements = 0;
+                    this.totalItems = 0;
+                    this.draggedElement = null;
+
+                    this.levels = {
+                        colors: {
+                            instruction: 'اسحب كل عنصر إلى المربع المناسب له حسب لونه ✨',
+                            pages: [
+                                {
+                                    items: 6,
+                                    categories: ['أحمر', 'أزرق'],
+                                    colors: ['#e53e3e', '#3182ce']
+                                },
+                                {
+                                    items: 9,
+                                    categories: ['أخضر', 'أصفر', 'بنفسجي'],
+                                    colors: ['#38a169', '#d69e2e', '#805ad5']
+                                },
+                                {
+                                    items: 12,
+                                    categories: ['برتقالي', 'وردي', 'بني', 'رمادي'],
+                                    colors: ['#dd6b20', '#e91e63', '#8b4513', '#718096']
+                                }
+                            ]
+                        },
+                        sizes: {
+                            instruction: 'اسحب كل عنصر إلى المربع المناسب له حسب حجمه 📏',
+                            pages: [
+                                {
+                                    items: 6,
+                                    categories: ['صغير', 'كبير'],
+                                    shape: '●',
+                                    emoji: '🔴',
+                                    color: '#e53e3e'
+                                },
+                                {
+                                    items: 9,
+                                    categories: ['صغير', 'متوسط', 'كبير'],
+                                    shape: '■',
+                                    emoji: '🟦',
+                                    color: '#3182ce'
+                                },
+                                {
+                                    items: 12,
+                                    categories: ['صغير', 'متوسط', 'كبير'],
+                                    shape: '▲',
+                                    emoji: '🔺',
+                                    color: '#38a169'
+                                }
+                            ]
+                        },
+                        shapes: {
+                            instruction: 'اسحب كل عنصر إلى المربع المناسب له حسب شكله 🔷',
+                            pages: [
+                                {
+                                    items: 6,
+                                    categories: ['دائرة', 'مربع'],
+                                    shapes: ['●', '■'],
+                                    emojis: ['🔴', '🟦']
+                                },
+                                {
+                                    items: 9,
+                                    categories: ['مثلث', 'نجمة', 'قلب'],
+                                    shapes: ['▲', '★', '♥'],
+                                    emojis: ['🔺', '⭐', '❤️']
+                                },
+                                {
+                                    items: 12,
+                                    categories: ['معين', 'سداسي', 'بيضاوي', 'صليب'],
+                                    shapes: ['◆', '⬡', '⬭', '✚'],
+                                    emojis: ['🔶', '🔷', '🥚', '➕']
+                                }
+                            ]
+                        }
+                    };
+
+                    this.init();
+                }
+
+                init() {
+                    this.setupEventListeners();
+                    this.loadLevel();
+                }
+
+                setupEventListeners() {
+                    // أزرار المستويات
+                    document.querySelectorAll('.level-btn').forEach((btn) => {
+                        btn.addEventListener('click', () => {
+                            this.currentLevel = btn.dataset.level;
+                            this.currentPage = 1;
+                            this.updateActiveButtons();
+                            this.loadLevel();
+                        });
+                    });
+
+                    // أزرار الصفحات
+                    document.querySelectorAll('.page-btn').forEach((btn) => {
+                        btn.addEventListener('click', () => {
+                            this.currentPage = parseInt(btn.dataset.page);
+                            this.updateActiveButtons();
+                            this.loadLevel();
+                        });
+                    });
+
+                    // زر المستوى التالي
+                    document.getElementById('nextBtn').addEventListener('click', () => {
+                        this.nextLevel();
+                    });
+                }
+
+                updateActiveButtons() {
+                    document.querySelectorAll('.level-btn').forEach((btn) => {
+                        btn.classList.toggle('active', btn.dataset.level === this.currentLevel);
+                    });
+
+                    document.querySelectorAll('.page-btn').forEach((btn) => {
+                        btn.classList.toggle('active', parseInt(btn.dataset.page) === this.currentPage);
+                    });
+                }
+
+                loadLevel() {
+                    const level = this.levels[this.currentLevel];
+                    const page = level.pages[this.currentPage - 1];
+
+                    // تحديث التعليمات
+                    document.getElementById('instructions').textContent = level.instruction;
+
+                    // إنشاء العناصر
+                    this.createItems(page);
+
+                    // إنشاء صناديق التصنيف
+                    this.createSortingBoxes(page);
+
+                    // إعادة تعيين المتغيرات
+                    this.correctPlacements = 0;
+                    this.totalItems = page.items;
+                    this.updateProgress();
+
+                    // إعادة تعيين صناديق التصنيف
+                    document.querySelectorAll('.sorting-box').forEach((box) => {
+                        box.classList.remove('correct');
+                        const content = box.querySelector('.sorting-box-content');
+                        if (content) {
+                            content.innerHTML = '';
+                        }
+                    });
+
+                    // إخفاء رسائل النجاح
+                    document.getElementById('successMessage').style.display = 'none';
+                    document.getElementById('nextBtn').style.display = 'none';
+                }
+
+                createItems(page) {
+                    const container = document.getElementById('itemsContainer');
+                    container.innerHTML = '';
+
+                    const categories = page.categories;
+                    const itemsPerCategory = Math.floor(page.items / categories.length);
+                    const extraItems = page.items % categories.length;
+
+                    let items = [];
+
+                    categories.forEach((category, index) => {
+                        const count = itemsPerCategory + (index < extraItems ? 1 : 0);
+                        for (let i = 0; i < count; i++) {
+                            items.push(category);
+                        }
+                    });
+
+                    // خلط العناصر
+                    items = this.shuffleArray(items);
+
+                    items.forEach((category, index) => {
+                        const item = this.createItem(category, index);
+                        container.appendChild(item);
+                    });
+                }
+
+                createItem(category, index) {
+                    const item = document.createElement('div');
+                    item.className = 'item';
+                    item.draggable = true;
+                    item.dataset.category = category;
+                    item.dataset.id = index;
+
+                    if (this.currentLevel === 'colors') {
+                        const page = this.levels.colors.pages[this.currentPage - 1];
+                        const colorIndex = page.categories.indexOf(category);
+                        item.style.backgroundColor = page.colors[colorIndex];
+
+                        // مستوى الألوان - دوائر ملونة فقط
+                        item.innerHTML = '●';
+                        item.style.fontSize = '40px';
+                        item.style.color = page.colors[colorIndex];
+                        item.style.border = '3px solid rgba(255,255,255,0.8)';
+                    } else if (this.currentLevel === 'sizes') {
+                        const sizes = ['صغير', 'متوسط', 'كبير'];
+                        const sizeClasses = ['size-small', 'size-medium', 'size-large'];
+                        const sizeIndex = sizes.indexOf(category);
+                        item.classList.add(sizeClasses[sizeIndex]);
+
+                        const page = this.levels.sizes.pages[this.currentPage - 1];
+
+                        // إضافة كلاس الشكل المناسب للصفحة
+                        if (page.shape === '■') {
+                            item.classList.add('square');
+                        } else if (page.shape === '▲') {
+                            item.classList.add('triangle');
+                        }
+
+                        // استخدام شكل مختلف لكل صفحة
+                        item.innerHTML = page.shape;
+                        item.style.backgroundColor = page.color;
+                        item.style.color = page.color;
+                        item.style.border = '3px solid rgba(255,255,255,0.8)';
+
+                        // تعديل حجم الرموز حسب الفئة
+                        if (category === 'صغير') {
+                            item.style.fontSize = '25px';
+                        } else if (category === 'متوسط') {
+                            item.style.fontSize = '35px';
+                        } else {
+                            item.style.fontSize = '45px';
+                        }
+                    } else if (this.currentLevel === 'shapes') {
+                        const page = this.levels.shapes.pages[this.currentPage - 1];
+                        const shapes = page.categories;
+                        const shapeClasses = {
+                            دائرة: '',
+                            مربع: 'square',
+                            مثلث: 'triangle',
+                            نجمة: 'star',
+                            قلب: 'heart',
+                            معين: 'diamond',
+                            سداسي: 'hexagon',
+                            بيضاوي: 'oval',
+                            صليب: 'cross'
+                        };
+
+                        const shapeIndex = shapes.indexOf(category);
+
+                        if (shapeClasses[category]) {
+                            item.classList.add(shapeClasses[category]);
+                        }
+
+                        // استخدام رموز تعبيرية للأشكال
+                        if (page.emojis[shapeIndex]) {
+                            item.innerHTML = page.emojis[shapeIndex];
+                            item.style.fontSize = '40px';
+                            item.style.backgroundColor = 'transparent';
+                        } else {
+                            item.innerHTML = page.shapes[shapeIndex];
+                            item.style.backgroundColor = this.getRandomColor();
+                        }
+                    }
+
+                    this.addDragListeners(item);
+                    return item;
+                }
+
+                createSortingBoxes(page) {
+                    const container = document.getElementById('sortingBoxes');
+                    container.innerHTML = '';
+
+                    page.categories.forEach((category) => {
+                        const box = document.createElement('div');
+                        box.className = 'sorting-box';
+                        box.dataset.category = category;
+
+                        // إنشاء رأس الصندوق (الأيقونة والعنوان)
+                        const header = document.createElement('div');
+                        header.className = 'sorting-box-header';
+
+                        const icon = document.createElement('div');
+                        icon.className = 'box-icon';
+
+                        const label = document.createElement('div');
+                        label.className = 'box-label';
+                        label.textContent = category;
+
+                        if (this.currentLevel === 'colors') {
+                            const page = this.levels.colors.pages[this.currentPage - 1];
+                            const colorIndex = page.categories.indexOf(category);
+
+                            // مستوى الألوان - دوائر ملونة بسيطة
+                            icon.innerHTML = '●';
+                            icon.style.color = page.colors[colorIndex];
+                            icon.style.fontSize = '50px';
+                        } else if (this.currentLevel === 'sizes') {
+                            // رموز تدل على الأحجام المختلفة - أشكال مختلفة لكل صفحة
+                            const page = this.levels.sizes.pages[this.currentPage - 1];
+                            icon.innerHTML = page.emoji;
+
+                            if (category === 'صغير') {
+                                icon.style.fontSize = '30px';
+                            } else if (category === 'متوسط') {
+                                icon.style.fontSize = '45px';
+                            } else {
+                                icon.style.fontSize = '60px';
+                            }
+                        } else if (this.currentLevel === 'shapes') {
+                            // رموز للأشكال المختلفة
+                            const page = this.levels.shapes.pages[this.currentPage - 1];
+                            const shapeIndex = page.categories.indexOf(category);
+                            icon.innerHTML = page.emojis[shapeIndex];
+                        }
+
+                        header.appendChild(icon);
+                        header.appendChild(label);
+
+                        // إنشاء منطقة المحتوى للعناصر المسحوبة
+                        const content = document.createElement('div');
+                        content.className = 'sorting-box-content';
+
+                        box.appendChild(header);
+                        box.appendChild(content);
+
+                        this.addDropListeners(box);
+                        container.appendChild(box);
+                    });
+                }
+
+                addDragListeners(item) {
+                    item.addEventListener('dragstart', (e) => {
+                        this.draggedElement = item;
+                        item.classList.add('dragging');
+                    });
+
+                    item.addEventListener('dragend', () => {
+                        item.classList.remove('dragging');
+                    });
+                }
+
+                addDropListeners(box) {
+                    box.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        box.classList.add('drag-over');
+                    });
+
+                    box.addEventListener('dragleave', () => {
+                        box.classList.remove('drag-over');
+                    });
+
+                    box.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        box.classList.remove('drag-over');
+
+                        if (this.draggedElement && this.draggedElement.dataset.category === box.dataset.category) {
+                            // إجابة صحيحة
+                            const content = box.querySelector('.sorting-box-content');
+                            content.appendChild(this.draggedElement);
+                            box.classList.add('correct');
+                            this.correctPlacements++;
+                            this.updateProgress();
+
+                            // صوت النجاح
+                            this.playSuccessSound();
+
+                            if (this.correctPlacements === this.totalItems) {
+                                this.showSuccess();
+                            }
+                        } else {
+                            // إجابة خاطئة - العنصر يعود لمكانه
+                            this.playErrorSound();
+                            this.shakeElement(this.draggedElement);
+                        }
+                    });
+                }
+
+                updateProgress() {
+                    const percentage = (this.correctPlacements / this.totalItems) * 100;
+                    document.getElementById('progressFill').style.width = percentage + '%';
+                }
+
+                showSuccess() {
+                    document.getElementById('successMessage').style.display = 'block';
+
+                    // الانتقال التلقائي للمستوى التالي بعد 2 ثانية
+                    setTimeout(() => {
+                        this.nextLevel();
+                    }, 2000);
+                }
+
+                nextLevel() {
+                    if (this.currentPage < 3) {
+                        this.currentPage++;
+                    } else {
+                        // الانتقال للمستوى التالي
+                        const levels = ['colors', 'sizes', 'shapes'];
+                        const currentIndex = levels.indexOf(this.currentLevel);
+                        if (currentIndex < levels.length - 1) {
+                            this.currentLevel = levels[currentIndex + 1];
+                            this.currentPage = 1;
+                        } else {
+                            // اللعبة مكتملة
+                            setTimeout(() => {
+                                this.showFinalSuccess();
+                            }, 100);
+                            this.currentLevel = 'colors';
+                            this.currentPage = 1;
+                        }
+                    }
+
+                    this.updateActiveButtons();
+                    this.loadLevel();
+                }
+
+                shuffleArray(array) {
+                    const newArray = [...array];
+                    for (let i = newArray.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+                    }
+                    return newArray;
+                }
+
+                getRandomColor() {
+                    const colors = ['#e53e3e', '#3182ce', '#38a169', '#d69e2e', '#805ad5', '#dd6b20', '#e91e63', '#00bcd4'];
+                    return colors[Math.floor(Math.random() * colors.length)];
+                }
+
+                shakeElement(element) {
+                    element.style.animation = 'shake 0.5s ease';
+                    setTimeout(() => {
+                        element.style.animation = '';
+                    }, 500);
+                }
+
+                playSuccessSound() {
+                    // صوت الجليتر للإجابة الصحيحة
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                    // إنشاء تردد مرتفع وسعيد
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    // تردد جميل للنجاح
+                    oscillator.frequency.setValueAtTime(523, audioContext.currentTime); // C5
+                    oscillator.frequency.setValueAtTime(659, audioContext.currentTime + 0.1); // E5
+                    oscillator.frequency.setValueAtTime(784, audioContext.currentTime + 0.2); // G5
+
+                    oscillator.type = 'sine';
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                }
+
+                playErrorSound() {
+                    // صوت الباز للإجابة الخاطئة
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    // تردد منخفض للخطأ
+                    oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+                    oscillator.frequency.setValueAtTime(150, audioContext.currentTime + 0.1);
+
+                    oscillator.type = 'sawtooth';
+                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.2);
+                }
+
+                showFinalSuccess() {
+                    const successMsg = document.getElementById('successMessage');
+                    successMsg.innerHTML = '🎉🏆 مبروك! لقد أكملت جميع المستويات! 🏆🎉<br><span style="font-size: 0.8em;">ستبدأ اللعبة من جديد خلال 3 ثوانٍ...</span>';
+                    successMsg.style.display = 'block';
+
+                    // تشغيل صوت النجاح النهائي
+                    this.playFinalSuccessSound();
+
+                    setTimeout(() => {
+                        successMsg.style.display = 'none';
+                        this.updateActiveButtons();
+                        this.loadLevel();
+                    }, 3000);
+                }
+
+                playFinalSuccessSound() {
+                    // صوت نجاح نهائي أكثر إثارة
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                    // تشغيل نغمة احتفالية
+                    const frequencies = [523, 659, 784, 1047]; // C5, E5, G5, C6
+
+                    frequencies.forEach((freq, index) => {
+                        setTimeout(() => {
+                            const oscillator = audioContext.createOscillator();
+                            const gainNode = audioContext.createGain();
+
+                            oscillator.connect(gainNode);
+                            gainNode.connect(audioContext.destination);
+
+                            oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+                            oscillator.type = 'sine';
+                            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+
+                            oscillator.start(audioContext.currentTime);
+                            oscillator.stop(audioContext.currentTime + 0.4);
+                        }, index * 150);
+                    });
+                }
+            }
+
+            // بدء اللعبة
+            document.addEventListener('DOMContentLoaded', () => {
+                new SortingGame();
+            });
+
+            // إضافة تأثير الاهتزاز
+            const style = document.createElement('style');
+            style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                20%, 40%, 60%, 80% { transform: translateX(5px); }
+            }
+        `;
+            document.head.appendChild(style);
+        </script>
     </body>
 </html>

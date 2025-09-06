@@ -1,0 +1,1271 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>لعبة الذاكرة العكسية للأطفال</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: 'Arial', sans-serif;
+            }
+
+            body {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                direction: rtl;
+                padding: 10px;
+                overflow-x: hidden;
+            }
+
+            .game-container {
+                background: rgba(255, 255, 255, 0.95);
+                border-radius: 25px;
+                padding: 25px;
+                max-width: 800px;
+                width: 100%;
+                box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+                text-align: center;
+                position: relative;
+                backdrop-filter: blur(10px);
+            }
+
+            .floating-helper {
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                background: linear-gradient(45deg, #4caf50, #45a049);
+                color: white;
+                padding: 8px 15px;
+                border-radius: 20px;
+                font-size: 0.9em;
+                font-weight: bold;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+                animation: helpPulse 3s infinite;
+                z-index: 10;
+            }
+
+            @keyframes helpPulse {
+                0%,
+                100% {
+                    opacity: 0.8;
+                    transform: scale(1);
+                }
+                50% {
+                    opacity: 1;
+                    transform: scale(1.05);
+                }
+            }
+
+            .header {
+                margin-bottom: 25px;
+            }
+
+            .title {
+                color: #2c3e50;
+                font-size: 2.2em;
+                margin-bottom: 15px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+                font-weight: bold;
+            }
+
+            .game-info {
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+                flex-wrap: wrap;
+                margin-bottom: 20px;
+            }
+
+            .info-badge {
+                padding: 10px 20px;
+                border-radius: 25px;
+                color: white;
+                font-weight: bold;
+                font-size: 1.1em;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+                min-width: 120px;
+            }
+
+            .level-badge {
+                background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            }
+
+            .page-badge {
+                background: linear-gradient(45deg, #feca57, #ff9ff3);
+            }
+
+            .score-badge {
+                background: linear-gradient(45deg, #48cae4, #0077b6);
+            }
+
+            .accuracy-badge {
+                background: linear-gradient(45deg, #4caf50, #45a049);
+            }
+
+            .progress-container {
+                margin: 20px 0;
+            }
+
+            .progress-bar {
+                width: 100%;
+                height: 15px;
+                background: #e0e0e0;
+                border-radius: 10px;
+                overflow: hidden;
+                box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+            }
+
+            .progress-fill {
+                height: 100%;
+                background: linear-gradient(90deg, #4caf50, #8bc34a);
+                border-radius: 10px;
+                transition: width 0.8s ease;
+                width: 0%;
+            }
+
+            .sequence-display {
+                margin: 25px 0;
+                min-height: 180px;
+                background: rgba(255, 255, 255, 0.5);
+                border-radius: 20px;
+                padding: 20px;
+                box-shadow: inset 0 5px 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .sequence-title {
+                font-size: 1.4em;
+                color: #2c3e50;
+                margin-bottom: 15px;
+                font-weight: bold;
+            }
+
+            .sequence-items {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 15px;
+                margin: 20px 0;
+                min-height: 120px;
+            }
+
+            .sequence-item {
+                width: 100px;
+                height: 100px;
+                border-radius: 20px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                color: white;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                cursor: pointer;
+                position: relative;
+                overflow: hidden;
+                user-select: none;
+            }
+
+            .sequence-item::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(45deg, rgba(255, 255, 255, 0.2), transparent);
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+
+            .sequence-item:hover::before {
+                opacity: 1;
+            }
+
+            .sequence-item:hover:not(.selected) {
+                transform: translateY(-8px) scale(1.08);
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            }
+
+            .sequence-item:active {
+                transform: translateY(-4px) scale(1.02);
+            }
+
+            .sequence-item.showing {
+                animation: showItem 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            }
+
+            .sequence-item.selected {
+                opacity: 0.4;
+                transform: scale(0.9);
+                pointer-events: none;
+                filter: grayscale(0.5);
+            }
+
+            .sequence-item.disabled {
+                pointer-events: none;
+                opacity: 0.7;
+            }
+
+            @keyframes showItem {
+                0% {
+                    transform: scale(0) rotate(180deg);
+                    opacity: 0;
+                }
+                50% {
+                    transform: scale(1.2) rotate(90deg);
+                    opacity: 0.8;
+                }
+                100% {
+                    transform: scale(1) rotate(0deg);
+                    opacity: 1;
+                }
+            }
+
+            .item-emoji {
+                font-size: 2.2em;
+                margin-bottom: 5px;
+                filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
+            }
+
+            .item-name {
+                font-size: 0.8em;
+                font-weight: bold;
+            }
+
+            .user-input-area {
+                margin: 25px 0;
+                background: rgba(255, 255, 255, 0.8);
+                border-radius: 20px;
+                padding: 20px;
+                display: none;
+            }
+
+            .input-title {
+                font-size: 1.3em;
+                color: #2c3e50;
+                margin-bottom: 15px;
+                font-weight: bold;
+            }
+
+            .input-slots {
+                display: flex;
+                justify-content: center;
+                gap: 10px;
+                flex-wrap: wrap;
+                margin-bottom: 20px;
+            }
+
+            .input-slot {
+                width: 70px;
+                height: 70px;
+                border: 3px dashed #bdc3c7;
+                border-radius: 15px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                background: rgba(255, 255, 255, 0.9);
+                transition: all 0.3s ease;
+                position: relative;
+            }
+
+            .input-slot.filled {
+                border: 3px solid #4caf50;
+                background: rgba(76, 175, 80, 0.1);
+                transform: scale(1.05);
+            }
+
+            .input-slot.filled::before {
+                content: '✓';
+                position: absolute;
+                top: -5px;
+                right: -5px;
+                width: 20px;
+                height: 20px;
+                background: #4caf50;
+                color: white;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.8em;
+                font-weight: bold;
+            }
+
+            .controls {
+                margin: 25px 0;
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+                flex-wrap: wrap;
+            }
+
+            .btn {
+                background: linear-gradient(45deg, #3498db, #2980b9);
+                color: white;
+                border: none;
+                padding: 12px 25px;
+                border-radius: 25px;
+                font-size: 1.1em;
+                font-weight: bold;
+                cursor: pointer;
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+                transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                position: relative;
+                overflow: hidden;
+            }
+
+            .btn::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                transition: left 0.5s ease;
+            }
+
+            .btn:hover:not(:disabled)::before {
+                left: 100%;
+            }
+
+            .btn:hover:not(:disabled) {
+                transform: translateY(-3px);
+                box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+            }
+
+            .btn:active:not(:disabled) {
+                transform: translateY(-1px);
+            }
+
+            .btn:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+                transform: none;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .btn-start {
+                background: linear-gradient(45deg, #4caf50, #45a049);
+            }
+
+            .btn-next {
+                background: linear-gradient(45deg, #feca57, #ff9ff3);
+            }
+
+            .btn-reset {
+                background: linear-gradient(45deg, #95a5a6, #7f8c8d);
+            }
+
+            .feedback {
+                margin: 20px 0;
+                padding: 20px;
+                border-radius: 20px;
+                font-size: 1.2em;
+                font-weight: bold;
+                min-height: 60px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+                transition: all 0.5s ease;
+            }
+
+            .feedback.neutral {
+                background: linear-gradient(45deg, #74b9ff, #0984e3);
+                color: white;
+            }
+
+            .feedback.success {
+                background: linear-gradient(45deg, #00b894, #00a085);
+                color: white;
+                animation: successPulse 0.6s ease-in-out;
+            }
+
+            .feedback.error {
+                background: linear-gradient(45deg, #e17055, #d63031);
+                color: white;
+                animation: errorShake 0.6s ease-in-out;
+            }
+
+            @keyframes successPulse {
+                0%,
+                100% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.05);
+                }
+            }
+
+            @keyframes errorShake {
+                0%,
+                100% {
+                    transform: translateX(0);
+                }
+                25% {
+                    transform: translateX(-10px);
+                }
+                75% {
+                    transform: translateX(10px);
+                }
+            }
+
+            .celebration {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 4em;
+                z-index: 1000;
+                pointer-events: none;
+                animation: celebrate 2s ease-out forwards;
+            }
+
+            @keyframes celebrate {
+                0% {
+                    opacity: 0;
+                    transform: translate(-50%, -50%) scale(0) rotate(0deg);
+                }
+                50% {
+                    opacity: 1;
+                    transform: translate(-50%, -50%) scale(1.2) rotate(180deg);
+                }
+                100% {
+                    opacity: 0;
+                    transform: translate(-50%, -50%) scale(1) rotate(360deg);
+                }
+            }
+
+            .floating-hearts {
+                position: fixed;
+                font-size: 2em;
+                color: #e74c3c;
+                pointer-events: none;
+                z-index: 999;
+                animation: floatUp 3s ease-out forwards;
+            }
+
+            @keyframes floatUp {
+                0% {
+                    opacity: 1;
+                    transform: translateY(0) scale(1) rotate(0deg);
+                }
+                100% {
+                    opacity: 0;
+                    transform: translateY(-200px) scale(1.5) rotate(360deg);
+                }
+            }
+
+            .page-indicators {
+                display: flex;
+                justify-content: center;
+                gap: 8px;
+                margin: 15px 0;
+            }
+
+            .page-dot {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background: #bdc3c7;
+                transition: all 0.3s ease;
+                cursor: pointer;
+            }
+
+            .page-dot.active {
+                background: #4caf50;
+                transform: scale(1.3);
+                box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+            }
+
+            .loading {
+                opacity: 0.7;
+                pointer-events: none;
+            }
+
+            @media (max-width: 600px) {
+                .game-container {
+                    padding: 15px;
+                    margin: 10px;
+                }
+
+                .title {
+                    font-size: 1.8em;
+                }
+
+                .sequence-item {
+                    width: 80px;
+                    height: 80px;
+                }
+
+                .item-emoji {
+                    font-size: 1.8em;
+                }
+
+                .info-badge {
+                    font-size: 0.9em;
+                    padding: 8px 15px;
+                    min-width: 100px;
+                }
+
+                .floating-helper {
+                    position: relative;
+                    top: 0;
+                    right: 0;
+                    margin-bottom: 15px;
+                    display: inline-block;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="game-container">
+            <div class="floating-helper">💡 اختر بالترتيب العكسي - التحقق تلقائي</div>
+
+            <div class="header">
+                <h1 class="title">🧠 لعبة الذاكرة العكسية 🌟</h1>
+
+                <div class="game-info">
+                    <div class="info-badge level-badge" id="levelDisplay">المستوى 1: الألوان</div>
+                    <div class="info-badge page-badge" id="pageDisplay">صفحة 1/5</div>
+                    <div class="info-badge score-badge" id="scoreDisplay">النقاط: 0</div>
+                    <div class="info-badge accuracy-badge" id="accuracyDisplay">الدقة: 0%</div>
+                </div>
+
+                <div class="page-indicators" id="pageIndicators"></div>
+
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sequence-display">
+                <div class="sequence-title" id="sequenceTitle">اضغط "ابدأ" لرؤية التسلسل</div>
+                <div class="sequence-items" id="sequenceItems"></div>
+            </div>
+
+            <div class="user-input-area" id="inputArea">
+                <div class="input-title">رتب العناصر بالترتيب العكسي (التحقق تلقائي):</div>
+                <div class="input-slots" id="inputSlots"></div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-start" id="startBtn">🚀 ابدأ جولة جديدة</button>
+                <button class="btn btn-next" id="nextBtn" style="display: none">⭐ المستوى التالي</button>
+                <button class="btn btn-reset" id="resetBtn">🔄 إعادة تشغيل</button>
+            </div>
+
+            <div class="feedback neutral" id="feedback">مرحباً! اضغط على "ابدأ جولة جديدة" لنبدأ اللعب معاً! 🎮</div>
+        </div>
+
+        <script>
+            // متغيرات اللعبة الأساسية
+            let gameState = {
+                currentLevel: 1,
+                currentPage: 1,
+                currentSequence: [],
+                userAnswer: [],
+                score: 0,
+                correctAnswers: 0,
+                totalAttempts: 0,
+                isPlaying: false,
+                isChecking: false,
+                audioContext: null
+            };
+
+            // بيانات اللعبة
+            const gameData = {
+                1: {
+                    name: 'الألوان',
+                    items: [
+                        { name: 'أحمر', color: '#e74c3c', emoji: '🔴' },
+                        { name: 'أزرق', color: '#3498db', emoji: '🔵' },
+                        { name: 'أخضر', color: '#2ecc71', emoji: '🟢' },
+                        { name: 'أصفر', color: '#f1c40f', emoji: '🟡' },
+                        { name: 'بنفسجي', color: '#9b59b6', emoji: '🟣' },
+                        { name: 'برتقالي', color: '#e67e22', emoji: '🟠' }
+                    ]
+                },
+                2: {
+                    name: 'الأشكال',
+                    items: [
+                        { name: 'دائرة', color: '#e74c3c', emoji: '⭕' },
+                        { name: 'مربع', color: '#3498db', emoji: '🟦' },
+                        { name: 'مثلث', color: '#2ecc71', emoji: '🔺' },
+                        { name: 'نجمة', color: '#f1c40f', emoji: '⭐' },
+                        { name: 'قلب', color: '#e91e63', emoji: '❤️' },
+                        { name: 'ماسة', color: '#9b59b6', emoji: '💎' }
+                    ]
+                },
+                3: {
+                    name: 'أشياء البيت',
+                    items: [
+                        { name: 'كرة', color: '#e74c3c', emoji: '⚽' },
+                        { name: 'سيارة', color: '#3498db', emoji: '🚗' },
+                        { name: 'دمية', color: '#e91e63', emoji: '🧸' },
+                        { name: 'كتاب', color: '#2ecc71', emoji: '📚' },
+                        { name: 'تفاحة', color: '#e74c3c', emoji: '🍎' },
+                        { name: 'قلم', color: '#f39c12', emoji: '✏️' }
+                    ]
+                }
+            };
+
+            // الأصوات
+            function initAudio() {
+                try {
+                    if (!gameState.audioContext) {
+                        gameState.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    }
+                } catch (e) {
+                    console.log('Audio not supported');
+                }
+            }
+
+            function playTone(frequency, duration = 0.2, volume = 0.1) {
+                try {
+                    if (!gameState.audioContext) return;
+
+                    const oscillator = gameState.audioContext.createOscillator();
+                    const gainNode = gameState.audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(gameState.audioContext.destination);
+
+                    oscillator.frequency.setValueAtTime(frequency, gameState.audioContext.currentTime);
+                    oscillator.type = 'sine';
+
+                    gainNode.gain.setValueAtTime(0, gameState.audioContext.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(volume, gameState.audioContext.currentTime + 0.01);
+                    gainNode.gain.linearRampToValueAtTime(0, gameState.audioContext.currentTime + duration);
+
+                    oscillator.start(gameState.audioContext.currentTime);
+                    oscillator.stop(gameState.audioContext.currentTime + duration);
+                } catch (e) {
+                    console.log('Audio playback error:', e);
+                }
+            }
+
+            const sounds = {
+                success: () => {
+                    playTone(523, 0.15); // C5
+                    setTimeout(() => playTone(659, 0.15), 100); // E5
+                    setTimeout(() => playTone(784, 0.3), 200); // G5
+                },
+                error: () => {
+                    playTone(220, 0.3); // A3
+                    setTimeout(() => playTone(196, 0.3), 150); // G3
+                },
+                click: () => playTone(440, 0.1), // A4
+                levelComplete: () => {
+                    const notes = [523, 587, 659, 698, 784]; // C-D-E-F-G
+                    notes.forEach((note, i) => {
+                        setTimeout(() => playTone(note, 0.2), i * 100);
+                    });
+                }
+            };
+
+            // الحصول على طول التسلسل حسب الصفحة
+            function getSequenceLength() {
+                if (gameState.currentPage <= 2) return 2;
+                if (gameState.currentPage <= 4) return 3;
+                return 4;
+            }
+
+            // إنشاء تسلسل عشوائي
+            function generateSequence() {
+                try {
+                    const items = gameData[gameState.currentLevel].items;
+                    const length = getSequenceLength();
+                    gameState.currentSequence = [];
+
+                    const availableItems = [...items];
+
+                    for (let i = 0; i < length && availableItems.length > 0; i++) {
+                        const randomIndex = Math.floor(Math.random() * availableItems.length);
+                        const selectedItem = availableItems.splice(randomIndex, 1)[0];
+                        gameState.currentSequence.push({ ...selectedItem });
+                    }
+                } catch (error) {
+                    console.error('Error generating sequence:', error);
+                    showFeedback('حدث خطأ في إنشاء التسلسل', 'error');
+                }
+            }
+
+            // عرض التسلسل
+            function displaySequence() {
+                try {
+                    const container = document.getElementById('sequenceItems');
+                    const title = document.getElementById('sequenceTitle');
+
+                    if (!container || !title) return;
+
+                    title.textContent = 'احفظ هذا التسلسل جيداً...';
+                    container.innerHTML = '';
+
+                    gameState.currentSequence.forEach((item, index) => {
+                        setTimeout(() => {
+                            const element = document.createElement('div');
+                            element.className = 'sequence-item showing';
+                            element.style.background = `linear-gradient(135deg, ${item.color}, ${darkenColor(item.color, 0.2)})`;
+                            element.innerHTML = `
+                            <div class="item-emoji">${item.emoji}</div>
+                            <div class="item-name">${item.name}</div>
+                        `;
+                            container.appendChild(element);
+                            sounds.click();
+                        }, index * 800);
+                    });
+
+                    setTimeout(
+                        () => {
+                            title.textContent = 'الآن رتب العناصر بالترتيب العكسي:';
+                            showInputInterface();
+                        },
+                        gameState.currentSequence.length * 800 + 1000
+                    );
+                } catch (error) {
+                    console.error('Error displaying sequence:', error);
+                    showFeedback('حدث خطأ في عرض التسلسل', 'error');
+                }
+            }
+
+            // تغميق اللون
+            function darkenColor(hex, amount) {
+                try {
+                    const num = parseInt(hex.slice(1), 16);
+                    const r = Math.max(0, (num >> 16) - Math.round(255 * amount));
+                    const g = Math.max(0, ((num >> 8) & 0x00ff) - Math.round(255 * amount));
+                    const b = Math.max(0, (num & 0x0000ff) - Math.round(255 * amount));
+                    return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+                } catch (error) {
+                    console.error('Error darkening color:', error);
+                    return hex; // إرجاع اللون الأصلي في حالة الخطأ
+                }
+            }
+
+            // عرض واجهة الإدخال
+            function showInputInterface() {
+                try {
+                    const inputArea = document.getElementById('inputArea');
+                    if (inputArea) {
+                        inputArea.style.display = 'block';
+                    }
+                    setupInputSlots();
+                    setupSelectableItems();
+                } catch (error) {
+                    console.error('Error showing input interface:', error);
+                }
+            }
+
+            // إعداد فتحات الإدخال
+            function setupInputSlots() {
+                try {
+                    const container = document.getElementById('inputSlots');
+                    if (!container) return;
+
+                    container.innerHTML = '';
+
+                    for (let i = 0; i < gameState.currentSequence.length; i++) {
+                        const slot = document.createElement('div');
+                        slot.className = 'input-slot';
+                        slot.id = `slot-${i}`;
+                        container.appendChild(slot);
+                    }
+                } catch (error) {
+                    console.error('Error setting up input slots:', error);
+                }
+            }
+
+            // إعداد العناصر القابلة للاختيار
+            function setupSelectableItems() {
+                try {
+                    const container = document.getElementById('sequenceItems');
+                    if (!container) return;
+
+                    container.innerHTML = '';
+
+                    // خلط العناصر عشوائياً
+                    const shuffledItems = [...gameState.currentSequence].sort(() => Math.random() - 0.5);
+
+                    shuffledItems.forEach((item) => {
+                        const element = document.createElement('div');
+                        element.className = 'sequence-item';
+                        element.style.background = `linear-gradient(135deg, ${item.color}, ${darkenColor(item.color, 0.2)})`;
+                        element.innerHTML = `
+                        <div class="item-emoji">${item.emoji}</div>
+                        <div class="item-name">${item.name}</div>
+                    `;
+                        element.addEventListener('click', () => selectItem(item, element));
+                        container.appendChild(element);
+                    });
+
+                    gameState.userAnswer = [];
+                } catch (error) {
+                    console.error('Error setting up selectable items:', error);
+                }
+            }
+
+            // اختيار عنصر
+            function selectItem(item, element) {
+                try {
+                    if (element.classList.contains('selected') || element.classList.contains('disabled') || gameState.userAnswer.length >= gameState.currentSequence.length || gameState.isChecking) {
+                        return;
+                    }
+
+                    sounds.click();
+                    element.classList.add('selected');
+
+                    const slotIndex = gameState.userAnswer.length;
+                    const slot = document.getElementById(`slot-${slotIndex}`);
+
+                    if (slot) {
+                        slot.innerHTML = `
+                        <div style="font-size: 1.5em;">${item.emoji}</div>
+                        <div style="font-size: 0.7em; margin-top: 2px;">${item.name}</div>
+                    `;
+                        slot.classList.add('filled');
+                        slot.style.background = `linear-gradient(135deg, ${item.color}, ${darkenColor(item.color, 0.2)})`;
+                        slot.style.color = 'white';
+                    }
+
+                    gameState.userAnswer.push({ ...item });
+
+                    // التحقق التلقائي فور اكتمال الإجابة
+                    if (gameState.userAnswer.length === gameState.currentSequence.length) {
+                        setTimeout(() => {
+                            checkAnswer();
+                        }, 500);
+                    }
+                } catch (error) {
+                    console.error('Error selecting item:', error);
+                }
+            }
+
+            // التحقق من الإجابة
+            function checkAnswer() {
+                try {
+                    if (gameState.userAnswer.length !== gameState.currentSequence.length || gameState.isChecking) {
+                        return;
+                    }
+
+                    gameState.isChecking = true;
+
+                    // تعطيل التفاعل مع العناصر أثناء التحقق
+                    const selectableItems = document.querySelectorAll('.sequence-item:not(.selected)');
+                    selectableItems.forEach((item) => {
+                        item.classList.add('disabled');
+                    });
+
+                    const correctAnswer = [...gameState.currentSequence].reverse();
+                    let isCorrect = true;
+
+                    for (let i = 0; i < gameState.userAnswer.length; i++) {
+                        if (gameState.userAnswer[i].name !== correctAnswer[i].name) {
+                            isCorrect = false;
+                            break;
+                        }
+                    }
+
+                    gameState.totalAttempts++;
+
+                    if (isCorrect) {
+                        gameState.correctAnswers++;
+                        gameState.score += 10 * gameState.currentLevel;
+                        sounds.success();
+                        showFeedback('🎉 ممتاز! إجابة صحيحة! 🎉', 'success');
+                        createCelebration();
+
+                        setTimeout(() => {
+                            if (gameState.currentPage < 5) {
+                                nextPage();
+                            } else {
+                                completeLevel();
+                            }
+                        }, 2000);
+                    } else {
+                        sounds.error();
+                        const correctSequence = correctAnswer.map((item) => `${item.emoji} ${item.name}`).join(' ← ');
+                        showFeedback(`❌ حاول مرة أخرى! الإجابة الصحيحة: ${correctSequence}`, 'error');
+
+                        setTimeout(() => {
+                            resetCurrentRound();
+                        }, 3000);
+                    }
+
+                    updateDisplay();
+                } catch (error) {
+                    console.error('Error checking answer:', error);
+                    showFeedback('حدث خطأ في التحقق من الإجابة', 'error');
+                    gameState.isChecking = false;
+                }
+            }
+
+            // عرض رسالة التغذية الراجعة
+            function showFeedback(message, type) {
+                try {
+                    const feedback = document.getElementById('feedback');
+                    if (feedback) {
+                        feedback.textContent = message;
+                        feedback.className = `feedback ${type}`;
+                    }
+                } catch (error) {
+                    console.error('Error showing feedback:', error);
+                }
+            }
+
+            // إنشاء احتفال
+            function createCelebration() {
+                try {
+                    // نجمة احتفالية
+                    const celebration = document.createElement('div');
+                    celebration.className = 'celebration';
+                    celebration.textContent = '🌟';
+                    document.body.appendChild(celebration);
+
+                    setTimeout(() => {
+                        if (document.body.contains(celebration)) {
+                            document.body.removeChild(celebration);
+                        }
+                    }, 2000);
+
+                    // قلوب متحركة
+                    for (let i = 0; i < 5; i++) {
+                        setTimeout(() => {
+                            const heart = document.createElement('div');
+                            heart.className = 'floating-hearts';
+                            heart.textContent = ['❤️', '💚', '💙', '💛', '💜'][i % 5];
+                            heart.style.left = 20 + Math.random() * 60 + '%';
+                            heart.style.top = 20 + Math.random() * 60 + '%';
+                            document.body.appendChild(heart);
+
+                            setTimeout(() => {
+                                if (document.body.contains(heart)) {
+                                    document.body.removeChild(heart);
+                                }
+                            }, 3000);
+                        }, i * 300);
+                    }
+                } catch (error) {
+                    console.error('Error creating celebration:', error);
+                }
+            }
+
+            // الانتقال للصفحة التالية
+            function nextPage() {
+                try {
+                    if (gameState.currentPage < 5) {
+                        gameState.currentPage++;
+                        gameState.isChecking = false;
+                        updateDisplay();
+                        showFeedback(`انتقلت للصفحة ${gameState.currentPage}! استعد للتحدي التالي 🚀`, 'neutral');
+                        setTimeout(() => {
+                            startNewRound();
+                        }, 2000);
+                    }
+                } catch (error) {
+                    console.error('Error going to next page:', error);
+                }
+            }
+
+            // إكمال المستوى
+            function completeLevel() {
+                try {
+                    const accuracy = gameState.totalAttempts > 0 ? Math.round((gameState.correctAnswers / gameState.totalAttempts) * 100) : 0;
+
+                    gameState.isChecking = false;
+
+                    if (accuracy >= 70) {
+                        sounds.levelComplete();
+                        if (gameState.currentLevel < 3) {
+                            showFeedback(`🎊 ممتاز! أكملت المستوى ${gameState.currentLevel}! دقتك: ${accuracy}% 🎊`, 'success');
+                            const nextBtn = document.getElementById('nextBtn');
+                            if (nextBtn) {
+                                nextBtn.style.display = 'inline-block';
+                            }
+                        } else {
+                            showFeedback('🏆 تهانينا! أكملت جميع المستويات! أنت بطل الذاكرة! 🏆', 'success');
+                            createFinalCelebration();
+                        }
+                    } else {
+                        showFeedback(`تحتاج لتحسين دقتك! دقتك الحالية: ${accuracy}%. حاول مرة أخرى! 💪`, 'error');
+                        setTimeout(() => {
+                            resetLevel();
+                        }, 3000);
+                    }
+                } catch (error) {
+                    console.error('Error completing level:', error);
+                }
+            }
+
+            // احتفال نهائي
+            function createFinalCelebration() {
+                try {
+                    const emojis = ['🎉', '🎊', '🏆', '⭐', '🌟', '💫'];
+                    for (let i = 0; i < 10; i++) {
+                        setTimeout(() => {
+                            const celebration = document.createElement('div');
+                            celebration.className = 'celebration';
+                            celebration.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                            celebration.style.left = Math.random() * 100 + '%';
+                            celebration.style.top = Math.random() * 100 + '%';
+                            document.body.appendChild(celebration);
+
+                            setTimeout(() => {
+                                if (document.body.contains(celebration)) {
+                                    document.body.removeChild(celebration);
+                                }
+                            }, 2000);
+                        }, i * 200);
+                    }
+                } catch (error) {
+                    console.error('Error creating final celebration:', error);
+                }
+            }
+
+            // المستوى التالي
+            function nextLevel() {
+                try {
+                    if (gameState.currentLevel < 3) {
+                        gameState.currentLevel++;
+                        gameState.currentPage = 1;
+                        gameState.correctAnswers = 0;
+                        gameState.totalAttempts = 0;
+                        gameState.isChecking = false;
+
+                        const nextBtn = document.getElementById('nextBtn');
+                        if (nextBtn) {
+                            nextBtn.style.display = 'none';
+                        }
+
+                        updateDisplay();
+
+                        showFeedback(`🌟 مرحباً بك في المستوى ${gameState.currentLevel}: ${gameData[gameState.currentLevel].name}! 🌟`, 'success');
+
+                        setTimeout(() => {
+                            startNewRound();
+                        }, 3000);
+                    }
+                } catch (error) {
+                    console.error('Error going to next level:', error);
+                }
+            }
+
+            // إعادة تعيين الجولة الحالية
+            function resetCurrentRound() {
+                try {
+                    gameState.isChecking = false;
+                    const inputArea = document.getElementById('inputArea');
+                    const sequenceTitle = document.getElementById('sequenceTitle');
+                    const sequenceItems = document.getElementById('sequenceItems');
+                    const startBtn = document.getElementById('startBtn');
+
+                    if (inputArea) inputArea.style.display = 'none';
+                    if (sequenceTitle) sequenceTitle.textContent = 'اضغط "ابدأ جولة جديدة" للمحاولة مرة أخرى';
+                    if (sequenceItems) sequenceItems.innerHTML = '';
+                    if (startBtn) startBtn.disabled = false;
+
+                    showFeedback('جاهز للمحاولة مرة أخرى؟ اضغط "ابدأ جولة جديدة" 🎯', 'neutral');
+                } catch (error) {
+                    console.error('Error resetting current round:', error);
+                }
+            }
+
+            // إعادة تعيين المستوى
+            function resetLevel() {
+                try {
+                    gameState.currentPage = 1;
+                    gameState.correctAnswers = 0;
+                    gameState.totalAttempts = 0;
+                    gameState.isChecking = false;
+                    updateDisplay();
+                    resetCurrentRound();
+                } catch (error) {
+                    console.error('Error resetting level:', error);
+                }
+            }
+
+            // بدء جولة جديدة
+            function startNewRound() {
+                try {
+                    if (gameState.isPlaying || gameState.isChecking) return;
+
+                    gameState.isPlaying = true;
+                    gameState.isChecking = false;
+                    gameState.userAnswer = [];
+
+                    const inputArea = document.getElementById('inputArea');
+                    const startBtn = document.getElementById('startBtn');
+
+                    if (inputArea) inputArea.style.display = 'none';
+                    if (startBtn) startBtn.disabled = true;
+
+                    generateSequence();
+                    displaySequence();
+
+                    setTimeout(
+                        () => {
+                            gameState.isPlaying = false;
+                            if (startBtn) startBtn.disabled = false;
+                        },
+                        gameState.currentSequence.length * 800 + 2000
+                    );
+                } catch (error) {
+                    console.error('Error starting new round:', error);
+                    gameState.isPlaying = false;
+                    showFeedback('حدث خطأ في بدء الجولة الجديدة', 'error');
+                }
+            }
+
+            // إعادة تشغيل اللعبة
+            function resetGame() {
+                try {
+                    gameState.currentLevel = 1;
+                    gameState.currentPage = 1;
+                    gameState.currentSequence = [];
+                    gameState.userAnswer = [];
+                    gameState.score = 0;
+                    gameState.correctAnswers = 0;
+                    gameState.totalAttempts = 0;
+                    gameState.isPlaying = false;
+                    gameState.isChecking = false;
+
+                    const inputArea = document.getElementById('inputArea');
+                    const nextBtn = document.getElementById('nextBtn');
+                    const startBtn = document.getElementById('startBtn');
+                    const sequenceTitle = document.getElementById('sequenceTitle');
+                    const sequenceItems = document.getElementById('sequenceItems');
+
+                    if (inputArea) inputArea.style.display = 'none';
+                    if (nextBtn) nextBtn.style.display = 'none';
+                    if (startBtn) startBtn.disabled = false;
+                    if (sequenceTitle) sequenceTitle.textContent = 'اضغط "ابدأ" لرؤية التسلسل';
+                    if (sequenceItems) sequenceItems.innerHTML = '';
+
+                    updateDisplay();
+                    showFeedback('مرحباً! اضغط على "ابدأ جولة جديدة" لنبدأ اللعب معاً! 🎮', 'neutral');
+                } catch (error) {
+                    console.error('Error resetting game:', error);
+                }
+            }
+
+            // تحديث العرض
+            function updateDisplay() {
+                try {
+                    const levelDisplay = document.getElementById('levelDisplay');
+                    const pageDisplay = document.getElementById('pageDisplay');
+                    const scoreDisplay = document.getElementById('scoreDisplay');
+                    const accuracyDisplay = document.getElementById('accuracyDisplay');
+                    const progressFill = document.getElementById('progressFill');
+
+                    if (levelDisplay && gameData[gameState.currentLevel]) {
+                        levelDisplay.textContent = `المستوى ${gameState.currentLevel}: ${gameData[gameState.currentLevel].name}`;
+                    }
+
+                    if (pageDisplay) {
+                        pageDisplay.textContent = `صفحة ${gameState.currentPage}/5`;
+                    }
+
+                    if (scoreDisplay) {
+                        scoreDisplay.textContent = `النقاط: ${gameState.score}`;
+                    }
+
+                    const accuracy = gameState.totalAttempts > 0 ? Math.round((gameState.correctAnswers / gameState.totalAttempts) * 100) : 0;
+
+                    if (accuracyDisplay) {
+                        accuracyDisplay.textContent = `الدقة: ${accuracy}%`;
+                    }
+
+                    const progress = Math.min(100, ((gameState.currentPage - 1) / 4) * 100);
+                    if (progressFill) {
+                        progressFill.style.width = progress + '%';
+                    }
+
+                    updatePageIndicators();
+                } catch (error) {
+                    console.error('Error updating display:', error);
+                }
+            }
+
+            // تحديث مؤشرات الصفحات
+            function updatePageIndicators() {
+                try {
+                    const container = document.getElementById('pageIndicators');
+                    if (!container) return;
+
+                    container.innerHTML = '';
+
+                    for (let i = 1; i <= 5; i++) {
+                        const dot = document.createElement('div');
+                        dot.className = `page-dot ${i === gameState.currentPage ? 'active' : ''}`;
+                        dot.addEventListener('click', () => {
+                            if (!gameState.isPlaying && !gameState.isChecking && i <= gameState.currentPage) {
+                                gameState.currentPage = i;
+                                updateDisplay();
+                                resetCurrentRound();
+                            }
+                        });
+                        container.appendChild(dot);
+                    }
+                } catch (error) {
+                    console.error('Error updating page indicators:', error);
+                }
+            }
+
+            // التهيئة الأولية
+            function initGame() {
+                try {
+                    updateDisplay();
+                    showFeedback('مرحباً! اضغط على "ابدأ جولة جديدة" لنبدأ اللعب معاً! 🎮', 'neutral');
+
+                    // ربط أحداث الأزرار
+                    const startBtn = document.getElementById('startBtn');
+                    const nextBtn = document.getElementById('nextBtn');
+                    const resetBtn = document.getElementById('resetBtn');
+
+                    if (startBtn) {
+                        startBtn.addEventListener('click', startNewRound);
+                    }
+
+                    if (nextBtn) {
+                        nextBtn.addEventListener('click', nextLevel);
+                    }
+
+                    if (resetBtn) {
+                        resetBtn.addEventListener('click', resetGame);
+                    }
+                } catch (error) {
+                    console.error('Error initializing game:', error);
+                }
+            }
+
+            // تشغيل اللعبة عند تحميل الصفحة
+            window.addEventListener('load', initGame);
+
+            // السماح بلمس الشاشة لتشغيل الأصوات على الهواتف
+            document.addEventListener('touchstart', initAudio, { once: true });
+            document.addEventListener('click', initAudio, { once: true });
+
+            // منع الأخطاء العامة
+            window.addEventListener('error', function (e) {
+                console.error('Global error:', e.error);
+            });
+
+            // منع أخطاء Promise
+            window.addEventListener('unhandledrejection', function (e) {
+                console.error('Unhandled promise rejection:', e.reason);
+            });
+        </script>
+    </body>
+</html>

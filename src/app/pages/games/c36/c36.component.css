@@ -1,0 +1,24 @@
+ .game-wrapper {
+     width: 100%;
+     height: 100vh;
+     margin: 0;
+     padding: 0;
+     overflow: hidden;
+ }
+
+ .game-iframe {
+     width: 100%;
+     height: 100vh;
+     border: none;
+     margin: 0;
+     padding: 0;
+     display: block;
+ }
+
+ :host {
+     display: block;
+     width: 100%;
+     height: 100vh;
+     margin: 0;
+     padding: 0;
+ }
