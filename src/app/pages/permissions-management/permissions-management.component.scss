@@ -1,0 +1,41 @@
+.permissions-management-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+
+    :host ::ng-deep {
+        .p-card {
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .p-tabview {
+            .p-tabview-nav {
+                background: white;
+                border-radius: 12px 12px 0 0;
+            }
+
+            .p-tabview-panels {
+                background: transparent;
+                padding: 0;
+            }
+        }
+
+        .p-dropdown {
+            border-radius: 8px;
+        }
+
+        .p-checkbox {
+            .p-checkbox-box {
+                border-radius: 4px;
+                width: 22px;
+                height: 22px;
+            }
+        }
+    }
+}
+
+.dark {
+    .permissions-management-container {
+        background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+    }
+}

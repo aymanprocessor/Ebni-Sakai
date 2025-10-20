@@ -21,9 +21,9 @@ export function createTranslateLoader(http: HttpClient) {
     return new TranslateHttpLoader(http, './i18n/', '.json');
 }
 
-// Function to get default language from localStorage or fallback to 'en-US'
+// Function to get default language from localStorage or fallback to 'ar-EG'
 export function getDefaultLanguage(): string {
-    return localStorage.getItem('language') || 'en-US';
+    return localStorage.getItem('language') || 'ar-EG';
 }
 
 export function initializeAuth(authService: AuthService) {

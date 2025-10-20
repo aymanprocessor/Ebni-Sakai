@@ -1,0 +1,32 @@
+<footer class="landing-footer">
+    <div class="footer-container">
+        <div class="footer-grid">
+            <div class="footer-column">
+                <div class="footer-logo">
+                    <img src="assets/images/Logo.png" alt="KidSkills Logo" />
+                    <span>KidSkills</span>
+                </div>
+                <p class="footer-tagline">{{ 'pages.home.footer.tagline' | translate }}</p>
+            </div>
+            <div class="footer-column">
+                <h4>{{ 'pages.home.footer.quickLinks.title' | translate }}</h4>
+                <a routerLink="/app/about-us">{{ 'pages.home.footer.quickLinks.aboutUs' | translate }}</a>
+                <a routerLink="/app/game">{{ 'pages.home.footer.quickLinks.games' | translate }}</a>
+                <a routerLink="/auth/register">{{ 'pages.home.footer.quickLinks.getStarted' | translate }}</a>
+            </div>
+            <div class="footer-column">
+                <h4>{{ 'pages.home.footer.legal.title' | translate }}</h4>
+                <a routerLink="/privacy-policy">{{ 'pages.home.footer.legal.privacyPolicy' | translate }}</a>
+                <a routerLink="/terms-of-use">{{ 'pages.home.footer.legal.termsOfUse' | translate }}</a>
+            </div>
+            <div class="footer-column">
+                <h4>{{ 'pages.home.footer.contact.title' | translate }}</h4>
+                <p><i class="pi pi-envelope"></i> info&#64;kidskills.com</p>
+                <p><i class="pi pi-map-marker"></i> {{ 'pages.home.footer.contact.location' | translate }}</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>{{ 'pages.home.footer.copyright' | translate }}</p>
+        </div>
+    </div>
+</footer>

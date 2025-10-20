@@ -71,7 +71,10 @@ export class AppMenu implements OnInit {
                 label: '',
                 items: [
                     { label: 'navigation.dashboard', icon: 'pi pi-fw pi-home', routerLink: ['dashboard'] },
+                    { label: 'navigation.myAccess', icon: 'pi pi-fw pi-lock-open', routerLink: ['my-access'] },
                     { label: 'navigation.users', icon: 'pi pi-fw pi-users', routerLink: ['user-management'] },
+                    { label: 'navigation.permissions', icon: 'pi pi-fw pi-shield', routerLink: ['permissions-management'] },
+                    { label: 'navigation.userPermissions', icon: 'pi pi-fw pi-user-edit', routerLink: ['user-permissions'] },
                     { label: 'navigation.timeSlots', icon: 'pi pi-fw pi-calendar', routerLink: ['booking/time-slots'] },
                     { label: 'navigation.appointments', icon: 'pi pi-fw pi-calendar-times', routerLink: ['booking/appointments'] },
                     { label: 'navigation.reports', icon: 'pi pi-fw pi-chart-bar', routerLink: ['reports'] },
@@ -89,11 +92,10 @@ export class AppMenu implements OnInit {
                 label: '',
                 items: [
                     { label: 'navigation.dashboard', icon: 'pi pi-fw pi-home', routerLink: ['dashboard'] },
-                    { label: 'navigation.myAppointments', icon: 'pi pi-fw pi-calendar', routerLink: ['specialist-bookings'] },
-                    //{ label: 'navigation.schedule', icon: 'pi pi-fw pi-calendar-plus', routerLink: ['booking/appointments'] },
-                    //{ label: 'navigation.reports', icon: 'pi pi-fw pi-chart-bar', routerLink: ['reports'] },
-                    { label: 'navigation.user-profile', icon: 'pi pi-fw pi-user', routerLink: ['user-profile'] },
-                    { label: 'navigation.survey', icon: 'pi pi-fw pi-file', routerLink: ['mini-survey'] }
+                    // removed: myAccess, myAppointments, survey
+                    { label: 'navigation.scales', icon: 'pi pi-fw pi-list', routerLink: ['/app', 'scales'] },
+                    { label: 'navigation.games', icon: 'pi pi-fw pi-play', routerLink: ['/app', 'game'] },
+                    { label: 'navigation.user-profile', icon: 'pi pi-fw pi-user', routerLink: ['user-profile'] }
                 ]
             }
         ];

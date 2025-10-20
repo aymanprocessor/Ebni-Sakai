@@ -1,0 +1,71 @@
+<app-landing-header></app-landing-header>
+
+<div class="about-us-container" [attr.dir]="currentDir">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">{{ 'pages.aboutUs.title' | translate }}</h1>
+            <p class="hero-subtitle">{{ 'pages.aboutUs.subtitle' | translate }}</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content-wrapper">
+        <!-- Mission & Vision Cards -->
+        <div class="grid grid-cols-1 gap-6 mb-8">
+            <!-- Mission Card -->
+            <p-card class="mission-card">
+                <ng-template pTemplate="header">
+                    <div class="card-header mission-header">
+                        <div class="icon-title-row">
+                            <div class="icon-wrapper">
+                                <i class="pi pi-compass text-5xl"></i>
+                            </div>
+                            <h2 class="card-title">{{ 'pages.aboutUs.missionTitle' | translate }}</h2>
+                        </div>
+                    </div>
+                </ng-template>
+                <div class="card-content">
+                    <p class="card-text">{{ 'pages.aboutUs.mission' | translate }}</p>
+                </div>
+            </p-card>
+
+            <!-- Vision Card -->
+            <p-card class="vision-card">
+                <ng-template pTemplate="header">
+                    <div class="card-header vision-header">
+                        <div class="icon-title-row">
+                            <div class="icon-wrapper">
+                                <i class="pi pi-eye text-5xl"></i>
+                            </div>
+                            <h2 class="card-title">{{ 'pages.aboutUs.visionTitle' | translate }}</h2>
+                        </div>
+                    </div>
+                </ng-template>
+                <div class="card-content">
+                    <p class="card-text">{{ 'pages.aboutUs.vision' | translate }}</p>
+                </div>
+            </p-card>
+        </div>
+
+        <!-- Values Section -->
+        <div class="values-section">
+            <h2 class="values-title">{{ 'pages.aboutUs.valuesTitle' | translate }}</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div *ngFor="let value of 'pages.aboutUs.values' | translate; let i = index" class="value-card" [class.animate-fade-in]="true" [style.animation-delay.ms]="i * 100">
+                    <div class="value-icon">
+                        <i class="pi" [ngClass]="getValueIcon(i)"></i>
+                    </div>
+                    <div class="value-content">
+                        <ng-container *ngIf="getValueParts(value) as parts">
+                            <h3 class="value-title">{{ parts[0] }}</h3>
+                            <div class="value-desc">{{ parts[1] }}</div>
+                        </ng-container>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<app-landing-footer></app-landing-footer>

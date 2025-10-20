@@ -1,0 +1,103 @@
+<div class="games-list-container p-2 sm:p-4">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-4 sm:mb-6 gap-3 sm:gap-4">
+            <div class="text-center md:text-right w-full md:w-auto">
+                <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-1 sm:mb-2">
+                    {{ 'pages.gamesList.title' | translate }}
+                </h1>
+                <p class="text-base sm:text-lg text-gray-600 dark:text-gray-300">
+                    {{ 'pages.gamesList.subtitle' | translate }}
+                </p>
+            </div>
+            <button pButton pRipple label="{{ 'pages.gamesList.back' | translate }}" icon="pi pi-arrow-right" iconPos="right" class="p-button-outlined p-button-secondary w-full md:w-auto" (click)="goBack()"></button>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="mb-4 sm:mb-6 bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4 shadow-sm">
+            <!-- Categories -->
+            <div class="mb-3 sm:mb-4">
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2 sm:mb-3">التصنيفات</h3>
+                <div class="flex gap-3 sm:gap-4 flex-wrap">
+                    <button pButton pRipple class="p-button-md text-base sm:text-lg" (click)="selectCategory(null)" [ngClass]="selectedCategory === null ? 'p-button-primary' : 'p-button-outlined'">الكل</button>
+                    <button *ngFor="let c of categories" pButton pRipple class="p-button-md text-base sm:text-lg" (click)="selectCategory(c.key)" [ngClass]="selectedCategory === c.key ? 'p-button-primary' : 'p-button-outlined'">
+                        {{ c.label }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- Subcategories (only shown if category has multiple subcats) -->
+            <div *ngIf="selectedCategory && hasSubcats" class="mb-2 pt-2 sm:pt-3 border-t border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2 sm:mb-3">التصنيفات الفرعية</h3>
+                <div class="flex gap-3 sm:gap-4 flex-wrap">
+                    <button pButton pRipple class="p-button-md p-button-secondary text-base sm:text-lg" (click)="selectSubcat(null)" [ngClass]="!selectedSubcat ? 'p-button-secondary' : 'p-button-outlined p-button-secondary'">الكل</button>
+                    <button
+                        *ngFor="let sc of visibleSubcats"
+                        pButton
+                        pRipple
+                        class="p-button-md p-button-secondary text-base sm:text-lg"
+                        (click)="selectSubcat(sc.key)"
+                        [ngClass]="selectedSubcat === sc.key ? 'p-button-secondary' : 'p-button-outlined p-button-secondary'"
+                    >
+                        {{ sc.label }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search -->
+        <div class="mb-4 sm:mb-6">
+            <span class="p-input-icon-left w-full sm:w-96">
+                <i class="pi pi-search"></i>
+                <input type="text" pInputText [(ngModel)]="searchTerm" (ngModelChange)="filterGames()" placeholder="{{ 'pages.gamesList.searchPlaceholder' | translate }}" class="w-full text-base sm:text-lg" />
+            </span>
+        </div>
+
+        <!-- Games Grid (shimmer placeholders while loading) -->
+        <div *ngIf="accessibleGameIds === null" class="shimmer-grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div *ngFor="let i of [1, 2, 3, 4, 5, 6, 7, 8]" class="shimmer-card">
+                <div class="shimmer-badge"></div>
+                <div class="shimmer-lines">
+                    <div class="shimmer-line short"></div>
+                    <div class="shimmer-line long"></div>
+                </div>
+            </div>
+        </div>
+
+        <div *ngIf="accessibleGameIds !== null" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+            <div *ngFor="let game of filteredGames" class="game-card" (click)="navigateToGame(game.route)">
+                <p-card styleClass="h-full hover:shadow-xl transition-all duration-300 cursor-pointer">
+                    <ng-template pTemplate="header">
+                        <div class="flex justify-center items-center py-4 sm:py-6 bg-gradient-to-br from-purple-50 to-pink-100 dark:from-purple-900 dark:to-pink-900">
+                            <i [class]="game.icon + ' text-5xl sm:text-6xl text-purple-600 dark:text-purple-300'"></i>
+                        </div>
+                    </ng-template>
+                    <div class="text-center">
+                        <h3 class="text-lg sm:text-2xl font-bold text-gray-800 dark:text-white mb-2 line-clamp-2">
+                            {{ game.title }}
+                        </h3>
+                        <!-- <p class="text-gray-600 dark:text-gray-300 text-sm sm:text-base mb-3 sm:mb-4 line-clamp-2">
+                            {{ game.description }}
+                        </p> -->
+                        <button
+                            pButton
+                            pRipple
+                            label="{{ 'pages.gamesList.play' | translate }}"
+                            icon="pi pi-play"
+                            class="p-button-md p-button-success w-full text-sm sm:text-base"
+                            (click)="navigateToGame(game.route); $event.stopPropagation()"
+                        ></button>
+                    </div>
+                </p-card>
+            </div>
+        </div>
+
+        <!-- No Results -->
+        <div *ngIf="filteredGames.length === 0" class="text-center py-8 sm:py-12">
+            <i class="pi pi-search text-5xl sm:text-7xl text-gray-400 mb-3 sm:mb-4"></i>
+            <p class="text-xl sm:text-2xl text-gray-600 dark:text-gray-400">
+                {{ 'pages.gamesList.noResults' | translate }}
+            </p>
+        </div>
+    </div>
+</div>

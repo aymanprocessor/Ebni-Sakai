@@ -1,0 +1,967 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>مقياس التقدير التشخيصي لصعوبات تعلم الرياضيات</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #1877f2, #42a5f5, #e3f2fd);
+                min-height: 100vh;
+                padding: 20px;
+            }
+
+            .container {
+                max-width: 900px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 20px 40px rgba(24, 119, 242, 0.2);
+                overflow: hidden;
+            }
+
+            .header {
+                background: linear-gradient(135deg, #1877f2, #42a5f5);
+                color: white;
+                text-align: center;
+                padding: 30px;
+            }
+
+            .header h1 {
+                font-size: 2.2em;
+                margin-bottom: 10px;
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            }
+
+            .header p {
+                font-size: 1.1em;
+                opacity: 0.9;
+            }
+
+            .page {
+                display: none;
+                padding: 40px;
+                min-height: 500px;
+            }
+
+            .page.active {
+                display: block;
+            }
+
+            .page-1 {
+                text-align: center;
+            }
+
+            .welcome-content h2 {
+                color: #1877f2;
+                font-size: 2.5em;
+                margin-bottom: 20px;
+            }
+
+            .welcome-content p {
+                font-size: 1.2em;
+                line-height: 1.8;
+                color: #666;
+                margin-bottom: 15px;
+            }
+
+            .author-info {
+                background: linear-gradient(135deg, #e3f2fd, #f5f5f5);
+                padding: 25px;
+                border-radius: 15px;
+                margin: 30px 0;
+                border-right: 5px solid #1877f2;
+            }
+
+            .form-group {
+                margin-bottom: 20px;
+            }
+
+            .form-group label {
+                display: block;
+                font-weight: bold;
+                color: #1877f2;
+                margin-bottom: 8px;
+                font-size: 1.1em;
+            }
+
+            .form-group input,
+            .form-group select {
+                width: 100%;
+                padding: 12px;
+                border: 2px solid #e0e0e0;
+                border-radius: 10px;
+                font-size: 1em;
+                transition: all 0.3s ease;
+            }
+
+            .form-group input:focus,
+            .form-group select:focus {
+                border-color: #1877f2;
+                box-shadow: 0 0 0 3px rgba(24, 119, 242, 0.1);
+                outline: none;
+            }
+
+            .form-row {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+
+            .instructions {
+                background: #f8f9ff;
+                padding: 25px;
+                border-radius: 15px;
+                margin: 20px 0;
+                border-right: 5px solid #1877f2;
+            }
+
+            .instructions h3 {
+                color: #1877f2;
+                margin-bottom: 15px;
+                font-size: 1.3em;
+            }
+
+            .instructions ul {
+                list-style-type: none;
+                padding-right: 20px;
+            }
+
+            .instructions li {
+                margin-bottom: 10px;
+                padding-right: 20px;
+                position: relative;
+            }
+
+            .instructions li:before {
+                content: '▶';
+                color: #1877f2;
+                position: absolute;
+                right: 0;
+            }
+
+            .scale-info {
+                display: grid;
+                grid-template-columns: repeat(5, 1fr);
+                gap: 10px;
+                margin: 20px 0;
+            }
+
+            .scale-item {
+                background: linear-gradient(135deg, #1877f2, #42a5f5);
+                color: white;
+                padding: 15px;
+                border-radius: 10px;
+                text-align: center;
+                font-weight: bold;
+            }
+
+            .question-card {
+                background: #f8f9ff;
+                border-radius: 15px;
+                padding: 20px;
+                margin-bottom: 20px;
+                border: 1px solid #e0e7ff;
+                transition: all 0.3s ease;
+            }
+
+            .question-card:hover {
+                box-shadow: 0 5px 15px rgba(24, 119, 242, 0.1);
+                transform: translateY(-2px);
+            }
+
+            .question-number {
+                background: #1877f2;
+                color: white;
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                margin-left: 10px;
+            }
+
+            .question-text {
+                font-size: 1.1em;
+                margin: 15px 0;
+                color: #333;
+                line-height: 1.6;
+            }
+
+            .rating-options {
+                display: grid;
+                grid-template-columns: repeat(5, 1fr);
+                gap: 10px;
+                margin-top: 15px;
+            }
+
+            .rating-option {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .rating-option input[type='radio'] {
+                display: none;
+            }
+
+            .rating-option label {
+                background: #f0f0f0;
+                border: 2px solid #ddd;
+                border-radius: 10px;
+                padding: 10px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                text-align: center;
+                width: 100%;
+                font-size: 0.9em;
+            }
+
+            .rating-option input[type='radio']:checked + label {
+                background: linear-gradient(135deg, #1877f2, #42a5f5);
+                color: white;
+                border-color: #1877f2;
+                transform: scale(1.05);
+            }
+
+            .btn {
+                background: linear-gradient(135deg, #1877f2, #42a5f5);
+                color: white;
+                border: none;
+                padding: 15px 30px;
+                border-radius: 10px;
+                font-size: 1.1em;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                margin: 10px;
+            }
+
+            .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(24, 119, 242, 0.3);
+            }
+
+            .btn:disabled {
+                background: #ccc;
+                cursor: not-allowed;
+                transform: none;
+                box-shadow: none;
+            }
+
+            .btn-secondary {
+                background: linear-gradient(135deg, #6c757d, #868e96);
+            }
+
+            .navigation {
+                text-align: center;
+                margin-top: 30px;
+                padding-top: 20px;
+                border-top: 1px solid #eee;
+            }
+
+            .progress-bar {
+                background: #e9ecef;
+                border-radius: 10px;
+                overflow: hidden;
+                margin: 20px 0;
+                height: 8px;
+            }
+
+            .progress-fill {
+                background: linear-gradient(135deg, #1877f2, #42a5f5);
+                height: 100%;
+                width: 0%;
+                transition: width 0.5s ease;
+            }
+
+            .result-section {
+                margin-bottom: 30px;
+            }
+
+            .result-card {
+                background: linear-gradient(135deg, #f8f9ff, #e3f2fd);
+                border: 2px solid #1877f2;
+                border-radius: 15px;
+                padding: 25px;
+                margin-bottom: 20px;
+            }
+
+            .result-card h3 {
+                color: #1877f2;
+                margin-bottom: 15px;
+                font-size: 1.4em;
+            }
+
+            .score-display {
+                font-size: 2em;
+                font-weight: bold;
+                color: #1877f2;
+                text-align: center;
+                margin: 20px 0;
+            }
+
+            .diagnosis-level {
+                padding: 15px;
+                border-radius: 10px;
+                text-align: center;
+                font-weight: bold;
+                font-size: 1.2em;
+                margin: 15px 0;
+            }
+
+            .level-normal {
+                background: linear-gradient(135deg, #28a745, #34ce57);
+                color: white;
+            }
+
+            .level-mild {
+                background: linear-gradient(135deg, #ffc107, #ffeb3b);
+                color: #333;
+            }
+
+            .level-moderate {
+                background: linear-gradient(135deg, #fd7e14, #ff9800);
+                color: white;
+            }
+
+            .level-severe {
+                background: linear-gradient(135deg, #dc3545, #f44336);
+                color: white;
+            }
+
+            .recommendations {
+                background: #f8f9fa;
+                border-right: 5px solid #1877f2;
+                padding: 20px;
+                border-radius: 10px;
+                margin-top: 20px;
+            }
+
+            .recommendations h4 {
+                color: #1877f2;
+                margin-bottom: 15px;
+            }
+
+            .recommendations ul {
+                list-style-type: none;
+                padding-right: 20px;
+            }
+
+            .recommendations li {
+                margin-bottom: 8px;
+                position: relative;
+                padding-right: 20px;
+            }
+
+            .recommendations li:before {
+                content: '✓';
+                color: #28a745;
+                font-weight: bold;
+                position: absolute;
+                right: 0;
+            }
+
+            .student-info {
+                background: #e3f2fd;
+                border-radius: 10px;
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+
+            .print-btn {
+                background: linear-gradient(135deg, #28a745, #34ce57);
+            }
+
+            @media print {
+                body {
+                    background: white;
+                    padding: 0;
+                }
+                .container {
+                    box-shadow: none;
+                    border-radius: 0;
+                }
+                .navigation,
+                .btn:not(.print-btn) {
+                    display: none;
+                }
+            }
+
+            .error-message {
+                color: #dc3545;
+                background: #f8d7da;
+                border: 1px solid #f5c6cb;
+                border-radius: 10px;
+                padding: 15px;
+                margin: 10px 0;
+                text-align: center;
+            }
+
+            @media (max-width: 768px) {
+                .container {
+                    margin: 10px;
+                    border-radius: 15px;
+                }
+
+                .header {
+                    padding: 20px;
+                }
+
+                .header h1 {
+                    font-size: 1.8em;
+                }
+
+                .page {
+                    padding: 20px;
+                }
+
+                .form-row {
+                    grid-template-columns: 1fr;
+                }
+
+                .rating-options {
+                    grid-template-columns: 1fr;
+                    gap: 5px;
+                }
+
+                .scale-info {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>مقياس التقدير التشخيصي لصعوبات تعلم الرياضيات</h1>
+                <p>نظام تشخيصي تفاعلي للأخصائيين</p>
+            </div>
+
+            <!-- Page 1: Welcome -->
+            <div class="page page-1 active">
+                <div class="welcome-content">
+                    <h2>مرحباً بك</h2>
+                    <p>مقياس التقدير التشخيصي لصعوبات تعلم الرياضيات (LDDRS)</p>
+                    <p>أداة تشخيصية علمية لتقييم صعوبات التعلم في الرياضيات</p>
+
+                    <div class="author-info">
+                        <h3 style="color: #1877f2; margin-bottom: 15px">مقياس علمي متخصص</h3>
+                        <p>أداة تشخيصية معتمدة لتقييم صعوبات التعلم في الرياضيات</p>
+                        <p>للاستخدام من قبل الأخصائيين المؤهلين في مجال صعوبات التعلم</p>
+                    </div>
+
+                    <p><strong>يهدف هذا المقياس إلى:</strong></p>
+                    <p>الكشف عن التلاميذ ذوي اضطرابات أو صعوبات التعلم في الرياضيات من خلال تقييم الخصائص السلوكية المتعلقة بهذه الصعوبات.</p>
+                </div>
+
+                <div class="navigation">
+                    <button class="btn" onclick="nextPage()">ابدأ التقييم</button>
+                </div>
+            </div>
+
+            <!-- Page 2: Instructions and Student Info -->
+            <div class="page page-2">
+                <h2 style="color: #1877f2; margin-bottom: 30px">معلومات الطفل والتعليمات</h2>
+
+                <div class="result-card">
+                    <h3>بيانات الطفل</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="studentName">اسم التلميذ</label>
+                            <input type="text" id="studentName" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="studentGender">الجنس</label>
+                            <select id="studentGender" required>
+                                <option value="">اختر الجنس</option>
+                                <option value="ذكر">ذكر</option>
+                                <option value="أنثى">أنثى</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="studentGrade">الصف</label>
+                            <input type="text" id="studentGrade" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="studentSchool">المدرسة</label>
+                            <input type="text" id="studentSchool" required />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="evaluatorName">اسم القائم بالتقدير</label>
+                            <input type="text" id="evaluatorName" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="evaluatorPosition">الوظيفة</label>
+                            <input type="text" id="evaluatorPosition" required />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="evaluationDate">تاريخ التقدير</label>
+                        <input type="date" id="evaluationDate" required />
+                    </div>
+                </div>
+
+                <div class="instructions">
+                    <h3>تعليمات مهمة للأخصائي</h3>
+                    <ul>
+                        <li>تأكد من معرفتك الجيدة بالطفل موضوع التقدير</li>
+                        <li>اقرأ كل فقرة بعناية قبل إعطاء التقدير</li>
+                        <li>استخدم خبرتك وملاحظاتك المتكررة للطفل</li>
+                        <li>كن موضوعياً وصادقاً في تقديراتك</li>
+                        <li>لا تترك أي فقرة بدون تقدير</li>
+                    </ul>
+                </div>
+
+                <div class="instructions">
+                    <h3>مقياس التقدير</h3>
+                    <div class="scale-info">
+                        <div class="scale-item">دائماً (4)</div>
+                        <div class="scale-item">غالباً (3)</div>
+                        <div class="scale-item">أحياناً (2)</div>
+                        <div class="scale-item">نادراً (1)</div>
+                        <div class="scale-item">لا تنطبق (0)</div>
+                    </div>
+                </div>
+
+                <div class="instructions">
+                    <h3>تعريف صعوبات تعلم الرياضيات</h3>
+                    <p>ضعف أو قصور القدرة على إجراء العمليات الحسابية الأساسية، وفهم لغة الرياضيات ورموزها وقواعدها وقوانينها، وحل المشكلات والمسائل الرياضية أو الحسابية.</p>
+                </div>
+
+                <div class="navigation">
+                    <button class="btn btn-secondary" onclick="prevPage()">السابق</button>
+                    <button class="btn" onclick="nextPage()" id="startAssessment">بدء التقييم</button>
+                </div>
+            </div>
+
+            <!-- Page 3: Assessment Questions -->
+            <div class="page page-3">
+                <h2 style="color: #1877f2; margin-bottom: 20px">تقييم الطفل</h2>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <p style="text-align: center; color: #666; margin-bottom: 30px" id="progressText">السؤال 1 من 20</p>
+
+                <div id="questionsContainer">
+                    <!-- Questions will be generated by JavaScript -->
+                </div>
+
+                <div class="navigation">
+                    <button class="btn btn-secondary" onclick="prevPage()">السابق</button>
+                    <button class="btn" onclick="nextPage()" id="finishAssessment" disabled>إنهاء التقييم</button>
+                </div>
+            </div>
+
+            <!-- Page 4: Results -->
+            <div class="page page-4">
+                <h2 style="color: #1877f2; margin-bottom: 30px">تقرير التشخيص</h2>
+
+                <div class="student-info" id="studentInfoDisplay">
+                    <!-- Student info will be displayed here -->
+                </div>
+
+                <div class="result-section">
+                    <div class="result-card">
+                        <h3>النتيجة الإجمالية</h3>
+                        <div class="score-display" id="totalScore">0</div>
+                        <div id="diagnosisLevel" class="diagnosis-level">
+                            <!-- Diagnosis level will be displayed here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-section">
+                    <div class="result-card">
+                        <h3>التشخيص التفصيلي</h3>
+                        <div id="detailedDiagnosis">
+                            <!-- Detailed diagnosis will be displayed here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recommendations">
+                    <h4>التوصيات والمتابعة</h4>
+                    <div id="recommendationsContent">
+                        <!-- Recommendations will be displayed here -->
+                    </div>
+                </div>
+
+                <div class="navigation">
+                    <button class="btn btn-secondary" onclick="prevPage()">السابق</button>
+                    <button class="btn" onclick="restartAssessment()">تقييم جديد</button>
+                    <button class="btn print-btn" onclick="printReport()">طباعة التقرير</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Assessment data
+            const questions = [
+                'يجد صعوبة في التمييز بين الأرقام مثل: (6،2) (8،7)',
+                'يجد صعوبة في إجراء عمليات الضرب والقسمة المطولة',
+                'يجد صعوبة في حل مسائل الجمع مع الحمل والطرح مع الاستلاف',
+                'يضع أرقام أو فاصلة الكسور العشرية في غير مكانها',
+                'يجد صعوبة في الاستخدام الصحيح لعلامات أكبر من، أصغر من',
+                'يجد صعوبة في حل المسائل اللفظية الشفهية المتعددة الخطوات',
+                'يجد صعوبة في فهم القيم المكانية للأرقام وكتابتها وفقاً لها',
+                'يجد صعوبة في حفظ الحقائق الرياضية، والاحتفاظ بها',
+                'يجد صعوبة في فهم معنى الرموز الرياضية',
+                'ينسى القواعد الرياضية المتعلقة بالدروس السابقة',
+                'يجد صعوبة في حل المسائل متعددة الخطوات وتمييز ناتج الحل',
+                'يجد صعوبة في تحويل الصياغات اللفظية للمسائل إلى رموز رياضية',
+                'يجد صعوبة في حل المسائل الرياضية أو الحسابية عقلياً',
+                'يجد صعوبة في التحويل بين الوحدات الأكبر والأصغر (مم، سم، متر، كم)',
+                'يجد صعوبة في تمييز الحجم، والكمية، والمسافة، والزمن',
+                'يجد صعوبة في فهم واستخدام الرموز الرياضية مثل: > <',
+                'يجد صعوبة في حل المسائل التي تتطلب تنوع العمليات الحسابية',
+                'يحتاج إلى تصحيح كل خطوة في المسائل متعددة الخطوات',
+                'يجد صعوبة في تركيب الأعداد تصاعدياً أو تنازلياً',
+                'يجد صعوبة في جمع وطرح وضرب الإشارات عند حل المسائل'
+            ];
+
+            const ratingLabels = ['لا تنطبق', 'نادراً', 'أحياناً', 'غالباً', 'دائماً'];
+
+            let currentPage = 1;
+            let responses = {};
+
+            // Initialize the assessment
+            function init() {
+                generateQuestions();
+                updateProgress();
+
+                // Set current date
+                document.getElementById('evaluationDate').value = new Date().toISOString().split('T')[0];
+            }
+
+            function generateQuestions() {
+                const container = document.getElementById('questionsContainer');
+                container.innerHTML = '';
+
+                questions.forEach((question, index) => {
+                    const questionCard = document.createElement('div');
+                    questionCard.className = 'question-card';
+
+                    questionCard.innerHTML = `
+                    <div style="display: flex; align-items: center;">
+                        <div class="question-number">${index + 1}</div>
+                        <div class="question-text">${question}</div>
+                    </div>
+                    <div class="rating-options">
+                        ${ratingLabels
+                            .map(
+                                (label, ratingIndex) => `
+                            <div class="rating-option">
+                                <input type="radio" id="q${index}_r${ratingIndex}" name="question_${index}" value="${ratingIndex}" onchange="updateResponse(${index}, ${ratingIndex})">
+                                <label for="q${index}_r${ratingIndex}">${label}</label>
+                            </div>
+                        `
+                            )
+                            .join('')}
+                    </div>
+                `;
+
+                    container.appendChild(questionCard);
+                });
+            }
+
+            function updateResponse(questionIndex, rating) {
+                responses[questionIndex] = rating;
+                updateProgress();
+
+                // Enable finish button if all questions answered
+                const allAnswered = Object.keys(responses).length === questions.length;
+                document.getElementById('finishAssessment').disabled = !allAnswered;
+            }
+
+            function updateProgress() {
+                const answered = Object.keys(responses).length;
+                const total = questions.length;
+                const percentage = (answered / total) * 100;
+
+                document.getElementById('progressFill').style.width = percentage + '%';
+                document.getElementById('progressText').textContent = `تم الإجابة على ${answered} من ${total} سؤال`;
+            }
+
+            function nextPage() {
+                if (currentPage === 2) {
+                    // Validate student information
+                    const requiredFields = ['studentName', 'studentGender', 'studentGrade', 'studentSchool', 'evaluatorName', 'evaluatorPosition'];
+                    let allFilled = true;
+
+                    requiredFields.forEach((field) => {
+                        const element = document.getElementById(field);
+                        if (!element.value.trim()) {
+                            element.style.borderColor = '#dc3545';
+                            allFilled = false;
+                        } else {
+                            element.style.borderColor = '#e0e0e0';
+                        }
+                    });
+
+                    if (!allFilled) {
+                        showError('يرجى ملء جميع البيانات المطلوبة');
+                        return;
+                    }
+                }
+
+                if (currentPage === 3) {
+                    // Check if all questions are answered
+                    if (Object.keys(responses).length !== questions.length) {
+                        showError('يرجى الإجابة على جميع الأسئلة');
+                        return;
+                    }
+                    calculateResults();
+                }
+
+                if (currentPage < 4) {
+                    document.querySelector('.page-' + currentPage).classList.remove('active');
+                    currentPage++;
+                    document.querySelector('.page-' + currentPage).classList.add('active');
+                }
+            }
+
+            function prevPage() {
+                if (currentPage > 1) {
+                    document.querySelector('.page-' + currentPage).classList.remove('active');
+                    currentPage--;
+                    document.querySelector('.page-' + currentPage).classList.add('active');
+                }
+            }
+
+            function showError(message) {
+                // Remove existing error messages
+                const existingErrors = document.querySelectorAll('.error-message');
+                existingErrors.forEach((error) => error.remove());
+
+                // Create new error message
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.textContent = message;
+
+                const currentPageElement = document.querySelector('.page.active');
+                const navigation = currentPageElement.querySelector('.navigation');
+                navigation.parentNode.insertBefore(errorDiv, navigation);
+
+                // Auto remove error after 5 seconds
+                setTimeout(() => {
+                    if (errorDiv.parentNode) {
+                        errorDiv.remove();
+                    }
+                }, 5000);
+            }
+
+            function calculateResults() {
+                const totalScore = Object.values(responses).reduce((sum, rating) => sum + rating, 0);
+                const maxScore = questions.length * 4; // Maximum possible score
+                const percentage = (totalScore / maxScore) * 100;
+
+                // Display student information
+                displayStudentInfo();
+
+                // Display total score
+                document.getElementById('totalScore').textContent = totalScore + ' / ' + maxScore;
+
+                // Determine diagnosis level based on the scale criteria
+                let diagnosisLevel, levelClass, diagnosis, recommendations;
+
+                if (totalScore < 20) {
+                    diagnosisLevel = 'عادي / لا توجد صعوبة';
+                    levelClass = 'level-normal';
+                    diagnosis = 'احتمال ألا تكون لدى التلميذ صعوبة في تعلم الرياضيات';
+                    recommendations = ['متابعة الأداء الأكاديمي العادي', 'توفير أنشطة إثرائية في الرياضيات', 'التشجيع المستمر لتطوير المهارات الرياضية', 'مراقبة دورية للتأكد من استمرار التقدم'];
+                } else if (totalScore >= 20 && totalScore < 40) {
+                    diagnosisLevel = 'صعوبة خفيفة';
+                    levelClass = 'level-mild';
+                    diagnosis = 'يحتمل أن تكون لدى التلميذ صعوبة تعلم خفيفة في الرياضيات';
+                    recommendations = ['توفير دعم إضافي في الفصل الدراسي', 'استخدام أساليب تعليمية متنوعة ومبسطة', 'تقسيم المهام الرياضية إلى خطوات صغيرة', 'توفير وقت إضافي للتدريب والممارسة', 'متابعة دورية مع المعلم المختص'];
+                } else if (totalScore >= 40 && totalScore < 60) {
+                    diagnosisLevel = 'صعوبة متوسطة';
+                    levelClass = 'level-moderate';
+                    diagnosis = 'يحتمل أن تكون لدى التلميذ صعوبة تعلم متوسطة في الرياضيات';
+                    recommendations = ['تقييم شامل من قبل أخصائي صعوبات التعلم', 'وضع برنامج تعليمي فردي مخصص', 'استخدام وسائل تعليمية ملموسة ومرئية', 'تدريب مكثف على المهارات الأساسية', 'تقليل المشتتات في البيئة التعليمية', 'متابعة أسبوعية للتقدم'];
+                } else {
+                    // 60 and above
+                    diagnosisLevel = 'صعوبة شديدة';
+                    levelClass = 'level-severe';
+                    diagnosis = 'يحتمل أن تكون لدى التلميذ صعوبة تعلم شديدة في الرياضيات';
+                    recommendations = [
+                        'تقييم تشخيصي شامل ومتعمق',
+                        'إحالة لأخصائي صعوبات التعلم فوراً',
+                        'وضع برنامج تدخل مكثف ومتخصص',
+                        'استخدام تقنيات تعليمية متقدمة ومساعدة',
+                        'تدريب يومي على المهارات الأساسية',
+                        'تعاون وثيق بين المدرسة والأسرة',
+                        'متابعة يومية للتقدم وتعديل الخطة حسب الحاجة'
+                    ];
+                }
+
+                // Display diagnosis level
+                const diagnosisElement = document.getElementById('diagnosisLevel');
+                diagnosisElement.className = 'diagnosis-level ' + levelClass;
+                diagnosisElement.textContent = diagnosisLevel;
+
+                // Display detailed diagnosis
+                displayDetailedDiagnosis(totalScore, percentage, diagnosis);
+
+                // Display recommendations
+                displayRecommendations(recommendations);
+            }
+
+            function displayStudentInfo() {
+                const studentInfo = {
+                    name: document.getElementById('studentName').value,
+                    gender: document.getElementById('studentGender').value,
+                    grade: document.getElementById('studentGrade').value,
+                    school: document.getElementById('studentSchool').value,
+                    evaluator: document.getElementById('evaluatorName').value,
+                    position: document.getElementById('evaluatorPosition').value,
+                    date: document.getElementById('evaluationDate').value
+                };
+
+                const infoDisplay = document.getElementById('studentInfoDisplay');
+                infoDisplay.innerHTML = `
+                <h3 style="color: #1877f2; margin-bottom: 15px;">بيانات التلميذ</h3>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                    <p><strong>اسم التلميذ:</strong> ${studentInfo.name}</p>
+                    <p><strong>الجنس:</strong> ${studentInfo.gender}</p>
+                    <p><strong>الصف:</strong> ${studentInfo.grade}</p>
+                    <p><strong>المدرسة:</strong> ${studentInfo.school}</p>
+                    <p><strong>القائم بالتقدير:</strong> ${studentInfo.evaluator}</p>
+                    <p><strong>الوظيفة:</strong> ${studentInfo.position}</p>
+                </div>
+                <p><strong>تاريخ التقدير:</strong> ${new Date(studentInfo.date).toLocaleDateString('ar-EG')}</p>
+            `;
+            }
+
+            function displayDetailedDiagnosis(totalScore, percentage, diagnosis) {
+                const detailedDiagnosis = document.getElementById('detailedDiagnosis');
+
+                // Analyze specific areas of difficulty
+                const areas = analyzeSpecificAreas();
+
+                detailedDiagnosis.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <h4 style="color: #1877f2;">النتيجة الكمية:</h4>
+                    <p><strong>الدرجة الخام:</strong> ${totalScore} من 80</p>
+                    <p><strong>النسبة المئوية:</strong> ${percentage.toFixed(1)}%</p>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <h4 style="color: #1877f2;">التشخيص:</h4>
+                    <p>${diagnosis}</p>
+                </div>
+
+                <div>
+                    <h4 style="color: #1877f2;">تحليل المجالات:</h4>
+                    ${areas}
+                </div>
+            `;
+            }
+
+            function analyzeSpecificAreas() {
+                // Group questions by difficulty areas
+                const areas = {
+                    'التمييز والإدراك الرقمي': [0, 3, 6, 18], // Questions about number recognition and place value
+                    'العمليات الحسابية الأساسية': [1, 2, 16, 19], // Basic operations
+                    'الفهم والذاكرة': [7, 8, 9], // Memory and understanding
+                    'حل المشكلات': [5, 10, 11, 12, 17], // Problem solving
+                    'المفاهيم المتقدمة': [4, 13, 14, 15] // Advanced concepts
+                };
+
+                let areaAnalysis = '';
+
+                Object.keys(areas).forEach((areaName) => {
+                    const questionIndices = areas[areaName];
+                    const areaScore = questionIndices.reduce((sum, index) => {
+                        return sum + (responses[index] || 0);
+                    }, 0);
+                    const maxAreaScore = questionIndices.length * 4;
+                    const areaPercentage = (areaScore / maxAreaScore) * 100;
+
+                    let areaLevel;
+                    if (areaScore < questionIndices.length * 1) areaLevel = 'عادي';
+                    else if (areaScore < questionIndices.length * 2) areaLevel = 'خفيف';
+                    else if (areaScore < questionIndices.length * 3) areaLevel = 'متوسط';
+                    else areaLevel = 'شديد';
+
+                    areaAnalysis += `
+                    <div style="background: #f8f9ff; padding: 10px; margin: 5px 0; border-radius: 8px; border-right: 3px solid #1877f2;">
+                        <strong>${areaName}:</strong> ${areaScore}/${maxAreaScore} (${areaPercentage.toFixed(1)}%) - ${areaLevel}
+                    </div>
+                `;
+                });
+
+                return areaAnalysis;
+            }
+
+            function displayRecommendations(recommendations) {
+                const recommendationsContent = document.getElementById('recommendationsContent');
+
+                let recommendationsList = '<ul>';
+                recommendations.forEach((recommendation) => {
+                    recommendationsList += `<li>${recommendation}</li>`;
+                });
+                recommendationsList += '</ul>';
+
+                recommendationsContent.innerHTML = recommendationsList;
+            }
+
+            function restartAssessment() {
+                // Reset all variables
+                currentPage = 1;
+                responses = {};
+
+                // Reset form
+                document.querySelectorAll('input, select').forEach((input) => {
+                    if (input.type === 'radio') {
+                        input.checked = false;
+                    } else if (input.type === 'date') {
+                        input.value = new Date().toISOString().split('T')[0];
+                    } else {
+                        input.value = '';
+                    }
+                });
+
+                // Reset UI
+                document.querySelectorAll('.page').forEach((page) => page.classList.remove('active'));
+                document.querySelector('.page-1').classList.add('active');
+
+                document.getElementById('finishAssessment').disabled = true;
+                updateProgress();
+            }
+
+            function printReport() {
+                // Hide navigation and buttons before printing
+                const elements = document.querySelectorAll('.navigation, .btn:not(.print-btn)');
+                elements.forEach((el) => (el.style.display = 'none'));
+
+                // Print
+                window.print();
+
+                // Show elements again after printing
+                setTimeout(() => {
+                    elements.forEach((el) => (el.style.display = ''));
+                }, 1000);
+            }
+
+            // Initialize when page loads
+            window.onload = init;
+        </script>
+    </body>
+</html>

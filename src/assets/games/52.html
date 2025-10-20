@@ -1,0 +1,986 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>استكشاف المعنى من السياق</title>
+        <style>
+            :root {
+                --purple: #6a00b6;
+                --purple-weak: #8e4bd6;
+                --yellow: #ffd93d;
+                --bg: #161024;
+                --card: #22173a;
+                --text: #fff;
+                --success: #4caf50;
+                --error: #f44336;
+            }
+
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, var(--bg) 0%, var(--purple) 100%);
+                color: var(--text);
+                min-height: 100vh;
+                font-size: 20px;
+                line-height: 1.6;
+                padding: 20px;
+            }
+
+            .container {
+                max-width: 900px;
+                margin: 0 auto;
+            }
+
+            .header {
+                text-align: center;
+                margin-bottom: 30px;
+            }
+
+            .header h1 {
+                font-size: 2.5em;
+                color: var(--yellow);
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+                margin-bottom: 15px;
+            }
+
+            .header p {
+                font-size: 1.2em;
+                color: var(--purple-weak);
+            }
+
+            .card {
+                background: var(--card);
+                border-radius: 15px;
+                padding: 30px;
+                margin: 20px 0;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+                border: 2px solid var(--purple-weak);
+            }
+
+            .level-selection {
+                text-align: center;
+            }
+
+            .level-btn {
+                background: var(--purple);
+                color: white;
+                border: none;
+                border-radius: 12px;
+                padding: 15px 30px;
+                margin: 10px;
+                font-size: 1.1em;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(106, 0, 182, 0.3);
+            }
+
+            .level-btn:hover {
+                background: var(--purple-weak);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(106, 0, 182, 0.4);
+            }
+
+            .start-btn {
+                background: var(--yellow);
+                color: #333;
+                border: none;
+                border-radius: 12px;
+                padding: 20px 40px;
+                font-size: 1.3em;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                margin-top: 20px;
+            }
+
+            .start-btn:hover {
+                background: #ffed4e;
+                transform: scale(1.05);
+            }
+
+            .game-area {
+                display: none;
+            }
+
+            .progress-bar {
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 10px;
+                height: 20px;
+                margin-bottom: 20px;
+                overflow: hidden;
+            }
+
+            .progress-fill {
+                background: linear-gradient(90deg, var(--purple), var(--yellow));
+                height: 100%;
+                border-radius: 10px;
+                transition: width 0.5s ease;
+            }
+
+            .passage-area {
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                padding: 25px;
+                margin: 20px 0;
+                font-size: 1.3em;
+                line-height: 1.8;
+                border-right: 4px solid var(--yellow);
+            }
+
+            .highlight-word {
+                background: var(--yellow);
+                color: #333;
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-weight: bold;
+            }
+
+            .highlight-cue {
+                background: var(--purple-weak);
+                color: white;
+                padding: 1px 3px;
+                border-radius: 3px;
+            }
+
+            .options-area {
+                display: grid;
+                gap: 15px;
+                margin: 25px 0;
+            }
+
+            .option-btn {
+                background: rgba(255, 255, 255, 0.1);
+                color: var(--text);
+                border: 2px solid var(--purple-weak);
+                border-radius: 12px;
+                padding: 20px;
+                font-size: 1.2em;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                text-align: center;
+            }
+
+            .option-btn:hover {
+                background: var(--purple-weak);
+                transform: scale(1.02);
+            }
+
+            .option-btn.selected {
+                background: var(--yellow);
+                color: #333;
+                border-color: var(--yellow);
+            }
+
+            .controls {
+                display: flex;
+                gap: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+                margin: 20px 0;
+            }
+
+            .control-btn {
+                background: rgba(255, 255, 255, 0.1);
+                color: var(--text);
+                border: 1px solid var(--purple-weak);
+                border-radius: 8px;
+                padding: 12px 20px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                font-size: 1em;
+            }
+
+            .control-btn:hover {
+                background: var(--purple-weak);
+            }
+
+            .check-btn {
+                background: var(--success);
+                color: white;
+                font-weight: bold;
+            }
+
+            .evidence-input {
+                background: rgba(255, 255, 255, 0.1);
+                color: var(--text);
+                border: 2px solid var(--purple-weak);
+                border-radius: 8px;
+                padding: 15px;
+                font-size: 1.1em;
+                width: 100%;
+                margin: 15px 0;
+            }
+
+            .evidence-input::placeholder {
+                color: rgba(255, 255, 255, 0.6);
+            }
+
+            .feedback {
+                margin: 20px 0;
+                padding: 20px;
+                border-radius: 10px;
+                text-align: center;
+                font-size: 1.2em;
+                min-height: 60px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .feedback.success {
+                background: rgba(76, 175, 80, 0.2);
+                border: 2px solid var(--success);
+            }
+
+            .feedback.error {
+                background: rgba(244, 67, 54, 0.2);
+                border: 2px solid var(--error);
+            }
+
+            .stats {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin: 20px 0;
+                font-size: 1.1em;
+            }
+
+            .score {
+                background: var(--purple);
+                padding: 10px 20px;
+                border-radius: 20px;
+            }
+
+            .footer {
+                text-align: center;
+                margin-top: 50px;
+                padding: 20px;
+                color: var(--purple-weak);
+                font-style: italic;
+            }
+
+            .glitter {
+                animation: glitterPulse 1.2s ease-in-out;
+            }
+
+            @keyframes glitterPulse {
+                0%,
+                100% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.05);
+                    filter: brightness(1.2);
+                }
+            }
+
+            .focus-mode body {
+                line-height: 2;
+                letter-spacing: 1px;
+            }
+
+            .focus-btn {
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                background: var(--yellow);
+                color: #333;
+                border: none;
+                border-radius: 50%;
+                width: 50px;
+                height: 50px;
+                cursor: pointer;
+                font-size: 1.5em;
+            }
+
+            @media (max-width: 768px) {
+                body {
+                    font-size: 18px;
+                    padding: 10px;
+                }
+
+                .controls {
+                    flex-direction: column;
+                }
+
+                .control-btn {
+                    width: 100%;
+                }
+            }
+
+            .hidden {
+                display: none !important;
+            }
+        </style>
+    </head>
+    <body>
+        <button class="focus-btn" onclick="toggleFocusMode()" title="وضع التركيز">👁️</button>
+
+        <div class="container">
+            <div class="header">
+                <h1>🔍 استكشاف المعنى من السياق</h1>
+                <p>تعلم معاني الكلمات من خلال فهم النص</p>
+            </div>
+
+            <div id="level-selection" class="card level-selection">
+                <h2>اختر المستوى:</h2>
+                <div>
+                    <button class="level-btn" data-level="1">
+                        🌟 المستوى الأول - سهل
+                        <br /><small>قرائن واضحة</small>
+                    </button>
+                    <button class="level-btn" data-level="2">
+                        ⭐ المستوى الثاني - متوسط
+                        <br /><small>قرائن غير مباشرة</small>
+                    </button>
+                    <button class="level-btn" data-level="3">
+                        🏆 المستوى الثالث - متقدم
+                        <br /><small>فقرات أطول + تبرير</small>
+                    </button>
+                </div>
+                <button id="start-btn" class="start-btn hidden">ابدأ اللعب 🚀</button>
+            </div>
+
+            <div id="game-area" class="game-area">
+                <div class="stats">
+                    <div class="score">النقاط: <span id="score">0</span></div>
+                    <div>السؤال <span id="current-q">1</span> من <span id="total-q">6</span></div>
+                </div>
+
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+                </div>
+
+                <div id="passage-area" class="passage-area card"></div>
+
+                <div id="options-area" class="options-area"></div>
+
+                <div id="evidence-area" class="hidden">
+                    <input type="text" id="evidence-input" class="evidence-input" placeholder="اكتب كلمتين دليل من الفقرة (اختياري)" />
+                </div>
+
+                <div class="controls">
+                    <button id="speak-btn" class="control-btn">🔊 اقرأ النص</button>
+                    <button id="hint-btn" class="control-btn">💡 تلميح</button>
+                    <button id="cues-btn" class="control-btn hidden">📍 أظهر الدليل</button>
+                    <button id="check-btn" class="control-btn check-btn">✅ تحقق</button>
+                </div>
+
+                <div id="feedback" class="feedback" role="status"></div>
+
+                <div class="controls">
+                    <button id="next-btn" class="control-btn hidden">➡️ التالي</button>
+                    <button id="restart-btn" class="control-btn">🔄 إعادة اللعب</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">صنع بحب من kidskills ❤️</div>
+
+        <script>
+            (function () {
+                'use strict';
+
+                // Game data
+                const LEVEL1 = [
+                    {
+                        word: 'خافت',
+                        passage: 'دخل الطفل إلى غرفة مظلمة تمامًا، أشعل مصباحًا صغيرًا فبدأ يرى الأشياء بوضوح تحت ضوئه الخافت.',
+                        options: ['قوي جدًا', 'ضعيف', 'ملوّن'],
+                        answerIndex: 1,
+                        hint: 'اقرأ كلمات: مظلمة، مصباح صغير… ماذا توحي؟',
+                        rationale: 'الظلام والمصباح الصغير يدلان على ضوء ضعيف.',
+                        emoji: '💡',
+                        difficulty: 1
+                    },
+                    {
+                        word: 'رطبة',
+                        passage: 'بعد المطر أصبحت الأرض رطبة وامتلأت البرك بالماء.',
+                        options: ['جافة', 'مبللة', 'حارة'],
+                        answerIndex: 1,
+                        hint: 'فكر في تأثير المطر على الأرض.',
+                        rationale: 'المطر يجعل الأرض مبللة ورطبة.',
+                        emoji: '🌧️',
+                        difficulty: 1
+                    },
+                    {
+                        word: 'ضخم',
+                        passage: 'حملنا صندوقًا صغيرًا، لكن الحوت ضخم جدًا مقارنة به.',
+                        options: ['نحيف', 'سريع', 'كبير جدًا'],
+                        answerIndex: 2,
+                        hint: 'قارن بين الصندوق الصغير والحوت.',
+                        rationale: 'المقارنة مع الصندوق الصغير تظهر أن الحوت كبير جدًا.',
+                        emoji: '🐋',
+                        difficulty: 1
+                    },
+                    {
+                        word: 'هش',
+                        passage: 'انكسر الغصن بسرعة لأنه هش.',
+                        options: ['قوي', 'سهل الكسر', 'طويل'],
+                        answerIndex: 1,
+                        hint: 'لماذا انكسر الغصن بسرعة؟',
+                        rationale: 'الشيء الذي ينكسر بسرعة يكون سهل الكسر وهشًا.',
+                        emoji: '🌿',
+                        difficulty: 1
+                    },
+                    {
+                        word: 'هادئ',
+                        passage: 'بعد أن نام الأطفال صار البيت هادئًا.',
+                        options: ['صاخب', 'بارد', 'غير مزعج'],
+                        answerIndex: 2,
+                        hint: 'ماذا يحدث للبيت عندما ينام الأطفال؟',
+                        rationale: 'عندما ينام الأطفال يصبح البيت هادئًا وغير مزعج.',
+                        emoji: '🤫',
+                        difficulty: 1
+                    },
+                    {
+                        word: 'لامع',
+                        passage: 'نظفت أمي المرآة حتى أصبحت لامعة تعكس وجهي بوضوح.',
+                        options: ['مكسورة', 'متسخة', 'براق'],
+                        answerIndex: 2,
+                        hint: 'ماذا يحدث للمرآة بعد التنظيف؟',
+                        rationale: 'التنظيف يجعل المرآة لامعة وبراقة تعكس الصورة بوضوح.',
+                        emoji: '✨',
+                        difficulty: 1
+                    },
+                    {
+                        word: 'ثقيل',
+                        passage: 'حاول الرجل رفع الحجر لكنه لم يستطع لأنه ثقيل جدًا.',
+                        options: ['خفيف', 'صعب الحمل', 'صغير'],
+                        answerIndex: 1,
+                        hint: 'لماذا لم يستطع الرجل رفع الحجر؟',
+                        rationale: 'عدم القدرة على رفع الحجر يدل على أنه ثقيل وصعب الحمل.',
+                        emoji: '🪨',
+                        difficulty: 1
+                    }
+                ];
+
+                const LEVEL2 = [
+                    {
+                        word: 'قاحل',
+                        passage: 'ساروا طويلاً في سهلٍ قاحل؛ لا أشجار ولا أنهار، والرياح تحمل غبارًا دقيقًا.',
+                        options: ['جاف جدًا', 'بارد', 'مظلم'],
+                        answerIndex: 0,
+                        hint: 'انظر إلى غياب الأشجار والأنهار والغبار.',
+                        rationale: 'غياب الأشجار والأنهار والغبار يدل على الجفاف الشديد.',
+                        emoji: '🏜️',
+                        difficulty: 2
+                    },
+                    {
+                        word: 'عتيق',
+                        passage: 'في المتحف شاهدنا كرسيًا عتيقًا يحمل آثار الزمن وزخارف قديمة.',
+                        options: ['حديث', 'قديم', 'متسخ'],
+                        answerIndex: 1,
+                        hint: 'فكر في المتحف وآثار الزمن والزخارف القديمة.',
+                        rationale: 'المتحف وآثار الزمن والزخارف القديمة تدل على القِدم.',
+                        emoji: '🪑',
+                        difficulty: 2
+                    },
+                    {
+                        word: 'نادرًا',
+                        passage: 'هو يحب كرة القدم لكنه نادرًا ما يلعب بسبب الدراسة.',
+                        options: ['دائمًا', 'قليلًا', 'بسرعة'],
+                        answerIndex: 1,
+                        hint: 'رغم حبه للكرة، لا يلعب كثيرًا بسبب الدراسة.',
+                        rationale: 'الدراسة تمنعه من اللعب كثيرًا، فيلعب قليلاً فقط.',
+                        emoji: '⚽',
+                        difficulty: 2
+                    },
+                    {
+                        word: 'مفيد',
+                        passage: 'قرأنا كتابًا مفيدًا؛ تعلّمنا منه طرق تنظيف البيئة.',
+                        options: ['ممتع فقط', 'ينفع ويُفيد', 'قصير'],
+                        answerIndex: 1,
+                        hint: 'ماذا حدث بعد قراءة الكتاب؟',
+                        rationale: 'التعلم من الكتاب يدل على أنه مفيد وينفع.',
+                        emoji: '📚',
+                        difficulty: 2
+                    },
+                    {
+                        word: 'رشيق',
+                        passage: 'يقفز الراقص خطوات خفيفة بحركة رشيقة.',
+                        options: ['ثقيلة', 'خفيفة جميلة', 'بطيئة'],
+                        answerIndex: 1,
+                        hint: 'انظر إلى وصف القفز والخطوات الخفيفة.',
+                        rationale: 'الخطوات الخفيفة والقفز يدلان على الرشاقة والحركة الجميلة.',
+                        emoji: '🩰',
+                        difficulty: 2
+                    },
+                    {
+                        word: 'عاصف',
+                        passage: 'أغلقنا النوافذ بسرعة عندما بدأ الطقس العاصف يهز الأشجار بقوة.',
+                        options: ['هادئ', 'مضطرب', 'بارد'],
+                        answerIndex: 1,
+                        hint: 'لماذا أُغلقت النوافذ؟ وماذا حدث للأشجار؟',
+                        rationale: 'هز الأشجار بقوة وإغلاق النوافذ يدل على الطقس المضطرب.',
+                        emoji: '💨',
+                        difficulty: 2
+                    },
+                    {
+                        word: 'وافر',
+                        passage: 'كان المحصول وافرًا هذا العام، ملأ المزارعون عشرات الأكياس بالقمح.',
+                        options: ['قليل', 'كثير', 'غالي'],
+                        answerIndex: 1,
+                        hint: 'انظر إلى عدد الأكياس التي ملأها المزارعون.',
+                        rationale: 'ملء عشرات الأكياس يدل على كثرة المحصول ووفرته.',
+                        emoji: '🌾',
+                        difficulty: 2
+                    }
+                ];
+
+                const LEVEL3 = [
+                    {
+                        word: 'متردّد',
+                        passage: 'نظر إلى الباب ثم إلى الساعة، تقدّم خطوة وتراجع، كان وجهه حائرًا؛ بدا مترددًا في الدخول.',
+                        options: ['غير حاسم', 'سريع', 'سعيد'],
+                        answerIndex: 0,
+                        hint: 'انظر إلى تصرفاته: النظر للساعة، التقدم والتراجع، الحيرة.',
+                        rationale: 'التقدم والتراجع والحيرة تدل على عدم الحسم والتردد.',
+                        emoji: '🤔',
+                        difficulty: 3
+                    },
+                    {
+                        word: 'شاحط',
+                        passage: 'سمع النداء فانطلق شاحطًا ليلحق بالحافلة قبل أن تغادر.',
+                        options: ['مسرع جدًا', 'متعب', 'خائف'],
+                        answerIndex: 0,
+                        hint: 'لماذا انطلق بهذه الطريقة؟ وماذا كان يحاول أن يفعل؟',
+                        rationale: 'الانطلاق للحاق بالحافلة يتطلب سرعة شديدة.',
+                        emoji: '🏃‍♂️',
+                        difficulty: 3
+                    },
+                    {
+                        word: 'مغمور',
+                        passage: 'زرعوا الشجرة قرب النهر، وبعد الفيضان صار الجذر مغمورًا بالماء.',
+                        options: ['مغطى', 'بعيد', 'مرتفع'],
+                        answerIndex: 0,
+                        hint: 'ماذا يحدث للأشياء القريبة من النهر عند الفيضان؟',
+                        rationale: 'الفيضان يغطي الأشياء القريبة من النهر بالماء.',
+                        emoji: '🌊',
+                        difficulty: 3
+                    },
+                    {
+                        word: 'متوهّج',
+                        passage: 'أضاءت الجمرات الصغيرة وجه المخيّم بضوء متوهّج.',
+                        options: ['ساطع', 'بارد', 'رطب'],
+                        answerIndex: 0,
+                        hint: 'كيف تضيء الجمرات؟ وما تأثيرها على الوجه؟',
+                        rationale: 'الجمرات تصدر ضوءًا ساطعًا ومتوهجًا يضيء المكان.',
+                        emoji: '🔥',
+                        difficulty: 3
+                    },
+                    {
+                        word: 'مهجور',
+                        passage: 'مررنا بقرية مهجورة، البيوت فارغة والحشائش تنمو في الشوارع، لا صوت إلا صوت الريح.',
+                        options: ['مليء بالناس', 'خالي من السكان', 'جديد'],
+                        answerIndex: 1,
+                        hint: 'انظر إلى وصف البيوت والشوارع والأصوات.',
+                        rationale: 'البيوت الفارغة والحشائش في الشوارع تدل على ترك المكان.',
+                        emoji: '🏚️',
+                        difficulty: 3
+                    },
+                    {
+                        word: 'مبهر',
+                        passage: 'صعدنا إلى قمة الجبل ورأينا منظرًا مبهرًا؛ السحب تحتنا والشمس تشرق من بعيد، فتحنا أفواهنا من الدهشة.',
+                        options: ['مملّ', 'رائع جدًا', 'مخيف'],
+                        answerIndex: 1,
+                        hint: 'كيف تفاعلوا مع المنظر؟ ماذا فعلوا من الدهشة؟',
+                        rationale: 'فتح الأفواه من الدهشة يدل على جمال المنظر الرائع.',
+                        emoji: '🏔️',
+                        difficulty: 3
+                    },
+                    {
+                        word: 'مكتئب',
+                        passage: 'جلس الطفل وحيدًا في الزاوية، رأسه منخفض وعيناه حزينتان، لم يلعب مع أصدقائه اليوم وبدا مكتئبًا.',
+                        options: ['سعيد', 'حزين جدًا', 'غاضب'],
+                        answerIndex: 1,
+                        hint: 'انظر إلى وضعية الجلوس وحالة العينين وعدم اللعب.',
+                        rationale: 'الجلوس وحيدًا والعيون الحزينة تدل على الاكتئاب الشديد.',
+                        emoji: '😢',
+                        difficulty: 3
+                    }
+                ];
+
+                // Game state
+                let currentLevel = 1;
+                let currentItems = [];
+                let currentItemIndex = 0;
+                let score = 0;
+                let selectedOption = -1;
+                let attempts = 0;
+                let audioContext;
+                let focusMode = false;
+
+                // DOM elements
+                const levelSelection = document.getElementById('level-selection');
+                const gameArea = document.getElementById('game-area');
+                const startBtn = document.getElementById('start-btn');
+                const passageArea = document.getElementById('passage-area');
+                const optionsArea = document.getElementById('options-area');
+                const evidenceArea = document.getElementById('evidence-area');
+                const evidenceInput = document.getElementById('evidence-input');
+                const feedback = document.getElementById('feedback');
+                const scoreEl = document.getElementById('score');
+                const currentQEl = document.getElementById('current-q');
+                const totalQEl = document.getElementById('total-q');
+                const progressFill = document.getElementById('progress-fill');
+
+                // Initialize audio context
+                function initAudio() {
+                    if (!audioContext) {
+                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    }
+                }
+
+                // Play buzzer sound
+                function playBuzzer() {
+                    initAudio();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.type = 'sawtooth';
+                    oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.35);
+
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.35);
+                }
+
+                // Play glitter sound
+                function playGlitter() {
+                    initAudio();
+                    const frequencies = [600, 800, 1000, 1200];
+
+                    frequencies.forEach((freq, index) => {
+                        setTimeout(() => {
+                            const oscillator = audioContext.createOscillator();
+                            const gainNode = audioContext.createGain();
+
+                            oscillator.connect(gainNode);
+                            gainNode.connect(audioContext.destination);
+
+                            oscillator.type = 'sine';
+                            oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+
+                            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.12);
+
+                            oscillator.start();
+                            oscillator.stop(audioContext.currentTime + 0.12);
+                        }, index * 120);
+                    });
+                }
+
+                // Speak passage using Speech Synthesis
+                function speakPassage() {
+                    if ('speechSynthesis' in window) {
+                        const utterance = new SpeechSynthesisUtterance(currentItems[currentItemIndex].passage);
+                        utterance.lang = 'ar-SA';
+                        utterance.rate = 0.8;
+                        utterance.pitch = 1.1;
+                        speechSynthesis.speak(utterance);
+                    }
+                }
+
+                // Toggle focus mode
+                function toggleFocusMode() {
+                    focusMode = !focusMode;
+                    document.body.classList.toggle('focus-mode', focusMode);
+                }
+
+                // Initialize game
+                function init() {
+                    // Level selection
+                    document.querySelectorAll('.level-btn').forEach((btn) => {
+                        btn.addEventListener('click', () => {
+                            document.querySelectorAll('.level-btn').forEach((b) => b.classList.remove('selected'));
+                            btn.classList.add('selected');
+                            currentLevel = parseInt(btn.dataset.level);
+                            startBtn.classList.remove('hidden');
+                        });
+                    });
+
+                    // Start button
+                    startBtn.addEventListener('click', startGame);
+
+                    // Control buttons
+                    document.getElementById('speak-btn').addEventListener('click', speakPassage);
+                    document.getElementById('hint-btn').addEventListener('click', showHint);
+                    document.getElementById('cues-btn').addEventListener('click', showCues);
+                    document.getElementById('check-btn').addEventListener('click', checkAnswer);
+                    document.getElementById('next-btn').addEventListener('click', nextItem);
+                    document.getElementById('restart-btn').addEventListener('click', restartGame);
+
+                    // Keyboard shortcuts
+                    document.addEventListener('keydown', (e) => {
+                        if (gameArea.style.display === 'block') {
+                            switch (e.key) {
+                                case 'Enter':
+                                    e.preventDefault();
+                                    checkAnswer();
+                                    break;
+                                case ' ':
+                                    e.preventDefault();
+                                    speakPassage();
+                                    break;
+                                case '1':
+                                    selectOption(0);
+                                    break;
+                                case '2':
+                                    selectOption(1);
+                                    break;
+                                case '3':
+                                    selectOption(2);
+                                    break;
+                            }
+                        }
+                    });
+                }
+
+                // Start game
+                function startGame() {
+                    const allItems = currentLevel === 1 ? LEVEL1 : currentLevel === 2 ? LEVEL2 : LEVEL3;
+
+                    // Shuffle and pick 6 items
+                    const shuffled = [...allItems].sort(() => Math.random() - 0.5);
+                    currentItems = shuffled.slice(0, 6);
+
+                    currentItemIndex = 0;
+                    score = 0;
+
+                    levelSelection.style.display = 'none';
+                    gameArea.style.display = 'block';
+
+                    updateStats();
+                    renderCurrentItem();
+                }
+
+                // Update stats display
+                function updateStats() {
+                    scoreEl.textContent = score;
+                    currentQEl.textContent = currentItemIndex + 1;
+                    totalQEl.textContent = currentItems.length;
+
+                    const progress = (currentItemIndex / currentItems.length) * 100;
+                    progressFill.style.width = progress + '%';
+                }
+
+                // Render current item
+                function renderCurrentItem() {
+                    const item = currentItems[currentItemIndex];
+                    attempts = 0;
+                    selectedOption = -1;
+
+                    // Render passage with highlighted word
+                    const passageWithHighlight = item.passage.replace(new RegExp(item.word, 'g'), `<span class="highlight-word">${item.word}</span>`);
+                    passageArea.innerHTML = `${item.emoji} ${passageWithHighlight}`;
+
+                    // Render options
+                    optionsArea.innerHTML = '';
+                    item.options.forEach((option, index) => {
+                        const btn = document.createElement('button');
+                        btn.className = 'option-btn';
+                        btn.textContent = option;
+                        btn.onclick = () => selectOption(index);
+                        optionsArea.appendChild(btn);
+                    });
+
+                    // Show evidence input for level 3
+                    if (currentLevel === 3) {
+                        evidenceArea.classList.remove('hidden');
+                        evidenceInput.value = '';
+                    } else {
+                        evidenceArea.classList.add('hidden');
+                    }
+
+                    // Reset UI state
+                    feedback.innerHTML = '';
+                    feedback.className = 'feedback';
+                    document.getElementById('cues-btn').classList.add('hidden');
+                    document.getElementById('next-btn').classList.add('hidden');
+
+                    updateStats();
+                }
+
+                // Select option
+                function selectOption(index) {
+                    selectedOption = index;
+                    document.querySelectorAll('.option-btn').forEach((btn, i) => {
+                        btn.classList.toggle('selected', i === index);
+                    });
+                }
+
+                // Show hint
+                function showHint() {
+                    const item = currentItems[currentItemIndex];
+                    feedback.innerHTML = `💡 ${item.hint}`;
+                    feedback.className = 'feedback';
+                }
+
+                // Show cues (highlight context clues)
+                function showCues() {
+                    const item = currentItems[currentItemIndex];
+                    let highlightedPassage = item.passage;
+
+                    // Simple cue detection based on common patterns
+                    const cuePatterns = [
+                        /مظلمة|صغير|قوي|ضعيف/g,
+                        /المطر|ماء|جاف|مبلل/g,
+                        /انكسر|بسرعة|قوي|ضعيف/g,
+                        /نام|هادئ|صاخب/g,
+                        /لا أشجار|لا أنهار|غبار/g,
+                        /آثار الزمن|قديم/g,
+                        /تعلمنا|نفع|فائدة/g,
+                        /خفيفة|قفز|رشاقة/g,
+                        /تقدم|تراجع|حائر/g,
+                        /انطلق|ليلحق|سرعة/g,
+                        /فارغة|حشائش|صمت/g
+                    ];
+
+                    cuePatterns.forEach((pattern) => {
+                        highlightedPassage = highlightedPassage.replace(pattern, (match) => `<span class="highlight-cue">${match}</span>`);
+                    });
+
+                    const wordHighlight = highlightedPassage.replace(new RegExp(item.word, 'g'), `<span class="highlight-word">${item.word}</span>`);
+
+                    passageArea.innerHTML = `${item.emoji} ${wordHighlight}`;
+                }
+
+                // Check answer
+                function checkAnswer() {
+                    if (selectedOption === -1) {
+                        feedback.innerHTML = '⚠️ اختر إجابة أولاً';
+                        feedback.className = 'feedback error';
+                        return;
+                    }
+
+                    const item = currentItems[currentItemIndex];
+                    attempts++;
+
+                    if (selectedOption === item.answerIndex) {
+                        // Correct answer
+                        if (attempts === 1) {
+                            score++;
+                        }
+
+                        playGlitter();
+                        passageArea.classList.add('glitter');
+
+                        feedback.innerHTML = `✅ ممتاز! ${item.rationale}`;
+                        feedback.className = 'feedback success';
+
+                        setTimeout(() => {
+                            passageArea.classList.remove('glitter');
+                            nextItem();
+                        }, 1200);
+                    } else {
+                        // Wrong answer
+                        playBuzzer();
+
+                        if (attempts === 1) {
+                            // First attempt - show hint and allow retry
+                            feedback.innerHTML = `❌ ${item.hint}`;
+                            feedback.className = 'feedback error';
+
+                            // Highlight the sentence containing the word
+                            const sentences = item.passage.split(/[.!?]/);
+                            const targetSentence = sentences.find((s) => s.includes(item.word));
+                            if (targetSentence) {
+                                const highlighted = item.passage.replace(targetSentence, `<span class="highlight-cue">${targetSentence}</span>`);
+                                const withWord = highlighted.replace(new RegExp(item.word, 'g'), `<span class="highlight-word">${item.word}</span>`);
+                                passageArea.innerHTML = `${item.emoji} ${withWord}`;
+                            }
+                        } else {
+                            // Second attempt - show answer and move on
+                            feedback.innerHTML = `❌ الإجابة الصحيحة: ${item.options[item.answerIndex]}. ${item.rationale}`;
+                            feedback.className = 'feedback error';
+
+                            // Show cues button for level 3
+                            if (currentLevel === 3) {
+                                document.getElementById('cues-btn').classList.remove('hidden');
+                            }
+
+                            setTimeout(() => {
+                                nextItem();
+                            }, 2500);
+                        }
+                    }
+                }
+
+                // Next item
+                function nextItem() {
+                    currentItemIndex++;
+
+                    if (currentItemIndex >= currentItems.length) {
+                        // Game finished
+                        showResults();
+                    } else {
+                        renderCurrentItem();
+                    }
+                }
+
+                // Show results
+                function showResults() {
+                    const percentage = Math.round((score / currentItems.length) * 100);
+                    let message = '';
+                    let emoji = '';
+
+                    if (percentage >= 90) {
+                        message = 'ممتاز جداً! أنت بطل في فهم النصوص!';
+                        emoji = '🏆';
+                    } else if (percentage >= 75) {
+                        message = 'أحسنت! أداء رائع!';
+                        emoji = '⭐';
+                    } else if (percentage >= 60) {
+                        message = 'جيد! يمكنك التحسن أكثر!';
+                        emoji = '👍';
+                    } else {
+                        message = 'حاول مرة أخرى! ستتحسن مع التدريب!';
+                        emoji = '💪';
+                    }
+
+                    feedback.innerHTML = `
+                    ${emoji} انتهت اللعبة!<br>
+                    النتيجة: ${score} من ${currentItems.length} (${percentage}%)<br>
+                    ${message}
+                `;
+                    feedback.className = 'feedback success';
+
+                    document.getElementById('next-btn').classList.add('hidden');
+                    document.getElementById('restart-btn').textContent = '🎮 العب مرة أخرى';
+                }
+
+                // Restart game
+                function restartGame() {
+                    levelSelection.style.display = 'block';
+                    gameArea.style.display = 'none';
+                    document.getElementById('restart-btn').textContent = '🔄 إعادة اللعب';
+
+                    // Reset level selection
+                    document.querySelectorAll('.level-btn').forEach((btn) => btn.classList.remove('selected'));
+                    startBtn.classList.add('hidden');
+
+                    // Reset progress
+                    progressFill.style.width = '0%';
+                }
+
+                // Make functions global for HTML onclick
+                window.toggleFocusMode = toggleFocusMode;
+
+                // Initialize when page loads
+                document.addEventListener('DOMContentLoaded', init);
+            })();
+        </script>
+    </body>
+</html>

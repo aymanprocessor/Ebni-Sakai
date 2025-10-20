@@ -1,0 +1,140 @@
+<app-landing-header></app-landing-header>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-container">
+        <div class="hero-content">
+            <p-tag [value]="'pages.home.hero.badge' | translate" severity="success" class="hero-tag"></p-tag>
+            <h1 class="hero-title">
+                {{ 'pages.home.hero.titlePart1' | translate }}
+                <span class="gradient-text">{{ 'pages.home.hero.titlePart2' | translate }}</span>
+            </h1>
+            <p class="hero-description">
+                {{ 'pages.home.hero.description' | translate }}
+            </p>
+            <div class="hero-actions">
+                <button pButton [label]="'pages.home.hero.startTrial' | translate" icon="pi pi-arrow-right" iconPos="right" class="p-button-lg p-button-rounded btn-primary" routerLink="/auth/register"></button>
+                <button pButton [label]="'pages.home.hero.watchDemo' | translate" icon="pi pi-play" class="p-button-lg p-button-rounded p-button-outlined btn-secondary"></button>
+            </div>
+            <div class="hero-trust">
+                <div class="trust-badges">
+                    <span class="trust-item"><i class="pi pi-verified"></i> {{ 'pages.home.hero.trust.evidenceBased' | translate }}</span>
+                    <span class="trust-item"><i class="pi pi-shield"></i> {{ 'pages.home.hero.trust.safeSecure' | translate }}</span>
+                    <span class="trust-item"><i class="pi pi-heart"></i> {{ 'pages.home.hero.trust.madeInEgypt' | translate }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="hero-image">
+            <div class="floating-card card-1">
+                <i class="pi pi-star"></i>
+                <span>{{ 'pages.home.hero.floatingCards.interactiveLearning' | translate }}</span>
+            </div>
+            <div class="floating-card card-2">
+                <i class="pi pi-chart-line"></i>
+                <span>{{ 'pages.home.hero.floatingCards.trackProgress' | translate }}</span>
+            </div>
+            <div class="floating-card card-3">
+                <i class="pi pi-users"></i>
+                <span>{{ 'pages.home.hero.floatingCards.expertSupport' | translate }}</span>
+            </div>
+            <div class="hero-illustration">
+                <i class="pi pi-book hero-icon"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats-section">
+    <div class="stats-container">
+        <div class="stat-item" *ngFor="let stat of stats">
+            <h3 class="stat-value">{{ stat.value }}</h3>
+            <p class="stat-label">{{ stat.labelKey | translate }}</p>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="section-container">
+        <div class="section-header">
+            <p-tag [value]="'pages.home.sections.features.badge' | translate" severity="info"></p-tag>
+            <h2 class="section-title">{{ 'pages.home.sections.features.title' | translate }}</h2>
+            <p class="section-description">{{ 'pages.home.sections.features.description' | translate }}</p>
+        </div>
+        <div class="features-grid">
+            <p-card *ngFor="let feature of features" class="feature-card">
+                <div class="feature-icon" [style.background]="feature.color">
+                    <i class="pi" [ngClass]="feature.icon"></i>
+                </div>
+                <h3 class="feature-title">{{ feature.titleKey | translate }}</h3>
+                <p class="feature-description">{{ feature.descriptionKey | translate }}</p>
+            </p-card>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="how-it-works-section">
+    <div class="section-container">
+        <div class="section-header">
+            <p-tag [value]="'pages.home.sections.howItWorks.badge' | translate" severity="warning"></p-tag>
+            <h2 class="section-title">{{ 'pages.home.sections.howItWorks.title' | translate }}</h2>
+        </div>
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>{{ 'pages.home.sections.howItWorks.step1.title' | translate }}</h3>
+                    <p>{{ 'pages.home.sections.howItWorks.step1.description' | translate }}</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>{{ 'pages.home.sections.howItWorks.step2.title' | translate }}</h3>
+                    <p>{{ 'pages.home.sections.howItWorks.step2.description' | translate }}</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>{{ 'pages.home.sections.howItWorks.step3.title' | translate }}</h3>
+                    <p>{{ 'pages.home.sections.howItWorks.step3.description' | translate }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="benefits-section">
+    <div class="section-container">
+        <div class="section-header">
+            <p-tag [value]="'pages.home.sections.benefits.badge' | translate" severity="success"></p-tag>
+            <h2 class="section-title">{{ 'pages.home.sections.benefits.title' | translate }}</h2>
+        </div>
+        <div class="benefits-grid">
+            <div class="benefit-card" *ngFor="let benefit of benefits">
+                <i class="pi benefit-icon" [ngClass]="benefit.icon"></i>
+                <h3 class="benefit-title">{{ benefit.titleKey | translate }}</h3>
+                <p class="benefit-description">{{ benefit.descriptionKey | translate }}</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="cta-container">
+        <h2 class="cta-title">{{ 'pages.home.cta.title' | translate }}</h2>
+        <p class="cta-description">{{ 'pages.home.cta.description' | translate }}</p>
+        <div class="cta-actions">
+            <button pButton [label]="'pages.home.cta.startTrial' | translate" icon="pi pi-arrow-right" iconPos="right" class="p-button-lg p-button-rounded btn-cta" routerLink="/auth/register"></button>
+            <button pButton [label]="'pages.home.cta.contactUs' | translate" icon="pi pi-envelope" class="p-button-lg p-button-rounded p-button-outlined btn-cta-outline"></button>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<app-landing-footer></app-landing-footer>

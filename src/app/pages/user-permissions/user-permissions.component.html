@@ -1,0 +1,139 @@
+<div class="user-permissions-container p-4">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="mb-6">
+            <h1 class="text-4xl font-bold text-gray-800 dark:text-white mb-2">صلاحيات المستخدمين</h1>
+            <p class="text-lg text-gray-600 dark:text-gray-300">تحكم في صلاحيات الوصول للألعاب والمقاييس لكل مستخدم على حدة</p>
+        </div>
+
+        <!-- User Selector -->
+        <p-card styleClass="mb-6">
+            <div class="flex flex-col gap-4">
+                <div class="flex-1">
+                    <label class="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2"> اختر المستخدم </label>
+                    <p-autoComplete
+                        [(ngModel)]="selectedUser"
+                        [suggestions]="filteredUsers"
+                        (completeMethod)="searchUsers($event)"
+                        (onSelect)="onUserSelect($event)"
+                        [field]="'email'"
+                        placeholder="ابحث بالاسم أو البريد الإلكتروني"
+                        [dropdown]="true"
+                        styleClass="w-full"
+                    >
+                        <ng-template let-user pTemplate="item">
+                            <div class="flex items-center gap-3 p-2">
+                                <div>
+                                    <div class="font-semibold">{{ user.firstName }} {{ user.lastName }}</div>
+                                    <div class="text-sm text-gray-600">{{ user.email }}</div>
+                                    <div class="text-xs text-blue-600">
+                                        <span class="px-2 py-1 bg-blue-100 rounded">{{ user.role }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-template>
+                    </p-autoComplete>
+                </div>
+
+                <!-- User Info Display -->
+                <div *ngIf="selectedUser" class="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800 dark:text-white">{{ selectedUser.firstName }} {{ selectedUser.lastName }}</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ selectedUser.email }}</p>
+                            <div class="mt-2">
+                                <span class="px-3 py-1 bg-blue-600 text-white rounded-full text-sm">{{ getUserRoleBadge() }}</span>
+                                <span *ngIf="hasCustomPermissions()" class="mr-2 px-3 py-1 bg-green-600 text-white rounded-full text-sm"> <i class="pi pi-check-circle"></i> صلاحيات مخصصة </span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button pButton pRipple label="مسح الصلاحيات" icon="pi pi-times" class="p-button-danger p-button-outlined" (click)="clearUserPermissions()"></button>
+                            <button pButton pRipple label="حفظ" icon="pi pi-save" class="p-button-success" (click)="savePermissions()" [disabled]="loading"></button>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-sm text-gray-700 dark:text-gray-300">
+                        {{ getPermissionStats() }}
+                    </div>
+                    <!-- Expiry controls -->
+                    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">تاريخ انتهاء صلاحية ألعاب المستخدم</label>
+                            <p-calendar [(ngModel)]="userGameAccessExpires" dateFormat="yy-mm-dd" appendTo="body" inputId="gameExp"></p-calendar>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">تاريخ انتهاء صلاحية المقاييس</label>
+                            <p-calendar [(ngModel)]="userScaleAccessExpires" dateFormat="yy-mm-dd" appendTo="body" inputId="scaleExp"></p-calendar>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </p-card>
+
+        <!-- Permissions Editor (only shown when user is selected) -->
+        <div *ngIf="selectedUser">
+            <p-tabView>
+                <!-- Games Tab -->
+                <p-tabPanel header="الألعاب (Games)">
+                    <p-card>
+                        <div class="mb-4 flex items-center gap-3 border-b pb-4">
+                            <p-checkbox [(ngModel)]="selectAllGames" [binary]="true" (ngModelChange)="toggleAllGames($event)" inputId="selectAllGames"> </p-checkbox>
+                            <label for="selectAllGames" class="text-lg font-bold cursor-pointer"> تحديد الكل / إلغاء الكل </label>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            <div *ngFor="let game of games" class="flex items-start gap-3 p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                <p-checkbox [binary]="true" [ngModel]="isGameChecked(game.id)" (ngModelChange)="onGameCheckboxChange(game.id, $event)" [inputId]="'game-' + game.id"> </p-checkbox>
+                                <label [for]="'game-' + game.id" class="cursor-pointer flex-1">
+                                    <span class="font-semibold text-purple-600 dark:text-purple-400">#{{ game.id }}</span>
+                                    <span class="text-sm text-gray-700 dark:text-gray-300 mr-2">{{ game.title }}</span>
+                                </label>
+                            </div>
+                        </div>
+                    </p-card>
+                </p-tabPanel>
+
+                <!-- Scales Tab -->
+                <p-tabPanel header="المقاييس (Scales)">
+                    <p-card>
+                        <div class="mb-4 flex items-center gap-3 border-b pb-4">
+                            <p-checkbox [(ngModel)]="selectAllScales" [binary]="true" (ngModelChange)="toggleAllScales($event)" inputId="selectAllScales"> </p-checkbox>
+                            <label for="selectAllScales" class="text-lg font-bold cursor-pointer"> تحديد الكل / إلغاء الكل </label>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div *ngFor="let scale of scales" class="flex items-start gap-3 p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                <p-checkbox [binary]="true" [ngModel]="isScaleChecked(scale.id)" (ngModelChange)="onScaleCheckboxChange(scale.id, $event)" [inputId]="'scale-' + scale.id"> </p-checkbox>
+                                <label [for]="'scale-' + scale.id" class="cursor-pointer flex-1">
+                                    <span class="font-semibold text-blue-600 dark:text-blue-400">#{{ scale.id }}</span>
+                                    <span class="text-base text-gray-700 dark:text-gray-300 mr-2">{{ scale.title }}</span>
+                                </label>
+                            </div>
+                        </div>
+                    </p-card>
+                </p-tabPanel>
+            </p-tabView>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="!selectedUser" class="text-center py-12">
+            <i class="pi pi-users text-6xl text-gray-400 mb-4"></i>
+            <p class="text-xl text-gray-600 dark:text-gray-400">اختر مستخدماً لإدارة صلاحياته</p>
+        </div>
+
+        <!-- Info Box -->
+        <p-card styleClass="mt-6 bg-yellow-50 dark:bg-yellow-900">
+            <div class="flex gap-3">
+                <i class="pi pi-info-circle text-yellow-600 dark:text-yellow-400 text-2xl"></i>
+                <div>
+                    <h3 class="font-bold text-gray-800 dark:text-white mb-2">ملاحظات هامة:</h3>
+                    <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1">
+                        <li>الصلاحيات المخصصة للمستخدم <strong>تتجاوز</strong> صلاحيات الدور الافتراضية</li>
+                        <li>إذا لم يتم تعيين صلاحيات مخصصة، سيستخدم المستخدم صلاحيات دوره</li>
+                        <li>المستخدمون المشتركون (<strong>Paid</strong>) لديهم وصول كامل بشكل افتراضي</li>
+                        <li>لإزالة الصلاحيات المخصصة، اضغط "مسح الصلاحيات" ثم "حفظ"</li>
+                    </ul>
+                </div>
+            </div>
+        </p-card>
+    </div>
+</div>

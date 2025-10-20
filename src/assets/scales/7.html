@@ -1,0 +1,1218 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>مقياس التقدير التشخيصي لصعوبات السلوك الاجتماعي والانفعالي</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                padding: 20px;
+                direction: rtl;
+            }
+
+            .container {
+                max-width: 900px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                overflow: hidden;
+            }
+
+            .header {
+                background: linear-gradient(135deg, #1877f2 0%, #0d5dbf 100%);
+                color: white;
+                padding: 30px;
+                text-align: center;
+            }
+
+            .header h1 {
+                font-size: 28px;
+                margin-bottom: 10px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            }
+
+            .header p {
+                font-size: 16px;
+                opacity: 0.95;
+            }
+
+            .page {
+                display: none;
+                padding: 40px;
+                animation: fadeIn 0.5s;
+            }
+
+            .page.active {
+                display: block;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .welcome-content {
+                text-align: center;
+                padding: 40px 20px;
+            }
+
+            .welcome-icon {
+                font-size: 80px;
+                margin-bottom: 20px;
+                animation: bounce 2s infinite;
+            }
+
+            @keyframes bounce {
+                0%,
+                100% {
+                    transform: translateY(0);
+                }
+                50% {
+                    transform: translateY(-20px);
+                }
+            }
+
+            .welcome-content h2 {
+                color: #1877f2;
+                font-size: 32px;
+                margin-bottom: 20px;
+            }
+
+            .welcome-content p {
+                color: #666;
+                font-size: 18px;
+                line-height: 1.8;
+                margin-bottom: 15px;
+            }
+
+            .instructions-box {
+                background: #f0f8ff;
+                border-right: 4px solid #1877f2;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 10px;
+            }
+
+            .instructions-box h3 {
+                color: #1877f2;
+                margin-bottom: 15px;
+                font-size: 20px;
+            }
+
+            .instructions-box ul {
+                list-style: none;
+                padding-right: 0;
+            }
+
+            .instructions-box li {
+                padding: 10px 0;
+                border-bottom: 1px solid #e0e0e0;
+                color: #444;
+                line-height: 1.6;
+            }
+
+            .instructions-box li:last-child {
+                border-bottom: none;
+            }
+
+            .rating-scale {
+                background: #fff9e6;
+                padding: 20px;
+                border-radius: 10px;
+                margin: 20px 0;
+                border: 2px solid #ffd700;
+            }
+
+            .rating-scale h4 {
+                color: #d4a000;
+                margin-bottom: 15px;
+                text-align: center;
+            }
+
+            .rating-item {
+                display: flex;
+                justify-content: space-between;
+                padding: 8px;
+                margin: 5px 0;
+                background: white;
+                border-radius: 5px;
+            }
+
+            .form-group {
+                margin-bottom: 20px;
+            }
+
+            .form-group label {
+                display: block;
+                margin-bottom: 8px;
+                color: #333;
+                font-weight: bold;
+                font-size: 16px;
+            }
+
+            .form-group input,
+            .form-group select {
+                width: 100%;
+                padding: 12px;
+                border: 2px solid #e0e0e0;
+                border-radius: 8px;
+                font-size: 16px;
+                transition: border-color 0.3s;
+            }
+
+            .form-group input:focus,
+            .form-group select:focus {
+                outline: none;
+                border-color: #1877f2;
+            }
+
+            .form-row {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+
+            .question-section {
+                margin-bottom: 30px;
+            }
+
+            .section-title {
+                background: linear-gradient(135deg, #1877f2 0%, #0d5dbf 100%);
+                color: white;
+                padding: 15px 20px;
+                border-radius: 10px;
+                margin-bottom: 20px;
+                font-size: 20px;
+                text-align: center;
+                box-shadow: 0 4px 15px rgba(24, 119, 242, 0.3);
+            }
+
+            .question-item {
+                background: #f8f9fa;
+                padding: 20px;
+                margin-bottom: 15px;
+                border-radius: 10px;
+                border-right: 4px solid #1877f2;
+                transition:
+                    transform 0.3s,
+                    box-shadow 0.3s;
+            }
+
+            .question-item:hover {
+                transform: translateX(-5px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .question-text {
+                color: #333;
+                font-size: 16px;
+                margin-bottom: 15px;
+                font-weight: 500;
+            }
+
+            .question-number {
+                display: inline-block;
+                background: #1877f2;
+                color: white;
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                text-align: center;
+                line-height: 30px;
+                margin-left: 10px;
+                font-weight: bold;
+            }
+
+            .rating-options {
+                display: flex;
+                justify-content: space-between;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+
+            .rating-option {
+                flex: 1;
+                min-width: 80px;
+            }
+
+            .rating-option input[type='radio'] {
+                display: none;
+            }
+
+            .rating-option label {
+                display: block;
+                padding: 12px;
+                background: white;
+                border: 2px solid #e0e0e0;
+                border-radius: 8px;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.3s;
+                font-size: 14px;
+                font-weight: normal;
+            }
+
+            .rating-option input[type='radio']:checked + label {
+                background: #1877f2;
+                color: white;
+                border-color: #1877f2;
+                transform: scale(1.05);
+            }
+
+            .rating-option label:hover {
+                border-color: #1877f2;
+                transform: translateY(-2px);
+            }
+
+            .navigation {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 30px;
+                gap: 15px;
+            }
+
+            .btn {
+                padding: 15px 40px;
+                font-size: 18px;
+                border: none;
+                border-radius: 10px;
+                cursor: pointer;
+                transition: all 0.3s;
+                font-weight: bold;
+                flex: 1;
+            }
+
+            .btn-primary {
+                background: linear-gradient(135deg, #1877f2 0%, #0d5dbf 100%);
+                color: white;
+            }
+
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 20px rgba(24, 119, 242, 0.4);
+            }
+
+            .btn-secondary {
+                background: #6c757d;
+                color: white;
+            }
+
+            .btn-secondary:hover {
+                background: #5a6268;
+                transform: translateY(-2px);
+            }
+
+            .btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            .progress-bar {
+                height: 8px;
+                background: #e0e0e0;
+                border-radius: 10px;
+                overflow: hidden;
+                margin-bottom: 20px;
+            }
+
+            .progress-fill {
+                height: 100%;
+                background: linear-gradient(90deg, #1877f2 0%, #764ba2 100%);
+                transition: width 0.3s;
+            }
+
+            .progress-text {
+                text-align: center;
+                color: #666;
+                margin-bottom: 10px;
+                font-size: 14px;
+            }
+
+            .results-container {
+                padding: 20px;
+            }
+
+            .result-card {
+                background: white;
+                border-radius: 15px;
+                padding: 25px;
+                margin-bottom: 20px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .result-header {
+                background: linear-gradient(135deg, #1877f2 0%, #0d5dbf 100%);
+                color: white;
+                padding: 20px;
+                border-radius: 10px;
+                margin-bottom: 25px;
+                text-align: center;
+            }
+
+            .result-header h2 {
+                font-size: 26px;
+                margin-bottom: 10px;
+            }
+
+            .student-info {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 10px;
+                margin-bottom: 25px;
+            }
+
+            .info-item {
+                padding: 10px;
+            }
+
+            .info-label {
+                color: #666;
+                font-size: 14px;
+                margin-bottom: 5px;
+            }
+
+            .info-value {
+                color: #333;
+                font-size: 16px;
+                font-weight: bold;
+            }
+
+            .scores-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 20px 0;
+            }
+
+            .scores-table th {
+                background: #1877f2;
+                color: white;
+                padding: 15px;
+                text-align: center;
+                font-size: 14px;
+            }
+
+            .scores-table td {
+                padding: 12px;
+                text-align: center;
+                border-bottom: 1px solid #e0e0e0;
+            }
+
+            .scores-table tr:hover {
+                background: #f8f9fa;
+            }
+
+            .severity-badge {
+                display: inline-block;
+                padding: 6px 15px;
+                border-radius: 20px;
+                font-size: 13px;
+                font-weight: bold;
+            }
+
+            .severity-none {
+                background: #d4edda;
+                color: #155724;
+            }
+
+            .severity-mild {
+                background: #fff3cd;
+                color: #856404;
+            }
+
+            .severity-moderate {
+                background: #ffeaa7;
+                color: #d63031;
+            }
+
+            .severity-severe {
+                background: #f8d7da;
+                color: #721c24;
+            }
+
+            .diagnosis-box {
+                background: #e8f4fd;
+                border-right: 4px solid #1877f2;
+                padding: 20px;
+                border-radius: 10px;
+                margin: 20px 0;
+            }
+
+            .diagnosis-box h3 {
+                color: #1877f2;
+                margin-bottom: 15px;
+            }
+
+            .recommendations {
+                background: #f0f8ff;
+                padding: 20px;
+                border-radius: 10px;
+                margin-top: 20px;
+            }
+
+            .recommendations h3 {
+                color: #1877f2;
+                margin-bottom: 15px;
+            }
+
+            .recommendations ul {
+                list-style: none;
+                padding-right: 0;
+            }
+
+            .recommendations li {
+                padding: 10px;
+                margin: 8px 0;
+                background: white;
+                border-radius: 8px;
+                border-right: 3px solid #1877f2;
+            }
+
+            .btn-print {
+                background: linear-gradient(135deg, #10ac84 0%, #0d8a6a 100%);
+                color: white;
+                width: 100%;
+                margin-top: 20px;
+                padding: 18px;
+                font-size: 20px;
+            }
+
+            .btn-print:hover {
+                box-shadow: 0 5px 20px rgba(16, 172, 132, 0.4);
+            }
+
+            @media print {
+                body {
+                    background: white;
+                    padding: 0;
+                }
+                .container {
+                    box-shadow: none;
+                    max-width: 100%;
+                }
+                .header,
+                .navigation,
+                .btn-print,
+                .progress-bar,
+                .progress-text {
+                    display: none;
+                }
+                .page {
+                    display: block;
+                    page-break-after: always;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .form-row {
+                    grid-template-columns: 1fr;
+                }
+                .rating-options {
+                    flex-direction: column;
+                }
+                .student-info {
+                    grid-template-columns: 1fr;
+                }
+                .navigation {
+                    flex-direction: column;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🎯 مقياس التقدير التشخيصي</h1>
+                <p>لصعوبات السلوك الاجتماعي والانفعالي</p>
+            </div>
+
+            <!-- صفحة 1: الترحيب -->
+            <div class="page active" id="page1">
+                <div class="welcome-content">
+                    <div class="welcome-icon">📋</div>
+                    <h2>مرحباً بك في المقياس التشخيصي</h2>
+                    <p>هذا المقياس مصمم للكشف عن التلاميذ ذوي صعوبات السلوك الاجتماعي والانفعالي</p>
+                    <p>يتكون المقياس من 80 سؤالاً موزعة على 8 مجالات سلوكية</p>
+                    <p>يستغرق التقييم من 15-20 دقيقة تقريباً</p>
+                    <div class="instructions-box" style="margin-top: 40px">
+                        <h3>⚠️ ملاحظات هامة:</h3>
+                        <ul>
+                            <li>✓ يُرجى قراءة كل فقرة بعناية قبل التقييم</li>
+                            <li>✓ يجب أن تكون لديك معرفة جيدة بالطفل موضوع التقييم</li>
+                            <li>✓ التقييم يعتمد على ملاحظاتك المتكررة للطفل</li>
+                            <li>✓ لا تستمر في التقييم لأكثر من 6 تلاميذ في الجلسة الواحدة</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="navigation">
+                    <button class="btn btn-primary" onclick="nextPage()">ابدأ التقييم ←</button>
+                </div>
+            </div>
+
+            <!-- صفحة 2: الإرشادات والبيانات -->
+            <div class="page" id="page2">
+                <h2 style="color: #1877f2; margin-bottom: 20px">التعليمات وبيانات الطفل</h2>
+
+                <div class="instructions-box">
+                    <h3>📝 تعليمات التقييم:</h3>
+                    <ul>
+                        <li><strong>دائماً (4):</strong> عندما يظهر التلميذ هذا السلوك بشكل دائم ومستمر</li>
+                        <li><strong>غالباً (3):</strong> عندما يظهر هذا السلوك بدرجة عالية من التكرار</li>
+                        <li><strong>أحياناً (2):</strong> عندما يظهر هذا السلوك بشكل متقطع</li>
+                        <li><strong>نادراً (1):</strong> عندما يظهر هذا السلوك بشكل نادر جداً</li>
+                        <li><strong>لا تنطبق (0):</strong> عندما لا ينطبق هذا السلوك على التلميذ إطلاقاً</li>
+                    </ul>
+                </div>
+
+                <div class="rating-scale">
+                    <h4>مقياس التقدير الخماسي</h4>
+                    <div class="rating-item">
+                        <span><strong>دائماً</strong> = 4 درجات</span>
+                        <span><strong>غالباً</strong> = 3 درجات</span>
+                        <span><strong>أحياناً</strong> = 2 درجتان</span>
+                        <span><strong>نادراً</strong> = درجة واحدة</span>
+                        <span><strong>لا تنطبق</strong> = صفر</span>
+                    </div>
+                </div>
+
+                <h3 style="color: #1877f2; margin: 30px 0 20px">معلومات الطفل:</h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>اسم الطفل: *</label>
+                        <input type="text" id="studentName" required />
+                    </div>
+                    <div class="form-group">
+                        <label>الجنس: *</label>
+                        <select id="studentGender" required>
+                            <option value="">اختر...</option>
+                            <option value="ذكر">ذكر</option>
+                            <option value="أنثى">أنثى</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>تاريخ الميلاد: *</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px">
+                        <select id="birthDay" required>
+                            <option value="">اليوم</option>
+                        </select>
+                        <select id="birthMonth" required>
+                            <option value="">الشهر</option>
+                            <option value="1">يناير</option>
+                            <option value="2">فبراير</option>
+                            <option value="3">مارس</option>
+                            <option value="4">أبريل</option>
+                            <option value="5">مايو</option>
+                            <option value="6">يونيو</option>
+                            <option value="7">يوليو</option>
+                            <option value="8">أغسطس</option>
+                            <option value="9">سبتمبر</option>
+                            <option value="10">أكتوبر</option>
+                            <option value="11">نوفمبر</option>
+                            <option value="12">ديسمبر</option>
+                        </select>
+                        <select id="birthYear" required>
+                            <option value="">السنة</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>العمر:</label>
+                    <input type="text" id="studentAge" readonly placeholder="يحسب تلقائياً" style="background: #f0f8ff; font-weight: bold; color: #1877f2" />
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>الصف الدراسي: *</label>
+                        <input type="text" id="studentGrade" required />
+                    </div>
+                    <div class="form-group">
+                        <label>المدرسة: *</label>
+                        <input type="text" id="schoolName" required />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>اسم القائم بالتقييم: *</label>
+                        <input type="text" id="assessorName" required />
+                    </div>
+                    <div class="form-group">
+                        <label>الوظيفة: *</label>
+                        <input type="text" id="assessorPosition" required />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>تاريخ التقييم: *</label>
+                    <input type="date" id="assessmentDate" required />
+                </div>
+
+                <div class="navigation">
+                    <button class="btn btn-secondary" onclick="prevPage()">→ السابق</button>
+                    <button class="btn btn-primary" onclick="validateAndNext()">التالي ←</button>
+                </div>
+            </div>
+
+            <!-- صفحة 3: الأسئلة 1-20 -->
+            <div class="page" id="page3">
+                <div class="progress-text">صفحة 1 من 4 - الأسئلة (1-20)</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 25%"></div>
+                </div>
+
+                <div class="question-section">
+                    <div class="section-title">الإفراط في النشاط (1-10)</div>
+                    <div id="questions1-10"></div>
+                </div>
+
+                <div class="question-section">
+                    <div class="section-title">التشتت أو اللا انتباهية (11-20)</div>
+                    <div id="questions11-20"></div>
+                </div>
+
+                <div class="navigation">
+                    <button class="btn btn-secondary" onclick="prevPage()">→ السابق</button>
+                    <button class="btn btn-primary" onclick="nextPage()">التالي ←</button>
+                </div>
+            </div>
+
+            <!-- صفحة 4: الأسئلة 21-40 -->
+            <div class="page" id="page4">
+                <div class="progress-text">صفحة 2 من 4 - الأسئلة (21-40)</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 50%"></div>
+                </div>
+
+                <div class="question-section">
+                    <div class="section-title">انخفاض أو ضعف مفهوم الذات (21-30)</div>
+                    <div id="questions21-30"></div>
+                </div>
+
+                <div class="question-section">
+                    <div class="section-title">قصور المهارات الاجتماعية (31-40)</div>
+                    <div id="questions31-40"></div>
+                </div>
+
+                <div class="navigation">
+                    <button class="btn btn-secondary" onclick="prevPage()">→ السابق</button>
+                    <button class="btn btn-primary" onclick="nextPage()">التالي ←</button>
+                </div>
+            </div>
+
+            <!-- صفحة 5: الأسئلة 41-60 -->
+            <div class="page" id="page5">
+                <div class="progress-text">صفحة 3 من 4 - الأسئلة (41-60)</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 75%"></div>
+                </div>
+
+                <div class="question-section">
+                    <div class="section-title">الاندفاعية (41-50)</div>
+                    <div id="questions41-50"></div>
+                </div>
+
+                <div class="question-section">
+                    <div class="section-title">السلوك العدواني (51-60)</div>
+                    <div id="questions51-60"></div>
+                </div>
+
+                <div class="navigation">
+                    <button class="btn btn-secondary" onclick="prevPage()">→ السابق</button>
+                    <button class="btn btn-primary" onclick="nextPage()">التالي ←</button>
+                </div>
+            </div>
+
+            <!-- صفحة 6: الأسئلة 61-80 -->
+            <div class="page" id="page6">
+                <div class="progress-text">صفحة 4 من 4 - الأسئلة (61-80)</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 100%"></div>
+                </div>
+
+                <div class="question-section">
+                    <div class="section-title">السلوك الانسحابي (61-70)</div>
+                    <div id="questions61-70"></div>
+                </div>
+
+                <div class="question-section">
+                    <div class="section-title">الاعتمادية (71-80)</div>
+                    <div id="questions71-80"></div>
+                </div>
+
+                <div class="navigation">
+                    <button class="btn btn-secondary" onclick="prevPage()">→ السابق</button>
+                    <button class="btn btn-primary" onclick="calculateResults()">عرض النتائج ←</button>
+                </div>
+            </div>
+
+            <!-- صفحة 7: النتائج -->
+            <div class="page" id="page7">
+                <div class="results-container" id="resultsContainer"></div>
+            </div>
+        </div>
+
+        <script>
+            const questions = [
+                'يجد صعوبة في أن يجلس أو يظل ساكناً أو هادئاً قليلاً',
+                'يؤدي واجباته وهو يجري، أو يتحرك، وبشكل متقطع',
+                'كثير الخروج من مقعده، وخلط أوراقه والشخبطة فيها',
+                'كثير التحرك في مقعده في الفصل أو البيت بلا هدف',
+                'دائم التحريك لقدمه أو ساقه، ينقر بقلمه على درجه',
+                'يتعرض للحوادث والجروح في أنشطته كالجري وركوب الدراجة',
+                'يندفع في حركاته وأنشطته، وردود أفعاله',
+                'يحتاج بصورة مستمرة لتعزيز السلوك غير الحركي',
+                'يحتاج لجدول عمل يومي والتذكير المستمر به',
+                'يفرط في الحركة غير الهادفة داخل الفصل أو البيت',
+
+                'سريع وسهل التشتت وذو سعة انتباهية قصيرة',
+                'لا يمكنه العمل على واجباته لفترة طويلة نسبياً',
+                'يتشتت عند متابعة أداء الواجبات لأي ضوضاء',
+                'يترك نفسه لأحلام اليقظة شارد أو هائم',
+                'لا يهتم بأداء واجباته أو ما هو مطلوب منه ذاتياً',
+                'يتأثر بأي مشتتات سمعية أو بصرية',
+                'يتحدث بصوت منخفض عند أدائه لأي عمل يكلف به',
+                'سهل الاستثارة، عصبي أو حاد المزاج',
+                'يدخل في نوبات مفاجئة من البكاء دون أسباب معروفة',
+                'يبدو عليه الميل للنوم أثناء الدروس أو أداء الواجبات',
+
+                'يفشل في أداء المهام بصورة متكررة خلال سنواته المدرسية',
+                'يجد صعوبة في تكوين الصداقات، ولا يتعاون مع أقرانه',
+                'يجد صعوبة في أداء أي واجبات أو تكليفات مدرسية',
+                'ضعيف الشعور بفشله أو تكرار تعرضه لخبرات الفشل',
+                'ضعيف الثقة بنفسه وقدراته ومعلوماته',
+                'ينسحب من مواقف التنافس الاجتماعي أو الأكاديمي',
+                'يبدي كثير من الخوف والاضطراب عند أداء الاختبارات',
+                'لا يهتم بدقة أو صحة استجابته، ولا يراجعها',
+                'يعزو فشله المتكرر إلى الآخرين أو الظروف أو المرض',
+                'يحتاج إلى التشجيع والدعم المستمر لضعف مفهوم الذات لديه',
+
+                'متهور أو أحمق لا يهتم بآثار سلوكه على الآخرين',
+                'يبدو غير متعاون ولا يقدم أي عون أو مساعدة للغير',
+                'يجد صعوبة في التفاعل الاجتماعي المقبول من الآخرين',
+                'يهمل الإنصات لحديث الآخرين أو الاهتمام به',
+                'يجد صعوبة في القيام بالمهارات الاجتماعية الملائمة',
+                'يقاطع أي حديث يتم بين أي فردين أو عدة أفراد',
+                'يتجاهل متابعة زملائه لحديثه أو انتباههم له',
+                'يتجاهل ردود فعل الآخرين تجاه ما يصدر عنه من سلوك',
+                'دائرة أصدقائه ضعيفة، لضعف وقلة مشاركته لهم',
+                'يتجاهله زملاؤه في المشاركات أو الأعمال التعاونية',
+
+                'يقبل على أي عمل باندفاع وتهور ودون إدراك للنتائج',
+                'يندفع في إنهاء تكليفاته أو واجباته بسرعة مع الخطأ',
+                'يخطئ نتيجة اندفاعه وتسرعه في الإجابة',
+                'يتحدث دون إذن، أو في وقت غير مناسب، ودون هدف',
+                'يستجيب بسرعة واندفاع وبلا أدنى تفكير',
+                'يقدم أعماله وإجاباته بإهمال وبسرعة وبلا مراجعة',
+                'يهمل تنظيم أعماله وواجباته، وملابسه، وأدواته',
+                'متهور أو أحمق أو طائش يندفع مع الخطأ في استجاباته',
+                'يصعب عليه تأجيل حاجاته أو إشباع طلباته',
+                'لا يهتم بشكل ونوع استجاباته وتأثيرها على الآخرين',
+
+                'يميل إلى مضايقة الآخرين بالفعل أو اللفظ، دائماً مزعج',
+                'يميل إلى افتعال العراك أو المشاكسة لزملائه',
+                'يبدو مستثاراً، ويجد صعوبة في تعديل سلوك العدوان لديه',
+                'يتكرر تعرضه للجروح أو الكسور بسبب سلوك العنف لديه',
+                'يؤذي زملائه عشوائياً خلال ممارسته اللعب معهم',
+                'يحتاج بصورة متكررة لتعزيز السلوك السوي المرغوب',
+                'يميل إلى إتلاف كتبه أو أوراقه أو دفاتره',
+                'أقلامه عادة لا تعمل، أو مكسورة أو غير كاملة',
+                'يكتب على درجه بصورة مشوهة تخريبية',
+                'يستثار لأبسط سبب ويرد بعنف لا يتناسب مع السبب',
+
+                'يميل إلى العمل أو اللعب أو حتى الأكل وحيداً',
+                'صامت معظم الوقت، يجلس في مقعده هادئ تماماً',
+                'يتهرب أو ينسحب من مواقف التنافس التحصيلي',
+                'يتهرب من المناقشة أو المواقف الاجتماعية مع أقرانه',
+                'لا يبدأ الحديث أو المناقشة، ويتجنب الانضمام إلى أقرانه',
+                'يبدو سلبياً في تناول المواقف أو التفاعل معها',
+                'غير مبادئ أو لا يبدأ الحديث أو المناقشة',
+                'يعتذر عن الدعوات مدعياً أعذار لا مبرر لها',
+                'يقنع بأي إنجاز يحققه، ويفتقر إلى روح التنافس',
+                'يتغيب عن الحفلات أو الأنشطة المدرسية والمناسبات',
+
+                'ينفذ ما يطلب منه حرفياً دون أن يكون له رأي',
+                'يقلد الآخرين تماماً، ويحتاج إلى التشجيع المستمر',
+                'عندما يكلف بمهام يردد دون تفكير: لا يمكنني، لا أعرف',
+                'يوجه انتباهه إلى ما يقوم به غيره تاركاً ما بيده',
+                'يعتمد على الغير ويكرر طلب كل المساعدات الممكنة',
+                'يلجأ إلى مدرسه أو زملائه مردداً ساعدني أو أرني كيف؟',
+                'يكرر عبارة يصعب علي حتى قبل أن يعرف طبيعة المهام',
+                'يفضل الأعمال التي يمكنه أدائها بمساعدة الآخرين',
+                'يفضل ممارسة الأنشطة التي يسهل عليه النجاح فيها',
+                'يفضل ممارسة الأنشطة منفرداً بلا تواجد مباشر للآخرين'
+            ];
+
+            let currentPage = 1;
+            let answers = {};
+
+            function initializeDateSelectors() {
+                const daySelect = document.getElementById('birthDay');
+                const yearSelect = document.getElementById('birthYear');
+                const currentYear = new Date().getFullYear();
+
+                for (let i = 1; i <= 31; i++) {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = i;
+                    daySelect.appendChild(option);
+                }
+
+                for (let i = currentYear; i >= currentYear - 20; i--) {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = i;
+                    yearSelect.appendChild(option);
+                }
+            }
+
+            function calculateAge() {
+                const day = document.getElementById('birthDay').value;
+                const month = document.getElementById('birthMonth').value;
+                const year = document.getElementById('birthYear').value;
+
+                if (day && month && year) {
+                    const birthDate = new Date(year, month - 1, day);
+                    const today = new Date();
+
+                    let years = today.getFullYear() - birthDate.getFullYear();
+                    let months = today.getMonth() - birthDate.getMonth();
+                    let days = today.getDate() - birthDate.getDate();
+
+                    if (days < 0) {
+                        months--;
+                        const lastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+                        days += lastMonth.getDate();
+                    }
+
+                    if (months < 0) {
+                        years--;
+                        months += 12;
+                    }
+
+                    let ageText = '';
+                    if (years > 0) {
+                        ageText += years + ' سنة';
+                    }
+                    if (months > 0) {
+                        if (ageText) ageText += ' و ';
+                        ageText += months + ' شهر';
+                    }
+                    if (days > 0 && years === 0) {
+                        if (ageText) ageText += ' و ';
+                        ageText += days + ' يوم';
+                    }
+
+                    document.getElementById('studentAge').value = ageText || '0';
+                }
+            }
+
+            document.getElementById('birthDay').addEventListener('change', calculateAge);
+            document.getElementById('birthMonth').addEventListener('change', calculateAge);
+            document.getElementById('birthYear').addEventListener('change', calculateAge);
+
+            document.getElementById('assessmentDate').valueAsDate = new Date();
+
+            initializeDateSelectors();
+
+            function createQuestions() {
+                const sections = [
+                    { start: 1, end: 10, container: 'questions1-10' },
+                    { start: 11, end: 20, container: 'questions11-20' },
+                    { start: 21, end: 30, container: 'questions21-30' },
+                    { start: 31, end: 40, container: 'questions31-40' },
+                    { start: 41, end: 50, container: 'questions41-50' },
+                    { start: 51, end: 60, container: 'questions51-60' },
+                    { start: 61, end: 70, container: 'questions61-70' },
+                    { start: 71, end: 80, container: 'questions71-80' }
+                ];
+
+                sections.forEach((section) => {
+                    const container = document.getElementById(section.container);
+                    for (let i = section.start; i <= section.end; i++) {
+                        const questionDiv = document.createElement('div');
+                        questionDiv.className = 'question-item';
+                        questionDiv.innerHTML = `
+                        <div class="question-text">
+                            <span class="question-number">${i}</span>
+                            ${questions[i - 1]}
+                        </div>
+                        <div class="rating-options">
+                            <div class="rating-option">
+                                <input type="radio" id="q${i}_4" name="q${i}" value="4">
+                                <label for="q${i}_4">دائماً<br>(4)</label>
+                            </div>
+                            <div class="rating-option">
+                                <input type="radio" id="q${i}_3" name="q${i}" value="3">
+                                <label for="q${i}_3">غالباً<br>(3)</label>
+                            </div>
+                            <div class="rating-option">
+                                <input type="radio" id="q${i}_2" name="q${i}" value="2">
+                                <label for="q${i}_2">أحياناً<br>(2)</label>
+                            </div>
+                            <div class="rating-option">
+                                <input type="radio" id="q${i}_1" name="q${i}" value="1">
+                                <label for="q${i}_1">نادراً<br>(1)</label>
+                            </div>
+                            <div class="rating-option">
+                                <input type="radio" id="q${i}_0" name="q${i}" value="0">
+                                <label for="q${i}_0">لا تنطبق<br>(0)</label>
+                            </div>
+                        </div>
+                    `;
+                        container.appendChild(questionDiv);
+                    }
+                });
+            }
+
+            function nextPage() {
+                if (currentPage < 7) {
+                    document.getElementById('page' + currentPage).classList.remove('active');
+                    currentPage++;
+                    document.getElementById('page' + currentPage).classList.add('active');
+                    window.scrollTo(0, 0);
+                }
+            }
+
+            function prevPage() {
+                if (currentPage > 1) {
+                    document.getElementById('page' + currentPage).classList.remove('active');
+                    currentPage--;
+                    document.getElementById('page' + currentPage).classList.add('active');
+                    window.scrollTo(0, 0);
+                }
+            }
+
+            function validateAndNext() {
+                const required = ['studentName', 'studentGender', 'birthDay', 'birthMonth', 'birthYear', 'studentGrade', 'schoolName', 'assessorName', 'assessorPosition', 'assessmentDate'];
+                let valid = true;
+
+                required.forEach((field) => {
+                    const input = document.getElementById(field);
+                    if (!input.value) {
+                        input.style.borderColor = 'red';
+                        valid = false;
+                    } else {
+                        input.style.borderColor = '#e0e0e0';
+                    }
+                });
+
+                if (valid) {
+                    nextPage();
+                } else {
+                    alert('⚠️ يرجى ملء جميع الحقول المطلوبة');
+                }
+            }
+
+            function calculateResults() {
+                for (let i = 1; i <= 80; i++) {
+                    const selected = document.querySelector('input[name="q' + i + '"]:checked');
+                    if (selected) {
+                        answers[i] = parseInt(selected.value);
+                    } else {
+                        alert('⚠️ يرجى الإجابة على السؤال رقم ' + i);
+                        return;
+                    }
+                }
+
+                const scores = {
+                    hyperactivity: calculateDomainScore(1, 10),
+                    inattention: calculateDomainScore(11, 20),
+                    selfConcept: calculateDomainScore(21, 30),
+                    socialSkills: calculateDomainScore(31, 40),
+                    impulsivity: calculateDomainScore(41, 50),
+                    aggression: calculateDomainScore(51, 60),
+                    withdrawal: calculateDomainScore(61, 70),
+                    dependency: calculateDomainScore(71, 80)
+                };
+
+                displayResults(scores);
+                nextPage();
+            }
+
+            function calculateDomainScore(start, end) {
+                let total = 0;
+                for (let i = start; i <= end; i++) {
+                    total += answers[i] || 0;
+                }
+                return total;
+            }
+
+            function getSeverityLevel(score) {
+                if (score < 23) return { level: 'لا يوجد', cls: 'severity-none' };
+                if (score >= 23 && score < 29) return { level: 'خفيفة', cls: 'severity-mild' };
+                if (score >= 29 && score < 33) return { level: 'متوسطة', cls: 'severity-moderate' };
+                return { level: 'شديدة', cls: 'severity-severe' };
+            }
+
+            function displayResults(scores) {
+                const studentName = document.getElementById('studentName').value;
+                const studentGender = document.getElementById('studentGender').value;
+                const studentAge = document.getElementById('studentAge').value;
+                const studentGrade = document.getElementById('studentGrade').value;
+                const schoolName = document.getElementById('schoolName').value;
+                const assessorName = document.getElementById('assessorName').value;
+                const assessorPosition = document.getElementById('assessorPosition').value;
+                const assessmentDate = document.getElementById('assessmentDate').value;
+
+                const birthDay = document.getElementById('birthDay').value;
+                const birthMonth = document.getElementById('birthMonth').value;
+                const birthYear = document.getElementById('birthYear').value;
+                const birthDateFormatted = birthDay + '/' + birthMonth + '/' + birthYear;
+
+                const domains = [
+                    { name: 'الإفراط في النشاط', key: 'hyperactivity' },
+                    { name: 'التشتت أو اللا انتباهية', key: 'inattention' },
+                    { name: 'انخفاض أو ضعف مفهوم الذات', key: 'selfConcept' },
+                    { name: 'قصور المهارات الاجتماعية', key: 'socialSkills' },
+                    { name: 'الاندفاعية', key: 'impulsivity' },
+                    { name: 'السلوك العدواني', key: 'aggression' },
+                    { name: 'السلوك الانسحابي', key: 'withdrawal' },
+                    { name: 'الاعتمادية', key: 'dependency' }
+                ];
+
+                let hasAnyDifficulty = false;
+                let difficultiesFound = [];
+
+                let tableRows = '';
+                domains.forEach((domain) => {
+                    const score = scores[domain.key];
+                    const severity = getSeverityLevel(score);
+
+                    if (score >= 23) {
+                        hasAnyDifficulty = true;
+                        difficultiesFound.push({ name: domain.name, score: score, severity: severity.level });
+                    }
+
+                    tableRows += '<tr><td style="text-align: right; font-weight: bold;">' + domain.name + '</td><td>' + score + '</td><td><span class="severity-badge ' + severity.cls + '">' + severity.level + '</span></td></tr>';
+                });
+
+                let diagnosisText = '';
+                if (!hasAnyDifficulty) {
+                    diagnosisText =
+                        '<p style="color: #155724; font-size: 18px; font-weight: bold;">✓ لا يوجد لدى التلميذ اضطراب أو صعوبة في السلوك الاجتماعي والانفعالي.</p><p style="margin-top: 10px;">جميع درجات المقاييس تقع أقل من الدرجة (23).</p>';
+                } else {
+                    diagnosisText = '<p style="color: #721c24; font-size: 18px; font-weight: bold;">⚠️ يحتمل أن يكون لدى التلميذ اضطراب أو صعوبة في السلوك الاجتماعي والانفعالي</p>';
+                    diagnosisText += '<p style="margin-top: 15px; font-weight: bold;">المجالات التي تحتاج إلى متابعة:</p><ul style="margin-top: 10px;">';
+                    difficultiesFound.forEach((d) => {
+                        diagnosisText += '<li style="padding: 8px; margin: 5px 0; background: #fff3cd; border-radius: 5px;">• ' + d.name + ' - الدرجة: ' + d.score + ' (' + d.severity + ')</li>';
+                    });
+                    diagnosisText += '</ul>';
+                }
+
+                const recommendations = getRecommendations(hasAnyDifficulty, difficultiesFound);
+
+                const resultsHTML =
+                    '<div class="result-header"><h2>📊 تقرير التقييم النهائي</h2><p>مقياس التقدير التشخيصي لصعوبات السلوك الاجتماعي والانفعالي</p></div><div class="result-card"><h3 style="color: #1877f2; margin-bottom: 20px;">معلومات الطفل:</h3><div class="student-info"><div class="info-item"><div class="info-label">اسم الطفل:</div><div class="info-value">' +
+                    studentName +
+                    '</div></div><div class="info-item"><div class="info-label">الجنس:</div><div class="info-value">' +
+                    studentGender +
+                    '</div></div><div class="info-item"><div class="info-label">تاريخ الميلاد:</div><div class="info-value">' +
+                    birthDateFormatted +
+                    '</div></div><div class="info-item"><div class="info-label">العمر:</div><div class="info-value">' +
+                    studentAge +
+                    '</div></div><div class="info-item"><div class="info-label">الصف الدراسي:</div><div class="info-value">' +
+                    studentGrade +
+                    '</div></div><div class="info-item"><div class="info-label">المدرسة:</div><div class="info-value">' +
+                    schoolName +
+                    '</div></div><div class="info-item"><div class="info-label">تاريخ التقييم:</div><div class="info-value">' +
+                    new Date(assessmentDate).toLocaleDateString('ar-EG') +
+                    '</div></div><div class="info-item"><div class="info-label">القائم بالتقييم:</div><div class="info-value">' +
+                    assessorName +
+                    '</div></div><div class="info-item"><div class="info-label">الوظيفة:</div><div class="info-value">' +
+                    assessorPosition +
+                    '</div></div></div></div><div class="result-card"><h3 style="color: #1877f2; margin-bottom: 20px;">نتائج التقييم التفصيلية:</h3><table class="scores-table"><thead><tr><th>المجال السلوكي</th><th>الدرجة الخام</th><th>مستوى الصعوبة</th></tr></thead><tbody>' +
+                    tableRows +
+                    '</tbody></table><div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 20px;"><h4 style="color: #1877f2; margin-bottom: 10px;">معايير التشخيص:</h4><ul style="list-style: none; padding: 0;"><li style="padding: 5px 0;">• <strong>لا يوجد:</strong> أقل من 23 درجة</li><li style="padding: 5px 0;">• <strong>صعوبة خفيفة:</strong> من 23 إلى أقل من 29 درجة</li><li style="padding: 5px 0;">• <strong>صعوبة متوسطة:</strong> من 29 إلى أقل من 33 درجة</li><li style="padding: 5px 0;">• <strong>صعوبة شديدة:</strong> 33 درجة فأكثر</li></ul></div></div><div class="result-card"><div class="diagnosis-box"><h3>🔍 التشخيص:</h3>' +
+                    diagnosisText +
+                    '</div></div><div class="result-card"><div class="recommendations"><h3>💡 التوصيات والإرشادات:</h3>' +
+                    recommendations +
+                    '</div></div><button class="btn btn-print" onclick="window.print()">🖨️ طباعة التقرير</button><div class="navigation" style="margin-top: 20px;"><button class="btn btn-secondary" onclick="location.reload()">🔄 تقييم جديد</button></div>';
+
+                document.getElementById('resultsContainer').innerHTML = resultsHTML;
+            }
+
+            function getRecommendations(hasDifficulty, difficulties) {
+                if (!hasDifficulty) {
+                    return '<ul><li>الاستمرار في دعم السلوك الإيجابي للطفل</li><li>متابعة التطور الأكاديمي والاجتماعي بشكل دوري</li><li>تعزيز نقاط القوة لدى الطفل</li><li>الحفاظ على بيئة تعليمية محفزة وداعمة</li></ul>';
+                }
+
+                let recs = '<ul>';
+                let addedRecs = {};
+
+                difficulties.forEach((d) => {
+                    if (d.name.includes('الإفراط في النشاط') && !addedRecs.hyperactivity) {
+                        recs += '<li>توفير فرص للحركة المنظمة والأنشطة البدنية الموجهة</li>';
+                        recs += '<li>استخدام جدول يومي واضح ومنظم مع تذكيرات مستمرة</li>';
+                        addedRecs.hyperactivity = true;
+                    }
+                    if (d.name.includes('اللا انتباهية') && !addedRecs.inattention) {
+                        recs += '<li>تقليل المشتتات في البيئة الدراسية</li>';
+                        recs += '<li>تقسيم المهام إلى أجزاء صغيرة قابلة للإنجاز</li>';
+                        addedRecs.inattention = true;
+                    }
+                    if (d.name.includes('مفهوم الذات') && !addedRecs.selfConcept) {
+                        recs += '<li>تعزيز الثقة بالنفس من خلال النجاحات الصغيرة</li>';
+                        recs += '<li>تقديم التشجيع المستمر والتغذية الراجعة الإيجابية</li>';
+                        addedRecs.selfConcept = true;
+                    }
+                    if (d.name.includes('المهارات الاجتماعية') && !addedRecs.socialSkills) {
+                        recs += '<li>تدريب الطفل على المهارات الاجتماعية بشكل مباشر</li>';
+                        recs += '<li>توفير فرص للتفاعل الاجتماعي الإيجابي</li>';
+                        addedRecs.socialSkills = true;
+                    }
+                    if (d.name.includes('الاندفاعية') && !addedRecs.impulsivity) {
+                        recs += '<li>تعليم استراتيجيات التفكير قبل التصرف</li>';
+                        recs += '<li>استخدام تقنيات ضبط الذات والتأمل</li>';
+                        addedRecs.impulsivity = true;
+                    }
+                    if (d.name.includes('العدواني') && !addedRecs.aggression) {
+                        recs += '<li>وضع حدود واضحة للسلوك المقبول</li>';
+                        recs += '<li>تعليم بدائل مناسبة للتعبير عن الغضب</li>';
+                        addedRecs.aggression = true;
+                    }
+                    if (d.name.includes('الانسحابي') && !addedRecs.withdrawal) {
+                        recs += '<li>تشجيع المشاركة الاجتماعية بشكل تدريجي</li>';
+                        recs += '<li>توفير بيئة آمنة ومريحة للتفاعل</li>';
+                        addedRecs.withdrawal = true;
+                    }
+                    if (d.name.includes('الاعتمادية') && !addedRecs.dependency) {
+                        recs += '<li>تعزيز الاستقلالية التدريجية في المهام</li>';
+                        recs += '<li>تشجيع حل المشكلات بشكل مستقل</li>';
+                        addedRecs.dependency = true;
+                    }
+                });
+
+                recs += '<li><strong>التوصية العامة:</strong> استشارة أخصائي نفسي أو تربوي لوضع خطة تدخل مناسبة</li>';
+                recs += '<li>التعاون بين الأسرة والمدرسة لتطبيق الاستراتيجيات العلاجية</li>';
+                recs += '<li>المتابعة الدورية وإعادة التقييم بعد فترة مناسبة</li>';
+                recs += '</ul>';
+
+                return recs;
+            }
+
+            createQuestions();
+        </script>
+    </body>
+</html>

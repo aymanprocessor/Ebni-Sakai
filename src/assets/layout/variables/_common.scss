@@ -17,4 +17,16 @@
     --focus-ring-color: var(--p-focus-ring-color);
     --focus-ring-offset: var(--p-focus-ring-offset);
     --focus-ring-shadow: var(--p-focus-ring-shadow);
+    /* Fallback yellow variables for warning badge */
+    --yellow: #ffd93d;
+    --yellow-contrast: #3b2f00;
+    /* Additional yellow shades for desktop warning styles */
+    --yellow-50: #fff5cc;
+    --yellow-900: #473300;
+    --yellow-border: #ffca28;
+    /* Green tokens used by success badge */
+    --green-50: #ecfdf5;
+    --green-400: #34d399;
+    --green-500: #10b981;
+    --green-900: #064e3b;
 }

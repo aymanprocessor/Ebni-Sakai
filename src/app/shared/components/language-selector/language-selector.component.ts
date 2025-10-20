@@ -1,16 +1,10 @@
 // language-selector.component.ts
 import { NgFor, NgIf } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { OverlayModule } from 'primeng/overlay';
-
-interface Language {
-    code: string;
-    name: string;
-    flag: string;
-    rtl: boolean;
-}
+import { LanguageService, Language } from '../../../services/language.service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-language-selector',
@@ -18,32 +12,30 @@ interface Language {
     templateUrl: './language-selector.component.html',
     styleUrls: ['./language-selector.component.scss']
 })
-export class LanguageSelectorComponent implements OnInit {
-    languages: Language[] = [
-        { code: 'ar-EG', name: 'العربية', flag: 'eg', rtl: true },
-        { code: 'en-US', name: 'English', flag: 'us', rtl: false }
-    ];
-
+export class LanguageSelectorComponent implements OnInit, OnDestroy {
+    languages: Language[] = [];
     selectedLanguage: Language;
     visible: boolean = false;
+    private languageSubscription?: Subscription;
 
-    constructor(private translateServ: TranslateService) {
-        // Default to English
-        this.selectedLanguage = this.languages[0];
+    constructor(private languageService: LanguageService) {
+        // Initialize with current language from service
+        this.selectedLanguage = this.languageService.getCurrentLanguage();
     }
 
     ngOnInit(): void {
-        // Check for saved language preference
-        const savedLang = localStorage.getItem('language');
-        if (savedLang) {
-            const found = this.languages.find((lang) => lang.code === savedLang);
-            if (found) {
-                this.selectedLanguage = found;
-                this.applyLanguage(found);
-            }
-        } else {
-            this.applyLanguage(this.languages[0]);
-        }
+        // Get available languages
+        this.languages = this.languageService.getLanguages();
+
+        // Subscribe to language changes
+        this.languageSubscription = this.languageService.currentLanguage$.subscribe((language) => {
+            this.selectedLanguage = language;
+        });
+    }
+
+    ngOnDestroy(): void {
+        // Clean up subscription
+        this.languageSubscription?.unsubscribe();
     }
 
     toggleOverlay(): void {
@@ -51,20 +43,9 @@ export class LanguageSelectorComponent implements OnInit {
     }
 
     selectLanguage(lang: Language): void {
-        this.selectedLanguage = lang;
         this.visible = false;
-        localStorage.setItem('language', lang.code);
-        //this.applyLanguage(lang);
-        this.translateServ.use(lang.code);
-        location.reload(); // Required to re-bootstrap LOCALE_ID
-    }
 
-    private applyLanguage(lang: Language): void {
-        // Set direction based on RTL flag
-        document.documentElement.dir = lang.rtl ? 'rtl' : 'ltr';
-        document.documentElement.lang = lang.code;
-
-        // Additional language change logic would go here
-        // For example, using a translation service
+        // Change language smoothly without reload
+        this.languageService.changeLanguage(lang.code);
     }
 }

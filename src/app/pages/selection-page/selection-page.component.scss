@@ -1,0 +1,30 @@
+.selection-page-container {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    
+    &.dark {
+        background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+    }
+}
+
+.selection-card {
+    transition: transform 0.3s ease;
+    
+    &:hover {
+        transform: translateY(-8px);
+    }
+}
+
+:host ::ng-deep {
+    .p-card {
+        border-radius: 1rem;
+        overflow: hidden;
+        
+        .p-card-body {
+            padding: 0;
+        }
+        
+        .p-card-content {
+            padding: 1.5rem;
+        }
+    }
+}

@@ -37,6 +37,151 @@
         }
     }
 
+    .logo-trial-badge {
+        margin-left: 0.75rem;
+
+        [dir='rtl'] & {
+            margin-left: 0;
+            margin-right: 0.75rem;
+        }
+    }
+
+    .trial-badge.logo {
+        padding: 0 10px;
+        height: 1.9rem;
+        font-size: 0.9rem;
+        border-radius: 8px;
+    }
+
+    /* Centered trial badge - Sticky positioning with margin */
+    .center-trial-badge-sticky {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        top: 4.5rem; /* Below topbar (4rem) + 0.5rem margin */
+        z-index: 996; /* Below topbar but above content */
+        display: flex;
+        align-items: center;
+        pointer-events: none;
+    }
+
+    .trial-badge-alert {
+        pointer-events: auto;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border-radius: var(--border-radius);
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        /* PrimeNG message styling integration */
+        &.p-message {
+            margin: 0;
+
+            .p-message-wrapper {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.75rem 1rem;
+
+                i {
+                    font-size: 1.1rem;
+                }
+
+                .trial-badge-dots {
+                    display: none;
+                }
+
+                .trial-badge-text {
+                    display: inline;
+                    font-size: 0.95rem;
+                    font-weight: 500;
+                }
+            }
+        }
+
+        /* Success state (more than 3 days) */
+        &.p-message-success {
+            .p-message-wrapper {
+                background: var(--green-50);
+                color: var(--green-900);
+                border-left: 4px solid var(--green-500);
+
+                i {
+                    color: var(--green-500);
+                }
+            }
+
+            /* Dark mode support */
+            :host-context(.layout-dark) & {
+                .p-message-wrapper {
+                    background: rgba(34, 197, 94, 0.15);
+                    color: var(--green-400);
+                    border-left: 4px solid var(--green-400);
+
+                    i {
+                        color: var(--green-400);
+                    }
+                }
+            }
+        }
+
+        /* Warning state (3 days or less) */
+        &.p-message-warn {
+            .p-message-wrapper {
+                /* Use yellow for warning if available, otherwise fallback to orange */
+                background: var(--yellow-50, var(--orange-50));
+                color: var(--yellow-900, var(--orange-900));
+                border-left: 4px solid var(--yellow-border, var(--orange-500));
+
+                i {
+                    color: var(--yellow-border, var(--orange-500));
+                }
+            }
+
+            /* Dark mode support */
+            :host-context(.layout-dark) & {
+                .p-message-wrapper {
+                    background: rgba(251, 146, 60, 0.15);
+                    color: var(--orange-400);
+                    border-left: 4px solid var(--orange-400);
+
+                    i {
+                        color: var(--orange-400);
+                    }
+                }
+            }
+        }
+
+        /* Force a solid warning background on the button itself (desktop)
+           to avoid transparent button backgrounds in some browsers/themes. */
+        &.p-message-warn {
+            background: var(--yellow, var(--orange-500));
+            color: var(--yellow-contrast, var(--orange-50));
+            border: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+
+            .p-message-wrapper {
+                /* keep inner wrapper transparent so the button color shows as the bar */
+                background: transparent;
+                color: inherit;
+            }
+        }
+    }
+
     .layout-topbar-action {
         display: inline-flex;
         justify-content: center;
@@ -98,6 +243,17 @@
         gap: 1rem;
     }
 
+    .trial-badge-wrapper {
+        display: inline-flex;
+        align-items: center;
+        margin-left: 1rem;
+
+        [dir='rtl'] & {
+            margin-right: 1rem;
+            margin-left: 0;
+        }
+    }
+
     .layout-config-menu {
         display: flex;
         gap: 1rem;
@@ -119,6 +275,68 @@
 
         .layout-topbar-menu-button {
             display: inline-flex;
+        }
+
+        /* Mobile: Make badge a sticky full-width bar showing full text (no dots)
+           and use colored background based on state (success/warn). */
+        .center-trial-badge-sticky {
+            position: fixed;
+            left: 0;
+            transform: none;
+            top: 4.25rem; /* Slightly less margin on mobile */
+            width: 100%;
+            z-index: 996;
+            pointer-events: none;
+            padding: 0 1rem;
+        }
+
+        .trial-badge-alert {
+            &.p-message .p-message-wrapper {
+                padding: 0.5rem 1rem;
+                width: 100%;
+                justify-content: flex-start;
+                box-shadow: none;
+
+                /* On mobile show full text and hide dots */
+                .trial-badge-text {
+                    display: inline;
+                }
+
+                .trial-badge-dots {
+                    display: none;
+                }
+
+                i {
+                    font-size: 1rem;
+                }
+            }
+
+            /* Full-width colored backgrounds for mobile states */
+            &.p-message-success .p-message-wrapper {
+                background: var(--green-500);
+                color: var(--green-50);
+                border-left: none;
+                border-radius: 6px;
+                padding-left: 1rem;
+            }
+
+            &.p-message-warn .p-message-wrapper {
+                /* Prefer a yellow/gold variable if defined, otherwise fall back to orange */
+                background: var(--yellow, var(--orange-500));
+                color: var(--yellow-contrast, var(--orange-50));
+                border-left: none;
+                border-radius: 6px;
+                padding-left: 1rem;
+            }
+
+            /* Ensure the clickable area spans the width */
+            &.p-message {
+                display: block;
+                width: 100%;
+                .p-message-wrapper { width: 100%; }
+                cursor: pointer;
+                pointer-events: auto;
+            }
         }
 
         .layout-topbar-menu {
@@ -173,6 +391,144 @@
 
         .layout-topbar-menu-content {
             flex-direction: column;
+        }
+    }
+}
+
+/* Subscription Popup Styles */
+.subscription-popup {
+    padding: 1rem;
+    min-width: 320px;
+    max-width: 400px;
+
+    h3 {
+        margin: 0 0 1rem 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-color);
+    }
+
+    .subscription-content {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+
+        .trial-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: var(--highlight-bg);
+            border-radius: 8px;
+            color: var(--highlight-text-color);
+
+            i {
+                font-size: 1.25rem;
+            }
+
+            span {
+                font-weight: 500;
+            }
+        }
+
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+
+            .step {
+                display: flex;
+                gap: 1rem;
+                align-items: flex-start;
+
+                .step-number {
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 50%;
+                    background: var(--primary-color);
+                    color: var(--primary-contrast-color);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: 600;
+                    flex-shrink: 0;
+                }
+
+                .step-content {
+                    flex: 1;
+
+                    h4 {
+                        margin: 0 0 0.25rem 0;
+                        font-size: 1rem;
+                        font-weight: 600;
+                        color: var(--text-color);
+                    }
+
+                    p {
+                        margin: 0;
+                        font-size: 0.875rem;
+                        color: var(--text-color-secondary);
+                        line-height: 1.5;
+                    }
+                }
+            }
+        }
+
+        .popup-actions {
+            display: flex;
+            gap: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--surface-border);
+
+            ::ng-deep {
+                .p-button {
+                    flex: 1;
+                }
+            }
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .subscription-popup {
+        min-width: 280px;
+        max-width: 90vw;
+        padding: 0.75rem;
+
+        h3 {
+            font-size: 1.1rem;
+        }
+
+        .subscription-content {
+            gap: 1rem;
+
+            .steps .step {
+                gap: 0.75rem;
+
+                .step-number {
+                    width: 28px;
+                    height: 28px;
+                    font-size: 0.875rem;
+                }
+
+                .step-content {
+                    h4 {
+                        font-size: 0.9rem;
+                    }
+
+                    p {
+                        font-size: 0.8rem;
+                    }
+                }
+            }
+
+            .popup-actions {
+                flex-direction: column;
+
+                ::ng-deep .p-button {
+                    width: 100%;
+                }
+            }
         }
     }
 }

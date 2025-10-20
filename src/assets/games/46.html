@@ -1,0 +1,1411 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>لعبة القوافي التفاعلية</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Arial', sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .game-container {
+                max-width: 900px;
+                margin: 20px;
+                background: rgba(255, 255, 255, 0.95);
+                border-radius: 25px;
+                box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+                padding: 40px;
+                text-align: center;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .game-header {
+                margin-bottom: 30px;
+            }
+
+            .game-title {
+                font-size: 2.8em;
+                color: #2d3748;
+                margin-bottom: 15px;
+                font-weight: bold;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .level-info {
+                font-size: 1.3em;
+                color: #667eea;
+                margin-bottom: 20px;
+                font-weight: 600;
+            }
+
+            .progress-bar {
+                background: #e2e8f0;
+                border-radius: 20px;
+                height: 25px;
+                margin: 20px 0;
+                overflow: hidden;
+            }
+
+            .progress-fill {
+                height: 100%;
+                background: linear-gradient(90deg, #48bb78, #38a169);
+                border-radius: 20px;
+                width: 0%;
+                transition: width 0.5s ease;
+            }
+
+            .stats {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+                margin: 25px 0;
+            }
+
+            .stat-item {
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                color: white;
+                padding: 20px;
+                border-radius: 15px;
+                font-weight: bold;
+                font-size: 1.1em;
+            }
+
+            .sound-controls {
+                position: absolute;
+                top: 20px;
+                left: 20px;
+                display: flex;
+                gap: 10px;
+            }
+
+            .sound-btn {
+                width: 55px;
+                height: 55px;
+                border: none;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                color: white;
+                font-size: 1.3em;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .sound-btn:hover {
+                transform: scale(1.1);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            }
+
+            /* شاشة اختيار النمط */
+            .mode-screen {
+                display: block;
+            }
+
+            .mode-title {
+                font-size: 2.2em;
+                color: #4a5568;
+                margin: 30px 0;
+                font-weight: bold;
+            }
+
+            .mode-buttons {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 25px;
+                margin: 30px 0;
+            }
+
+            .mode-btn {
+                background: linear-gradient(135deg, #ffecd2, #fcb69f);
+                border: none;
+                border-radius: 20px;
+                padding: 30px 20px;
+                font-size: 1.2em;
+                font-weight: bold;
+                color: #2d3748;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            }
+
+            .mode-btn:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            }
+
+            .mode-btn.primary {
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                color: white;
+            }
+
+            .mode-btn.secondary {
+                background: linear-gradient(135deg, #84fab0, #8fd3f4);
+            }
+
+            .mode-btn.success {
+                background: linear-gradient(135deg, #ffd89b, #19547b);
+                color: white;
+            }
+
+            /* شاشة اللعب */
+            .game-screen {
+                display: none;
+            }
+
+            .question-container {
+                background: #f7fafc;
+                border-radius: 20px;
+                padding: 40px;
+                margin: 30px 0;
+                border: 3px solid #e2e8f0;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            }
+
+            .main-word-container {
+                margin: 30px 0;
+            }
+
+            .main-image {
+                width: 160px;
+                height: 160px;
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                border-radius: 25px;
+                margin: 20px auto;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 4.5em;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+            }
+
+            .main-image:hover {
+                transform: scale(1.05);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+            }
+
+            .main-word {
+                font-size: 2.5em;
+                color: #2d3748;
+                margin: 25px 0;
+                font-weight: bold;
+                cursor: pointer;
+                transition: color 0.3s ease;
+            }
+
+            .main-word:hover {
+                color: #667eea;
+            }
+
+            .question-text {
+                font-size: 1.5em;
+                color: #4a5568;
+                margin: 25px 0;
+                font-weight: 600;
+                line-height: 1.4;
+            }
+
+            .attempts-display {
+                font-size: 1.2em;
+                color: #667eea;
+                margin: 20px 0;
+                font-weight: 600;
+            }
+
+            .options-container {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 25px;
+                margin: 35px 0;
+            }
+
+            .option {
+                background: white;
+                border: 3px solid #e2e8f0;
+                border-radius: 20px;
+                padding: 25px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            }
+
+            .option:hover {
+                border-color: #667eea;
+                transform: translateY(-8px);
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            }
+
+            .option.correct {
+                border-color: #48bb78;
+                background: linear-gradient(135deg, #c6f6d5, #9ae6b4);
+                animation: correctPulse 0.6s ease;
+            }
+
+            .option.wrong {
+                border-color: #f56565;
+                background: linear-gradient(135deg, #fed7d7, #feb2b2);
+                animation: wrongShake 0.6s ease;
+            }
+
+            .option.disabled {
+                pointer-events: none;
+                opacity: 0.7;
+            }
+
+            @keyframes correctPulse {
+                0% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.05);
+                }
+                100% {
+                    transform: scale(1);
+                }
+            }
+
+            @keyframes wrongShake {
+                0%,
+                100% {
+                    transform: translateX(0);
+                }
+                25% {
+                    transform: translateX(-5px);
+                }
+                75% {
+                    transform: translateX(5px);
+                }
+            }
+
+            .option-image {
+                width: 90px;
+                height: 90px;
+                background: linear-gradient(135deg, #fbb6ce, #f093fb);
+                border-radius: 20px;
+                margin: 0 auto 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 3em;
+                transition: all 0.3s ease;
+            }
+
+            .option:hover .option-image {
+                transform: scale(1.1);
+            }
+
+            .option-text {
+                font-size: 1.4em;
+                color: #2d3748;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+            .option-text:hover {
+                color: #667eea;
+            }
+
+            .feedback {
+                margin: 25px 0;
+                padding: 25px;
+                border-radius: 15px;
+                font-size: 1.3em;
+                font-weight: bold;
+                transition: all 0.5s ease;
+                display: none;
+            }
+
+            .feedback.success {
+                background: linear-gradient(135deg, #c6f6d5, #9ae6b4);
+                color: #22543d;
+                border: 3px solid #48bb78;
+                display: block;
+            }
+
+            .feedback.error {
+                background: linear-gradient(135deg, #fed7d7, #feb2b2);
+                color: #742a2a;
+                border: 3px solid #f56565;
+                display: block;
+            }
+
+            .hint {
+                background: linear-gradient(135deg, #bee3f8, #90cdf4);
+                padding: 20px;
+                border-radius: 15px;
+                margin: 20px 0;
+                font-size: 1.2em;
+                color: #2a4365;
+                display: none;
+                border: 2px solid #4299e1;
+            }
+
+            .hint.show {
+                display: block;
+            }
+
+            .stars-display {
+                font-size: 2.5em;
+                margin: 25px 0;
+            }
+
+            .star {
+                margin: 0 5px;
+                transition: all 0.3s ease;
+            }
+
+            .star.filled {
+                color: #ecc94b;
+                animation: starPulse 0.5s ease;
+            }
+
+            .star.empty {
+                color: #e2e8f0;
+            }
+
+            @keyframes starPulse {
+                0% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.3);
+                }
+                100% {
+                    transform: scale(1);
+                }
+            }
+
+            .controls {
+                display: flex;
+                justify-content: center;
+                gap: 20px;
+                margin: 35px 0;
+                flex-wrap: wrap;
+            }
+
+            .btn {
+                padding: 15px 30px;
+                border: none;
+                border-radius: 25px;
+                font-size: 1.2em;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            }
+
+            .btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 12px 25px rgba(0, 0, 0, 0.25);
+            }
+
+            .btn.primary {
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                color: white;
+            }
+
+            .btn.secondary {
+                background: linear-gradient(135deg, #ffecd2, #fcb69f);
+                color: #2d3748;
+            }
+
+            .btn.success {
+                background: linear-gradient(135deg, #84fab0, #8fd3f4);
+                color: #2d3748;
+            }
+
+            .btn.hidden {
+                display: none;
+            }
+
+            /* شاشات النتائج */
+            .result-screen {
+                display: none;
+            }
+
+            .result-title {
+                font-size: 2.5em;
+                margin: 30px 0;
+                font-weight: bold;
+            }
+
+            .result-title.success {
+                color: #48bb78;
+            }
+
+            .result-title.complete {
+                color: #667eea;
+            }
+
+            .result-stars {
+                font-size: 3.5em;
+                margin: 30px 0;
+            }
+
+            .result-score {
+                font-size: 1.4em;
+                margin: 25px 0;
+                color: #4a5568;
+            }
+
+            /* الاحتفالات */
+            .celebration {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                z-index: 1000;
+                display: none;
+            }
+
+            .confetti {
+                position: absolute;
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                animation: confettifall 3s linear infinite;
+            }
+
+            @keyframes confettifall {
+                0% {
+                    transform: translateY(-100vh) rotateZ(0deg);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateY(100vh) rotateZ(360deg);
+                    opacity: 0;
+                }
+            }
+
+            /* استجابة الشاشات */
+            @media (max-width: 768px) {
+                .game-container {
+                    margin: 10px;
+                    padding: 25px;
+                }
+
+                .game-title {
+                    font-size: 2.2em;
+                }
+
+                .main-image {
+                    width: 130px;
+                    height: 130px;
+                    font-size: 3.5em;
+                }
+
+                .options-container {
+                    grid-template-columns: 1fr;
+                    gap: 20px;
+                }
+
+                .stats {
+                    grid-template-columns: 1fr;
+                    gap: 15px;
+                }
+
+                .mode-buttons {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            .hidden {
+                display: none !important;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="game-container">
+            <div class="sound-controls">
+                <button class="sound-btn" onclick="toggleSound()" id="soundToggle">🔊</button>
+                <button class="sound-btn" onclick="playWelcomeSound()">🎵</button>
+            </div>
+
+            <div class="game-header">
+                <h1 class="game-title">🎵 لعبة القوافي التفاعلية 🎵</h1>
+                <div class="level-info" id="levelInfo">اختر نمط اللعب</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-item">
+                    <div>النجوم ⭐</div>
+                    <div id="totalStars">0</div>
+                </div>
+                <div class="stat-item">
+                    <div>المستوى 📊</div>
+                    <div id="levelNumber">-</div>
+                </div>
+                <div class="stat-item">
+                    <div>السؤال 🎯</div>
+                    <div id="questionNumber">-</div>
+                </div>
+            </div>
+
+            <!-- شاشة اختيار النمط -->
+            <div class="mode-screen" id="modeScreen">
+                <h2 class="mode-title">اختر نمط اللعب</h2>
+                <div class="mode-buttons">
+                    <button class="mode-btn primary" onclick="startGame('recognition')">
+                        🎯 تمييز القوافي<br />
+                        <small>هل تقفي الكلمتان؟</small>
+                    </button>
+                    <button class="mode-btn secondary" onclick="startGame('generation')">
+                        🎨 إنتاج القوافي<br />
+                        <small>اختر الكلمة المناسبة</small>
+                    </button>
+                    <button class="mode-btn success" onclick="startGame('mixed')">
+                        🌟 اللعب المختلط<br />
+                        <small>تمييز وإنتاج معاً</small>
+                    </button>
+                </div>
+            </div>
+
+            <!-- شاشة اللعب -->
+            <div class="game-screen" id="gameScreen">
+                <div class="question-container">
+                    <div class="main-word-container">
+                        <div class="main-image" onclick="speakMainWord()" id="mainImage">🏠</div>
+                        <div class="main-word" onclick="speakMainWord()" id="mainWord">فأر</div>
+                    </div>
+
+                    <div class="question-text" id="questionText">اختر الكلمة التي تقفي مع "فأر"</div>
+                    <div class="attempts-display" id="attemptsDisplay">المحاولة: 1 من 2</div>
+
+                    <div class="options-container" id="optionsContainer">
+                        <!-- الخيارات ستُضاف هنا -->
+                    </div>
+
+                    <div class="feedback" id="feedback"></div>
+                    <div class="hint" id="hint"></div>
+                </div>
+
+                <div class="stars-display" id="starsDisplay">⭐⭐⭐⭐⭐</div>
+
+                <div class="controls">
+                    <button class="btn secondary" onclick="repeatQuestion()">🔄 إعادة السؤال</button>
+                    <button class="btn primary" onclick="speakMainWord()">🔊 اسمع الكلمة</button>
+                    <button class="btn success hidden" onclick="nextQuestion()" id="nextBtn">⏭️ التالي</button>
+                </div>
+            </div>
+
+            <!-- شاشة إنهاء المستوى -->
+            <div class="result-screen" id="levelCompleteScreen">
+                <h2 class="result-title success">🎉 أحسنت! أكملت المستوى! 🎉</h2>
+                <div class="result-stars" id="levelStars">⭐⭐⭐⭐⭐</div>
+                <div class="result-score">حصلت على <span id="levelScore">5</span> نجوم من 5!</div>
+                <div class="controls">
+                    <button class="btn primary" onclick="nextLevel()">⏭️ المستوى التالي</button>
+                    <button class="btn secondary" onclick="restartLevel()">🔄 إعادة المستوى</button>
+                    <button class="btn success" onclick="goToModeSelection()">🏠 القائمة الرئيسية</button>
+                </div>
+            </div>
+
+            <!-- شاشة إنهاء اللعبة -->
+            <div class="result-screen" id="gameCompleteScreen">
+                <h2 class="result-title complete">🏆 مبروك! أكملت جميع المستويات! 🏆</h2>
+                <div class="result-stars">⭐⭐⭐⭐⭐</div>
+                <div class="result-score">
+                    إجمالي النجوم: <span id="finalScore">15</span> من 15!<br />
+                    <span style="color: #667eea; font-size: 1.1em; margin-top: 10px; display: block"> أصبحت خبيراً في القوافي! 🎵 </span>
+                </div>
+                <div class="controls">
+                    <button class="btn primary" onclick="restartGame()">🔄 لعب مرة أخرى</button>
+                    <button class="btn success" onclick="goToModeSelection()">🏠 القائمة الرئيسية</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="celebration" id="celebration"></div>
+
+        <script>
+            // فئة إدارة الأصوات
+            class AudioManager {
+                constructor() {
+                    this.audioContext = null;
+                    this.isMuted = false;
+                    this.volume = 0.8;
+                    this.initAudio();
+                }
+
+                async initAudio() {
+                    try {
+                        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    } catch (e) {
+                        console.log('Web Audio API not supported');
+                    }
+                }
+
+                createTone(frequency, duration, type = 'sine') {
+                    if (!this.audioContext || this.isMuted) return;
+
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+
+                    oscillator.frequency.value = frequency;
+                    oscillator.type = type;
+
+                    gainNode.gain.setValueAtTime(this.volume, this.audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
+
+                    oscillator.start();
+                    oscillator.stop(this.audioContext.currentTime + duration);
+                }
+
+                playSuccess() {
+                    this.createTone(523.25, 0.2);
+                    setTimeout(() => this.createTone(659.25, 0.2), 150);
+                    setTimeout(() => this.createTone(783.99, 0.3), 300);
+                }
+
+                playError() {
+                    this.createTone(220, 0.3, 'triangle');
+                    setTimeout(() => this.createTone(196, 0.3, 'triangle'), 200);
+                }
+
+                playClick() {
+                    this.createTone(440, 0.1, 'square');
+                }
+
+                playWelcome() {
+                    const notes = [261.63, 329.63, 392, 523.25];
+                    notes.forEach((note, index) => {
+                        setTimeout(() => this.createTone(note, 0.3), index * 200);
+                    });
+                }
+
+                toggle() {
+                    this.isMuted = !this.isMuted;
+                    return this.isMuted;
+                }
+            }
+
+            // بيانات اللعبة
+            const gameData = {
+                levels: [
+                    {
+                        name: 'أجزاء الجسم والحيوانات',
+                        questions: [
+                            {
+                                word: 'فأر',
+                                emoji: '🐭',
+                                options: [
+                                    { word: 'نار', emoji: '🔥', correct: true },
+                                    { word: 'كوب', emoji: '☕', correct: false },
+                                    { word: 'شجرة', emoji: '🌳', correct: false }
+                                ]
+                            },
+                            {
+                                word: 'نحلة',
+                                emoji: '🐝',
+                                options: [
+                                    { word: 'قبلة', emoji: '😘', correct: true },
+                                    { word: 'ورد', emoji: '🌹', correct: false },
+                                    { word: 'صندوق', emoji: '📦', correct: false }
+                                ]
+                            },
+                            {
+                                word: 'قرد',
+                                emoji: '🐵',
+                                options: [
+                                    { word: 'ورد', emoji: '🌹', correct: true },
+                                    { word: 'سماء', emoji: '🌌', correct: false },
+                                    { word: 'مصباح', emoji: '💡', correct: false }
+                                ]
+                            },
+                            {
+                                word: 'يد',
+                                emoji: '🤚',
+                                options: [
+                                    { word: 'غد', emoji: '📅', correct: true },
+                                    { word: 'قمر', emoji: '🌙', correct: false },
+                                    { word: 'طاولة', emoji: '🪑', correct: false }
+                                ]
+                            },
+                            {
+                                word: 'ذراع',
+                                emoji: '💪',
+                                options: [
+                                    { word: 'شارع', emoji: '🛣️', correct: true },
+                                    { word: 'بحر', emoji: '🌊', correct: false },
+                                    { word: 'طائر', emoji: '🐦', correct: false }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        name: 'أشياء من البيئة المحيطة',
+                        questions: [
+                            {
+                                word: 'باب',
+                                emoji: '🚪',
+                                options: [
+                                    { word: 'كتاب', emoji: '📚', correct: true },
+                                    { word: 'زهرة', emoji: '🌺', correct: false },
+                                    { word: 'ليل', emoji: '🌃', correct: false }
+                                ]
+                            },
+                            {
+                                word: 'شباك',
+                                emoji: '🪟',
+                                options: [
+                                    { word: 'أسماك', emoji: '🐟', correct: true },
+                                    { word: 'جبل', emoji: '⛰️', correct: false },
+                                    { word: 'نجوم', emoji: '✨', correct: false }
+                                ]
+                            },
+                            {
+                                word: 'حديقة',
+                                emoji: '🌷',
+                                options: [
+                                    { word: 'طريقة', emoji: '📋', correct: true },
+                                    { word: 'صحراء', emoji: '🏜️', correct: false },
+                                    { word: 'قطار', emoji: '🚂', correct: false }
+                                ]
+                            },
+                            {
+                                word: 'مكتبة',
+                                emoji: '📚',
+                                options: [
+                                    { word: 'لعبة', emoji: '🎮', correct: true },
+                                    { word: 'هواء', emoji: '💨', correct: false },
+                                    { word: 'حجر', emoji: '🪨', correct: false }
+                                ]
+                            },
+                            {
+                                word: 'جسر',
+                                emoji: '🌉',
+                                options: [
+                                    { word: 'قصر', emoji: '🏰', correct: true },
+                                    { word: 'غابة', emoji: '🌲', correct: false },
+                                    { word: 'بحيرة', emoji: '🏞️', correct: false }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        name: 'كلمات متنوعة',
+                        questions: [
+                            {
+                                word: 'قلم',
+                                emoji: '✏️',
+                                options: [
+                                    { word: 'حلم', emoji: '💭', correct: true },
+                                    { word: 'ماء', emoji: '💧', correct: false },
+                                    { word: 'رياح', emoji: '🌪️', correct: false }
+                                ]
+                            },
+                            {
+                                word: 'مدينة',
+                                emoji: '🏙️',
+                                options: [
+                                    { word: 'سفينة', emoji: '🚢', correct: true },
+                                    { word: 'عصفور', emoji: '🐦', correct: false },
+                                    { word: 'رمال', emoji: '🏖️', correct: false }
+                                ]
+                            },
+                            {
+                                word: 'ثلج',
+                                emoji: '❄️',
+                                options: [
+                                    { word: 'برج', emoji: '🗼', correct: true },
+                                    { word: 'فراشة', emoji: '🦋', correct: false },
+                                    { word: 'موسيقى', emoji: '🎵', correct: false }
+                                ]
+                            },
+                            {
+                                word: 'عصفور',
+                                emoji: '🐦',
+                                options: [
+                                    { word: 'منور', emoji: '🔆', correct: true },
+                                    { word: 'غيوم', emoji: '☁️', correct: false },
+                                    { word: 'تفاحة', emoji: '🍎', correct: false }
+                                ]
+                            },
+                            {
+                                word: 'جبنة',
+                                emoji: '🧀',
+                                options: [
+                                    { word: 'سنة', emoji: '📅', correct: true },
+                                    { word: 'رعد', emoji: '⚡', correct: false },
+                                    { word: 'خيال', emoji: '🌈', correct: false }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            };
+
+            // متغيرات اللعبة
+            let currentLevel = 0;
+            let currentQuestion = 0;
+            let currentAttempt = 1;
+            let totalStars = 0;
+            let levelStars = 0;
+            let gameMode = 'generation';
+            let currentQuestionType = 'generation'; // للعب المختلط
+
+            // إنشاء مدير الأصوات
+            const audioManager = new AudioManager();
+
+            // تهيئة اللعبة
+            function initGame() {
+                audioManager.playWelcome();
+                updateDisplay();
+            }
+
+            // بدء اللعبة
+            function startGame(mode) {
+                gameMode = mode;
+                currentLevel = 0;
+                currentQuestion = 0;
+                currentAttempt = 1;
+                totalStars = 0;
+                levelStars = 0;
+
+                hideAllScreens();
+                document.getElementById('gameScreen').style.display = 'block';
+
+                audioManager.playClick();
+                loadQuestion();
+                updateDisplay();
+            }
+
+            // إخفاء جميع الشاشات
+            function hideAllScreens() {
+                document.getElementById('modeScreen').style.display = 'none';
+                document.getElementById('gameScreen').style.display = 'none';
+                document.getElementById('levelCompleteScreen').style.display = 'none';
+                document.getElementById('gameCompleteScreen').style.display = 'none';
+            }
+
+            // تحميل السؤال
+            function loadQuestion() {
+                const level = gameData.levels[currentLevel];
+                const question = level.questions[currentQuestion];
+
+                // تحديد نوع السؤال للعب المختلط
+                if (gameMode === 'mixed') {
+                    currentQuestionType = Math.random() < 0.5 ? 'recognition' : 'generation';
+                } else {
+                    currentQuestionType = gameMode;
+                }
+
+                // عرض الكلمة والصورة الرئيسية
+                document.getElementById('mainImage').textContent = question.emoji;
+                document.getElementById('mainWord').textContent = question.word;
+
+                // تحميل السؤال حسب النوع
+                if (currentQuestionType === 'recognition') {
+                    loadRecognitionQuestion(question);
+                } else {
+                    loadGenerationQuestion(question);
+                }
+
+                // إعادة تعيين المتغيرات
+                currentAttempt = 1;
+                clearFeedback();
+                updateDisplay();
+            }
+
+            // تحميل سؤال التمييز
+            function loadRecognitionQuestion(question) {
+                // اختيار عشوائي بين سؤال صحيح وخاطئ
+                const isCorrectPair = Math.random() < 0.5;
+                let questionWord, correctAnswer;
+
+                if (isCorrectPair) {
+                    // استخدام الإجابة الصحيحة
+                    const correctOption = question.options.find((opt) => opt.correct);
+                    questionWord = correctOption.word;
+                    correctAnswer = true;
+                } else {
+                    // استخدام إجابة خاطئة
+                    const wrongOptions = question.options.filter((opt) => !opt.correct);
+                    const randomWrong = wrongOptions[Math.floor(Math.random() * wrongOptions.length)];
+                    questionWord = randomWrong.word;
+                    correctAnswer = false;
+                }
+
+                // حفظ المعلومات للتحقق لاحقاً
+                question.recognitionData = {
+                    questionWord: questionWord,
+                    correctAnswer: correctAnswer
+                };
+
+                // عرض السؤال
+                document.getElementById('questionText').textContent = `هل تقفي كلمة "${question.word}" مع كلمة "${questionWord}"؟`;
+
+                // إنشاء خيارات نعم/لا
+                const optionsContainer = document.getElementById('optionsContainer');
+                optionsContainer.innerHTML = `
+                <div class="option" onclick="selectRecognitionAnswer(true)">
+                    <div class="option-image">✅</div>
+                    <div class="option-text">نعم، تقفيان</div>
+                </div>
+                <div class="option" onclick="selectRecognitionAnswer(false)">
+                    <div class="option-image">❌</div>
+                    <div class="option-text">لا، لا تقفيان</div>
+                </div>
+            `;
+            }
+
+            // تحميل سؤال الإنتاج
+            function loadGenerationQuestion(question) {
+                document.getElementById('questionText').textContent = `اختر الكلمة التي تقفي مع "${question.word}"`;
+
+                const optionsContainer = document.getElementById('optionsContainer');
+                optionsContainer.innerHTML = '';
+
+                question.options.forEach((option, index) => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'option';
+                    optionDiv.onclick = () => selectGenerationAnswer(option.correct, index);
+
+                    optionDiv.innerHTML = `
+                    <div class="option-image">${option.emoji}</div>
+                    <div class="option-text" onclick="speakWord('${option.word}')">${option.word}</div>
+                `;
+
+                    optionsContainer.appendChild(optionDiv);
+                });
+            }
+
+            // اختيار إجابة التمييز
+            function selectRecognitionAnswer(userAnswer) {
+                audioManager.playClick();
+
+                const level = gameData.levels[currentLevel];
+                const question = level.questions[currentQuestion];
+                const isCorrect = userAnswer === question.recognitionData.correctAnswer;
+
+                handleAnswer(isCorrect, userAnswer ? 0 : 1);
+            }
+
+            // اختيار إجابة الإنتاج
+            function selectGenerationAnswer(isCorrect, optionIndex) {
+                audioManager.playClick();
+                handleAnswer(isCorrect, optionIndex);
+            }
+
+            // التعامل مع الإجابة
+            function handleAnswer(isCorrect, optionIndex) {
+                const options = document.querySelectorAll('.option');
+
+                // تعطيل جميع الخيارات
+                options.forEach((option) => option.classList.add('disabled'));
+
+                if (isCorrect) {
+                    // إجابة صحيحة
+                    options[optionIndex].classList.add('correct');
+                    levelStars++;
+                    totalStars++;
+                    audioManager.playSuccess();
+                    showFeedback('success', getSuccessMessage());
+                    showCelebration();
+
+                    setTimeout(() => {
+                        document.getElementById('nextBtn').classList.remove('hidden');
+                    }, 1000);
+                } else {
+                    // إجابة خاطئة
+                    options[optionIndex].classList.add('wrong');
+                    audioManager.playError();
+
+                    if (currentAttempt < 2) {
+                        currentAttempt++;
+                        showFeedback('error', getErrorMessage());
+                        showHint();
+
+                        // إعادة تفعيل الخيارات للمحاولة الثانية
+                        setTimeout(() => {
+                            options.forEach((option) => option.classList.remove('disabled'));
+                        }, 2000);
+                    } else {
+                        showFeedback('error', 'الإجابة الصحيحة هي: ' + getCorrectAnswer());
+                        highlightCorrectAnswer();
+                        setTimeout(() => {
+                            document.getElementById('nextBtn').classList.remove('hidden');
+                        }, 2000);
+                    }
+                }
+
+                updateDisplay();
+            }
+
+            // إظهار التلميح
+            function showHint() {
+                const hint = document.getElementById('hint');
+                const level = gameData.levels[currentLevel];
+                const question = level.questions[currentQuestion];
+
+                let hintText = '';
+                if (currentQuestionType === 'recognition') {
+                    if (question.recognitionData.correctAnswer) {
+                        hintText = `اسمع نهاية الكلمتين: "${question.word}" و "${question.recognitionData.questionWord}" - هل تنتهيان بنفس الصوت؟ 🎵`;
+                    } else {
+                        hintText = `قارن نهاية الكلمتين: "${question.word}" و "${question.recognitionData.questionWord}" - هل تبدوان مختلفتين؟ 🤔`;
+                    }
+                } else {
+                    hintText = `فكر في كلمة تنتهي مثل "${question.word}"... الصوت الأخير مهم! 🎵`;
+                }
+
+                hint.textContent = hintText;
+                hint.classList.add('show');
+            }
+
+            // تسليط الضوء على الإجابة الصحيحة
+            function highlightCorrectAnswer() {
+                const options = document.querySelectorAll('.option');
+
+                if (currentQuestionType === 'recognition') {
+                    const level = gameData.levels[currentLevel];
+                    const question = level.questions[currentQuestion];
+                    const correctIndex = question.recognitionData.correctAnswer ? 0 : 1;
+                    options[correctIndex].classList.add('correct');
+                } else {
+                    const level = gameData.levels[currentLevel];
+                    const question = level.questions[currentQuestion];
+
+                    question.options.forEach((option, index) => {
+                        if (option.correct) {
+                            options[index].classList.add('correct');
+                        }
+                    });
+                }
+            }
+
+            // الحصول على الإجابة الصحيحة
+            function getCorrectAnswer() {
+                const level = gameData.levels[currentLevel];
+                const question = level.questions[currentQuestion];
+
+                if (currentQuestionType === 'recognition') {
+                    return question.recognitionData.correctAnswer ? 'نعم، تقفيان' : 'لا، لا تقفيان';
+                } else {
+                    const correctOption = question.options.find((opt) => opt.correct);
+                    return correctOption.word;
+                }
+            }
+
+            // رسائل النجاح
+            function getSuccessMessage() {
+                const messages = ['🎉 ممتاز! أحسنت!', '⭐ رائع جداً!', '🎵 أنت بطل القوافي!', '🌟 إجابة صحيحة!', '👏 برافو عليك!', '🎊 عظيم جداً!', '💫 مذهل!'];
+                return messages[Math.floor(Math.random() * messages.length)];
+            }
+
+            // رسائل الخطأ
+            function getErrorMessage() {
+                const messages = ['🤔 حاول مرة أخرى!', '💭 فكر في نهاية الكلمة...', '🎵 اسمع الصوت جيداً...', '⭐ لا بأس، حاول مرة أخرى!', '🔄 فرصة أخرى!', '💪 يمكنك فعلها!'];
+                return messages[Math.floor(Math.random() * messages.length)];
+            }
+
+            // إظهار التغذية الراجعة
+            function showFeedback(type, message) {
+                const feedback = document.getElementById('feedback');
+                feedback.textContent = message;
+                feedback.className = `feedback ${type}`;
+                feedback.style.display = 'block';
+            }
+
+            // مسح التغذية الراجعة
+            function clearFeedback() {
+                document.getElementById('feedback').style.display = 'none';
+                document.getElementById('hint').classList.remove('show');
+                document.getElementById('nextBtn').classList.add('hidden');
+            }
+
+            // السؤال التالي
+            function nextQuestion() {
+                audioManager.playClick();
+
+                currentQuestion++;
+
+                if (currentQuestion >= gameData.levels[currentLevel].questions.length) {
+                    showLevelComplete();
+                } else {
+                    loadQuestion();
+                    resetOptions();
+                }
+            }
+
+            // إعادة تعيين الخيارات
+            function resetOptions() {
+                const options = document.querySelectorAll('.option');
+                options.forEach((option) => {
+                    option.classList.remove('correct', 'wrong', 'disabled');
+                });
+            }
+
+            // إظهار شاشة إنهاء المستوى
+            function showLevelComplete() {
+                hideAllScreens();
+                document.getElementById('levelCompleteScreen').style.display = 'block';
+
+                document.getElementById('levelScore').textContent = levelStars;
+                updateStarsDisplay('levelStars', levelStars);
+
+                audioManager.playSuccess();
+                showCelebration();
+            }
+
+            // المستوى التالي
+            function nextLevel() {
+                audioManager.playClick();
+
+                currentLevel++;
+                levelStars = 0;
+
+                if (currentLevel >= gameData.levels.length) {
+                    showGameComplete();
+                } else {
+                    currentQuestion = 0;
+                    currentAttempt = 1;
+
+                    hideAllScreens();
+                    document.getElementById('gameScreen').style.display = 'block';
+
+                    loadQuestion();
+                    updateDisplay();
+                }
+            }
+
+            // إظهار شاشة إنهاء اللعبة
+            function showGameComplete() {
+                hideAllScreens();
+                document.getElementById('gameCompleteScreen').style.display = 'block';
+
+                document.getElementById('finalScore').textContent = totalStars;
+
+                // احتفال كبير
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(() => {
+                        audioManager.playSuccess();
+                        showCelebration();
+                    }, i * 1000);
+                }
+            }
+
+            // إعادة المستوى
+            function restartLevel() {
+                audioManager.playClick();
+
+                currentQuestion = 0;
+                currentAttempt = 1;
+                levelStars = 0;
+
+                hideAllScreens();
+                document.getElementById('gameScreen').style.display = 'block';
+
+                loadQuestion();
+                updateDisplay();
+            }
+
+            // إعادة اللعبة
+            function restartGame() {
+                audioManager.playClick();
+
+                currentLevel = 0;
+                currentQuestion = 0;
+                currentAttempt = 1;
+                totalStars = 0;
+                levelStars = 0;
+
+                hideAllScreens();
+                document.getElementById('gameScreen').style.display = 'block';
+
+                loadQuestion();
+                updateDisplay();
+            }
+
+            // العودة لاختيار النمط
+            function goToModeSelection() {
+                audioManager.playClick();
+
+                hideAllScreens();
+                document.getElementById('modeScreen').style.display = 'block';
+
+                // إعادة تعيين المتغيرات
+                currentLevel = 0;
+                currentQuestion = 0;
+                currentAttempt = 1;
+                totalStars = 0;
+                levelStars = 0;
+
+                updateDisplay();
+            }
+
+            // إعادة السؤال
+            function repeatQuestion() {
+                audioManager.playClick();
+                speakMainWord();
+
+                resetOptions();
+                clearFeedback();
+
+                currentAttempt = 1;
+                updateDisplay();
+            }
+
+            // تحديث العرض
+            function updateDisplay() {
+                // تحديث معلومات المستوى
+                if (currentLevel < gameData.levels.length) {
+                    document.getElementById('levelInfo').textContent = `المستوى ${currentLevel + 1}: ${gameData.levels[currentLevel].name}`;
+                    document.getElementById('levelNumber').textContent = currentLevel + 1;
+
+                    // تحديث السؤال
+                    document.getElementById('questionNumber').textContent = `${currentQuestion + 1}/${gameData.levels[currentLevel].questions.length}`;
+
+                    // تحديث شريط التقدم
+                    const progress = (currentQuestion / gameData.levels[currentLevel].questions.length) * 100;
+                    document.getElementById('progressFill').style.width = progress + '%';
+                } else {
+                    document.getElementById('levelInfo').textContent = 'اختر نمط اللعب';
+                    document.getElementById('levelNumber').textContent = '-';
+                    document.getElementById('questionNumber').textContent = '-';
+                    document.getElementById('progressFill').style.width = '0%';
+                }
+
+                // تحديث النجوم والمحاولات
+                document.getElementById('totalStars').textContent = totalStars;
+                document.getElementById('attemptsDisplay').textContent = `المحاولة: ${currentAttempt} من 2`;
+                updateStarsDisplay('starsDisplay', levelStars);
+            }
+
+            // تحديث عرض النجوم
+            function updateStarsDisplay(elementId, stars) {
+                const starsElement = document.getElementById(elementId);
+                let starsHTML = '';
+
+                for (let i = 0; i < 5; i++) {
+                    if (i < stars) {
+                        starsHTML += '<span class="star filled">⭐</span>';
+                    } else {
+                        starsHTML += '<span class="star empty">☆</span>';
+                    }
+                }
+
+                starsElement.innerHTML = starsHTML;
+            }
+
+            // نطق الكلمة الرئيسية
+            function speakMainWord() {
+                const word = document.getElementById('mainWord').textContent;
+                speakWord(word);
+            }
+
+            // نطق الكلمة
+            function speakWord(word) {
+                if ('speechSynthesis' in window && !audioManager.isMuted) {
+                    const utterance = new SpeechSynthesisUtterance(word);
+                    utterance.lang = 'ar-SA';
+                    utterance.rate = 0.8;
+                    utterance.pitch = 1.2;
+                    utterance.volume = audioManager.volume;
+
+                    speechSynthesis.speak(utterance);
+                }
+                audioManager.playClick();
+            }
+
+            // تبديل الصوت
+            function toggleSound() {
+                const isMuted = audioManager.toggle();
+                const soundBtn = document.getElementById('soundToggle');
+                soundBtn.textContent = isMuted ? '🔇' : '🔊';
+                audioManager.playClick();
+            }
+
+            // صوت الترحيب
+            function playWelcomeSound() {
+                audioManager.playWelcome();
+                speakWord('أهلاً وسهلاً!');
+            }
+
+            // إظهار الاحتفال
+            function showCelebration() {
+                const celebration = document.getElementById('celebration');
+                celebration.style.display = 'block';
+
+                // إنشاء كونفيتي
+                for (let i = 0; i < 50; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.animationDelay = Math.random() * 3 + 's';
+                    confetti.style.backgroundColor = getRandomColor();
+                    celebration.appendChild(confetti);
+                }
+
+                setTimeout(() => {
+                    celebration.style.display = 'none';
+                    celebration.innerHTML = '';
+                }, 3000);
+            }
+
+            // الحصول على لون عشوائي
+            function getRandomColor() {
+                const colors = ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98FB98'];
+                return colors[Math.floor(Math.random() * colors.length)];
+            }
+
+            // تهيئة اللعبة عند التحميل
+            window.addEventListener('load', () => {
+                initGame();
+
+                // إضافة مستمعي الأحداث للوحة المفاتيح
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        const nextBtn = document.getElementById('nextBtn');
+                        if (!nextBtn.classList.contains('hidden')) {
+                            nextQuestion();
+                        }
+                    }
+
+                    if (e.key >= '1' && e.key <= '3') {
+                        const optionIndex = parseInt(e.key) - 1;
+                        const options = document.querySelectorAll('.option');
+                        if (options[optionIndex] && !options[optionIndex].classList.contains('disabled')) {
+                            options[optionIndex].click();
+                        }
+                    }
+                });
+
+                // تشغيل السياق الصوتي عند أول تفاعل
+                document.addEventListener(
+                    'click',
+                    () => {
+                        if (audioManager.audioContext && audioManager.audioContext.state === 'suspended') {
+                            audioManager.audioContext.resume();
+                        }
+                    },
+                    { once: true }
+                );
+            });
+        </script>
+    </body>
+</html>

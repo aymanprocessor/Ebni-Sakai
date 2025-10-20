@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>لعبة حذف وتبديل الأصوات</title>
+        <style>
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                direction: rtl;
+                color: #333;
+                font-size: 22px;
+            }
+
+            .container {
+                max-width: 900px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+
+            .header {
+                text-align: center;
+                color: white;
+                margin-bottom: 30px;
+            }
+
+            .header h1 {
+                font-size: 2.5em;
+                margin-bottom: 10px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            }
+
+            .card {
+                background: white;
+                border-radius: 20px;
+                padding: 30px;
+                margin-bottom: 20px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                border: 3px solid #e0e0e0;
+            }
+
+            .level-selection {
+                text-align: center;
+            }
+
+            .level-buttons {
+                display: flex;
+                gap: 20px;
+                justify-content: center;
+                margin: 30px 0;
+                flex-wrap: wrap;
+            }
+
+            .level-btn {
+                background: linear-gradient(45deg, #4caf50, #45a049);
+                color: white;
+                border: none;
+                padding: 20px 30px;
+                font-size: 1.2em;
+                border-radius: 15px;
+                cursor: pointer;
+                transition:
+                    transform 0.2s,
+                    box-shadow 0.2s;
+                min-width: 150px;
+            }
+
+            .level-btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 20px rgba(76, 175, 80, 0.4);
+            }
+
+            .game-area {
+                display: none;
+                text-align: center;
+            }
+
+            .progress-container {
+                background: #f0f0f0;
+                border-radius: 15px;
+                padding: 10px;
+                margin-bottom: 30px;
+            }
+
+            .progress-bar {
+                background: linear-gradient(45deg, #2196f3, #21cbf3);
+                height: 15px;
+                border-radius: 10px;
+                transition: width 0.3s ease;
+                position: relative;
+            }
+
+            .score {
+                font-size: 1.3em;
+                font-weight: bold;
+                color: #4caf50;
+                margin-bottom: 20px;
+            }
+
+            .word-display {
+                font-size: 3em;
+                font-weight: bold;
+                color: #333;
+                margin: 20px 0;
+            }
+
+            .emoji {
+                font-size: 4em;
+                margin: 20px 0;
+            }
+
+            .challenge-text {
+                font-size: 1.4em;
+                color: #666;
+                margin: 20px 0;
+                background: #f8f9fa;
+                padding: 15px;
+                border-radius: 10px;
+                border-right: 5px solid #2196f3;
+            }
+
+            .input-area {
+                margin: 30px 0;
+            }
+
+            .answer-input {
+                font-size: 2em;
+                padding: 15px 20px;
+                border: 3px solid #ddd;
+                border-radius: 15px;
+                width: 100%;
+                max-width: 400px;
+                text-align: center;
+                direction: rtl;
+            }
+
+            .answer-input:focus {
+                outline: none;
+                border-color: #4caf50;
+                box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+            }
+
+            .controls {
+                display: flex;
+                gap: 15px;
+                justify-content: center;
+                margin: 20px 0;
+                flex-wrap: wrap;
+            }
+
+            .btn {
+                background: linear-gradient(45deg, #2196f3, #21cbf3);
+                color: white;
+                border: none;
+                padding: 15px 25px;
+                font-size: 1.1em;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: all 0.2s;
+                min-width: 120px;
+            }
+
+            .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+            }
+
+            .btn:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+            .btn-check {
+                background: linear-gradient(45deg, #4caf50, #45a049);
+            }
+
+            .btn-hint {
+                background: linear-gradient(45deg, #ff9800, #f57c00);
+            }
+
+            .btn-speak {
+                background: linear-gradient(45deg, #9c27b0, #7b1fa2);
+            }
+
+            .feedback {
+                margin: 20px 0;
+                padding: 15px;
+                border-radius: 10px;
+                font-size: 1.3em;
+                font-weight: bold;
+                min-height: 60px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .feedback.correct {
+                background: linear-gradient(45deg, #4caf50, #81c784);
+                color: white;
+            }
+
+            .feedback.incorrect {
+                background: linear-gradient(45deg, #f44336, #ef5350);
+                color: white;
+            }
+
+            .feedback.hint {
+                background: linear-gradient(45deg, #ff9800, #ffb74d);
+                color: white;
+            }
+
+            .difference-display {
+                margin: 20px 0;
+                font-size: 1.5em;
+            }
+
+            .char-correct {
+                color: #4caf50;
+                background: rgba(76, 175, 80, 0.1);
+                padding: 5px;
+                border-radius: 5px;
+                margin: 2px;
+            }
+
+            .char-missing {
+                color: #f44336;
+                text-decoration: underline dotted;
+                padding: 5px;
+                margin: 2px;
+            }
+
+            .char-extra {
+                color: #999;
+                opacity: 0.6;
+                padding: 5px;
+                margin: 2px;
+            }
+
+            .game-controls {
+                display: flex;
+                gap: 15px;
+                justify-content: center;
+                margin-top: 30px;
+                flex-wrap: wrap;
+            }
+
+            .results {
+                display: none;
+                text-align: center;
+            }
+
+            .final-score {
+                font-size: 2.5em;
+                color: #4caf50;
+                margin: 20px 0;
+            }
+
+            @media (max-width: 768px) {
+                .container {
+                    padding: 10px;
+                }
+
+                .word-display {
+                    font-size: 2em;
+                }
+
+                .emoji {
+                    font-size: 3em;
+                }
+
+                .answer-input {
+                    font-size: 1.5em;
+                }
+
+                .controls {
+                    flex-direction: column;
+                    align-items: center;
+                }
+
+                .btn {
+                    width: 100%;
+                    max-width: 200px;
+                }
+            }
+
+            /* Flash animation for visual feedback */
+            @keyframes flash {
+                0%,
+                100% {
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 0.3;
+                }
+            }
+
+            .flash {
+                animation: flash 0.5s ease-in-out;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🎵 لعبة حذف وتبديل الأصوات 🎵</h1>
+                <p>تعلم اللعب بالأصوات والكلمات</p>
+            </div>
+
+            <!-- Level Selection -->
+            <div class="card level-selection" id="levelSelection">
+                <h2>اختر المستوى</h2>
+                <p>اضغط على أي مستوى لتبدأ اللعبة. ستسمع التعليمات عند بداية كل مستوى</p>
+                <div class="level-buttons">
+                    <button class="level-btn" onclick="startLevel(1)" onmouseover="speak('المستوى الأول - حذف البداية', 0.7)">
+                        المستوى 1<br />
+                        <small>حذف البداية</small>
+                    </button>
+                    <button class="level-btn" onclick="startLevel(2)" onmouseover="speak('المستوى الثاني - حذف النهاية وتبديل البداية', 0.7)">
+                        المستوى 2<br />
+                        <small>حذف النهاية + تبديل البداية</small>
+                    </button>
+                    <button class="level-btn" onclick="startLevel(3)" onmouseover="speak('المستوى الثالث - تحديات متقدمة', 0.7)">
+                        المستوى 3<br />
+                        <small>تحديات متقدمة</small>
+                    </button>
+                </div>
+                <p style="font-size: 0.9em; color: #666; margin-top: 20px">💡 اختصارات لوحة المفاتيح: Enter للتحقق | مسافة لسماع الكلمة | R لإعادة التحدي | H للتلميح</p>
+            </div>
+
+            <!-- Game Area -->
+            <div class="card game-area" id="gameArea">
+                <div class="progress-container">
+                    <div>التحدي <span id="currentChallenge">1</span> من <span id="totalChallenges">5</span></div>
+                    <div class="progress-bar" id="progressBar" style="width: 20%"></div>
+                </div>
+
+                <div class="score">النقاط: <span id="score">0</span></div>
+
+                <div class="emoji" id="emoji">📖</div>
+                <div class="word-display" id="wordDisplay">كتاب</div>
+                <div class="challenge-text" id="challengeText">قل "كتاب" بدون صوت "ك"</div>
+
+                <div class="input-area">
+                    <input type="text" class="answer-input" id="answerInput" placeholder="اكتب الكلمة الجديدة هنا..." dir="rtl" />
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-check" onclick="checkAnswer()" id="checkBtn">تحقق</button>
+                    <button class="btn btn-hint" onclick="showHint()" id="hintBtn">تلميح</button>
+                    <button class="btn btn-speak" onclick="speakWord()" id="speakBtn">استمع</button>
+                </div>
+
+                <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
+                <div class="difference-display" id="differenceDisplay"></div>
+
+                <div class="game-controls">
+                    <button class="btn" onclick="backToLevels()">رجوع للمستويات</button>
+                    <button class="btn" onclick="restartGame()">إعادة اللعب</button>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div class="card results" id="results">
+                <h2>انتهت اللعبة! 🎉</h2>
+                <div class="final-score" id="finalScore">النقاط النهائية: 0/5</div>
+                <p id="resultMessage">أحسنت! استمر في التدريب</p>
+                <div class="game-controls">
+                    <button class="level-btn" onclick="backToLevels()">اختيار مستوى جديد</button>
+                    <button class="level-btn" onclick="restartGame()">إعادة اللعب</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Game data
+            const LEVEL1 = [
+                { type: 'delete-begin', word: 'كتاب', target: 'ك', answer: 'تاب', hint: 'احذف أول صوت', emoji: '📖' },
+                { type: 'delete-begin', word: 'قلم', target: 'ق', answer: 'لم', hint: 'احذف أول صوت', emoji: '✏️' },
+                { type: 'delete-begin', word: 'بيت', target: 'ب', answer: 'يت', hint: 'احذف أول صوت', emoji: '🏠' },
+                { type: 'delete-begin', word: 'موزة', target: 'م', answer: 'وزة', hint: 'احذف أول صوت', emoji: '🍌' },
+                { type: 'delete-begin', word: 'باب', target: 'ب', answer: 'اب', hint: 'احذف أول صوت', emoji: '🚪' },
+                { type: 'delete-begin', word: 'نجم', target: 'ن', answer: 'جم', hint: 'احذف أول صوت', emoji: '⭐' },
+                { type: 'delete-begin', word: 'سمك', target: 'س', answer: 'مك', hint: 'احذف أول صوت', emoji: '🐟' },
+                { type: 'delete-begin', word: 'قمر', target: 'ق', answer: 'مر', hint: 'احذف أول صوت', emoji: '🌙' },
+                { type: 'delete-begin', word: 'شمس', target: 'ش', answer: 'مس', hint: 'احذف أول صوت', emoji: '☀️' },
+                { type: 'delete-begin', word: 'ورد', target: 'و', answer: 'رد', hint: 'احذف أول صوت', emoji: '🌹' }
+            ];
+
+            const LEVEL2 = [
+                { type: 'delete-end', word: 'بيت', target: 'ت', answer: 'بي', hint: 'احذف آخر صوت', emoji: '🏠' },
+                { type: 'delete-end', word: 'نوم', target: 'م', answer: 'نو', hint: 'احذف آخر صوت', emoji: '😴' },
+                { type: 'delete-end', word: 'تفاحة', target: 'ة', answer: 'تفاح', hint: 'احذف آخر صوت', emoji: '🍎' },
+                { type: 'delete-end', word: 'باب', target: 'ب', answer: 'با', hint: 'احذف آخر صوت', emoji: '🚪' },
+                { type: 'sub-begin', word: 'باب', target: 'ب', replacement: 'ن', answer: 'ناب', hint: 'بدّل أول صوت', emoji: '🚪' },
+                { type: 'sub-begin', word: 'بيت', target: 'ب', replacement: 'ز', answer: 'زيت', hint: 'بدّل أول صوت', emoji: '🏠' },
+                { type: 'sub-begin', word: 'سمك', target: 'س', replacement: 'ل', answer: 'لمك', hint: 'بدّل أول صوت', emoji: '🐟' },
+                { type: 'sub-begin', word: 'قلم', target: 'ق', replacement: 'ع', answer: 'علم', hint: 'بدّل أول صوت', emoji: '✏️' }
+            ];
+
+            const LEVEL3 = [
+                { type: 'delete-mid', word: 'سمر', target: 'م', answer: 'سر', hint: 'احذف صوتًا من الوسط', emoji: '🙂' },
+                { type: 'delete-mid', word: 'بيت', target: 'ي', answer: 'بت', hint: 'احذف صوتًا من الوسط', emoji: '🏠' },
+                { type: 'delete-mid', word: 'مدرسة', target: 'د', answer: 'مرسة', hint: 'احذف صوتًا من الوسط', emoji: '🏫' },
+                { type: 'sub-end', word: 'قمر', target: 'ر', replacement: 'ل', answer: 'قمل', hint: 'بدّل آخر صوت', emoji: '🌙' },
+                { type: 'sub-end', word: 'قلم', target: 'م', replacement: 'ن', answer: 'قلن', hint: 'بدّل آخر صوت', emoji: '✏️' },
+                { type: 'sub-begin', word: 'كتاب', target: 'ك', replacement: 'ن', answer: 'نتاب', hint: 'بدّل أول صوت', emoji: '📖' },
+                { type: 'sub-begin', word: 'تفاح', target: 'ت', replacement: 'ك', answer: 'كفاح', hint: 'بدّل أول صوت', emoji: '🍎' },
+                { type: 'sub-end', word: 'تمام', target: 'م', replacement: 'ن', answer: 'تمان', hint: 'بدّل آخر صوت', emoji: '✅' }
+            ];
+
+            // Game state
+            let currentLevel = 1;
+            let currentChallengeIndex = 0;
+            let challenges = [];
+            let score = 0;
+            let attempts = 0;
+            let maxAttempts = 2;
+            let audioContext;
+
+            // Initialize audio context
+            function initAudio() {
+                try {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.log('Audio not supported');
+                }
+            }
+
+            // Sound effects
+            function playBuzzer() {
+                if (!audioContext) return;
+
+                try {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.type = 'sawtooth';
+                    oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.35);
+
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.35);
+                } catch (e) {
+                    // Visual feedback if audio fails
+                    document.body.classList.add('flash');
+                    setTimeout(() => document.body.classList.remove('flash'), 500);
+                }
+            }
+
+            function playGlitter() {
+                if (!audioContext) return;
+
+                try {
+                    const frequencies = [600, 800, 1000, 1200];
+                    frequencies.forEach((freq, index) => {
+                        setTimeout(() => {
+                            const oscillator = audioContext.createOscillator();
+                            const gainNode = audioContext.createGain();
+
+                            oscillator.connect(gainNode);
+                            gainNode.connect(audioContext.destination);
+
+                            oscillator.type = 'sine';
+                            oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+
+                            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.12);
+
+                            oscillator.start(audioContext.currentTime);
+                            oscillator.stop(audioContext.currentTime + 0.12);
+                        }, index * 120);
+                    });
+                } catch (e) {
+                    console.log('Glitter sound failed');
+                }
+            }
+
+            // Normalize Arabic text
+            function normalizeArabic(text) {
+                return text
+                    .replace(/[أإآ]/g, 'ا')
+                    .replace(/ى/g, 'ي')
+                    .replace(/[ًٌٍَُِّْ]/g, '')
+                    .replace(/[\s\-]/g, '')
+                    .trim()
+                    .toLowerCase();
+            }
+
+            // Text-to-speech
+            function speakWord() {
+                const challenge = challenges[currentChallengeIndex];
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(challenge.word);
+                    utterance.lang = 'ar-SA';
+                    utterance.rate = 0.8;
+                    speechSynthesis.speak(utterance);
+                }
+            }
+
+            // Start level
+            function startLevel(level) {
+                currentLevel = level;
+                currentChallengeIndex = 0;
+                score = 0;
+                attempts = 0;
+
+                // Select challenges based on level
+                switch (level) {
+                    case 1:
+                        challenges = shuffleArray([...LEVEL1]).slice(0, 5);
+                        break;
+                    case 2:
+                        challenges = shuffleArray([...LEVEL2]).slice(0, 5);
+                        break;
+                    case 3:
+                        challenges = shuffleArray([...LEVEL3]).slice(0, 5);
+                        break;
+                }
+
+                document.getElementById('levelSelection').style.display = 'none';
+                document.getElementById('gameArea').style.display = 'block';
+                document.getElementById('results').style.display = 'none';
+
+                initAudio();
+                showChallenge();
+            }
+
+            // Shuffle array
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+
+            // Show current challenge
+            function showChallenge() {
+                const challenge = challenges[currentChallengeIndex];
+
+                document.getElementById('emoji').textContent = challenge.emoji;
+                document.getElementById('wordDisplay').textContent = challenge.word;
+                document.getElementById('currentChallenge').textContent = currentChallengeIndex + 1;
+                document.getElementById('totalChallenges').textContent = challenges.length;
+                document.getElementById('score').textContent = score;
+
+                // Update progress bar
+                const progress = ((currentChallengeIndex + 1) / challenges.length) * 100;
+                document.getElementById('progressBar').style.width = progress + '%';
+
+                // Generate challenge text
+                let challengeText = '';
+                if (challenge.type === 'delete-begin' || challenge.type === 'delete-end' || challenge.type === 'delete-mid') {
+                    challengeText = `قل "${challenge.word}" بدون صوت "${challenge.target}"`;
+                } else if (challenge.type.startsWith('sub-')) {
+                    challengeText = `بدّل في "${challenge.word}" صوت "${challenge.target}" بـ "${challenge.replacement}"`;
+                }
+
+                document.getElementById('challengeText').textContent = challengeText;
+                document.getElementById('answerInput').value = '';
+                document.getElementById('feedback').textContent = '';
+                document.getElementById('differenceDisplay').innerHTML = '';
+
+                attempts = 0;
+                document.getElementById('checkBtn').disabled = false;
+                document.getElementById('answerInput').focus();
+            }
+
+            // Check answer
+            function checkAnswer() {
+                const challenge = challenges[currentChallengeIndex];
+                const userAnswer = normalizeArabic(document.getElementById('answerInput').value);
+                const correctAnswer = normalizeArabic(challenge.answer);
+
+                attempts++;
+
+                if (userAnswer === correctAnswer) {
+                    // Correct answer
+                    if (attempts === 1) {
+                        score++;
+                        document.getElementById('score').textContent = score;
+                    }
+
+                    playGlitter();
+                    document.getElementById('feedback').className = 'feedback correct';
+                    document.getElementById('feedback').textContent = `أحسنت! الجواب الصحيح هو: ${challenge.answer}`;
+
+                    // Show colored answer
+                    showColoredAnswer(challenge.answer);
+
+                    // Auto advance to next challenge
+                    setTimeout(() => {
+                        nextChallenge();
+                    }, 1200);
+                } else {
+                    // Wrong answer
+                    playBuzzer();
+                    document.getElementById('feedback').className = 'feedback incorrect';
+
+                    if (attempts >= maxAttempts) {
+                        document.getElementById('feedback').textContent = `الجواب الصحيح هو: ${challenge.answer}`;
+                        showColoredAnswer(challenge.answer);
+                        setTimeout(() => {
+                            nextChallenge();
+                        }, 2000);
+                    } else {
+                        document.getElementById('feedback').textContent = 'حاول مرة أخرى!';
+                        renderDifference(userAnswer, correctAnswer);
+                    }
+                }
+            }
+
+            // Show colored answer
+            function showColoredAnswer(answer) {
+                const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'];
+                let coloredHtml = '';
+
+                for (let i = 0; i < answer.length; i++) {
+                    const color = colors[i % colors.length];
+                    coloredHtml += `<span style="color: ${color}; font-weight: bold;">${answer[i]}</span>`;
+                }
+
+                document.getElementById('differenceDisplay').innerHTML = coloredHtml;
+            }
+
+            // Render difference between user answer and correct answer
+            function renderDifference(userAnswer, correctAnswer) {
+                let html = 'مقارنة: ';
+                const maxLength = Math.max(userAnswer.length, correctAnswer.length);
+
+                for (let i = 0; i < maxLength; i++) {
+                    const userChar = userAnswer[i] || '';
+                    const correctChar = correctAnswer[i] || '';
+
+                    if (userChar === correctChar) {
+                        html += `<span class="char-correct">${userChar}</span>`;
+                    } else if (userChar && !correctChar) {
+                        html += `<span class="char-extra">${userChar}</span>`;
+                    } else if (!userChar && correctChar) {
+                        html += `<span class="char-missing">${correctChar}</span>`;
+                    } else {
+                        html += `<span class="char-missing">${correctChar}</span>`;
+                    }
+                }
+
+                document.getElementById('differenceDisplay').innerHTML = html;
+            }
+
+            // Show hint
+            function showHint() {
+                const challenge = challenges[currentChallengeIndex];
+                document.getElementById('feedback').className = 'feedback hint';
+                document.getElementById('feedback').textContent = challenge.hint;
+            }
+
+            // Next challenge
+            function nextChallenge() {
+                currentChallengeIndex++;
+
+                if (currentChallengeIndex >= challenges.length) {
+                    showResults();
+                } else {
+                    showChallenge();
+                }
+            }
+
+            // Show results
+            function showResults() {
+                document.getElementById('gameArea').style.display = 'none';
+                document.getElementById('results').style.display = 'block';
+
+                const finalScore = `${score}/${challenges.length}`;
+                document.getElementById('finalScore').textContent = `النقاط النهائية: ${finalScore}`;
+
+                let message = '';
+                const percentage = (score / challenges.length) * 100;
+
+                if (percentage >= 80) {
+                    message = 'ممتاز! أداء رائع جداً! 🌟';
+                } else if (percentage >= 60) {
+                    message = 'أحسنت! أداء جيد جداً! 👏';
+                } else if (percentage >= 40) {
+                    message = 'جيد! استمر في التدريب! 💪';
+                } else {
+                    message = 'لا بأس، المحاولة تحتاج لتدريب أكثر! 📚';
+                }
+
+                document.getElementById('resultMessage').textContent = message;
+            }
+
+            // Back to levels
+            function backToLevels() {
+                document.getElementById('levelSelection').style.display = 'block';
+                document.getElementById('gameArea').style.display = 'none';
+                document.getElementById('results').style.display = 'none';
+            }
+
+            // Restart game
+            function restartGame() {
+                startLevel(currentLevel);
+            }
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (document.getElementById('gameArea').style.display === 'block') {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        checkAnswer();
+                    } else if (e.key === ' ') {
+                        e.preventDefault();
+                        speakWord();
+                    }
+                }
+            });
+
+            // Initialize game
+            document.addEventListener('DOMContentLoaded', () => {
+                // Focus on answer input when game starts
+                document.getElementById('answerInput').addEventListener('input', (e) => {
+                    // Allow only Arabic characters
+                    e.target.value = e.target.value.replace(/[^\u0600-\u06FF\s]/g, '');
+                });
+            });
+        </script>
+    </body>
+</html>

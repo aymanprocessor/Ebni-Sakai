@@ -1,0 +1,88 @@
+<div class="permissions-management-container p-4">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="mb-6">
+            <h1 class="text-4xl font-bold text-gray-800 dark:text-white mb-2">إدارة الصلاحيات</h1>
+            <p class="text-lg text-gray-600 dark:text-gray-300">تحكم في صلاحيات الوصول للألعاب والمقاييس حسب دور المستخدم</p>
+        </div>
+
+        <!-- Role Selector -->
+        <p-card styleClass="mb-6">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div class="flex-1">
+                    <label class="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2"> اختر الدور (Role) </label>
+                    <p-dropdown [(ngModel)]="selectedRole" [options]="roles" optionLabel="label" optionValue="value" (onChange)="onRoleChange()" [style]="{ width: '100%', 'min-width': '250px' }" placeholder="اختر دور المستخدم"> </p-dropdown>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <div class="text-sm text-gray-600 dark:text-gray-400">
+                        {{ getPermissionStats() }}
+                    </div>
+                    <button pButton pRipple label="حفظ الصلاحيات" icon="pi pi-save" class="p-button-success" (click)="savePermissions()" [disabled]="loading"></button>
+                </div>
+            </div>
+        </p-card>
+
+        <!-- Tabs for Games and Scales -->
+        <p-tabView>
+            <!-- Games Tab -->
+            <p-tabPanel header="الألعاب (Games)">
+                <p-card>
+                    <div class="mb-4 flex items-center gap-3 border-b pb-4">
+                        <p-checkbox [(ngModel)]="selectAllGames" [binary]="true" (ngModelChange)="toggleAllGames($event)" inputId="selectAllGames"> </p-checkbox>
+                        <label for="selectAllGames" class="text-lg font-bold cursor-pointer"> تحديد الكل / إلغاء الكل </label>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        <div *ngFor="let game of games" class="flex items-start gap-3 p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                            <p-checkbox [binary]="true" [ngModel]="isGameChecked(game.id)" (ngModelChange)="onGameCheckboxChange(game.id, $event)" [inputId]="'game-' + game.id"> </p-checkbox>
+                            <label [for]="'game-' + game.id" class="cursor-pointer flex-1">
+                                <span class="font-semibold text-purple-600 dark:text-purple-400">#{{ game.id }}</span>
+                                <span class="text-sm text-gray-700 dark:text-gray-300 mr-2">{{ game.title }}</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div *ngIf="games.length === 0" class="text-center py-8 text-gray-500">لا توجد ألعاب متاحة</div>
+                </p-card>
+            </p-tabPanel>
+
+            <!-- Scales Tab -->
+            <p-tabPanel header="المقاييس (Scales)">
+                <p-card>
+                    <div class="mb-4 flex items-center gap-3 border-b pb-4">
+                        <p-checkbox [(ngModel)]="selectAllScales" [binary]="true" (ngModelChange)="toggleAllScales($event)" inputId="selectAllScales"> </p-checkbox>
+                        <label for="selectAllScales" class="text-lg font-bold cursor-pointer"> تحديد الكل / إلغاء الكل </label>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div *ngFor="let scale of scales" class="flex items-start gap-3 p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                            <p-checkbox [binary]="true" [ngModel]="isScaleChecked(scale.id)" (ngModelChange)="onScaleCheckboxChange(scale.id, $event)" [inputId]="'scale-' + scale.id"> </p-checkbox>
+                            <label [for]="'scale-' + scale.id" class="cursor-pointer flex-1">
+                                <span class="font-semibold text-blue-600 dark:text-blue-400">#{{ scale.id }}</span>
+                                <span class="text-base text-gray-700 dark:text-gray-300 mr-2">{{ scale.title }}</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div *ngIf="scales.length === 0" class="text-center py-8 text-gray-500">لا توجد مقاييس متاحة</div>
+                </p-card>
+            </p-tabPanel>
+        </p-tabView>
+
+        <!-- Info Box -->
+        <p-card styleClass="mt-6 bg-blue-50 dark:bg-blue-900">
+            <div class="flex gap-3">
+                <i class="pi pi-info-circle text-blue-600 dark:text-blue-400 text-2xl"></i>
+                <div>
+                    <h3 class="font-bold text-gray-800 dark:text-white mb-2">ملاحظات هامة:</h3>
+                    <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1">
+                        <li>دور <strong>Admin</strong> لديه صلاحية الوصول لكل شيء تلقائياً</li>
+                        <li>دور <strong>Paid User</strong> لديه صلاحية الوصول لكل الألعاب والمقاييس</li>
+                        <li>دور <strong>Specialist</strong> و <strong>User</strong> يحتاجون تحديد الصلاحيات يدوياً</li>
+                        <li>يمكنك تعيين صلاحيات مخصصة لكل مستخدم على حدة من صفحة إدارة المستخدمين</li>
+                    </ul>
+                </div>
+            </div>
+        </p-card>
+    </div>
+</div>

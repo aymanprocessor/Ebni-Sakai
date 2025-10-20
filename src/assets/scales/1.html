@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>مقياس صعوبات الانتباه</title>
+        <!-- Tailwind CSS (Play CDN) -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            @media print {
+                body {
+                    print-color-adjust: exact;
+                    -webkit-print-color-adjust: exact;
+                }
+                .print\:hidden {
+                    display: none !important;
+                }
+                .print\:space-y-4 > * + * {
+                    margin-top: 1rem !important;
+                }
+                .print\:bg-blue-700 {
+                    background-color: #1d4ed8 !important;
+                }
+            }
+        </style>
+    </head>
+    <body class="bg-gradient-to-br from-blue-50 via-white to-blue-50 p-4 md:p-8">
+        <div id="root"></div>
+
+        <!-- React + ReactDOM + Babel (for JSX in browser) -->
+        <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+        <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+        <script type="text/babel">
+            // ====== Icon Components (inline SVGs) ======
+            const iconProps = 'w-6 h-6';
+            const ChevronRight = ({ className = 'w-5 h-5' }) => (
+                <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m15 19-7-7 7-7" />
+                </svg>
+            );
+            const ChevronLeft = ({ className = 'w-5 h-5' }) => (
+                <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m9 5 7 7-7 7" />
+                </svg>
+            );
+            const FileText = ({ className = 'w-6 h-6' }) => (
+                <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" />
+                </svg>
+            );
+            const Printer = ({ className = 'w-6 h-6' }) => (
+                <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M6 9V2h12v7" />
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                    <path d="M6 14h12v8H6z" />
+                </svg>
+            );
+            const AlertCircle = ({ className = 'w-6 h-6' }) => (
+                <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12" y2="16"></line>
+                </svg>
+            );
+            const CheckCircle = ({ className = 'w-6 h-6' }) => (
+                <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <path d="M22 4 12 14.01l-3-3" />
+                </svg>
+            );
+
+            // ====== App ======
+            const { useState } = React;
+
+            function AttentionScale() {
+                const [currentPage, setCurrentPage] = useState(0);
+                const [formData, setFormData] = useState({
+                    studentName: '',
+                    age: '',
+                    gender: '',
+                    grade: '',
+                    school: '',
+                    evaluatorName: '',
+                    evaluatorRole: '',
+                    evaluationDate: ''
+                });
+                const [responses, setResponses] = useState(Array(20).fill(null));
+
+                const questions = [
+                    'يصعب عليه الاستمرار في أي عمل حتى يتمه',
+                    'يبدو شارداً أو مشتتاً أو غير منتبه لما يسمع أو يقرأ أو يرى',
+                    'يسهل تشتيته، يتشتت انتباهه بسهولة لأي مثيرات',
+                    'يجد صعوبة أن يظل محتفظاً بانتباهه في المهام التي تتطلب تركيز الانتباه',
+                    'يجد صعوبة في التوقف عن أنشطة اللعب',
+                    'يجد صعوبة أن يظل هادئاً خلال الحصة أو الدرس أو الجلوس بصفة عامة',
+                    'يبدو متململاً أو عصبياً خلال الأداء على المهام أو الأنشطة الأكاديمية',
+                    'يجد صعوبة في الاستغراق أو الانشغال بالعمل أو اللعب بهدوء',
+                    'يتحدث كثيراً، وبصورة مفرطة، وبلا ضوابط أو هدف',
+                    'يتحول من نشاط إلى آخر قبل اكتمال النشاط الذي يبدأه',
+                    'يجد صعوبة في متابعة الدروس أو التوجيهات التي تصدر عن المعلمين',
+                    'يتشتت انتباهه لأي مثيرات خارج مواقف التعلم',
+                    'يبدو مشوشاً تتداخل لديه المثيرات وتختلط عليه المعلومات',
+                    'يقاطع أو يتطفل أو يقتحم الآخرين دون مبرر أو استئذان',
+                    'يجيب على الأسئلة باندفاع، وبلا تفكير، وقبل اكتمال سماعها',
+                    'يجد صعوبة في انتظار دوره في الألعاب أو المواقف',
+                    'يقحم نفسه بدنياً في أنشطة خطرة دون اعتبار لنتائجها',
+                    'مندفعاً دون التأكد من معرفته الصحيحة للإجابات',
+                    'يفقد أو ينسى أدواته اللازمة لأداء الأنشطة المدرسية أو المنزلية أو الرياضية',
+                    'يبدو مهملاً أو غير مهتم أو مكترث بما يكلف به من أنشطة أو مهام'
+                ];
+
+                const options = [
+                    { label: 'دائماً', value: 4 },
+                    { label: 'غالباً', value: 3 },
+                    { label: 'أحياناً', value: 2 },
+                    { label: 'نادراً', value: 1 },
+                    { label: 'لا تنطبق', value: 0 }
+                ];
+
+                const handleInputChange = (field, value) => {
+                    setFormData({ ...formData, [field]: value });
+                };
+
+                const handleResponse = (index, value) => {
+                    const newResponses = [...responses];
+                    newResponses[index] = value;
+                    setResponses(newResponses);
+                };
+
+                const calculateResults = () => {
+                    const rawScore = responses.reduce((sum, val) => sum + (val || 0), 0);
+                    let percentile = 0;
+                    let difficultyLevel = '';
+                    let difficultyColor = '';
+
+                    if (rawScore < 20) {
+                        difficultyLevel = 'عادي - لا توجد صعوبات';
+                        difficultyColor = '#10b981';
+                        percentile = Math.round((rawScore / 20) * 28);
+                    } else if (rawScore >= 20 && rawScore < 40) {
+                        difficultyLevel = 'صعوبات خفيفة';
+                        difficultyColor = '#f59e0b';
+                        percentile = 29 + Math.round(((rawScore - 20) / 20) * 45);
+                    } else if (rawScore >= 40 && rawScore < 60) {
+                        difficultyLevel = 'صعوبات متوسطة';
+                        difficultyColor = '#ef4444';
+                        percentile = 75 + Math.round(((rawScore - 40) / 20) * 24);
+                    } else {
+                        difficultyLevel = 'صعوبات شديدة';
+                        difficultyColor = '#dc2626';
+                        percentile = 99;
+                    }
+
+                    return { rawScore, percentile, difficultyLevel, difficultyColor };
+                };
+
+                const getRecommendations = (level) => {
+                    if (level.includes('عادي')) {
+                        return ['الاستمرار في المتابعة الدورية للتلميذ', 'تعزيز السلوكيات الإيجابية', 'توفير بيئة تعليمية محفزة'];
+                    } else if (level.includes('خفيفة')) {
+                        return ['المتابعة الدقيقة مع المعلمين وأولياء الأمور', 'توفير أنشطة تعزز التركيز والانتباه', 'تقليل المشتتات في البيئة التعليمية', 'استخدام تقنيات تعزيز الانتباه البسيطة'];
+                    } else if (level.includes('متوسطة')) {
+                        return ['إعداد خطة تدخل تربوية متخصصة', 'التنسيق مع أخصائي صعوبات التعلم', 'تطبيق استراتيجيات تعليمية فردية', 'المتابعة المستمرة وتقييم التقدم', 'إشراك الأسرة في خطة التدخل'];
+                    } else {
+                        return [
+                            'التحويل الفوري لأخصائي صعوبات التعلم',
+                            'إجراء تقييم شامل متعدد التخصصات',
+                            'وضع خطة تربوية فردية مكثفة',
+                            'التنسيق مع الأسرة والمدرسة بشكل وثيق',
+                            'المتابعة الدورية المكثفة وتعديل الخطة حسب الحاجة',
+                            'النظر في إمكانية الاستشارة الطبية المتخصصة'
+                        ];
+                    }
+                };
+
+                const handlePrint = () => window.print();
+
+                const allQuestionsAnswered = responses.every((r) => r !== null);
+                const allFieldsFilled = Object.values(formData).every((val) => (val ?? '').toString().trim() !== '');
+
+                const pages = [
+                    // ===== صفحة الترحيب =====
+                    <div className="text-center space-y-8 py-12" key="p1">
+                        <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-12 px-8 rounded-2xl shadow-2xl">
+                            <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center rounded-full bg-white/10">
+                                <FileText className="w-12 h-12" />
+                            </div>
+                            <h1 className="text-4xl font-bold mb-4">مقياس التقدير التشخيصي</h1>
+                            <h2 className="text-3xl mb-6">لصعوبات الانتباه</h2>
+                            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 max-w-2xl mx-auto">
+                                <p className="text-xl leading-relaxed">
+                                    بطارية مقاييس التقدير التشخيصية
+                                    <br />
+                                    لصعوبات التعلم النمائية والأكاديمية
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="bg-blue-50 border-r-4 border-blue-500 p-6 rounded-lg max-w-2xl mx-auto text-right">
+                            <div className="flex items-start gap-4">
+                                <AlertCircle className="w-6 h-6 text-blue-600 mt-1 flex-shrink-0" />
+                                <div>
+                                    <h3 className="font-bold text-lg text-blue-900 mb-2">هدف المقياس</h3>
+                                    <p className="text-gray-700 leading-relaxed">يهدف هذا المقياس إلى الكشف عن التلاميذ ذوي اضطرابات أو صعوبات الانتباه من خلال تقييم الخصائص السلوكية المرتبطة بهذه الصعوبات</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>,
+
+                    // ===== صفحة التعليمات =====
+                    <div className="space-y-6 print:space-y-4" key="p2">
+                        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-xl shadow-lg">
+                            <h2 className="text-2xl font-bold text-center">التعليمات وطريقة الاستخدام</h2>
+                        </div>
+
+                        <div className="bg-white border-2 border-blue-200 rounded-xl p-6 shadow-md text-right">
+                            <h3 className="font-bold text-xl text-blue-900 mb-4 flex items-center gap-2 justify-end">
+                                <span>تعريف صعوبات الانتباه</span>
+                                <CheckCircle className="w-6 h-6" />
+                            </h3>
+                            <p className="text-gray-700 leading-relaxed mb-4">
+                                يقصد باضطراب أو صعوبات الانتباه:
+                                <strong> ضعف أو قصور القدرة على تركيز الانتباه، والاحتفاظ به، والوعي الشعوري بموضوع الانتباه </strong>، وقد يكون مصحوباً بفرط الحركة والنشاط، أو اندفاعية.
+                            </p>
+                            <p className="text-gray-700 leading-relaxed bg-yellow-50 p-4 rounded-lg border-r-4 border-yellow-400">
+                                صعوبات الانتباه من أكثر الصعوبات النمائية التي تثير الإزعاج نظراً لاعتماد كافة المدخلات التدريسية على العرض النظري للمعلومات، ومن ثم تؤثر كفاءة عمليات الانتباه تأثيراً جوهرياً على استيعاب كافة الأنشطة المعرفية
+                                والأكاديمية والمهارية.
+                            </p>
+                        </div>
+
+                        <div className="bg-white border-2 border-blue-200 rounded-xl p-6 shadow-md text-right">
+                            <h3 className="font-bold text-xl text-blue-900 mb-4">خطوات التطبيق</h3>
+                            <div className="space-y-3">
+                                {['تأكد من معرفتك الجيدة بالتلميذ موضوع التقدير', 'املأ جميع البيانات الشخصية المطلوبة بدقة', 'اقرأ كل فقرة بعناية قبل تقديرها', 'حدد مدى تواتر ظهور السلوك لدى التلميذ', 'لا تترك أي فقرة دون تقدير'].map((step, i) => (
+                                    <div key={i} className="flex items-start gap-3 bg-blue-50 p-3 rounded-lg">
+                                        <span className="bg-blue-600 text-white w-7 h-7 rounded-full flex items-center justify-center font-bold flex-shrink-0">{i + 1}</span>
+                                        <p className="text-gray-700 pt-1">{step}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="bg-white border-2 border-blue-200 rounded-xl p-6 shadow-md">
+                            <h3 className="font-bold text-xl text-blue-900 mb-4 text-right">مستويات التقدير</h3>
+                            <div className="grid grid-cols-5 gap-2">
+                                {options.map((opt, i) => (
+                                    <div key={i} className="bg-gradient-to-b from-blue-50 to-blue-100 border border-blue-300 rounded-lg p-3 text-center">
+                                        <p className="font-bold text-blue-900">{opt.label}</p>
+                                        <p className="text-2xl font-bold text-blue-600 mt-1">{opt.value}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="bg-amber-50 border-2 border-amber-400 rounded-xl p-5">
+                            <div className="flex items-start gap-3">
+                                <AlertCircle className="w-6 h-6 text-amber-600 mt-1 flex-shrink-0" />
+                                <div className="text-right">
+                                    <h4 className="font-bold text-amber-900 mb-2">ملاحظات هامة</h4>
+                                    <ul className="list-disc list-inside space-y-1 text-amber-800">
+                                        <li>تستغرق الاستجابة من 15-20 دقيقة لكل تلميذ</li>
+                                        <li>لا تقيم أكثر من 6 تلاميذ في الجلسة الواحدة</li>
+                                        <li>التقدير يعتمد على ملاحظتك المباشرة للتلميذ</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>,
+
+                    // ===== صفحة البيانات والأسئلة =====
+                    <div className="space-y-6" key="p3">
+                        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-xl shadow-lg">
+                            <h2 className="text-2xl font-bold text-center">البيانات الشخصية والتقييم</h2>
+                        </div>
+
+                        <div className="bg-white border-2 border-blue-200 rounded-xl p-6 shadow-md">
+                            <h3 className="font-bold text-xl text-blue-900 mb-4 text-right">البيانات الأساسية</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <input
+                                    type="text"
+                                    placeholder="اسم التلميذ *"
+                                    value={formData.studentName}
+                                    onChange={(e) => handleInputChange('studentName', e.target.value)}
+                                    className="border-2 border-blue-300 rounded-lg p-3 text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    aria-label="اسم التلميذ"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="العمر *"
+                                    value={formData.age}
+                                    onChange={(e) => handleInputChange('age', e.target.value)}
+                                    className="border-2 border-blue-300 rounded-lg p-3 text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    aria-label="العمر"
+                                />
+                                <select
+                                    value={formData.gender}
+                                    onChange={(e) => handleInputChange('gender', e.target.value)}
+                                    className="border-2 border-blue-300 rounded-lg p-3 text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    aria-label="الجنس"
+                                >
+                                    <option value="">الجنس *</option>
+                                    <option value="ذكر">ذكر</option>
+                                    <option value="أنثى">أنثى</option>
+                                </select>
+                                <input
+                                    type="text"
+                                    placeholder="الصف الدراسي *"
+                                    value={formData.grade}
+                                    onChange={(e) => handleInputChange('grade', e.target.value)}
+                                    className="border-2 border-blue-300 rounded-lg p-3 text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    aria-label="الصف الدراسي"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="اسم المدرسة *"
+                                    value={formData.school}
+                                    onChange={(e) => handleInputChange('school', e.target.value)}
+                                    className="border-2 border-blue-300 rounded-lg p-3 text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    aria-label="اسم المدرسة"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="اسم القائم بالتقييم *"
+                                    value={formData.evaluatorName}
+                                    onChange={(e) => handleInputChange('evaluatorName', e.target.value)}
+                                    className="border-2 border-blue-300 rounded-lg p-3 text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    aria-label="اسم القائم بالتقييم"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="الوظيفة *"
+                                    value={formData.evaluatorRole}
+                                    onChange={(e) => handleInputChange('evaluatorRole', e.target.value)}
+                                    className="border-2 border-blue-300 rounded-lg p-3 text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    aria-label="الوظيفة"
+                                />
+                                <input
+                                    type="date"
+                                    value={formData.evaluationDate}
+                                    onChange={(e) => handleInputChange('evaluationDate', e.target.value)}
+                                    className="border-2 border-blue-300 rounded-lg p-3 text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    aria-label="تاريخ التقييم"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="bg-white border-2 border-blue-200 rounded-xl p-6 shadow-md">
+                            <h3 className="font-bold text-xl text-blue-900 mb-4 text-right">فقرات التقييم</h3>
+                            <div className="space-y-4 max-h-96 overflow-y-auto pl-2">
+                                {questions.map((q, idx) => (
+                                    <div key={idx} className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                                        <p className="font-semibold text-gray-800 mb-3 text-right">
+                                            <span className="bg-blue-600 text-white px-3 py-1 rounded-full ml-2">{idx + 1}</span>
+                                            {q}
+                                        </p>
+                                        <div className="flex gap-2 flex-wrap justify-end">
+                                            {options.map((opt) => (
+                                                <button
+                                                    key={opt.value}
+                                                    onClick={() => handleResponse(idx, opt.value)}
+                                                    className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                                                        responses[idx] === opt.value ? 'bg-blue-600 text-white shadow-lg scale-105' : 'bg-white text-blue-600 border-2 border-blue-300 hover:bg-blue-100'
+                                                    }`}
+                                                    aria-pressed={responses[idx] === opt.value}
+                                                >
+                                                    {opt.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>,
+
+                    // ===== صفحة النتائج =====
+                    <div className="space-y-6 print:space-y-4" key="p4">
+                        {(() => {
+                            const { rawScore, percentile, difficultyLevel, difficultyColor } = calculateResults();
+                            return (
+                                <>
+                                    <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-xl shadow-lg print:bg-blue-700">
+                                        <h2 className="text-2xl font-bold text-center flex items-center justify-center gap-3">
+                                            <FileText className="w-8 h-8" />
+                                            التقرير التشخيصي النهائي
+                                        </h2>
+                                    </div>
+
+                                    <div className="bg-white border-2 border-blue-200 rounded-xl p-6 shadow-md">
+                                        <h3 className="font-bold text-xl text-blue-900 mb-4 border-b-2 border-blue-200 pb-2 text-right">البيانات الشخصية</h3>
+                                        <div className="grid grid-cols-2 gap-4 text-right">
+                                            {[
+                                                ['اسم التلميذ', formData.studentName],
+                                                ['العمر', formData.age],
+                                                ['الجنس', formData.gender],
+                                                ['الصف الدراسي', formData.grade],
+                                                ['المدرسة', formData.school],
+                                                ['القائم بالتقييم', formData.evaluatorName],
+                                                ['الوظيفة', formData.evaluatorRole],
+                                                ['تاريخ التقييم', formData.evaluationDate]
+                                            ].map(([label, value], i) => (
+                                                <div className="bg-blue-50 p-3 rounded-lg" key={i}>
+                                                    <p className="text-gray-600 text-sm">{label}</p>
+                                                    <p className="font-bold text-blue-900">{value}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-xl shadow-lg text-center">
+                                            <p className="text-sm opacity-90 mb-2">الدرجة الخام</p>
+                                            <p className="text-5xl font-bold">{rawScore}</p>
+                                            <p className="text-sm opacity-90 mt-2">من 80</p>
+                                        </div>
+                                        <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-6 rounded-xl shadow-lg text-center">
+                                            <p className="text-sm opacity-90 mb-2">النسبة المئينية</p>
+                                            <p className="text-5xl font-bold">{percentile}</p>
+                                            <p className="text-sm opacity-90 mt-2">%</p>
+                                        </div>
+                                        <div className="text-white p-6 rounded-xl shadow-lg text-center" style={{ background: `linear-gradient(135deg, ${difficultyColor}, ${difficultyColor}dd)` }}>
+                                            <p className="text-sm opacity-90 mb-2">مستوى الصعوبة</p>
+                                            <p className="text-xl font-bold leading-tight">{difficultyLevel}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white border-2 border-blue-200 rounded-xl p-6 shadow-md">
+                                        <h3 className="font-bold text-xl text-blue-900 mb-4 text-right">التشخيص التفصيلي</h3>
+                                        <div className="bg-blue-50 p-4 rounded-lg border-r-4 border-blue-500 text-right">
+                                            <p className="text-gray-800 leading-relaxed">
+                                                {rawScore < 20 && (
+                                                    <span>
+                                                        <strong>النتيجة:</strong> احتمال ألا تكون لدى التلميذ صعوبة تعلم في الانتباه.
+                                                        <br />
+                                                        <br />
+                                                        <strong>الأساس التشخيصي:</strong> الدرجة الخام ({rawScore}) أقل من 20 درجة، مما يشير إلى أداء طبيعي في مهارات الانتباه.
+                                                    </span>
+                                                )}
+                                                {rawScore >= 20 && rawScore < 40 && (
+                                                    <span>
+                                                        <strong>النتيجة:</strong> احتمال وجود صعوبات تعلم خفيفة في الانتباه.
+                                                        <br />
+                                                        <br />
+                                                        <strong>الأساس التشخيصي:</strong> الدرجة الخام ({rawScore}) تقع في المدى (20-39)، مما يشير إلى صعوبات خفيفة تتطلب المتابعة والدعم.
+                                                    </span>
+                                                )}
+                                                {rawScore >= 40 && rawScore < 60 && (
+                                                    <span>
+                                                        <strong>النتيجة:</strong> احتمال وجود صعوبات تعلم متوسطة في الانتباه.
+                                                        <br />
+                                                        <br />
+                                                        <strong>الأساس التشخيصي:</strong> الدرجة الخام ({rawScore}) تقع في المدى (40-59)، مما يشير إلى صعوبات متوسطة تتطلب تدخل تربوي متخصص.
+                                                    </span>
+                                                )}
+                                                {rawScore >= 60 && (
+                                                    <span>
+                                                        <strong>النتيجة:</strong> احتمال وجود صعوبات تعلم شديدة في الانتباه.
+                                                        <br />
+                                                        <br />
+                                                        <strong>الأساس التشخيصي:</strong> الدرجة الخام ({rawScore}) تساوي أو تزيد عن 60 درجة، مما يشير إلى صعوبات شديدة تتطلب تدخل فوري ومكثف.
+                                                    </span>
+                                                )}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white border-2 border-green-200 rounded-xl p-6 shadow-md">
+                                        <h3 className="font-bold text-xl text-green-900 mb-4 flex items-center gap-2 justify-end">
+                                            <span>التوصيات والمتابعة</span>
+                                            <CheckCircle className="w-6 h-6" />
+                                        </h3>
+                                        <ul className="space-y-2 text-right">
+                                            {getRecommendations(difficultyLevel).map((rec, i) => (
+                                                <li key={i} className="flex items-start gap-3 bg-green-50 p-3 rounded-lg">
+                                                    <span className="bg-green-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">{i + 1}</span>
+                                                    <span className="text-gray-700">{rec}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+
+                                    <div className="bg-amber-50 border-2 border-amber-400 rounded-xl p-5 print:hidden">
+                                        <div className="flex items-start gap-3">
+                                            <AlertCircle className="w-6 h-6 text-amber-600 flex-shrink-0 mt-1" />
+                                            <div className="text-right">
+                                                <h4 className="font-bold text-amber-900 mb-2">ملاحظة هامة</h4>
+                                                <p className="text-amber-800 text-sm leading-relaxed">هذا التقرير هو أداة تشخيصية أولية ويجب أن يُستخدم كجزء من تقييم شامل متعدد الأبعاد. يُنصح بإجراء تقييمات إضافية ومتابعة مع المتخصصين عند الحاجة.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex justify-center print:hidden">
+                                        <button
+                                            onClick={handlePrint}
+                                            className="bg-gradient-to-r from-green-600 to-green-700 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all flex items-center gap-3"
+                                        >
+                                            <Printer className="w-6 h-6" />
+                                            طباعة التقرير
+                                        </button>
+                                    </div>
+                                </>
+                            );
+                        })()}
+                    </div>
+                ];
+
+                return (
+                    <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden" dir="rtl">
+                        {/* Progress Bar */}
+                        <div className="bg-blue-600 h-2 print:hidden">
+                            <div className="bg-green-400 h-full transition-all duration-500 ease-out" style={{ width: `${((currentPage + 1) / pages.length) * 100}%` }} />
+                        </div>
+
+                        {/* Page Indicator */}
+                        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 flex justify-between items-center print:hidden">
+                            <div className="text-sm font-semibold">
+                                الصفحة {currentPage + 1} من {pages.length}
+                            </div>
+                            <div className="flex gap-2">
+                                {pages.map((_, idx) => (
+                                    <div key={idx} className={`w-3 h-3 rounded-full transition-all ${idx === currentPage ? 'bg-white scale-125' : 'bg-white/40'}`} />
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-6 md:p-10 min-h-[600px]">{pages[currentPage]}</div>
+
+                        {/* Navigation */}
+                        <div className="bg-gray-50 px-6 py-4 flex justify-between items-center border-t-2 border-gray-200 print:hidden">
+                            <button
+                                onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+                                disabled={currentPage === 0}
+                                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-all ${
+                                    currentPage === 0 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700 shadow-md hover:shadow-lg transform hover:scale-105'
+                                }`}
+                            >
+                                <ChevronRight className="w-5 h-5" />
+                                السابق
+                            </button>
+
+                            <div className="text-center">
+                                {currentPage === 2 && !allFieldsFilled && <p className="text-red-600 text-sm font-semibold">يرجى ملء جميع البيانات والإجابة على جميع الأسئلة</p>}
+                                {currentPage === 2 && allFieldsFilled && !allQuestionsAnswered && <p className="text-amber-600 text-sm font-semibold">يرجى الإجابة على جميع الأسئلة ({responses.filter((r) => r !== null).length}/20)</p>}
+                            </div>
+
+                            <button
+                                onClick={() => {
+                                    if (currentPage === 2 && (!allFieldsFilled || !allQuestionsAnswered)) {
+                                        alert('يرجى ملء جميع البيانات والإجابة على جميع الأسئلة قبل المتابعة');
+                                        return;
+                                    }
+                                    setCurrentPage(Math.min(pages.length - 1, currentPage + 1));
+                                }}
+                                disabled={currentPage === pages.length - 1}
+                                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-all ${
+                                    currentPage === pages.length - 1 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700 shadow-md hover:shadow-lg transform hover:scale-105'
+                                }`}
+                            >
+                                التالي
+                                <ChevronLeft className="w-5 h-5" />
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            function App() {
+                return (
+                    <div>
+                        <AttentionScale />
+                        <div className="text-center mt-6 text-gray-600 text-sm print:hidden">
+                            <p>بطارية مقاييس التقدير التشخيصية لصعوبات التعلم النمائية والأكاديمية</p>
+                            <p className="mt-1">جامعة الخليج العربي</p>
+                        </div>
+                    </div>
+                );
+            }
+
+            const root = ReactDOM.createRoot(document.getElementById('root'));
+            root.render(<App />);
+        </script>
+    </body>
+</html>

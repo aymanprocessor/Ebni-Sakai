@@ -1,0 +1,1579 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مغامرة القراءة - رحلة الأرنب سامي</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #87CEEB 0%, #98FB98 50%, #F0E68C 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            direction: rtl;
+            padding: 10px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            width: 95%;
+            max-width: 900px;
+            min-height: 650px;
+            overflow: hidden;
+            position: relative;
+            border: 3px solid #FFD700;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .header .speak-btn {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .book-cover {
+            background: linear-gradient(45deg, #4CAF50, #81C784);
+            color: white;
+            text-align: center;
+            padding: 50px 20px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            min-height: 550px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .book-cover:hover {
+            transform: scale(1.02);
+        }
+
+        .book-title {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 25px 0;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            animation: glow 2s ease-in-out infinite alternate;
+            position: relative;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 3px 3px 6px rgba(0,0,0,0.3); }
+            to { text-shadow: 3px 3px 15px rgba(255,255,255,0.5); }
+        }
+
+        .author {
+            font-size: 1.4rem;
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .cover-image {
+            font-size: 5rem;
+            margin: 25px 0;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .page-content {
+            padding: 40px;
+            min-height: 550px;
+            display: none;
+            position: relative;
+        }
+
+        .page-content.active {
+            display: block;
+        }
+
+        .level-header {
+            background: linear-gradient(45deg, #FF9800, #FFC107);
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .instruction-box {
+            background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+            border: 3px solid #2196F3;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-align: center;
+            color: #1976D2;
+            animation: pulse 3s ease-in-out infinite;
+            position: relative;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(33, 150, 243, 0.3); }
+            50% { box-shadow: 0 0 25px rgba(33, 150, 243, 0.6); }
+        }
+
+        .story-text {
+            font-size: 1.8rem;
+            line-height: 2.5;
+            margin: 25px 0;
+            text-align: center;
+            background: #FFFEF7;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #FDD835;
+            position: relative;
+        }
+
+        .story-image {
+            text-align: center;
+            font-size: 4rem;
+            margin: 30px 0;
+            background: white;
+            padding: 20px;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .highlight-word {
+            background: linear-gradient(45deg, #FFEB3B, #FFC107);
+            padding: 5px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #FF9800;
+            font-weight: bold;
+            position: relative;
+            display: inline-block;
+            margin: 2px;
+        }
+
+        .highlight-word:hover {
+            background: linear-gradient(45deg, #FFC107, #FF9800);
+            transform: scale(1.15);
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
+        }
+
+        .reading-direction {
+            border: 4px dashed #4CAF50;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #E8F5E8, #C8E6C9);
+            font-size: 1.6rem;
+            position: relative;
+        }
+
+        .arrow {
+            color: #4CAF50;
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0 10px;
+            animation: slide 2s ease-in-out infinite;
+        }
+
+        @keyframes slide {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            background: linear-gradient(45deg, #45a049, #7CB342);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #2196F3, #42A5F5);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(45deg, #1976D2, #1E88E5);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .speak-btn {
+            background: linear-gradient(45deg, #FF9800, #FFB74D);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 50%;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 5px;
+        }
+
+        .speak-btn:hover {
+            background: linear-gradient(45deg, #F57C00, #FF9800);
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .speak-btn.speaking {
+            animation: speaking 0.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes speaking {
+            from { transform: scale(1.1); }
+            to { transform: scale(1.3); }
+        }
+
+        .question-section {
+            background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+            padding: 25px;
+            border-radius: 20px;
+            margin: 25px 0;
+            display: none;
+            border: 3px solid #FF9800;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .question-section.active {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #E65100;
+            text-align: center;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .options {
+            display: grid;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .option {
+            background: white;
+            border: 3px solid #FFB74D;
+            padding: 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.3rem;
+            text-align: center;
+            font-weight: bold;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .option:hover:not(.correct):not(.wrong):not(.disabled) {
+            border-color: #4CAF50;
+            background: linear-gradient(135deg, #E8F5E8, #C8E6C9);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .option.correct {
+            background: linear-gradient(45deg, #4CAF50, #66BB6A);
+            color: white;
+            border-color: #4CAF50;
+            animation: success 0.6s ease-out;
+            cursor: default;
+        }
+
+        .option.wrong {
+            background: linear-gradient(45deg, #f44336, #EF5350);
+            color: white;
+            border-color: #f44336;
+            animation: shake 0.6s ease-out;
+        }
+
+        .option.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        @keyframes success {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .progress-container {
+            background: #f0f0f0;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .progress-bar {
+            height: 12px;
+            background: #e0e0e0;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 2px solid #ccc;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A, #CDDC39);
+            border-radius: 4px;
+            transition: width 0.8s ease;
+            width: 0%;
+        }
+
+        .level-indicator {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: linear-gradient(45deg, #FF5722, #FF7043);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .celebration-content {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            padding: 50px;
+            border-radius: 25px;
+            text-align: center;
+            max-width: 500px;
+            color: white;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+
+        .stars {
+            font-size: 4rem;
+            margin: 25px 0;
+            animation: sparkle 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes sparkle {
+            0% { transform: scale(1) rotate(0deg); }
+            100% { transform: scale(1.3) rotate(10deg); }
+        }
+
+        .clickable-area {
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            display: inline-block;
+            margin: 5px;
+            background: #E1F5FE;
+            position: relative;
+        }
+
+        .clickable-area:hover:not(.selected):not(.disabled) {
+            background: linear-gradient(135deg, #81D4FA, #4FC3F7);
+            border-color: #0277BD;
+            transform: translateY(-2px);
+        }
+
+        .clickable-area.selected {
+            background: linear-gradient(45deg, #4CAF50, #66BB6A);
+            color: white;
+            border-color: #4CAF50;
+            cursor: default;
+        }
+
+        .clickable-area.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .word-order {
+            font-size: 1.6rem;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .feedback-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(45deg, #4CAF50, #66BB6A);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            z-index: 999;
+            display: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-width: 80%;
+            text-align: center;
+        }
+
+        .text-with-speak {
+            position: relative;
+            display: inline-block;
+        }
+
+        .text-with-speak .speak-btn {
+            position: absolute;
+            top: -10px;
+            left: -40px;
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                width: 98%;
+                margin: 5px;
+            }
+
+            .book-title {
+                font-size: 2.2rem;
+            }
+
+            .story-text {
+                font-size: 1.5rem;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                position: relative;
+                bottom: auto;
+                left: auto;
+                transform: none;
+                margin-top: 20px;
+            }
+
+            .page-content {
+                padding: 20px;
+                padding-bottom: 120px;
+            }
+
+            .btn {
+                font-size: 1.1rem;
+                padding: 12px 25px;
+            }
+
+            .level-indicator {
+                top: 10px;
+                right: 10px;
+                font-size: 1rem;
+                padding: 8px 15px;
+            }
+
+            .speak-btn {
+                width: 35px;
+                height: 35px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            🌟 مغامرة تعلم القراءة مع سامي الأرنب 🌟
+            <button class="speak-btn" onclick="speakText('مغامرة تعلم القراءة مع سامي الأرنب')" title="استمع للعنوان">🔊</button>
+        </div>
+        <div class="level-indicator" id="levelIndicator">المستوى 1 من 5</div>
+
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+        </div>
+
+        <!-- غلاف الكتاب -->
+        <div class="book-cover" id="bookCover">
+            <div class="cover-image">🐰</div>
+            <div class="text-with-speak">
+                <h1 class="book-title">مغامرة الأرنب سامي</h1>
+                <button class="speak-btn" onclick="speakText('مغامرة الأرنب سامي')" title="استمع للعنوان">🔊</button>
+            </div>
+            <div class="text-with-speak">
+                <p class="author">قصة تفاعلية لتعلم القراءة</p>
+                <button class="speak-btn" onclick="speakText('قصة تفاعلية لتعلم القراءة')" title="استمع للوصف">🔊</button>
+            </div>
+            <div class="text-with-speak">
+                <div class="instruction-box">اضغط على غلاف الكتاب لتبدأ المغامرة الرائعة!</div>
+                <button class="speak-btn" onclick="speakText('اضغط على غلاف الكتاب لتبدأ المغامرة الرائعة')" title="استمع للتعليمات">🔊</button>
+            </div>
+        </div>
+
+        <!-- المستوى الأول: التعرف على أجزاء الكتاب -->
+        <div class="page-content" id="page1">
+            <div class="text-with-speak">
+                <div class="level-header">المستوى الأول: نتعرف على أجزاء الكتاب</div>
+                <button class="speak-btn" onclick="speakText('المستوى الأول: نتعرف على أجزاء الكتاب')" title="استمع للعنوان">🔊</button>
+            </div>
+            <div class="text-with-speak">
+                <div class="instruction-box">هيا نتعلم أين نجد عنوان القصة وأجزاء الكتاب المهمة!</div>
+                <button class="speak-btn" onclick="speakText('هيا نتعلم أين نجد عنوان القصة وأجزاء الكتاب المهمة')" title="استمع للتعليمات">🔊</button>
+            </div>
+            <div class="story-image">🐰🌳</div>
+            <div class="text-with-speak">
+                <div class="story-text">
+                    في صباح جميل، استيقظ <span class="highlight-word" data-word="سامي" onclick="speakText('سامي')">سامي</span> الأرنب الصغير وقرر أن يذهب في <span class="highlight-word" data-word="مغامرة" onclick="speakText('مغامرة')">مغامرة</span> رائعة في الغابة الخضراء.
+                </div>
+                <button class="speak-btn" onclick="speakText('في صباح جميل، استيقظ سامي الأرنب الصغير وقرر أن يذهب في مغامرة رائعة في الغابة الخضراء')" title="استمع للقصة">🔊</button>
+            </div>
+            <div class="question-section" id="question1">
+                <div class="text-with-speak">
+                    <div class="question">🤔 أين وجدنا عنوان هذه القصة؟</div>
+                    <button class="speak-btn" onclick="speakText('أين وجدنا عنوان هذه القصة؟')" title="استمع للسؤال">🔊</button>
+                </div>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, false, 'لا، العنوان ليس في وسط الصفحة', 1)">
+                        <span>في وسط الصفحة</span>
+                        <button class="speak-btn" onclick="event.stopPropagation(); speakText('في وسط الصفحة')" title="استمع للخيار">🔊</button>
+                    </div>
+                    <div class="option" onclick="selectOption(this, true, 'ممتاز! العنوان يكون في غلاف الكتاب', 1)">
+                        <span>في غلاف الكتاب</span>
+                        <button class="speak-btn" onclick="event.stopPropagation(); speakText('في غلاف الكتاب')" title="استمع للخيار">🔊</button>
+                    </div>
+                    <div class="option" onclick="selectOption(this, false, 'لا، العنوان ليس في نهاية الكتاب', 1)">
+                        <span>في نهاية الكتاب</span>
+                        <button class="speak-btn" onclick="event.stopPropagation(); speakText('في نهاية الكتاب')" title="استمع للخيار">🔊</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- المستوى الثاني: اتجاه القراءة -->
+        <div class="page-content" id="page2">
+            <div class="text-with-speak">
+                <div class="level-header">المستوى الثاني: نتعلم اتجاه القراءة</div>
+                <button class="speak-btn" onclick="speakText('المستوى الثاني: نتعلم اتجاه القراءة')" title="استمع للعنوان">🔊</button>
+            </div>
+            <div class="text-with-speak">
+                <div class="instruction-box">في العربية نقرأ من اليمين إلى اليسار. تابع الأسهم بإصبعك!</div>
+                <button class="speak-btn" onclick="speakText('في العربية نقرأ من اليمين إلى اليسار. تابع الأسهم بإصبعك')" title="استمع للتعليمات">🔊</button>
+            </div>
+            <div class="story-image">🌸🦋</div>
+            <div class="text-with-speak">
+                <div class="reading-direction">
+                    <div class="word-order">
+                        وجد سامي زهرة جميلة <span class="arrow">←</span> وفراشة ملونة <span class="arrow">←</span> ترقص حولها بسعادة
+                    </div>
+                </div>
+                <button class="speak-btn" onclick="speakText('وجد سامي زهرة جميلة وفراشة ملونة ترقص حولها بسعادة')" title="استمع للجملة">🔊</button>
+            </div>
+            <div class="question-section" id="question2">
+                <div class="text-with-speak">
+                    <div class="question">📚 من أي جهة نبدأ قراءة السطر في اللغة العربية؟</div>
+                    <button class="speak-btn" onclick="speakText('من أي جهة نبدأ قراءة السطر في اللغة العربية؟')" title="استمع للسؤال">🔊</button>
+                </div>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, true, 'رائع! نبدأ من اليمين في العربية', 2)">
+                        <span>من اليمين ←</span>
+                        <button class="speak-btn" onclick="event.stopPropagation(); speakText('من اليمين')" title="استمع للخيار">🔊</button>
+                    </div>
+                    <div class="option" onclick="selectOption(this, false, 'لا، في العربية لا نبدأ من اليسار', 2)">
+                        <span>من اليسار →</span>
+                        <button class="speak-btn" onclick="event.stopPropagation(); speakText('من اليسار')" title="استمع للخيار">🔊</button>
+                    </div>
+                    <div class="option" onclick="selectOption(this, false, 'لا، لا نبدأ من الوسط', 2)">
+                        <span>من الوسط</span>
+                        <button class="speak-btn" onclick="event.stopPropagation(); speakText('من الوسط')" title="استمع للخيار">🔊</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- المستوى الثالث: ترتيب الكلمات -->
+        <div class="page-content" id="page3">
+            <div class="text-with-speak">
+                <div class="level-header">المستوى الثالث: نرتب الكلمات</div>
+                <button class="speak-btn" onclick="speakText('المستوى الثالث: نرتب الكلمات')" title="استمع للعنوان">🔊</button>
+            </div>
+            <div class="text-with-speak">
+                <div class="instruction-box">اضغط على الكلمات بالترتيب الصحيح للقراءة من اليمين لليسار</div>
+                <button class="speak-btn" onclick="speakText('اضغط على الكلمات بالترتيب الصحيح للقراءة من اليمين لليسار')" title="استمع للتعليمات">🔊</button>
+            </div>
+            <div class="story-image">🏰✨</div>
+            <div class="story-text">
+                <span class="clickable-area" data-order="1" onclick="clickWord(this)">
+                    رأى
+                    <button class="speak-btn" onclick="event.stopPropagation(); speakText('رأى')" title="استمع للكلمة">🔊</button>
+                </span>
+                <span class="clickable-area" data-order="2" onclick="clickWord(this)">
+                    سامي
+                    <button class="speak-btn" onclick="event.stopPropagation(); speakText('سامي')" title="استمع للكلمة">🔊</button>
+                </span>
+                <span class="clickable-area" data-order="3" onclick="clickWord(this)">
+                    قلعة
+                    <button class="speak-btn" onclick="event.stopPropagation(); speakText('قلعة')" title="استمع للكلمة">🔊</button>
+                </span>
+                <span class="clickable-area" data-order="4" onclick="clickWord(this)">
+                    سحرية
+                    <button class="speak-btn" onclick="event.stopPropagation(); speakText('سحرية')" title="استمع للكلمة">🔊</button>
+                </span>
+            </div>
+            <div class="question-section" id="question3">
+                <div class="text-with-speak">
+                    <div class="question">💭 ما الذي يحمل معنى القصة ويخبرنا بالأحداث؟</div>
+                    <button class="speak-btn" onclick="speakText('ما الذي يحمل معنى القصة ويخبرنا بالأحداث؟')" title="استمع للسؤال">🔊</button>
+                </div>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, false, 'الصور جميلة لكنها لا تحمل كل المعنى', 3)">
+                        <span>الصور والرسوم فقط</span>
+                        <button class="speak-btn" onclick="event.stopPropagation(); speakText('الصور والرسوم فقط')" title="استمع للخيار">🔊</button>
+                    </div>
+                    <div class="option" onclick="selectOption(this, true, 'ممتاز! الكلمات تحمل المعنى والقصة', 3)">
+                        <span>الكلمات المكتوبة</span>
+                        <button class="speak-btn" onclick="event.stopPropagation(); speakText('الكلمات المكتوبة')" title="استمع للخيار">🔊</button>
+                    </div>
+                    <div class="option" onclick="selectOption(this, false, 'الألوان تزين الكتاب لكن لا تحمل المعنى', 3)">
+                        <span>الألوان الجميلة</span>
+                        <button class="speak-btn" onclick="event.stopPropagation(); speakText('الألوان الجميلة')" title="استمع للخيار">🔊</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- المستوى الرابع: بداية ونهاية الجملة -->
+        <div class="page-content" id="page4">
+            <div class="text-with-speak">
+                <div class="level-header">المستوى الرابع: نجد بداية ونهاية الجملة</div>
+                <button class="speak-btn" onclick="speakText('المستوى الرابع: نجد بداية ونهاية الجملة')" title="استمع للعنوان">🔊</button>
+            </div>
+            <div class="text-with-speak">
+                <div class="instruction-box">اضغط على بداية الجملة الأولى في النص</div>
+                <button class="speak-btn" onclick="speakText('اضغط على بداية الجملة الأولى في النص')" title="استمع للتعليمات">🔊</button>
+            </div>
+            <div class="story-image">🗝️🚪</div>
+            <div class="text-with-speak">
+                <div class="story-text">
+                    <span class="clickable-area" onclick="findStart(this, true)">
+                        وجد
+                        <button class="speak-btn" onclick="event.stopPropagation(); speakText('وجد')" title="استمع للكلمة">🔊</button>
+                    </span> سامي مفتاحاً ذهبياً لامعاً أمام باب القلعة الكبير<span class="highlight-word">.</span>
+                    <span class="clickable-area" onclick="findStart(this, false)">
+                        فرح
+                        <button class="speak-btn" onclick="event.stopPropagation(); speakText('فرح')" title="استمع للكلمة">🔊</button>
+                    </span> سامي كثيراً بهذا الاكتشاف الرائع<span class="highlight-word">.</span>
+                </div>
+                <button class="speak-btn" onclick="speakText('وجد سامي مفتاحاً ذهبياً لامعاً أمام باب القلعة الكبير. فرح سامي كثيراً بهذا الاكتشاف الرائع')" title="استمع للنص">🔊</button>
+            </div>
+            <div class="question-section" id="question4">
+                <div class="text-with-speak">
+                    <div class="question">🔍 كيف نعرف أن الجملة قد انتهت؟</div>
+                    <button class="speak-btn" onclick="speakText('كيف نعرف أن الجملة قد انتهت؟')" title="استمع للسؤال">🔊</button>
+                </div>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, false, 'الصورة لا تدل على نهاية الجملة', 4)">
+                        <span>عندما نرى صورة جديدة</span>
+                        <button class="speak-btn" onclick="event.stopPropagation(); speakText('عندما نرى صورة جديدة')" title="استمع للخيار">🔊</button>
+                    </div>
+                    <div class="option" onclick="selectOption(this, true, 'ممتاز! النقطة تدل على نهاية الجملة', 4)">
+                        <span>عندما نرى النقطة (.)</span>
+                        <button class="speak-btn" onclick="event.stopPropagation(); speakText('عندما نرى النقطة')" title="استمع للخيار">🔊</button>
+                    </div>
+                    <div class="option" onclick="selectOption(this, false, 'نهاية الصفحة ليست نهاية الجملة', 4)">
+                        <span>عندما تنتهي الصفحة</span>
+                        <button class="speak-btn" onclick="event.stopPropagation(); speakText('عندما تنتهي الصفحة')" title="استمع للخيار">🔊</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- المستوى الخامس: النهاية والمراجعة -->
+        <div class="page-content" id="page5">
+            <div class="text-with-speak">
+                <div class="level-header">المستوى الخامس: نهاية القصة السعيدة</div>
+                <button class="speak-btn" onclick="speakText('المستوى الخامس: نهاية القصة السعيدة')" title="استمع للعنوان">🔊</button>
+            </div>
+            <div class="text-with-speak">
+                <div class="instruction-box">لقد تعلمنا الكثير! هيا نقرأ النهاية الجميلة</div>
+                <button class="speak-btn" onclick="speakText('لقد تعلمنا الكثير! هيا نقرأ النهاية الجميلة')" title="استمع للتعليمات">🔊</button>
+            </div>
+            <div class="story-image">🏡💖👫</div>
+            <div class="text-with-speak">
+                <div class="story-text">
+                    فتح سامي الباب السحري ووجد كنزاً عظيماً... مجموعة من الأصدقاء الجدد ينتظرونه للعب معه! عاد سامي إلى بيته سعيداً جداً بمغامرته الرائعة وأصدقائه الجدد.
+                </div>
+                <button class="speak-btn" onclick="speakText('فتح سامي الباب السحري ووجد كنزاً عظيماً... مجموعة من الأصدقاء الجدد ينتظرونه للعب معه! عاد سامي إلى بيته سعيداً جداً بمغامرته الرائعة وأصدقائه الجدد')" title="استمع للقصة">🔊</button>
+            </div>
+            <div class="question-section" id="question5">
+                <div class="text-with-speak">
+                    <div class="question">📖 أين نجد نهاية أي قصة نقرؤها؟</div>
+                    <button class="speak-btn" onclick="speakText('أين نجد نهاية أي قصة نقرؤها؟')" title="استمع للسؤال">🔊</button>
+                </div>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, false, 'النهاية ليست في بداية القصة', 5)">
+                        <span>في البداية</span>
+                        <button class="speak-btn" onclick="event.stopPropagation(); speakText('في البداية')" title="استمع للخيار">🔊</button>
+                    </div>
+                    <div class="option" onclick="selectOption(this, false, 'النهاية ليست في منتصف القصة', 5)">
+                        <span>في المنتصف</span>
+                        <button class="speak-btn" onclick="event.stopPropagation(); speakText('في المنتصف')" title="استمع للخيار">🔊</button>
+                    </div>
+                    <div class="option" onclick="selectOption(this, true, 'رائع! النهاية في الصفحات الأخيرة', 5)">
+                        <span>في الصفحات الأخيرة</span>
+                        <button class="speak-btn" onclick="event.stopPropagation(); speakText('في الصفحات الأخيرة')" title="استمع للخيار">🔊</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn" id="startBtn" onclick="startGame()">🚀 ابدأ المغامرة</button>
+            <button class="btn btn-secondary" id="nextBtn" onclick="nextPage()" style="display: none;">➡️ المستوى التالي</button>
+            <button class="btn btn-secondary" id="prevBtn" onclick="prevPage()" style="display: none;">⬅️ المستوى السابق</button>
+            <button class="btn" id="showQuestionBtn" onclick="showQuestion()" style="display: none;">❓ أجب على السؤال</button>
+        </div>
+    </div>
+
+    <!-- رسالة التعزيز -->
+    <div class="feedback-message" id="feedbackMessage"></div>
+
+    <!-- شاشة الاحتفال النهائية -->
+    <div class="celebration" id="celebration">
+        <div class="celebration-content">
+            <div class="stars">⭐🌟✨⭐🌟</div>
+            <h2>🎉 مبروك يا بطل القراءة! 🎉</h2>
+            <p>لقد أتممت جميع مستويات مغامرة القراءة بنجاح!</p>
+            <p>🏆 أنت الآن تعرف أسرار الكتب والقراءة! 🏆</p>
+            <button class="btn" onclick="restartGame()">🔄 ابدأ مغامرة جديدة</button>
+            <button class="speak-btn" onclick="speakText('مبروك يا بطل القراءة! لقد أتممت جميع مستويات مغامرة القراءة بنجاح! أنت الآن تعرف أسرار الكتب والقراءة!')" title="استمع للتهنئة">🔊</button>
+        </div>
+    </div>
+
+    <script>
+        // متغيرات اللعبة الأساسية
+        let currentPage = 0;
+        let currentLevel = 1;
+        let score = 0;
+        let totalPages = 5;
+        let canProceed = false;
+        let expectedWordOrder = 1;
+        let gameStarted = false;
+        let currentSpeaking = null;
+        let speechSupported = false;
+
+        // مصفوفة أصوات التشجيع
+        const encouragementMessages = [
+            'ممتاز!', 'رائع!', 'أحسنت!', 'عظيم!', 'مذهل!', 'فخور بك!', 'استمر!'
+        ];
+
+        // التحقق من دعم النطق
+        function checkSpeechSupport() {
+            speechSupported = 'speechSynthesis' in window;
+            if (!speechSupported) {
+                console.log('متصفحك لا يدعم النطق الصوتي');
+            }
+        }
+
+        // دالة النطق
+        function speakText(text) {
+            if (!speechSupported) {
+                console.log('النطق غير مدعوم:', text);
+                return;
+            }
+
+            // إيقاف النطق الحالي
+            if (currentSpeaking) {
+                speechSynthesis.cancel();
+                const allSpeakBtns = document.querySelectorAll('.speak-btn');
+                allSpeakBtns.forEach(btn => btn.classList.remove('speaking'));
+            }
+
+            // إنشاء نطق جديد
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'ar-SA'; // العربية السعودية
+            utterance.rate = 0.8; // سرعة متوسطة
+            utterance.pitch = 1.1; // نبرة عالية قليلاً للأطفال
+            utterance.volume = 1;
+
+            // إضافة تأثير بصري
+            const speakBtn = event ? event.target.closest('.speak-btn') : null;
+            if (speakBtn) {
+                speakBtn.classList.add('speaking');
+            }
+
+            // عند انتهاء النطق
+            utterance.onend = function() {
+                currentSpeaking = null;
+                if (speakBtn) {
+                    speakBtn.classList.remove('speaking');
+                }
+            };
+
+            utterance.onerror = function() {
+                currentSpeaking = null;
+                if (speakBtn) {
+                    speakBtn.classList.remove('speaking');
+                }
+            };
+
+            currentSpeaking = utterance;
+            speechSynthesis.speak(utterance);
+        }
+
+        // إنشاء الأصوات - تحسين معالجة الأخطاء
+        function createAudioContext() {
+            try {
+                return new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.log('Audio Context not supported');
+                return null;
+            }
+        }
+
+        function playStarSound() {
+            const audioContext = createAudioContext();
+            if (!audioContext) return;
+
+            try {
+                // صوت نجمة متلألئة
+                for (let i = 0; i < 3; i++) {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.setValueAtTime(800 + (i * 200), audioContext.currentTime + (i * 0.1));
+                    oscillator.frequency.exponentialRampToValueAtTime(1200 + (i * 200), audioContext.currentTime + 0.3 + (i * 0.1));
+
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime + (i * 0.1));
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4 + (i * 0.1));
+
+                    oscillator.start(audioContext.currentTime + (i * 0.1));
+                    oscillator.stop(audioContext.currentTime + 0.4 + (i * 0.1));
+                }
+            } catch (e) {
+                console.log('Audio playback error:', e);
+            }
+        }
+
+        function playBuzzSound() {
+            const audioContext = createAudioContext();
+            if (!audioContext) return;
+
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.setValueAtTime(150, audioContext.currentTime);
+                oscillator.frequency.setValueAtTime(100, audioContext.currentTime + 0.15);
+
+                gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } catch (e) {
+                console.log('Audio playback error:', e);
+            }
+        }
+
+        function playClickSound() {
+            const audioContext = createAudioContext();
+            if (!audioContext) return;
+
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.value = 800;
+                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.1);
+            } catch (e) {
+                console.log('Audio playback error:', e);
+            }
+        }
+
+        // بدء اللعبة
+        function startGame() {
+            playClickSound();
+            gameStarted = true;
+            document.getElementById('bookCover').style.display = 'none';
+            currentPage = 1;
+            currentLevel = 1;
+            canProceed = false;
+            showPage(currentPage);
+            updateProgress();
+            updateControls();
+        }
+
+        // عرض الصفحة
+        function showPage(pageNumber) {
+            if (pageNumber < 1 || pageNumber > totalPages) return;
+
+            // إيقاف أي نطق حالي
+            if (currentSpeaking) {
+                speechSynthesis.cancel();
+                const allSpeakBtns = document.querySelectorAll('.speak-btn');
+                allSpeakBtns.forEach(btn => btn.classList.remove('speaking'));
+            }
+
+            // إخفاء جميع الصفحات
+            const pages = document.querySelectorAll('.page-content');
+            pages.forEach(page => page.classList.remove('active'));
+
+            // عرض الصفحة المطلوبة
+            const currentPageElement = document.getElementById(`page${pageNumber}`);
+            if (currentPageElement) {
+                currentPageElement.classList.add('active');
+            }
+
+            // إخفاء الأسئلة في البداية
+            const questions = document.querySelectorAll('.question-section');
+            questions.forEach(q => q.classList.remove('active'));
+
+            // إعادة تعيين حالة الكلمات والإجابات
+            resetPageState();
+            canProceed = false;
+
+            updateLevelIndicator();
+            updateControls();
+        }
+
+        // إعادة تعيين حالة الصفحة
+        function resetPageState() {
+            // إعادة تعيين الكلمات
+            resetWordOrder();
+
+            // إعادة تعيين الخيارات
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => {
+                option.classList.remove('correct', 'wrong', 'disabled');
+                option.style.pointerEvents = 'auto';
+            });
+
+            // إعادة تعيين المناطق القابلة للنقر
+            const clickableAreas = document.querySelectorAll('.clickable-area');
+            clickableAreas.forEach(area => {
+                area.classList.remove('selected', 'disabled');
+                area.style.pointerEvents = 'auto';
+            });
+        }
+
+        // تحديث مؤشر المستوى
+        function updateLevelIndicator() {
+            const indicator = document.getElementById('levelIndicator');
+            if (indicator) {
+                indicator.textContent = `المستوى ${currentLevel} من ${totalPages}`;
+            }
+        }
+
+        // تحديث شريط التقدم
+        function updateProgress() {
+            const progress = document.getElementById('progress');
+            if (progress) {
+                const percentage = ((currentLevel - 1) / totalPages) * 100;
+                progress.style.width = Math.max(0, percentage) + '%';
+            }
+        }
+
+        // تحديث أزرار التحكم
+        function updateControls() {
+            const startBtn = document.getElementById('startBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const prevBtn = document.getElementById('prevBtn');
+            const questionBtn = document.getElementById('showQuestionBtn');
+
+            if (startBtn) startBtn.style.display = !gameStarted ? 'block' : 'none';
+            if (nextBtn) nextBtn.style.display = gameStarted && canProceed && currentPage < totalPages ? 'block' : 'none';
+            if (prevBtn) prevBtn.style.display = gameStarted && currentPage > 1 ? 'block' : 'none';
+            if (questionBtn) questionBtn.style.display = gameStarted && !canProceed && currentPage > 0 ? 'block' : 'none';
+        }
+
+        // الانتقال للصفحة التالية
+        function nextPage() {
+            if (!canProceed) return;
+
+            if (currentPage < totalPages) {
+                playClickSound();
+                currentPage++;
+                currentLevel++;
+                showPage(currentPage);
+                updateProgress();
+            } else {
+                showCelebration();
+            }
+        }
+
+        // العودة للصفحة السابقة
+        function prevPage() {
+            if (currentPage > 1) {
+                playClickSound();
+                currentPage--;
+                currentLevel--;
+                showPage(currentPage);
+                updateProgress();
+            }
+        }
+
+        // عرض السؤال
+        function showQuestion() {
+            playClickSound();
+            const currentQuestion = document.getElementById(`question${currentPage}`);
+            if (currentQuestion) {
+                currentQuestion.classList.add('active');
+                const questionBtn = document.getElementById('showQuestionBtn');
+                if (questionBtn) questionBtn.style.display = 'none';
+            }
+        }
+
+        // اختيار إجابة - إصلاح كامل
+        function selectOption(element, isCorrect, feedbackText, questionNumber) {
+            if (!element || element.classList.contains('correct') || element.classList.contains('wrong') || element.classList.contains('disabled')) {
+                return; // منع النقر المتكرر
+            }
+
+            playClickSound();
+
+            // تعطيل جميع الخيارات
+            const options = element.parentNode.querySelectorAll('.option');
+            options.forEach(option => {
+                option.classList.add('disabled');
+                option.style.pointerEvents = 'none';
+            });
+
+            if (isCorrect) {
+                element.classList.remove('disabled');
+                element.classList.add('correct');
+                playStarSound();
+                score++;
+                canProceed = true;
+                showFeedback(feedbackText, true);
+
+                // نطق رسالة التشجيع
+                setTimeout(() => {
+                    speakText(feedbackText);
+                }, 500);
+
+                setTimeout(() => {
+                    updateControls();
+                }, 2000);
+            } else {
+                element.classList.remove('disabled');
+                element.classList.add('wrong');
+                playBuzzSound();
+                showFeedback(feedbackText, false);
+
+                // نطق رسالة التصحيح
+                setTimeout(() => {
+                    speakText(feedbackText);
+                }, 500);
+
+                setTimeout(() => {
+                    // إعادة تفعيل الخيارات ما عدا الخاطئة
+                    options.forEach(option => {
+                        if (!option.classList.contains('wrong')) {
+                            option.classList.remove('disabled');
+                            option.style.pointerEvents = 'auto';
+                        }
+                    });
+                }, 3000);
+            }
+        }
+
+        // النقر على الكلمات (المستوى الثالث) - إصلاح كامل
+        function clickWord(element) {
+            if (!element || element.classList.contains('selected') || element.classList.contains('disabled')) {
+                return; // منع النقر المتكرر
+            }
+
+            playClickSound();
+
+            const expectedOrder = parseInt(element.getAttribute('data-order'));
+
+            if (expectedOrder === expectedWordOrder) {
+                element.classList.add('selected');
+                element.classList.add('disabled');
+                element.style.pointerEvents = 'none';
+                expectedWordOrder++;
+
+                // نطق الكلمة المحددة
+                const wordText = element.textContent.trim().replace('🔊', '');
+                speakText(wordText);
+
+                if (expectedWordOrder > 4) {
+                    playStarSound();
+                    const successMessage = 'ممتاز! رتبت الكلمات بالترتيب الصحيح!';
+                    showFeedback(successMessage, true);
+                    canProceed = true;
+
+                    setTimeout(() => {
+                        speakText(successMessage);
+                    }, 500);
+
+                    setTimeout(() => {
+                        showQuestion();
+                    }, 2500);
+                }
+            } else {
+                playBuzzSound();
+                const errorMessage = 'جرب مرة أخرى! ابدأ من اليمين';
+                showFeedback(errorMessage, false);
+
+                setTimeout(() => {
+                    speakText(errorMessage);
+                }, 500);
+
+                setTimeout(() => {
+                    resetWordOrder();
+                }, 2000);
+            }
+        }
+
+        // إعادة تعيين ترتيب الكلمات
+        function resetWordOrder() {
+            expectedWordOrder = 1;
+            const words = document.querySelectorAll('.clickable-area[data-order]');
+            words.forEach(word => {
+                word.classList.remove('selected', 'disabled');
+                word.style.pointerEvents = 'auto';
+            });
+        }
+
+        // البحث عن بداية الجملة (المستوى الرابع) - إصلاح كامل
+        function findStart(element, isCorrect) {
+            if (!element || element.classList.contains('selected') || element.classList.contains('disabled')) {
+                return; // منع النقر المتكرر
+            }
+
+            playClickSound();
+
+            // تعطيل جميع المناطق القابلة للنقر
+            const clickableAreas = document.querySelectorAll('#page4 .clickable-area');
+            clickableAreas.forEach(area => {
+                area.classList.add('disabled');
+                area.style.pointerEvents = 'none';
+            });
+
+            if (isCorrect) {
+                element.classList.remove('disabled');
+                element.classList.add('selected');
+                playStarSound();
+                const successMessage = 'ممتاز! هذه هي بداية الجملة الأولى!';
+                showFeedback(successMessage, true);
+                canProceed = true;
+
+                setTimeout(() => {
+                    speakText(successMessage);
+                }, 500);
+
+                setTimeout(() => {
+                    showQuestion();
+                }, 2500);
+            } else {
+                element.classList.remove('disabled');
+                const errorMessage = 'لا، هذه بداية الجملة الثانية. جرب الكلمة الأولى!';
+                playBuzzSound();
+                showFeedback(errorMessage, false);
+
+                setTimeout(() => {
+                    speakText(errorMessage);
+                }, 500);
+
+                setTimeout(() => {
+                    // إعادة تفعيل المناطق القابلة للنقر
+                    clickableAreas.forEach(area => {
+                        area.classList.remove('disabled');
+                        area.style.pointerEvents = 'auto';
+                    });
+                }, 3000);
+            }
+        }
+
+        // عرض رسالة التعزيز
+        function showFeedback(message, isPositive) {
+            const feedbackElement = document.getElementById('feedbackMessage');
+            if (!feedbackElement) return;
+
+            feedbackElement.textContent = message;
+            feedbackElement.style.background = isPositive ?
+                'linear-gradient(45deg, #4CAF50, #66BB6A)' :
+                'linear-gradient(45deg, #FF5722, #FF7043)';
+            feedbackElement.style.display = 'block';
+
+            setTimeout(() => {
+                feedbackElement.style.display = 'none';
+            }, 4000);
+        }
+
+        // عرض شاشة الاحتفال
+        function showCelebration() {
+            playStarSound();
+            const celebration = document.getElementById('celebration');
+            if (celebration) {
+                celebration.style.display = 'flex';
+            }
+
+            // تحديث شريط التقدم إلى 100%
+            const progress = document.getElementById('progress');
+            if (progress) {
+                progress.style.width = '100%';
+            }
+
+            // نطق رسالة التهنئة
+            setTimeout(() => {
+                speakText('مبروك يا بطل القراءة! لقد أتممت جميع مستويات مغامرة القراءة بنجاح!');
+            }, 1000);
+        }
+
+        // إعادة بدء اللعبة
+        function restartGame() {
+            playClickSound();
+
+            // إيقاف أي نطق حالي
+            if (currentSpeaking) {
+                speechSynthesis.cancel();
+                const allSpeakBtns = document.querySelectorAll('.speak-btn');
+                allSpeakBtns.forEach(btn => btn.classList.remove('speaking'));
+            }
+
+            // إعادة تعيين المتغيرات
+            currentPage = 0;
+            currentLevel = 1;
+            score = 0;
+            canProceed = false;
+            expectedWordOrder = 1;
+            gameStarted = false;
+            currentSpeaking = null;
+
+            // إخفاء شاشة الاحتفال
+            const celebration = document.getElementById('celebration');
+            if (celebration) {
+                celebration.style.display = 'none';
+            }
+
+            // إظهار غلاف الكتاب
+            const bookCover = document.getElementById('bookCover');
+            if (bookCover) {
+                bookCover.style.display = 'block';
+            }
+
+            // إخفاء جميع الصفحات
+            const pages = document.querySelectorAll('.page-content');
+            pages.forEach(page => page.classList.remove('active'));
+
+            // إخفاء جميع الأسئلة
+            const questions = document.querySelectorAll('.question-section');
+            questions.forEach(q => q.classList.remove('active'));
+
+            // إعادة تعيين حالة جميع العناصر
+            resetPageState();
+
+            // إعادة تعيين التقدم والضوابط
+            updateProgress();
+            updateLevelIndicator();
+            updateControls();
+        }
+
+        // منع النقر المزدوج على الأزرار
+        function preventDoubleClick(button, callback, delay = 1000) {
+            let isClicking = false;
+            button.addEventListener('click', function(e) {
+                if (isClicking) {
+                    e.preventDefault();
+                    return false;
+                }
+                isClicking = true;
+                if (callback) callback(e);
+                setTimeout(() => {
+                    isClicking = false;
+                }, delay);
+            });
+        }
+
+        // تهيئة اللعبة عند التحميل
+        document.addEventListener('DOMContentLoaded', function() {
+            // التحقق من دعم النطق
+            checkSpeechSupport();
+
+            // إضافة مستمع للنقر على غلاف الكتاب
+            const bookCover = document.getElementById('bookCover');
+            if (bookCover) {
+                bookCover.addEventListener('click', startGame);
+            }
+
+            // تهيئة اللعبة
+            updateProgress();
+            updateLevelIndicator();
+            updateControls();
+
+            // منع النقر المزدوج على الأزرار
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(button => {
+                preventDoubleClick(button);
+            });
+
+            // إضافة تأثيرات صوتية للتفاعل
+            const clickableElements = document.querySelectorAll('.clickable-area, .option, .highlight-word');
+            clickableElements.forEach(element => {
+                element.addEventListener('mouseenter', function() {
+                    if (!this.classList.contains('disabled') && !this.classList.contains('selected')) {
+                        playClickSound();
+                    }
+                });
+            });
+
+            // إضافة اختصارات لوحة المفاتيح
+            document.addEventListener('keydown', function(e) {
+                if (!gameStarted) return;
+
+                switch(e.key) {
+                    case 'ArrowRight': // السهم اليمين للصفحة التالية
+                        if (canProceed && currentPage < totalPages) {
+                            nextPage();
+                        }
+                        break;
+                    case 'ArrowLeft': // السهم اليسار للصفحة السابقة
+                        if (currentPage > 1) {
+                            prevPage();
+                        }
+                        break;
+                    case ' ': // مسطرة المسافة لعرض السؤال
+                        e.preventDefault();
+                        if (!canProceed && currentPage > 0) {
+                            showQuestion();
+                        }
+                        break;
+                    case 'Escape': // زر الهروب لإيقاف النطق
+                        if (currentSpeaking) {
+                            speechSynthesis.cancel();
+                            const allSpeakBtns = document.querySelectorAll('.speak-btn');
+                            allSpeakBtns.forEach(btn => btn.classList.remove('speaking'));
+                        }
+                        break;
+                }
+            });
+
+            // إضافة إشارة بصرية لدعم النطق
+            if (!speechSupported) {
+                const speakBtns = document.querySelectorAll('.speak-btn');
+                speakBtns.forEach(btn => {
+                    btn.style.opacity = '0.5';
+                    btn.title = 'النطق غير مدعوم في هذا المتصفح';
+                });
+            }
+
+            // تحسين الأداء للهواتف المحمولة
+            if (window.matchMedia('(max-width: 768px)').matches) {
+                // تقليل عدد التأثيرات المتحركة
+                const animatedElements = document.querySelectorAll('.cover-image, .arrow');
+                animatedElements.forEach(el => {
+                    el.style.animation = 'none';
+                });
+            }
+        });
+
+        // معالج الأخطاء العام
+        window.addEventListener('error', function(e) {
+            console.log('خطأ في اللعبة:', e.error);
+        });
+
+        // منع تحديد النص في العناصر التفاعلية
+        document.addEventListener('selectstart', function(e) {
+            if (e.target.classList.contains('clickable-area') ||
+                e.target.classList.contains('option') ||
+                e.target.classList.contains('btn') ||
+                e.target.classList.contains('speak-btn')) {
+                e.preventDefault();
+            }
+        });
+
+        // معالج تغيير حجم النافذة
+        window.addEventListener('resize', function() {
+            // إعادة ضبط التخطيط للشاشات الصغيرة
+            if (window.matchMedia('(max-width: 768px)').matches) {
+                const controls = document.querySelector('.controls');
+                if (controls) {
+                    controls.style.position = 'relative';
+                    controls.style.bottom = 'auto';
+                    controls.style.left = 'auto';
+                    controls.style.transform = 'none';
+                }
+            }
+        });
+
+        // دالة مساعدة للتحقق من حالة اللعبة
+        function getGameState() {
+            return {
+                currentPage,
+                currentLevel,
+                score,
+                canProceed,
+                gameStarted,
+                expectedWordOrder
+            };
+        }
+
+        // دالة لحفظ التقدم (للاستخدام المستقبلي)
+        function saveProgress() {
+            const gameState = getGameState();
+            try {
+                // يمكن حفظ التقدم هنا إذا أردنا
+                console.log('حالة اللعبة:', gameState);
+            } catch (e) {
+                console.log('لا يمكن حفظ التقدم:', e);
+            }
+        }
+
+        // تحسين الأداء - تنظيف الذاكرة
+        window.addEventListener('beforeunload', function() {
+            if (currentSpeaking) {
+                speechSynthesis.cancel();
+            }
+        });
+
+        // إضافة دعم للإيماءات (للشاشات اللمسية)
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        document.addEventListener('touchstart', function(e) {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        });
+
+        document.addEventListener('touchend', function(e) {
+            if (!gameStarted) return;
+
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            const diffX = touchStartX - touchEndX;
+            const diffY = touchStartY - touchEndY;
+
+            // التأكد من أن الحركة أفقية أكثر من العمودية
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                if (diffX > 0) {
+                    // التمرير لليسار = الصفحة التالية
+                    if (canProceed && currentPage < totalPages) {
+                        nextPage();
+                    }
+                } else {
+                    // التمرير لليمين = الصفحة السابقة
+                    if (currentPage > 1) {
+                        prevPage();
+                    }
+                }
+            }
+        });
+
+        // التأكد من توافق الخطوط العربية
+        document.fonts.ready.then(function() {
+            console.log('تم تحميل جميع الخطوط بنجاح');
+        });
+    </script>
+</body>
+</html>

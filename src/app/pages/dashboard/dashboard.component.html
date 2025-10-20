@@ -1,106 +1,322 @@
 <!-- src/app/dashboard/components/dashboard/dashboard.component.html -->
-<div class="p-4">
-    <div *ngIf="user$ | async as user" class="mb-6">
-        <div class="flex flex-col md:flex-row justify-between gap-4 mb-4">
-            <div>
-                <h1 class="text-2xl font-semibold text-gray-800 dark:text-white">{{ 'pages.dashboard.welcome' | translate }} {{ user.firstName }} {{ user.lastName }}!</h1>
-                <p class="text-gray-600 dark:text-gray-300">
-                    <ng-container *ngIf="isSpecialist$ | async">{{ 'pages.dashboard.manageAppointments' | translate }}</ng-container>
-                    <ng-container *ngIf="isUser$ | async">{{ 'pages.dashboard.bookSessions' | translate }}</ng-container>
-                    <ng-container *ngIf="isAdmin$ | async">{{ 'pages.dashboard.managePlatform' | translate }}</ng-container>
-                </p>
-            </div>
-
-            <div class="flex items-center gap-2">
-                <button *ngIf="isUser$ | async" pButton pRipple label="{{ 'pages.dashboard.bookAppointment' | translate }}" icon="pi pi-calendar-plus" class="p-button-primary" routerLink="/app/booking"></button>
-                <button *ngIf="isSpecialist$ | async" pButton pRipple label="{{ 'pages.dashboard.manageAppointmentsButton' | translate }}" icon="pi pi-calendar" class="p-button-primary" routerLink="/app/specialist-bookings"></button>
-                <button *ngIf="isAdmin$ | async" pButton pRipple label="{{ 'pages.dashboard.manageTimeslots' | translate }}" icon="pi pi-cog" class="p-button-secondary" routerLink="/app/admin/time-slots"></button>
+<div class="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4 md:p-6">
+    <!-- Specialist Dashboard -->
+    <ng-container *ngIf="isSpecialist$ | async">
+        <!-- Header Section -->
+        <div *ngIf="user$ | async as user" class="mb-8">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 md:p-8 backdrop-blur-sm bg-opacity-90">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="relative">
+                            <p-avatar [label]="(user.firstName.charAt(0) || '') + (user.lastName.charAt(0) || '')" size="xlarge" shape="circle" styleClass="bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-2xl font-bold shadow-lg">
+                            </p-avatar>
+                            <span class="absolute bottom-0 right-0 w-5 h-5 bg-green-500 border-4 border-white dark:border-gray-800 rounded-full"></span>
+                        </div>
+                        <div>
+                            <h1 class="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">{{ greeting }}، {{ user.firstName }}!</h1>
+                            <p class="text-gray-600 dark:text-gray-300 mt-1">{{ currentTime | date: 'EEEE، d MMMM yyyy' : '' : 'ar-EG' }}</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <button pButton pRipple icon="pi pi-bell" class="p-button-rounded p-button-text p-button-lg" pBadge value="3" severity="danger"></button>
+                        <button pButton pRipple label="مقاييس" icon="pi pi-list" class="p-button-rounded p-button-outlined" routerLink="/app/scales"></button>
+                        <button pButton pRipple label="ألعاب" icon="pi pi-play" class="p-button-rounded" routerLink="/app/game"></button>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Upcoming Appointments Card -->
-        <div class="md:col-span-2">
-            <p-card [header]="'pages.dashboard.upcomingAppointments' | translate" [styleClass]="'h-full'">
-                <ng-template pTemplate="content">
-                    <div *ngIf="(upcomingBookings$ | async)?.length === 0" class="py-4 text-center">
-                        <p class="text-gray-500 dark:text-gray-400">{{ 'pages.dashboard.noUpcomingAppointments' | translate }}</p>
-                        <button *ngIf="isUser$ | async" pButton pRipple label="{{ 'pages.dashboard.bookNow' | translate }}" icon="pi pi-calendar-plus" class="p-button-primary mt-4" routerLink="/app/booking"></button>
+        <!-- Stats Cards -->
+        <div *ngIf="stats$ | async as stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Total Sessions -->
+            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-xl p-6 text-white transform hover:scale-105 transition-all duration-300">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-blue-100 text-sm font-medium mb-2">إجمالي الجلسات</p>
+                        <h3 class="text-4xl font-bold">{{ stats.totalSessions }}</h3>
                     </div>
+                    <div class="bg-white bg-opacity-20 rounded-xl p-3">
+                        <i class="pi pi-calendar text-3xl"></i>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i class="pi pi-arrow-up text-sm"></i>
+                    <span class="text-sm">+12% من الشهر السابق</span>
+                </div>
+            </div>
 
-                    <div *ngIf="(upcomingBookings$ | async)!.length > 0">
-                        <div *ngFor="let booking of upcomingBookings$ | async" class="border-b border-gray-200 dark:border-gray-700 py-4 last:border-0">
-                            <div class="flex flex-col md:flex-row justify-between gap-4">
+            <!-- Completed Sessions -->
+            <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl shadow-xl p-6 text-white transform hover:scale-105 transition-all duration-300">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-green-100 text-sm font-medium mb-2">جلسات مكتملة</p>
+                        <h3 class="text-4xl font-bold">{{ stats.completedSessions }}</h3>
+                    </div>
+                    <div class="bg-white bg-opacity-20 rounded-xl p-3">
+                        <i class="pi pi-check-circle text-3xl"></i>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <p-progressBar [value]="getCompletionPercentage(stats)" [showValue]="false" styleClass="h-2" [style]="{ background: 'rgba(255,255,255,0.2)' }"> </p-progressBar>
+                    <span class="text-sm mt-2 inline-block">{{ getCompletionPercentage(stats) }}% معدل الإكمال</span>
+                </div>
+            </div>
+
+            <!-- Today's Sessions -->
+            <div class="bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl shadow-xl p-6 text-white transform hover:scale-105 transition-all duration-300">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-purple-100 text-sm font-medium mb-2">جلسات اليوم</p>
+                        <h3 class="text-4xl font-bold">{{ stats.todaySessions }}</h3>
+                    </div>
+                    <div class="bg-white bg-opacity-20 rounded-xl p-3">
+                        <i class="pi pi-clock text-3xl"></i>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i class="pi pi-info-circle text-sm"></i>
+                    <span class="text-sm">{{ stats.upcomingSessions }} جلسة قادمة</span>
+                </div>
+            </div>
+
+            <!-- Pending Sessions -->
+            <div class="bg-gradient-to-br from-orange-500 to-amber-600 rounded-2xl shadow-xl p-6 text-white transform hover:scale-105 transition-all duration-300">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-orange-100 text-sm font-medium mb-2">جلسات معلقة</p>
+                        <h3 class="text-4xl font-bold">{{ stats.pendingSessions }}</h3>
+                    </div>
+                    <div class="bg-white bg-opacity-20 rounded-xl p-3">
+                        <i class="pi pi-hourglass text-3xl"></i>
+                    </div>
+                </div>
+                <button pButton pRipple label="مراجعة الطلبات" class="p-button-sm p-button-outlined w-full mt-2" style="border-color: white; color: white" routerLink="/app/specialist-bookings"></button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Today's Schedule -->
+            <div class="lg:col-span-2">
+                <p-card styleClass="h-full shadow-xl rounded-2xl border-0">
+                    <ng-template pTemplate="header">
+                        <div class="p-6 pb-0">
+                            <div class="flex justify-between items-center">
                                 <div>
-                                    <h5 class="text-lg font-medium text-gray-800 dark:text-white">
-                                        {{ formatDateTime(booking.timeSlot!.startTime) }}
-                                    </h5>
-                                    <p class="text-gray-600 dark:text-gray-300">{{ 'pages.dashboard.duration' | translate }} {{ booking.timeSlot!.startTime | date: 'shortTime' }} - {{ booking.timeSlot!.endTime | date: 'shortTime' }}</p>
-
-                                    <!-- Show client name for specialists -->
-                                    <p *ngIf="isSpecialist$ | async" class="text-gray-600 dark:text-gray-300 mt-1">
-                                        <span class="font-medium">{{ 'pages.dashboard.client' | translate }}</span> {{ booking.userName }}
-                                    </p>
-
-                                    <!-- Show specialist name for users -->
-                                    <p *ngIf="isUser$ | async" class="text-gray-600 dark:text-gray-300 mt-1">
-                                        <span class="font-medium">{{ 'pages.dashboard.specialist' | translate }}</span> {{ booking.assignedSpecialistName }}
-                                    </p>
-
-                                    <p *ngIf="booking.notes" class="text-gray-500 dark:text-gray-400 mt-2">
-                                        <span class="font-medium">{{ 'pages.dashboard.notes' | translate }}</span> {{ booking.notes }}
-                                    </p>
+                                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white">جدول اليوم</h2>
+                                    <p class="text-gray-500 dark:text-gray-400 mt-1">الجلسات المجدولة لليوم</p>
                                 </div>
+                                <p-badge [value]="(todayBookings$ | async)?.length || 0" severity="info" size="large"></p-badge>
+                            </div>
+                        </div>
+                    </ng-template>
 
-                                <div class="flex items-start gap-2">
-                                    <p-tag [value]="booking.status | translate" [severity]="getStatusSeverity(booking.status)"></p-tag>
-                                    <button pButton pRipple label="{{ 'common.buttons.cancel' | translate }}" icon="pi pi-times" class="p-button-danger p-button-outlined" (click)="cancelBooking(booking)"></button>
+                    <div class="space-y-4">
+                        <div *ngIf="(todayBookings$ | async)?.length === 0" class="text-center py-12">
+                            <div class="bg-gray-100 dark:bg-gray-700 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-4">
+                                <i class="pi pi-calendar-times text-4xl text-gray-400"></i>
+                            </div>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg">لا توجد جلسات مجدولة اليوم</p>
+                            <p class="text-gray-400 dark:text-gray-500 mt-2">استمتع بوقتك!</p>
+                        </div>
+
+                        <div
+                            *ngFor="let booking of todayBookings$ | async; let i = index"
+                            class="bg-gradient-to-r from-white to-gray-50 dark:from-gray-700 dark:to-gray-800 rounded-xl p-5 border-l-4 hover:shadow-lg transition-all duration-300"
+                            [ngClass]="{
+                                'border-blue-500': booking.status === 'confirmed',
+                                'border-orange-500': booking.status === 'pending',
+                                'border-green-500': booking.status === 'completed'
+                            }"
+                        >
+                            <div class="flex flex-col md:flex-row justify-between gap-4">
+                                <div class="flex gap-4 flex-1">
+                                    <div class="bg-indigo-100 dark:bg-indigo-900 rounded-lg p-3 text-center min-w-[80px]">
+                                        <div class="text-indigo-600 dark:text-indigo-300 text-2xl font-bold">
+                                            {{ booking.timeSlot!.startTime | date: 'HH:mm' }}
+                                        </div>
+                                        <div class="text-gray-600 dark:text-gray-400 text-xs mt-1">
+                                            {{ booking.timeSlot!.endTime | date: 'HH:mm' }}
+                                        </div>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <h4 class="text-lg font-semibold text-gray-800 dark:text-white">{{ booking.userName }}</h4>
+                                            <p-tag [value]="booking.status" [severity]="getStatusSeverity(booking.status)" styleClass="text-xs"></p-tag>
+                                        </div>
+                                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-2" *ngIf="booking.notes"><i class="pi pi-info-circle mr-2"></i>{{ booking.notes }}</p>
+                                        <div class="flex gap-4 text-sm text-gray-500 dark:text-gray-400">
+                                            <span><i class="pi pi-clock mr-1"></i>{{ computeDurationMinutes(booking) }} دقيقة</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex md:flex-col gap-2">
+                                    <button pButton pRipple icon="pi pi-video" class="p-button-rounded p-button-success" pTooltip="الانضمام للجلسة"></button>
+                                    <button pButton pRipple icon="pi pi-ellipsis-v" class="p-button-rounded p-button-text"></button>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </p-card>
+            </div>
 
-                        <div class="mt-4 text-right">
-                            <a routerLink="/app/session" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ 'pages.dashboard.viewAllAppointments' | translate }}</a>
+            <!-- Quick Actions & Recent Activity -->
+            <div class="space-y-6">
+                <!-- Quick Actions -->
+                <p-card styleClass="shadow-xl rounded-2xl border-0">
+                    <ng-template pTemplate="header">
+                        <div class="p-6 pb-0">
+                            <h2 class="text-xl font-bold text-gray-800 dark:text-white">إجراءات سريعة</h2>
+                        </div>
+                    </ng-template>
+
+                    <div class="space-y-3">
+                        <button pButton pRipple label="عرض المقاييس" icon="pi pi-list" class="w-full p-button-outlined justify-start" routerLink="/app/scales"></button>
+                        <button pButton pRipple label="عرض الألعاب" icon="pi pi-play" class="w-full p-button-outlined justify-start" routerLink="/app/game"></button>
+                        <button pButton pRipple label="الجلسات القادمة" icon="pi pi-calendar" class="w-full p-button-outlined justify-start" routerLink="/app/specialist-bookings"></button>
+                        <button pButton pRipple label="الملف الشخصي" icon="pi pi-user" class="w-full p-button-outlined justify-start" routerLink="/app/user-profile"></button>
+                    </div>
+                </p-card>
+
+                <!-- Recent Activity -->
+                <p-card styleClass="shadow-xl rounded-2xl border-0">
+                    <ng-template pTemplate="header">
+                        <div class="p-6 pb-0">
+                            <h2 class="text-xl font-bold text-gray-800 dark:text-white">النشاطات الأخيرة</h2>
+                        </div>
+                    </ng-template>
+
+                    <div class="space-y-4">
+                        <div *ngFor="let activity of recentActivity" class="flex gap-3 pb-4 border-b border-gray-100 dark:border-gray-700 last:border-0 last:pb-0">
+                            <div class="rounded-full w-10 h-10 flex items-center justify-center bg-gray-100 dark:bg-gray-700">
+                                <i [class]="'pi ' + activity.icon + ' ' + activity.iconColor"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h5 class="font-semibold text-gray-800 dark:text-white text-sm">{{ activity.title }}</h5>
+                                <p class="text-gray-600 dark:text-gray-400 text-xs mt-1">{{ activity.description }}</p>
+                                <p class="text-gray-400 dark:text-gray-500 text-xs mt-1">{{ activity.time }}</p>
+                            </div>
                         </div>
                     </div>
-                </ng-template>
-            </p-card>
+                </p-card>
+            </div>
         </div>
 
-        <!-- Quick Actions Card -->
-        <div>
-            <p-card [header]="'pages.dashboard.quickActions' | translate" [styleClass]="'h-full'">
-                <ng-template pTemplate="content">
-                    <div class="flex flex-col gap-3">
-                        <!-- User Quick Actions -->
-                        <ng-container *ngIf="isUser$ | async">
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Weekly Sessions Chart -->
+            <p-card styleClass="shadow-xl rounded-2xl border-0">
+                <ng-template pTemplate="header">
+                    <div class="p-6 pb-0">
+                        <h2 class="text-xl font-bold text-gray-800 dark:text-white">الجلسات الأسبوعية</h2>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">نظرة عامة على جلسات هذا الأسبوع</p>
+                    </div>
+                </ng-template>
+
+                <div style="height: 300px">
+                    <p-chart type="bar" [data]="bookingChartData" [options]="bookingChartOptions" height="300px"></p-chart>
+                </div>
+            </p-card>
+
+            <!-- Sessions by Type -->
+            <p-card styleClass="shadow-xl rounded-2xl border-0">
+                <ng-template pTemplate="header">
+                    <div class="p-6 pb-0">
+                        <h2 class="text-xl font-bold text-gray-800 dark:text-white">الجلسات حسب النوع</h2>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">توزيع أنواع الجلسات</p>
+                    </div>
+                </ng-template>
+
+                <div style="height: 300px">
+                    <p-chart type="doughnut" [data]="sessionsByTypeChart" [options]="sessionsByTypeOptions" height="300px"></p-chart>
+                </div>
+            </p-card>
+        </div>
+    </ng-container>
+
+    <!-- User Dashboard (Existing) -->
+    <ng-container *ngIf="isUser$ | async">
+        <div *ngIf="user$ | async as user" class="mb-6">
+            <div class="flex flex-col md:flex-row justify-between gap-4 mb-4">
+                <div>
+                    <h1 class="text-2xl font-semibold text-gray-800 dark:text-white">{{ 'pages.dashboard.welcome' | translate }} {{ user.firstName }} {{ user.lastName }}!</h1>
+                    <p class="text-gray-600 dark:text-gray-300">{{ 'pages.dashboard.bookSessions' | translate }}</p>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button pButton pRipple label="{{ 'pages.dashboard.bookAppointment' | translate }}" icon="pi pi-calendar-plus" class="p-button-primary" routerLink="/app/booking"></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Upcoming Appointments Card -->
+            <div class="md:col-span-2">
+                <p-card [header]="'pages.dashboard.upcomingAppointments' | translate" [styleClass]="'h-full'">
+                    <ng-template pTemplate="content">
+                        <div *ngIf="(upcomingBookings$ | async)?.length === 0" class="py-4 text-center">
+                            <p class="text-gray-500 dark:text-gray-400">{{ 'pages.dashboard.noUpcomingAppointments' | translate }}</p>
+                            <button pButton pRipple label="{{ 'pages.dashboard.bookNow' | translate }}" icon="pi pi-calendar-plus" class="p-button-primary mt-4" routerLink="/app/booking"></button>
+                        </div>
+
+                        <div *ngIf="(upcomingBookings$ | async)!.length > 0">
+                            <div *ngFor="let booking of upcomingBookings$ | async" class="border-b border-gray-200 dark:border-gray-700 py-4 last:border-0">
+                                <div class="flex flex-col md:flex-row justify-between gap-4">
+                                    <div>
+                                        <h5 class="text-lg font-medium text-gray-800 dark:text-white">
+                                            {{ formatDateTime(booking.timeSlot!.startTime) }}
+                                        </h5>
+                                        <p class="text-gray-600 dark:text-gray-300">{{ 'pages.dashboard.duration' | translate }} {{ booking.timeSlot!.startTime | date: 'shortTime' }} - {{ booking.timeSlot!.endTime | date: 'shortTime' }}</p>
+                                        <p class="text-gray-600 dark:text-gray-300 mt-1">
+                                            <span class="font-medium">{{ 'pages.dashboard.specialist' | translate }}</span> {{ booking.assignedSpecialistName }}
+                                        </p>
+                                        <p *ngIf="booking.notes" class="text-gray-500 dark:text-gray-400 mt-2">
+                                            <span class="font-medium">{{ 'pages.dashboard.notes' | translate }}</span> {{ booking.notes }}
+                                        </p>
+                                    </div>
+
+                                    <div class="flex items-start gap-2">
+                                        <p-tag [value]="booking.status" [severity]="getStatusSeverity(booking.status)"></p-tag>
+                                        <button pButton pRipple label="{{ 'common.buttons.cancel' | translate }}" icon="pi pi-times" class="p-button-danger p-button-outlined" (click)="cancelBooking(booking)"></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 text-right">
+                                <a routerLink="/app/session" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ 'pages.dashboard.viewAllAppointments' | translate }}</a>
+                            </div>
+                        </div>
+                    </ng-template>
+                </p-card>
+            </div>
+
+            <!-- Quick Actions Card -->
+            <div>
+                <p-card [header]="'pages.dashboard.quickActions' | translate" [styleClass]="'h-full'">
+                    <ng-template pTemplate="content">
+                        <div class="flex flex-col gap-3">
                             <button pButton pRipple label="{{ 'pages.dashboard.bookNewAppointment' | translate }}" icon="pi pi-calendar-plus" class="p-button-primary" routerLink="/app/booking"></button>
                             <button pButton pRipple label="{{ 'pages.dashboard.mySessions' | translate }}" icon="pi pi-calendar" class="p-button-secondary" routerLink="/app/session"></button>
                             <button pButton pRipple label="{{ 'pages.dashboard.myChildren' | translate }}" icon="pi pi-users" class="p-button-secondary" routerLink="/app/children"></button>
                             <button pButton pRipple label="{{ 'pages.dashboard.surveys' | translate }}" icon="pi pi-file" class="p-button-secondary" routerLink="/app/survey/list"></button>
-                        </ng-container>
-
-                        <!-- Specialist Quick Actions -->
-                        <ng-container *ngIf="isSpecialist$ | async">
-                            <button pButton pRipple label="{{ 'pages.dashboard.viewTodaySchedule' | translate }}" icon="pi pi-calendar" class="p-button-primary" routerLink="/app/specialist-bookings"></button>
-                            <button pButton pRipple label="{{ 'pages.dashboard.manageAppointmentsButton' | translate }}" icon="pi pi-calendar-times" class="p-button-secondary" routerLink="/app/specialist-bookings"></button>
-                            <button pButton pRipple label="{{ 'pages.dashboard.viewReports' | translate }}" icon="pi pi-chart-bar" class="p-button-secondary" routerLink="/app/reports"></button>
-                        </ng-container>
-
-                        <!-- Common Actions -->
-                        <button pButton pRipple label="{{ 'pages.dashboard.profileSettings' | translate }}" icon="pi pi-user-edit" class="p-button-outlined" routerLink="/app/user-profile"></button>
-
-                        <!-- Admin Actions -->
-                        <button *ngIf="isAdmin$ | async" pButton pRipple label="{{ 'pages.dashboard.adminDashboard' | translate }}" icon="pi pi-cog" class="p-button-help mt-2" routerLink="/app/admin"></button>
-                    </div>
-                </ng-template>
-            </p-card>
+                            <button pButton pRipple label="{{ 'pages.dashboard.profileSettings' | translate }}" icon="pi pi-user-edit" class="p-button-outlined" routerLink="/app/user-profile"></button>
+                        </div>
+                    </ng-template>
+                </p-card>
+            </div>
         </div>
-    </div>
+    </ng-container>
 
-    <!-- Admin Stats/Charts -->
-    <div *ngIf="isAdmin$ | async" class="mt-6">
+    <!-- Admin Dashboard (Existing) -->
+    <ng-container *ngIf="isAdmin$ | async">
+        <div *ngIf="user$ | async as user" class="mb-6">
+            <div class="flex flex-col md:flex-row justify-between gap-4 mb-4">
+                <div>
+                    <h1 class="text-2xl font-semibold text-gray-800 dark:text-white">{{ 'pages.dashboard.welcome' | translate }} {{ user.firstName }} {{ user.lastName }}!</h1>
+                    <p class="text-gray-600 dark:text-gray-300">{{ 'pages.dashboard.managePlatform' | translate }}</p>
+                </div>
+            </div>
+        </div>
+
         <p-card [header]="'pages.dashboard.bookingStatistics' | translate" styleClass="mb-4">
             <ng-template pTemplate="content">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -126,5 +342,5 @@
                 </div>
             </ng-template>
         </p-card>
-    </div>
+    </ng-container>
 </div>

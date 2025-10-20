@@ -1,8 +1,8 @@
 import { registerLocaleData } from '@angular/common';
 import { Component, OnInit, ErrorHandler, Injectable } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
 import { GoogleTagManagerModule } from 'angular-google-tag-manager';
+import { LanguageService } from './app/services/language.service';
 import localeAr from '@angular/common/locales/ar';
 import localeEn from '@angular/common/locales/en';
 registerLocaleData(localeAr, 'ar');
@@ -19,9 +19,10 @@ registerLocaleData(localeEn, 'en');
     `
 })
 export class AppComponent implements OnInit {
-    constructor(private translateService: TranslateService) {}
+    constructor(private languageService: LanguageService) {}
 
     ngOnInit() {
-        this.translateService.use('ar-EG'); // Set default language
+        // Language is already initialized by LanguageService constructor
+        // No additional initialization needed
     }
 }

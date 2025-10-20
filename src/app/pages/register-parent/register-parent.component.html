@@ -1,41 +1,151 @@
-<app-floating-configurator />
-<div class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-[100vw] overflow-hidden">
-    <div class="flex flex-col items-center justify-center">
-        <div style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)">
-            <div class="w-full bg-surface-0 dark:bg-surface-900 py-20 px-8 sm:px-20" style="border-radius: 53px">
-                <div class="text-center mb-8">
-                    <svg viewBox="0 0 54 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="mb-8 w-16 shrink-0 mx-auto">
-                        <!-- Same SVG as login page -->
-                    </svg>
-                    <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">{{ 'pages.register.welcome' | translate }}</div>
+<div class="register-container">
+    <!-- Language Selector at Top -->
+    <div class="language-selector-top">
+        <app-language-selector></app-language-selector>
+    </div>
+
+    <!-- Split Layout Container -->
+    <div class="split-layout">
+        <!-- Left Side - Info/Image Section -->
+        <div class="info-section">
+            <!-- Animated Background Shapes -->
+            <div class="animated-background">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+            </div>
+
+            <div class="info-content">
+                <!-- Logo -->
+                <div class="brand-section">
+                    <img src="assets/images/Logo.png" alt="KidSkills Logo" class="brand-logo" />
+                    <h1 class="brand-title">KidSkills</h1>
+                    <p class="brand-tagline">{{ 'pages.register.tagline' | translate }}</p>
                 </div>
 
-                <form [formGroup]="registerForm">
-                    <div class="flex mb-8 md:w-[30rem] w-full">
-                        <div class="flex-1 me-2">
-                            <label for="email" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">{{ 'common.labels.firstName' | translate }}</label>
-                            <input pInputText id="firstName" formControlName="firstName" type="text" class="w-full" />
+                <!-- Features List -->
+                <div class="features-list">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="pi pi-user-plus"></i>
                         </div>
-                        <div class="flex-1">
-                            <label for="email" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">{{ 'common.labels.lastName' | translate }}</label>
-                            <input pInputText id="lastName" formControlName="lastName" type="text" class="w-full" />
+                        <div class="feature-text">
+                            <h3>{{ 'pages.register.features.easy.title' | translate }}</h3>
+                            <p>{{ 'pages.register.features.easy.desc' | translate }}</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="pi pi-shield"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h3>{{ 'pages.register.features.secure.title' | translate }}</h3>
+                            <p>{{ 'pages.register.features.secure.desc' | translate }}</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="pi pi-heart"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h3>{{ 'pages.register.features.journey.title' | translate }}</h3>
+                            <p>{{ 'pages.register.features.journey.desc' | translate }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trust Badges -->
+                <div class="trust-badges">
+                    <div class="badge">
+                        <i class="pi pi-clock"></i>
+                        <span>{{ 'pages.register.quick' | translate }}</span>
+                    </div>
+                    <div class="badge">
+                        <i class="pi pi-check-circle"></i>
+                        <span>{{ 'pages.register.free' | translate }}</span>
+                    </div>
+                    <div class="badge">
+                        <i class="pi pi-lock"></i>
+                        <span>{{ 'pages.register.private' | translate }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side - Register Form Section -->
+        <div class="form-section">
+            <div class="form-container">
+                <!-- Welcome Header -->
+                <div class="register-header">
+                    <h1 class="welcome-title">{{ 'pages.register.welcome' | translate }}</h1>
+                    <p class="welcome-subtitle">{{ 'pages.register.subtitle' | translate }}</p>
+                </div>
+
+                <!-- Register Form -->
+                <form [formGroup]="registerForm" class="register-form">
+                    <!-- Name Fields Row -->
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="firstName" class="field-label">
+                                <i class="pi pi-user"></i>
+                                {{ 'common.labels.firstName' | translate }}
+                            </label>
+                            <input pInputText id="firstName" formControlName="firstName" type="text" [placeholder]="'common.labels.firstName' | translate" class="w-full" />
+                        </div>
+
+                        <div class="form-field">
+                            <label for="lastName" class="field-label">
+                                <i class="pi pi-user"></i>
+                                {{ 'common.labels.lastName' | translate }}
+                            </label>
+                            <input pInputText id="lastName" formControlName="lastName" type="text" [placeholder]="'common.labels.lastName' | translate" class="w-full" />
                         </div>
                     </div>
 
-                    <label for="email" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">{{ 'common.labels.email' | translate }}</label>
-                    <input pInputText id="email" formControlName="email" type="text" class="w-full md:w-[30rem] mb-8" />
+                    <!-- Email Field -->
+                    <div class="form-field">
+                        <label for="email" class="field-label">
+                            <i class="pi pi-envelope"></i>
+                            {{ 'common.labels.email' | translate }}
+                        </label>
+                        <input pInputText id="email" formControlName="email" type="email" [placeholder]="'common.placeholders.enterEmail' | translate" class="w-full" />
+                    </div>
 
-                    <label for="password" class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2">{{ 'common.labels.password' | translate }}</label>
-                    <p-password id="password" formControlName="password" [toggleMask]="true" styleClass="mb-4" [fluid]="true"></p-password>
+                    <!-- Password Field -->
+                    <div class="form-field">
+                        <label for="password" class="field-label">
+                            <i class="pi pi-lock"></i>
+                            {{ 'common.labels.password' | translate }}
+                        </label>
+                        <p-password id="password" formControlName="password" [toggleMask]="true" [feedback]="true" [placeholder]="'common.placeholders.enterPassword' | translate" styleClass="w-full" [inputStyleClass]="'w-full'"></p-password>
+                    </div>
 
-                    <label for="confirmPassword" class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2">{{ 'common.labels.confirmPassword' | translate }}</label>
-                    <p-password id="confirmPassword" formControlName="confirmPassword" [toggleMask]="true" styleClass="mb-8" [fluid]="true" [feedback]="false"></p-password>
+                    <!-- Confirm Password Field -->
+                    <div class="form-field">
+                        <label for="confirmPassword" class="field-label">
+                            <i class="pi pi-lock"></i>
+                            {{ 'common.labels.confirmPassword' | translate }}
+                        </label>
+                        <p-password
+                            id="confirmPassword"
+                            formControlName="confirmPassword"
+                            [toggleMask]="true"
+                            [feedback]="false"
+                            [placeholder]="'common.labels.confirmPassword' | translate"
+                            styleClass="w-full"
+                            [inputStyleClass]="'w-full'"
+                        ></p-password>
+                    </div>
 
-                    <p-button label="{{ 'common.buttons.register' | translate }}" [disabled]="!registerForm.valid" (onClick)="onRegister()" styleClass="w-full"></p-button>
+                    <!-- Register Button -->
+                    <p-button [label]="'common.buttons.register' | translate" icon="pi pi-user-plus" iconPos="right" (onClick)="onRegister()" styleClass="w-full register-button" [disabled]="!registerForm.valid" [loading]="isLoading"></p-button>
 
-                    <div class="text-center mt-4">
-                        <span class="text-surface-900 dark:text-surface-0">{{ 'common.labels.alreadyHaveAccount' | translate }}</span>
-                        <a class="font-medium no-underline ml-2 text-primary cursor-pointer" [routerLink]="['/auth/login']">{{ 'common.buttons.login' | translate }}</a>
+                    <!-- Login Link -->
+                    <div class="login-section">
+                        <span class="login-text">{{ 'common.labels.alreadyHaveAccount' | translate }}</span>
+                        <a routerLink="/auth/login" class="login-link">
+                            {{ 'common.buttons.login' | translate }}
+                        </a>
                     </div>
                 </form>
             </div>

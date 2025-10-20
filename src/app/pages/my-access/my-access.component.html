@@ -1,0 +1,136 @@
+<div class="my-access-container">
+    <!-- Header Section -->
+    <div class="page-header">
+        <h1>{{ 'MY_ACCESS.TITLE' | translate }}</h1>
+        <p class="subtitle">{{ 'MY_ACCESS.SUBTITLE' | translate }}</p>
+        <button pButton type="button" icon="pi pi-refresh" [label]="'MY_ACCESS.REFRESH' | translate" (click)="refreshAccess()" class="p-button-outlined refresh-btn"></button>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-container">
+        <p-skeleton height="200px" styleClass="mb-3"></p-skeleton>
+        <p-skeleton height="300px"></p-skeleton>
+    </div>
+
+    <!-- User Info Card -->
+    <p-card *ngIf="!loading && currentUser" class="user-info-card mb-4">
+        <div class="user-info">
+            <div class="user-avatar">
+                <i class="pi pi-user"></i>
+            </div>
+            <div class="user-details">
+                <h3>{{ currentUser.firstName }} {{ currentUser.lastName }}</h3>
+                <p>{{ currentUser.email }}</p>
+                <p-tag [value]="currentUser.role?.toUpperCase()" [severity]="currentUser.role === 'admin' ? 'danger' : currentUser.role === 'paid' ? 'success' : 'info'"> </p-tag>
+                <!-- Trial expiry display -->
+                <div class="mt-2" *ngIf="currentUser?.gameAccessExpires || currentUser?.scaleAccessExpires">
+                    <p class="text-sm text-yellow-700 dark:text-yellow-300">{{ 'MY_ACCESS.TRIAL_EXPIRES' | translate }}: {{ getNearestExpiry() | date: 'short' }}</p>
+                    <button pButton type="button" label="{{ 'MY_ACCESS.PAY_NOW' | translate }}" class="p-button-rounded p-button-warning mt-2" (click)="onPayNow()"></button>
+                </div>
+            </div>
+        </div>
+    </p-card>
+
+    <!-- Access Summary Cards -->
+    <div *ngIf="!loading" class="summary-cards">
+        <p-card class="summary-card games-summary">
+            <div class="summary-content">
+                <div class="summary-icon games-icon">
+                    <i class="pi pi-star"></i>
+                </div>
+                <div class="summary-details">
+                    <h2>{{ accessibleGamesCount }} / {{ totalGames }}</h2>
+                    <p>{{ 'MY_ACCESS.GAMES_ACCESSIBLE' | translate }}</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill games-progress" [style.width.%]="gamesAccessPercentage"></div>
+                    </div>
+                    <span class="percentage">{{ gamesAccessPercentage }}%</span>
+                </div>
+            </div>
+            <button pButton type="button" [label]="'MY_ACCESS.VIEW_GAMES' | translate" icon="pi pi-arrow-right" iconPos="right" (click)="navigateToGamesList()" class="p-button-rounded p-button-success mt-3"></button>
+        </p-card>
+
+        <p-card class="summary-card scales-summary">
+            <div class="summary-content">
+                <div class="summary-icon scales-icon">
+                    <i class="pi pi-chart-bar"></i>
+                </div>
+                <div class="summary-details">
+                    <h2>{{ accessibleScalesCount }} / {{ totalScales }}</h2>
+                    <p>{{ 'MY_ACCESS.SCALES_ACCESSIBLE' | translate }}</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill scales-progress" [style.width.%]="scalesAccessPercentage"></div>
+                    </div>
+                    <span class="percentage">{{ scalesAccessPercentage }}%</span>
+                </div>
+            </div>
+            <button pButton type="button" [label]="'MY_ACCESS.VIEW_SCALES' | translate" icon="pi pi-arrow-right" iconPos="right" (click)="navigateToScalesList()" class="p-button-rounded p-button-info mt-3"></button>
+        </p-card>
+    </div>
+
+    <p-divider></p-divider>
+
+    <!-- Games Access List -->
+    <div *ngIf="!loading" class="access-section">
+        <h2>
+            <i class="pi pi-star"></i>
+            {{ 'MY_ACCESS.GAMES_LIST' | translate }}
+        </h2>
+
+        <div *ngIf="isAdmin || isPaid" class="full-access-notice">
+            <i class="pi pi-check-circle"></i>
+            <span>{{ 'MY_ACCESS.FULL_ACCESS_MESSAGE' | translate }}</span>
+        </div>
+
+        <div class="access-grid">
+            <div *ngFor="let game of games" class="access-item" [class.has-access]="game.hasAccess" [class.no-access]="!game.hasAccess" (click)="game.hasAccess && navigateToGame(game.id)">
+                <div class="item-number">{{ game.id }}</div>
+                <div class="item-info">
+                    <h4>{{ game.nameAr }}</h4>
+                    <p>{{ game.name }}</p>
+                </div>
+                <div class="item-status">
+                    <i *ngIf="game.hasAccess" class="pi pi-check-circle access-icon"></i>
+                    <i *ngIf="!game.hasAccess" class="pi pi-lock no-access-icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <p-divider></p-divider>
+
+    <!-- Scales Access List -->
+    <div *ngIf="!loading" class="access-section">
+        <h2>
+            <i class="pi pi-chart-bar"></i>
+            {{ 'MY_ACCESS.SCALES_LIST' | translate }}
+        </h2>
+
+        <div *ngIf="isAdmin || isPaid" class="full-access-notice">
+            <i class="pi pi-check-circle"></i>
+            <span>{{ 'MY_ACCESS.FULL_ACCESS_MESSAGE' | translate }}</span>
+        </div>
+
+        <div class="access-grid scales-grid">
+            <div *ngFor="let scale of scales" class="access-item scale-item" [class.has-access]="scale.hasAccess" [class.no-access]="!scale.hasAccess" (click)="scale.hasAccess && navigateToScale(scale.id)">
+                <div class="item-number scale-number">{{ scale.id }}</div>
+                <div class="item-info">
+                    <h4>{{ scale.nameAr }}</h4>
+                    <p>{{ scale.name }}</p>
+                </div>
+                <div class="item-status">
+                    <i *ngIf="scale.hasAccess" class="pi pi-check-circle access-icon"></i>
+                    <i *ngIf="!scale.hasAccess" class="pi pi-lock no-access-icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && accessibleGamesCount === 0 && accessibleScalesCount === 0 && !isAdmin && !isPaid" class="empty-state">
+        <i class="pi pi-lock"></i>
+        <h3>{{ 'MY_ACCESS.NO_ACCESS_TITLE' | translate }}</h3>
+        <p>{{ 'MY_ACCESS.NO_ACCESS_MESSAGE' | translate }}</p>
+        <button pButton type="button" [label]="'MY_ACCESS.CONTACT_ADMIN' | translate" icon="pi pi-envelope" class="p-button-rounded p-button-outlined"></button>
+    </div>
+</div>

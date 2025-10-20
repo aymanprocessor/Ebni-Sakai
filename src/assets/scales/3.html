@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>مقياس الإدراك الاستماعي</title>
+
+        <!-- Tailwind CSS (Play CDN) -->
+        <script src="https://cdn.tailwindcss.com"></script>
+
+        <!-- خط القاهرة -->
+        <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+
+        <style>
+            body {
+                font-family:
+                    'Cairo',
+                    system-ui,
+                    -apple-system,
+                    Segoe UI,
+                    Roboto,
+                    'Helvetica Neue',
+                    Arial,
+                    'Noto Sans';
+            }
+            @media print {
+                body {
+                    background: #fff !important;
+                    print-color-adjust: exact;
+                    -webkit-print-color-adjust: exact;
+                }
+                .print\:hidden {
+                    display: none !important;
+                }
+                .print\:block {
+                    display: block !important;
+                }
+                @page {
+                    margin: 1cm;
+                    size: A4;
+                }
+            }
+        </style>
+    </head>
+    <body class="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+        <div id="root"></div>
+
+        <!-- React UMD + ReactDOM + Babel (لتشغيل JSX بالمتصفح) -->
+        <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+        <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+        <script type="text/babel">
+            // ===== أيقونات SVG بديلة لـ lucide-react =====
+            const PrinterIcon = ({ className = 'w-5 h-5' }) => (
+                <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M6 9V2h12v7M6 18H5a3 3 0 0 1-3-3v-3a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v3a3 3 0 0 1-3 3h-1" />
+                    <path d="M6 14h12v8H6z" />
+                </svg>
+            );
+            const CheckCircleIcon = ({ className = 'w-14 h-14' }) => (
+                <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M22 11.08V12A10 10 0 1 1 12 2a9.95 9.95 0 0 1 7.07 2.93" />
+                    <path d="M22 4 12 14l-3-3" />
+                </svg>
+            );
+            const AlertCircleIcon = ({ className = 'w-8 h-8' }) => (
+                <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12" y2="16"></line>
+                </svg>
+            );
+
+            // ===== التطبيق =====
+            const { useState } = React;
+
+            function AuditoryPerceptionScale() {
+                const [currentPage, setCurrentPage] = useState(1);
+                const [answers, setAnswers] = useState({});
+                const [personalInfo, setPersonalInfo] = useState({
+                    studentName: '',
+                    grade: '',
+                    school: '',
+                    gender: '',
+                    evaluationDate: '',
+                    evaluatorName: '',
+                    evaluatorJob: '',
+                    birthDate: '',
+                    evaluatorGender: ''
+                });
+
+                const questions = [
+                    'يجد صعوبات في الفهم الاستماعي للمعلومات التي تقدم شفهياً',
+                    'يجد صعوبة في فهم المناقشات أو الأسئلة التي توجه إليه',
+                    'يجد صعوبة في فهم الكلمات المتماثلة نطقاً والمختلفة معنى',
+                    'يجد صعوبة في متابعة التعليمات أو الشرح الشفوي للمعلم',
+                    'يجد صعوبة في تمييز أصوات الحروف أو المقاطع المنطوقة',
+                    'يجد صعوبة في تجميع أصوات الحروف والمقاطع',
+                    'يجد صعوبة في فهم وإتباع التعليمات الشفهية واسترجاعها',
+                    'يجد صعوبة في إدراك الزمن: لحظة، بعد قليل، بعد ساعة',
+                    'يحتاج إلى تكرار الشرح الشفهي للمعلومات عدة مرات',
+                    'يجد صعوبة في استيعاب معنى المعلومات شفهياً دون تكرار',
+                    'يفقد انتباهه للمدرس أو الدرس لأي مشتتات خارج الفصل',
+                    'يجد صعوبة في تتبع المثيرات والمعلومات السمعية',
+                    'يجد صعوبة في فهم معنى ومتابعة دلالات الأصوات والإشارات',
+                    'يجد صعوبة في متابعة شرح المعلم عند المعدل العادي للشرح',
+                    'يجد صعوبة في فهم الشرح باستخدام التعبيرات العادية',
+                    'يجد صعوبة في إكمال مقاطع الكلمات الناقصة المسموعة',
+                    'يجد صعوبة في إدراك تركيب الكلمات أو الحروف المسموعة',
+                    'يصعب عليه إدراك معنى الكلمات المسموعة ناقصة حرف أو أكثر',
+                    'يجد صعوبة في فهم معاني المقاطع المسموعة أو المنطوقة',
+                    'يجد صعوبة في الفهم الاستماعي للمفاهيم المجردة'
+                ];
+
+                const options = [
+                    { value: 4, label: 'دائماً' },
+                    { value: 3, label: 'غالباً' },
+                    { value: 2, label: 'أحياناً' },
+                    { value: 1, label: 'نادراً' },
+                    { value: 0, label: 'لا تنطبق' }
+                ];
+
+                const handleAnswerChange = (questionIndex, value) => {
+                    setAnswers((prev) => ({ ...prev, [questionIndex]: value }));
+                };
+
+                const calculateResults = () => {
+                    const totalScore = Object.values(answers).reduce((sum, val) => sum + val, 0);
+                    const answeredQuestions = Object.keys(answers).length;
+                    const average = answeredQuestions > 0 ? totalScore / answeredQuestions : 0;
+
+                    let severity = '';
+                    let severityColor = '';
+                    let diagnosis = '';
+
+                    if (totalScore < 20) {
+                        severity = 'عادي / لا توجد صعوبات';
+                        severityColor = 'text-green-600';
+                        diagnosis = 'احتمال ألا تكون لدى التلميذ صعوبة تعلم في الإدراك الاستماعي';
+                    } else if (totalScore >= 21 && totalScore < 40) {
+                        severity = 'صعوبات خفيفة';
+                        severityColor = 'text-yellow-600';
+                        diagnosis = 'احتمال أن تكون لدى التلميذ صعوبة تعلم خفيفة في الإدراك الاستماعي';
+                    } else if (totalScore >= 40 && totalScore < 60) {
+                        severity = 'صعوبات متوسطة';
+                        severityColor = 'text-orange-600';
+                        diagnosis = 'احتمال أن تكون لدى التلميذ صعوبة تعلم متوسطة في الإدراك الاستماعي';
+                    } else {
+                        severity = 'صعوبات شديدة';
+                        severityColor = 'text-red-600';
+                        diagnosis = 'احتمال أن تكون لدى التلميذ صعوبة تعلم شديدة في الإدراك الاستماعي';
+                    }
+
+                    return { totalScore, average, severity, severityColor, diagnosis };
+                };
+
+                const getRecommendations = (severity) => {
+                    if (severity === 'عادي / لا توجد صعوبات') {
+                        return ['متابعة التطور الطبيعي للطفل', 'تشجيع المشاركة في الأنشطة الصفية', 'الحفاظ على بيئة تعليمية داعمة'];
+                    } else if (severity === 'صعوبات خفيفة') {
+                        return ['توفير وقت إضافي لاستيعاب التعليمات الشفهية', 'استخدام التعزيز البصري مع الشرح الشفوي', 'تقسيم التعليمات إلى خطوات صغيرة', 'المتابعة الدورية مع الأخصائي'];
+                    } else if (severity === 'صعوبات متوسطة') {
+                        return ['إحالة الطفل لأخصائي صعوبات التعلم', 'وضع خطة تربوية فردية مناسبة', 'استخدام استراتيجيات تعليمية متعددة الحواس', 'تدريبات يومية على مهارات الإدراك السمعي', 'التنسيق بين المنزل والمدرسة', 'جلسات علاجية متخصصة'];
+                    } else {
+                        return [
+                            'إحالة فورية لأخصائي صعوبات التعلم',
+                            'تقييم شامل من فريق متعدد التخصصات',
+                            'برنامج علاجي مكثف ومتخصص',
+                            'خطة تربوية فردية شاملة ومفصلة',
+                            'جلسات علاج نطق وتخاطب إن لزم',
+                            'متابعة دقيقة ومستمرة للتقدم',
+                            'تدريب الأسرة على استراتيجيات الدعم المنزلي'
+                        ];
+                    }
+                };
+
+                const handlePrint = () => window.print();
+
+                const canProceedToQuestions = () => {
+                    return personalInfo.studentName && personalInfo.grade && personalInfo.gender && personalInfo.evaluationDate && personalInfo.evaluatorName;
+                };
+
+                const canProceedToResults = () => {
+                    return Object.keys(answers).length === questions.length;
+                };
+
+                return (
+                    <div className="min-h-screen p-4 print:p-8 print:bg-white" dir="rtl">
+                        <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden print:shadow-none">
+                            {/* الصفحة 1: الترحيب */}
+                            {currentPage === 1 && (
+                                <div className="p-8 md:p-12 text-center">
+                                    <div className="mb-8">
+                                        <div className="w-24 h-24 mx-auto mb-6 bg-blue-600 rounded-full flex items-center justify-center text-white">
+                                            <CheckCircleIcon />
+                                        </div>
+                                        <h1 className="text-3xl md:text-4xl font-bold text-blue-900 mb-4">بطارية مقياس التقدير التشخيصي</h1>
+                                        <h2 className="text-2xl md:text-3xl font-semibold text-blue-700 mb-3">لصعوبات التعلم النمائية والأكاديمية</h2>
+                                        <div className="inline-block bg-blue-600 text-white px-6 py-2 rounded-full text-lg font-semibold mb-6">LDDRS</div>
+                                        <h3 className="text-xl md:text-2xl font-bold text-blue-800 mt-2">مقياس التقدير التشخيصي</h3>
+                                        <h3 className="text-xl md:text-2xl font-bold text-blue-800 mb-6">لصعوبات الإدراك الاستماعي</h3>
+                                    </div>
+
+                                    <div className="bg-blue-50 p-6 rounded-xl mb-8">
+                                        <p className="text-gray-700 text-lg leading-relaxed">مرحباً بك في المقياس التشخيصي التفاعلي لتقييم صعوبات الإدراك الاستماعي لدى الأطفال</p>
+                                    </div>
+
+                                    <button onClick={() => setCurrentPage(2)} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-12 rounded-full text-xl transition-all transform hover:scale-105 shadow-lg">
+                                        ابدأ التقييم
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* الصفحة 2: التعليمات */}
+                            {currentPage === 2 && (
+                                <div className="p-8 md:p-12 print:hidden">
+                                    <h2 className="text-3xl font-bold text-blue-900 mb-6 text-center">تعليمات الاستخدام</h2>
+
+                                    <div className="bg-blue-50 p-6 rounded-xl mb-6">
+                                        <h3 className="text-xl font-bold text-blue-800 mb-4">عزيزي الأخصائي / المعلم / ولي الأمر</h3>
+                                        <div className="space-y-4 text-gray-700 leading-relaxed">
+                                            <p>• يهدف هذا المقياس إلى الكشف عن التلاميذ ذوي صعوبات التعلم في الإدراك الاستماعي</p>
+                                            <p>• معرفتك الجيدة بالطفل وملاحظتك المستمرة له ضرورية للتقييم الصحيح</p>
+                                            <p>• المقياس يتكون من 20 فقرة سلوكية</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-green-50 p-6 rounded-xl mb-6">
+                                        <h3 className="text-xl font-bold text-green-800 mb-4">مستويات التقدير</h3>
+                                        <div className="space-y-3">
+                                            {options.map((option, index) => (
+                                                <div key={index} className="flex items-center justify-between bg-white p-3 rounded-lg">
+                                                    <span className="font-semibold text-gray-800">{option.label}</span>
+                                                    <span className="bg-blue-600 text-white px-4 py-1 rounded-full">{option.value} درجات</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-yellow-50 p-6 rounded-xl mb-8">
+                                        <h3 className="text-xl font-bold text-yellow-800 mb-3">تعريف صعوبات الإدراك الاستماعي</h3>
+                                        <p className="text-gray-700 leading-relaxed">
+                                            ضعف القدرة على إدراك وتفسير المعلومات الشفهية المسموعة وفهمها. من الصعوبات النمائية التي تؤثر على استيعاب الأنشطة المعرفية والأكاديمية والمهارية نظراً لاعتماد التدريس على العرض الشفوي.
+                                        </p>
+                                    </div>
+
+                                    <div className="bg-red-50 p-6 rounded-xl mb-8">
+                                        <h3 className="text-xl font-bold text-red-800 mb-3">ملاحظات هامة</h3>
+                                        <ul className="space-y-2 text-gray-700">
+                                            <li>• اقرأ كل فقرة بعناية قبل التقييم</li>
+                                            <li>• تستغرق الإجابة من 15-20 دقيقة</li>
+                                            <li>• لا تقيم أكثر من 6 تلاميذ في جلسة واحدة</li>
+                                            <li>• يجب الإجابة على جميع الفقرات</li>
+                                        </ul>
+                                    </div>
+
+                                    <div className="flex gap-4">
+                                        <button onClick={() => setCurrentPage(1)} className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-6 rounded-lg transition-all">
+                                            السابق
+                                        </button>
+                                        <button onClick={() => setCurrentPage(3)} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-all">
+                                            التالي: البيانات الشخصية
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* الصفحة 3: البيانات الشخصية */}
+                            {currentPage === 3 && (
+                                <div className="p-8 md:p-12 print:hidden">
+                                    <h2 className="text-3xl font-bold text-blue-900 mb-6 text-center">البيانات الشخصية</h2>
+
+                                    <div className="bg-blue-50 p-6 rounded-xl mb-8">
+                                        <h3 className="text-xl font-bold text-blue-800 mb-4">معلومات التلميذ</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-gray-700 font-semibold mb-2">اسم التلميذ *</label>
+                                                <input
+                                                    type="text"
+                                                    value={personalInfo.studentName}
+                                                    onChange={(e) => setPersonalInfo({ ...personalInfo, studentName: e.target.value })}
+                                                    className="w-full p-3 border-2 border-blue-300 rounded-lg focus:border-blue-600 focus:outline-none"
+                                                    placeholder="أدخل اسم التلميذ"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-gray-700 font-semibold mb-2">جنس التلميذ *</label>
+                                                <select
+                                                    value={personalInfo.gender}
+                                                    onChange={(e) => setPersonalInfo({ ...personalInfo, gender: e.target.value })}
+                                                    className="w-full p-3 border-2 border-blue-300 rounded-lg focus:border-blue-600 focus:outline-none"
+                                                >
+                                                    <option value="">اختر</option>
+                                                    <option value="ذكر">ذكر</option>
+                                                    <option value="أنثى">أنثى</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="block text-gray-700 font-semibold mb-2">تاريخ الميلاد</label>
+                                                <input
+                                                    type="date"
+                                                    value={personalInfo.birthDate}
+                                                    onChange={(e) => setPersonalInfo({ ...personalInfo, birthDate: e.target.value })}
+                                                    className="w-full p-3 border-2 border-blue-300 rounded-lg focus:border-blue-600 focus:outline-none"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-gray-700 font-semibold mb-2">الصف الدراسي *</label>
+                                                <input
+                                                    type="text"
+                                                    value={personalInfo.grade}
+                                                    onChange={(e) => setPersonalInfo({ ...personalInfo, grade: e.target.value })}
+                                                    className="w-full p-3 border-2 border-blue-300 rounded-lg focus:border-blue-600 focus:outline-none"
+                                                    placeholder="مثال: الصف الثالث الابتدائي"
+                                                />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <label className="block text-gray-700 font-semibold mb-2">المدرسة</label>
+                                                <input
+                                                    type="text"
+                                                    value={personalInfo.school}
+                                                    onChange={(e) => setPersonalInfo({ ...personalInfo, school: e.target.value })}
+                                                    className="w-full p-3 border-2 border-blue-300 rounded-lg focus:border-blue-600 focus:outline-none"
+                                                    placeholder="اسم المدرسة"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-green-50 p-6 rounded-xl mb-8">
+                                        <h3 className="text-xl font-bold text-green-800 mb-4">معلومات القائم بالتقييم</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-gray-700 font-semibold mb-2">اسم القائم بالتقدير *</label>
+                                                <input
+                                                    type="text"
+                                                    value={personalInfo.evaluatorName}
+                                                    onChange={(e) => setPersonalInfo({ ...personalInfo, evaluatorName: e.target.value })}
+                                                    className="w-full p-3 border-2 border-green-300 rounded-lg focus:border-green-600 focus:outline-none"
+                                                    placeholder="اسم الأخصائي/المعلم"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-gray-700 font-semibold mb-2">الوظيفة</label>
+                                                <input
+                                                    type="text"
+                                                    value={personalInfo.evaluatorJob}
+                                                    onChange={(e) => setPersonalInfo({ ...personalInfo, evaluatorJob: e.target.value })}
+                                                    className="w-full p-3 border-2 border-green-300 rounded-lg focus:border-green-600 focus:outline-none"
+                                                    placeholder="أخصائي صعوبات تعلم/معلم"
+                                                />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <label className="block text-gray-700 font-semibold mb-2">تاريخ التقييم *</label>
+                                                <input
+                                                    type="date"
+                                                    value={personalInfo.evaluationDate}
+                                                    onChange={(e) => setPersonalInfo({ ...personalInfo, evaluationDate: e.target.value })}
+                                                    className="w-full p-3 border-2 border-green-300 rounded-lg focus:border-green-600 focus:outline-none"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {!canProceedToQuestions() && (
+                                        <div className="bg-yellow-100 border-r-4 border-yellow-500 p-4 mb-6 rounded">
+                                            <p className="text-yellow-800 font-semibold">⚠️ يرجى إكمال البيانات الأساسية المطلوبة (*) قبل الانتقال للأسئلة</p>
+                                        </div>
+                                    )}
+
+                                    <div className="flex gap-4">
+                                        <button onClick={() => setCurrentPage(2)} className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-6 rounded-lg transition-all">
+                                            السابق
+                                        </button>
+                                        <button
+                                            onClick={() => setCurrentPage(4)}
+                                            disabled={!canProceedToQuestions()}
+                                            className={`flex-1 font-bold py-3 px-6 rounded-lg transition-all ${canProceedToQuestions() ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+                                        >
+                                            التالي: أسئلة المقياس
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* الصفحة 4: الأسئلة */}
+                            {currentPage === 4 && (
+                                <div className="p-8 md:p-12 print:hidden">
+                                    <h2 className="text-3xl font-bold text-blue-900 mb-6 text-center">فقرات المقياس</h2>
+
+                                    <div className="bg-blue-100 p-4 rounded-lg mb-6 text-center">
+                                        <p className="text-blue-900 font-bold text-lg">قيّم مدى تواتر ظهور كل سلوك لدى التلميذ</p>
+                                        <p className="text-blue-700 mt-2">
+                                            الأسئلة المجابة: {Object.keys(answers).length} / {questions.length}
+                                        </p>
+                                    </div>
+
+                                    <div className="space-y-6">
+                                        {questions.map((question, index) => (
+                                            <div key={index} className="bg-gray-50 p-6 rounded-xl border-2 border-gray-200 hover:border-blue-400 transition-all">
+                                                <p className="text-gray-800 font-semibold mb-4 text-lg">
+                                                    {index + 1}. {question}
+                                                </p>
+                                                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                                                    {options.map((option) => (
+                                                        <button
+                                                            key={option.value}
+                                                            onClick={() => handleAnswerChange(index, option.value)}
+                                                            className={`p-3 rounded-lg font-semibold transition-all transform hover:scale-105 ${
+                                                                answers[index] === option.value ? 'bg-blue-600 text-white shadow-lg scale-105' : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-blue-400'
+                                                            }`}
+                                                        >
+                                                            {option.label}
+                                                            <span className="block text-sm mt-1">({option.value})</span>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="flex gap-4 mt-8">
+                                        <button onClick={() => setCurrentPage(3)} className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-6 rounded-lg transition-all">
+                                            السابق
+                                        </button>
+                                        <button
+                                            onClick={() => setCurrentPage(5)}
+                                            disabled={!canProceedToResults()}
+                                            className={`flex-1 font-bold py-3 px-6 rounded-lg transition-all ${canProceedToResults() ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+                                        >
+                                            {canProceedToResults() ? 'عرض النتائج' : `يجب الإجابة على جميع الأسئلة (${Object.keys(answers).length}/20)`}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* الصفحة 5: النتائج */}
+                            {currentPage === 5 && (
+                                <div className="p-8 md:p-12">
+                                    <div className="print:block">
+                                        <div className="text-center mb-8">
+                                            <h1 className="text-3xl font-bold text-blue-900 mb-2">تقرير التقييم التشخيصي</h1>
+                                            <h2 className="text-2xl font-semibold text-blue-700">مقياس صعوبات الإدراك الاستماعي</h2>
+                                        </div>
+
+                                        {/* بيانات التلميذ */}
+                                        <div className="bg-blue-50 p-6 rounded-xl mb-6">
+                                            <h3 className="text-xl font-bold text-blue-800 mb-4">بيانات التلميذ</h3>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
+                                                {[
+                                                    ['اسم التلميذ', personalInfo.studentName || '-'],
+                                                    ['الجنس', personalInfo.gender || '-'],
+                                                    ['الصف', personalInfo.grade || '-'],
+                                                    ['المدرسة', personalInfo.school || '-'],
+                                                    ['تاريخ الميلاد', personalInfo.birthDate || '-'],
+                                                    ['تاريخ التقييم', personalInfo.evaluationDate || '-'],
+                                                    ['القائم بالتقييم', personalInfo.evaluatorName || '-'],
+                                                    ['الوظيفة', personalInfo.evaluatorJob || '-']
+                                                ].map(([k, v], i) => (
+                                                    <div className="flex justify-between border-b pb-2" key={i}>
+                                                        <span className="font-semibold">{k}:</span>
+                                                        <span>{v}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* النتائج */}
+                                        {(() => {
+                                            const results = calculateResults();
+                                            return (
+                                                <>
+                                                    <div className="bg-gradient-to-r from-blue-100 to-blue-50 p-6 rounded-xl mb-6">
+                                                        <h3 className="text-xl font-bold text-blue-800 mb-4">نتائج التقييم</h3>
+                                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                            <div className="bg-white p-4 rounded-lg text-center shadow">
+                                                                <p className="text-gray-600 mb-2">الدرجة الخام</p>
+                                                                <p className="text-3xl font-bold text-blue-600">{results.totalScore}</p>
+                                                                <p className="text-sm text-gray-500 mt-1">من 80</p>
+                                                            </div>
+                                                            <div className="bg-white p-4 rounded-lg text-center shadow">
+                                                                <p className="text-gray-600 mb-2">المتوسط</p>
+                                                                <p className="text-3xl font-bold text-blue-600">{results.average.toFixed(2)}</p>
+                                                                <p className="text-sm text-gray-500 mt-1">من 4</p>
+                                                            </div>
+                                                            <div className="bg-white p-4 rounded-lg text-center shadow">
+                                                                <p className="text-gray-600 mb-2">النسبة المئوية</p>
+                                                                <p className="text-3xl font-bold text-blue-600">{((results.totalScore / 80) * 100).toFixed(1)}%</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div
+                                                        className={`bg-white border-r-8 p-6 rounded-xl mb-6 shadow-lg ${
+                                                            results.severity === 'عادي / لا توجد صعوبات'
+                                                                ? 'border-green-500'
+                                                                : results.severity === 'صعوبات خفيفة'
+                                                                  ? 'border-yellow-500'
+                                                                  : results.severity === 'صعوبات متوسطة'
+                                                                    ? 'border-orange-500'
+                                                                    : 'border-red-500'
+                                                        }`}
+                                                    >
+                                                        <div className="flex items-center gap-3 mb-4">
+                                                            <AlertCircleIcon className={`w-8 h-8 ${results.severityColor}`} />
+                                                            <h3 className="text-xl font-bold text-gray-800">التشخيص</h3>
+                                                        </div>
+                                                        <p className={`text-2xl font-bold ${results.severityColor} mb-3`}>{results.severity}</p>
+                                                        <p className="text-gray-700 leading-relaxed text-lg">{results.diagnosis}</p>
+                                                    </div>
+
+                                                    <div className="bg-green-50 p-6 rounded-xl mb-6">
+                                                        <h3 className="text-xl font-bold text-green-800 mb-4">التوصيات والمتابعة</h3>
+                                                        <ul className="space-y-3">
+                                                            {getRecommendations(results.severity).map((rec, index) => (
+                                                                <li key={index} className="flex items-start gap-3 text-gray-700">
+                                                                    <CheckCircleIcon className="w-5 h-5 text-green-600 mt-1" />
+                                                                    <span className="leading-relaxed">{rec}</span>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+
+                                                    {/* جدول تفصيلي */}
+                                                    <div className="bg-gray-50 p-6 rounded-xl mb-6">
+                                                        <h3 className="text-xl font-bold text-gray-800 mb-4">تفصيل الدرجات حسب الفقرات</h3>
+                                                        <div className="overflow-x-auto">
+                                                            <table className="w-full border-collapse">
+                                                                <thead>
+                                                                    <tr className="bg-blue-600 text-white">
+                                                                        <th className="border border-blue-700 p-3 text-right">رقم الفقرة</th>
+                                                                        <th className="border border-blue-700 p-3 text-right">السلوك</th>
+                                                                        <th className="border border-blue-700 p-3 text-center">الدرجة</th>
+                                                                        <th className="border border-blue-700 p-3 text-center">التقدير</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {questions.map((question, index) => (
+                                                                        <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}>
+                                                                            <td className="border border-gray-300 p-3 text-center font-semibold">{index + 1}</td>
+                                                                            <td className="border border-gray-300 p-3">{question}</td>
+                                                                            <td className="border border-gray-300 p-3 text-center font-bold text-blue-600">{answers[index]}</td>
+                                                                            <td className="border border-gray-300 p-3 text-center">{options.find((opt) => opt.value === answers[index])?.label}</td>
+                                                                        </tr>
+                                                                    ))}
+                                                                    <tr className="bg-blue-100 font-bold">
+                                                                        <td colSpan="2" className="border border-gray-300 p-3 text-right">
+                                                                            المجموع الكلي
+                                                                        </td>
+                                                                        <td className="border border-gray-300 p-3 text-center text-xl text-blue-600">{results.totalScore}</td>
+                                                                        <td className="border border-gray-300 p-3"></td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* مرجع المستويات */}
+                                                    <div className="bg-blue-50 p-6 rounded-xl mb-6">
+                                                        <h3 className="text-xl font-bold text-blue-800 mb-4">مرجع مستويات الصعوبة</h3>
+                                                        <div className="space-y-3">
+                                                            <div className="flex items-center justify-between bg-white p-3 rounded-lg border-r-4 border-green-500">
+                                                                <span className="font-semibold">عادي / لا توجد صعوبات</span>
+                                                                <span className="text-gray-600">أقل من 20 درجة</span>
+                                                            </div>
+                                                            <div className="flex items-center justify-between bg-white p-3 rounded-lg border-r-4 border-yellow-500">
+                                                                <span className="font-semibold">صعوبات خفيفة</span>
+                                                                <span className="text-gray-600">من 21 إلى أقل من 40 درجة</span>
+                                                            </div>
+                                                            <div className="flex items-center justify-between bg-white p-3 rounded-lg border-r-4 border-orange-500">
+                                                                <span className="font-semibold">صعوبات متوسطة</span>
+                                                                <span className="text-gray-600">من 40 إلى أقل من 60 درجة</span>
+                                                            </div>
+                                                            <div className="flex items-center justify-between bg-white p-3 rounded-lg border-r-4 border-red-500">
+                                                                <span className="font-semibold">صعوبات شديدة</span>
+                                                                <span className="text-gray-600">61 درجة فأكثر</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* الأزرار والطباعة */}
+                                                    <div className="flex gap-4 print:hidden">
+                                                        <button onClick={() => setCurrentPage(4)} className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-6 rounded-lg transition-all">
+                                                            تعديل التقييم
+                                                        </button>
+                                                        <button onClick={handlePrint} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-all flex items-center justify-center gap-2">
+                                                            <PrinterIcon />
+                                                            <span>طباعة التقرير</span>
+                                                        </button>
+                                                    </div>
+
+                                                    {/* تذييل الطباعة */}
+                                                    <div className="hidden print:block mt-12 pt-6 border-t-2 border-gray-300 text-center text-gray-600">
+                                                        <p className="mb-2">بطارية مقاييس التقدير التشخيصية لصعوبات التعلم النمائية والأكاديمية</p>
+                                                        <p className="text-sm">تاريخ الطباعة: {new Date().toLocaleDateString('ar-EG')}</p>
+                                                    </div>
+                                                </>
+                                            );
+                                        })()}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* أنماط طباعة إضافية (إن لزم) */}
+                        <style>
+                            {`
+              @media print {
+                .print\\:hidden { display: none !important; }
+                .print\\:block { display: block !important; }
+              }
+            `}
+                        </style>
+                    </div>
+                );
+            }
+
+            function App() {
+                return <AuditoryPerceptionScale />;
+            }
+
+            const root = ReactDOM.createRoot(document.getElementById('root'));
+            root.render(<App />);
+        </script>
+    </body>
+</html>

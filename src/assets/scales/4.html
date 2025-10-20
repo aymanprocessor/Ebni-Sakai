@@ -1,0 +1,1033 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>مقياس التقدير التشخيصي لصعوبات القراءة</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            :root {
+                --primary: #1877f2;
+                --primary-2: #42a5f5;
+                --ok: #4caf50;
+                --warn: #ff9800;
+                --mid: #f44336;
+                --high: #d32f2f;
+                --bg: #f8f9fa;
+            }
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
+                min-height: 100vh;
+                padding: 10px;
+            }
+            .container {
+                max-width: 980px;
+                margin: 0 auto;
+                background: #fff;
+                border-radius: 20px;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+                overflow: hidden;
+            }
+            .page {
+                display: none;
+                padding: 30px;
+                min-height: 520px;
+            }
+            .page.active {
+                display: block;
+            }
+            .header {
+                text-align: center;
+                margin-bottom: 24px;
+            }
+            .main-title {
+                color: var(--primary);
+                font-size: 2.2rem;
+                font-weight: 800;
+                margin-bottom: 8px;
+                text-shadow: 0 2px 4px rgba(24, 119, 242, 0.08);
+            }
+            @media (max-width: 768px) {
+                .main-title {
+                    font-size: 1.8rem;
+                }
+            }
+            .subtitle {
+                color: #666;
+                font-size: 1.05rem;
+            }
+            .welcome-text {
+                background: linear-gradient(135deg, var(--primary), var(--primary-2));
+                color: #fff;
+                padding: 22px;
+                border-radius: 16px;
+                line-height: 1.7;
+                margin: 20px 0;
+                box-shadow: 0 10px 25px rgba(24, 119, 242, 0.2);
+            }
+            .instructions {
+                background: var(--bg);
+                padding: 18px;
+                border-radius: 12px;
+                margin: 14px 0;
+                border-right: 4px solid var(--primary);
+            }
+            .instructions h3 {
+                color: var(--primary);
+                margin-bottom: 10px;
+                font-size: 1.12rem;
+            }
+            .rating-scale {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+                background: #e3f2fd;
+                padding: 10px;
+                border-radius: 10px;
+            }
+            .rating-item {
+                background: #fff;
+                padding: 6px 12px;
+                border-radius: 8px;
+                border: 2px solid var(--primary);
+                font-weight: 700;
+                color: var(--primary);
+                font-size: 0.9rem;
+            }
+            .form-group {
+                margin-bottom: 12px;
+            }
+            .form-group label {
+                display: block;
+                margin-bottom: 6px;
+                font-weight: 700;
+                color: #333;
+                font-size: 0.95rem;
+            }
+            .form-group input,
+            .form-group select {
+                width: 100%;
+                padding: 10px;
+                border: 2px solid #e0e0e0;
+                border-radius: 8px;
+                font-size: 14px;
+                transition: 0.2s border-color;
+                font-family: inherit;
+            }
+            .form-group input:focus,
+            .form-group select:focus {
+                outline: none;
+                border-color: var(--primary);
+                box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.1);
+            }
+            .form-row {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+            @media (max-width: 768px) {
+                .form-row {
+                    grid-template-columns: 1fr;
+                    gap: 0;
+                }
+            }
+            .question {
+                background: #fff;
+                border: 2px solid #e0e0e0;
+                border-radius: 12px;
+                padding: 16px;
+                margin: 12px 0;
+                transition: 0.2s all;
+            }
+            .question:focus-within {
+                border-color: var(--primary);
+                box-shadow: 0 6px 18px rgba(24, 119, 242, 0.12);
+            }
+            .question-number {
+                background: linear-gradient(135deg, var(--primary), var(--primary-2));
+                color: #fff;
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 800;
+                margin-bottom: 10px;
+            }
+            .question-text {
+                font-size: 1rem;
+                color: #333;
+                margin-bottom: 10px;
+                line-height: 1.6;
+                font-weight: 600;
+            }
+            .rating-buttons {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+                gap: 8px;
+            }
+            .rating-button {
+                background: #fff;
+                border: 2px solid #e0e0e0;
+                padding: 8px 10px;
+                border-radius: 22px;
+                cursor: pointer;
+                transition: 0.15s all;
+                font-weight: 800;
+                text-align: center;
+                font-size: 0.9rem;
+                user-select: none;
+            }
+            .rating-button:hover {
+                border-color: var(--primary);
+                background: #f0f8ff;
+            }
+            .rating-button.selected {
+                background: linear-gradient(135deg, var(--primary), var(--primary-2));
+                color: #fff;
+                border-color: var(--primary);
+                box-shadow: 0 3px 10px rgba(24, 119, 242, 0.3);
+            }
+            .nav-buttons {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 10px;
+                margin-top: 24px;
+            }
+            .btn {
+                background: linear-gradient(135deg, var(--primary), var(--primary-2));
+                color: #fff;
+                border: none;
+                padding: 12px 22px;
+                border-radius: 20px;
+                font-size: 1rem;
+                font-weight: 800;
+                cursor: pointer;
+                transition: 0.15s all;
+                box-shadow: 0 4px 12px rgba(24, 119, 242, 0.3);
+            }
+            .btn:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 5px 15px rgba(24, 119, 242, 0.4);
+            }
+            .btn:disabled {
+                background: #cfcfcf;
+                cursor: not-allowed;
+                transform: none;
+                box-shadow: none;
+            }
+            .btn-secondary {
+                background: #6c757d;
+            }
+            .btn-secondary:hover {
+                background: #545b62;
+            }
+            .btn-ghost {
+                background: #eef5ff;
+                color: #0b57d0;
+            }
+            .progress-wrap {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                margin: 10px 0 18px 0;
+            }
+            .progress-bar {
+                background: #e0e0e0;
+                height: 8px;
+                border-radius: 4px;
+                flex: 1;
+                overflow: hidden;
+            }
+            .progress-fill {
+                background: linear-gradient(90deg, var(--primary), var(--primary-2));
+                height: 100%;
+                width: 0%;
+                transition: width 0.4s ease;
+            }
+            .badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px 10px;
+                border-radius: 999px;
+                font-weight: 700;
+                font-size: 0.85rem;
+                background: #eef5ff;
+                color: #0b57d0;
+            }
+            .result-card {
+                background: linear-gradient(135deg, var(--primary), var(--primary-2));
+                color: #fff;
+                padding: 28px;
+                border-radius: 15px;
+                margin: 18px 0;
+                text-align: center;
+                box-shadow: 0 10px 25px rgba(24, 119, 242, 0.28);
+            }
+            .result-score {
+                font-size: 2.8rem;
+                font-weight: 900;
+            }
+            .result-category {
+                font-size: 1.2rem;
+                margin: 10px 0;
+                padding: 10px;
+                border-radius: 10px;
+                font-weight: 900;
+            }
+            .result-details {
+                background: #fff;
+                padding: 18px;
+                border-radius: 12px;
+                margin: 16px 0;
+                color: #333;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            }
+            .detail-row {
+                display: flex;
+                justify-content: space-between;
+                padding: 8px 0;
+                border-bottom: 1px solid #eee;
+                align-items: center;
+            }
+            .detail-row:last-child {
+                border-bottom: none;
+            }
+            .recommendations {
+                background: #e8f5e8;
+                padding: 18px;
+                border-radius: 12px;
+                border-right: 4px solid var(--ok);
+            }
+            .recommendations h3 {
+                color: #2e7d32;
+                margin-bottom: 10px;
+                font-size: 1.12rem;
+            }
+            .recommendations ul {
+                list-style: none;
+            }
+            .recommendations li {
+                padding: 6px 0;
+                position: relative;
+                padding-right: 20px;
+                line-height: 1.6;
+            }
+            .recommendations li:before {
+                content: '✓';
+                color: var(--ok);
+                font-weight: 900;
+                position: absolute;
+                right: 0;
+            }
+            .print-btn {
+                background: linear-gradient(135deg, var(--ok), #66bb6a);
+            }
+            .error-message {
+                background: #ffebee;
+                color: #c62828;
+                padding: 12px;
+                border-radius: 8px;
+                border-right: 4px solid #c62828;
+                margin: 10px 0;
+                display: none;
+                font-weight: 700;
+            }
+            .student-info-summary {
+                background: var(--bg);
+                padding: 18px;
+                border-radius: 12px;
+                margin: 16px 0;
+            }
+            .info-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 10px;
+            }
+            .info-item {
+                background: #fff;
+                padding: 12px;
+                border-radius: 8px;
+                border-right: 3px solid var(--primary);
+            }
+            .info-label {
+                font-weight: 900;
+                color: var(--primary);
+                font-size: 0.85rem;
+                margin-bottom: 4px;
+            }
+            .info-value {
+                color: #333;
+                font-size: 0.95rem;
+                font-weight: 700;
+            }
+            .tools {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                margin: 10px 0;
+            }
+            .tools .btn {
+                padding: 8px 14px;
+                border-radius: 12px;
+                font-size: 0.9rem;
+            }
+            .muted {
+                color: #666;
+                font-size: 0.9rem;
+            }
+            @media print {
+                body {
+                    background: #fff;
+                    padding: 0;
+                }
+                .container {
+                    box-shadow: none;
+                    border-radius: 0;
+                }
+                .nav-buttons,
+                .tools {
+                    display: none !important;
+                }
+                .page {
+                    display: block !important;
+                    page-break-after: always;
+                }
+                .page:last-child {
+                    page-break-after: auto;
+                }
+                @page {
+                    margin: 1cm;
+                    size: A4;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <!-- صفحة الترحيب -->
+            <div class="page active" id="page1">
+                <div class="header">
+                    <h1 class="main-title">🎯 مقياس التقدير التشخيصي لصعوبات القراءة</h1>
+                    <p class="subtitle">نظام تشخيصي تفاعلي للأخصائيين النفسيين والتربويين</p>
+                </div>
+
+                <div class="welcome-text">
+                    <h3 style="margin-bottom: 12px">🌟 مرحباً بك في المقياس التشخيصي التفاعلي</h3>
+                    <p>يهدف هذا المقياس إلى الكشف عن التلاميذ ذوي صعوبات التعلم في القراءة من خلال تقييم مجموعة شاملة من الخصائص السلوكية والأكاديمية.</p>
+                    <br />
+                    <p><strong>المميزات الرئيسية:</strong></p>
+                    <ul style="margin-right: 16px; margin-top: 6px; line-height: 1.6">
+                        <li>✅ تشخيص دقيق وموثوق علمياً</li>
+                        <li>✅ تقرير تفصيلي شامل</li>
+                        <li>✅ توصيات عملية للمتابعة</li>
+                        <li>✅ إمكانية طباعة التقرير وتنزيل JSON</li>
+                    </ul>
+                </div>
+
+                <div class="tools">
+                    <button class="btn" onclick="showPage(2)">ابدأ الآن 🚀</button>
+                    <button class="btn-ghost btn" onclick="resumeIfFound()">استئناف آخر جلسة</button>
+                    <span class="badge" id="sessionBadge">⏱️ مدة الجلسة: <span id="sessionTime">00:00</span></span>
+                </div>
+            </div>
+
+            <!-- صفحة التعليمات -->
+            <div class="page" id="page2">
+                <div class="header">
+                    <h2 class="main-title">📋 التعليمات وطريقة الاستخدام</h2>
+                    <div class="muted">رقم التقرير: <span id="reportId"></span></div>
+                </div>
+
+                <div class="instructions">
+                    <h3>🎯 الهدف من المقياس</h3>
+                    <p>الكشف عن التلاميذ ذوي اضطرابات أو صعوبات التعلم في القراءة، والذين يتواتر لديهم ظهور الخصائص السلوكية المحددة في المقياس.</p>
+                </div>
+
+                <div class="instructions">
+                    <h3>⚠️ متطلبات مهمة</h3>
+                    <ul style="margin-right: 18px; line-height: 1.6">
+                        <li>المعرفة الجيدة بالطفل موضوع التقدير</li>
+                        <li>تكرار ملاحظة الخصائص السلوكية لدى التلميذ</li>
+                        <li>قراءة كل فقرة بعناية قبل التقدير</li>
+                        <li>عدم تقدير أكثر من 6 تلاميذ في الجلسة الواحدة</li>
+                    </ul>
+                </div>
+
+                <div class="instructions">
+                    <h3>📊 نظام التقدير</h3>
+                    <p>يتم التقدير باستخدام مقياس خماسي كالتالي:</p>
+                    <div class="rating-scale">
+                        <div class="rating-item">دائماً (4)</div>
+                        <div class="rating-item">غالباً (3)</div>
+                        <div class="rating-item">أحياناً (2)</div>
+                        <div class="rating-item">نادراً (1)</div>
+                        <div class="rating-item">لا تنطبق (0)</div>
+                    </div>
+                </div>
+
+                <div class="instructions">
+                    <h3>🎯 معايير التشخيص</h3>
+                    <div style="background: #fff; padding: 10px; border-radius: 8px; margin-top: 8px">
+                        <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #eee">
+                            <span><strong>أقل من 20:</strong></span
+                            ><span style="color: var(--ok); font-weight: 900">عادي / لا توجد صعوبة</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #eee">
+                            <span><strong>21 - 40:</strong></span
+                            ><span style="color: var(--warn); font-weight: 900">صعوبات خفيفة</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #eee">
+                            <span><strong>41 - 60:</strong></span
+                            ><span style="color: var(--mid); font-weight: 900">صعوبات متوسطة</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 6px 0">
+                            <span><strong>61 فأكثر:</strong></span
+                            ><span style="color: var(--high); font-weight: 900">صعوبات شديدة</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="nav-buttons">
+                    <button class="btn btn-secondary" onclick="showPage(1)">السابق</button>
+                    <button class="btn" onclick="showPage(3)">التالي - بيانات التلميذ</button>
+                </div>
+            </div>
+
+            <!-- صفحة التقييم -->
+            <div class="page" id="page3">
+                <div class="header">
+                    <h2 class="main-title">📝 بيانات التلميذ والتقييم</h2>
+                </div>
+
+                <div class="progress-wrap">
+                    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+                    <span class="badge">تمت الإجابة: <span id="answeredCount">0</span>/20</span>
+                </div>
+
+                <!-- بيانات التلميذ -->
+                <div class="instructions" id="studentDataForm">
+                    <h3>👤 البيانات الشخصية للتلميذ</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>اسم التلميذ *</label>
+                            <input type="text" id="studentName" autocomplete="name" required />
+                        </div>
+                        <div class="form-group">
+                            <label>الجنس *</label>
+                            <select id="studentGender" required>
+                                <option value="">اختر الجنس</option>
+                                <option value="ذكر">ذكر</option>
+                                <option value="أنثى">أنثى</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>الصف *</label>
+                            <input type="text" id="studentGrade" required />
+                        </div>
+                        <div class="form-group">
+                            <label>تاريخ الميلاد *</label>
+                            <input type="date" id="studentBirthDate" required />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>المدرسة *</label>
+                        <input type="text" id="studentSchool" required />
+                    </div>
+
+                    <h3 style="margin-top: 18px">👨‍⚕️ بيانات القائم بالتقدير</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>اسم القائم بالتقدير *</label>
+                            <input type="text" id="evaluatorName" required />
+                        </div>
+                        <div class="form-group">
+                            <label>الوظيفة *</label>
+                            <input type="text" id="evaluatorJob" required />
+                        </div>
+                    </div>
+
+                    <div class="tools">
+                        <button class="btn" onclick="startAssessment()" style="flex: 1">ابدأ التقييم 📊</button>
+                        <button class="btn-ghost btn" onclick="saveProgress()">حفظ التقدّم</button>
+                        <button class="btn-ghost btn" onclick="clearProgress()">مسح البيانات</button>
+                    </div>
+
+                    <div class="error-message" id="formError">⚠️ يرجى تعبئة جميع الحقول المطلوبة</div>
+                </div>
+
+                <!-- الأسئلة -->
+                <div id="questionsContainer" style="display: none">
+                    <h3 style="color: var(--primary); margin-bottom: 10px">📋 أسئلة التقييم (20 سؤال)</h3>
+                    <div id="questionsForm"></div>
+                </div>
+
+                <div class="nav-buttons">
+                    <button class="btn btn-secondary" onclick="showPage(2)">السابق</button>
+                    <button class="btn" onclick="calculateResults()" id="calculateBtn" style="display: none">احسب النتائج 🎯</button>
+                </div>
+            </div>
+
+            <!-- صفحة النتائج -->
+            <div class="page" id="page4">
+                <div class="header">
+                    <h2 class="main-title">📈 التقرير التشخيصي الشامل</h2>
+                </div>
+
+                <div id="resultsContent"></div>
+
+                <div class="nav-buttons">
+                    <button class="btn btn-secondary" onclick="showPage(3)">السابق</button>
+                    <div class="tools">
+                        <button class="btn print-btn" onclick="printReport()">طباعة التقرير 🖨️</button>
+                        <button class="btn-ghost btn" onclick="downloadJSON()">تنزيل JSON</button>
+                        <button class="btn-ghost btn" onclick="resetAll()">تقييم جديد</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // ====== حالة عامة ======
+            let currentPage = 1;
+            let answers = {};
+            let studentData = {};
+            let startTs = Date.now();
+            let tickInterval = null;
+
+            const LS_KEY = 'reading_scale_state_v1';
+
+            // ====== الأسئلة ======
+            const questions = [
+                'يبدو عصبياً – متململاً – عبوساً عندما يقرأ.',
+                'يقرأ بصوت مرتفع وحاد – يضغط على مخارج الحروف.',
+                'يقاوم القراءة، يبكي، يتردد في المقاطع والكلمات.',
+                'يفقد مكان القراءة، ويعيد ما يقرأ بصورة متكررة.',
+                'ينطق بطريقة متقطعة متشنجة خلال القراءة.',
+                'يبدو قلقاً مرتبكاً، يقرب مواد القراءة من عينيه.',
+                'يحذف بعض الكلمات، يقفز من موقع إلى آخر أثناء القراءة.',
+                'يستبدل بعض الكلمات بكلمات أخرى غير موجودة بالنص.',
+                'يعكس/ يستبدل بعض الحروف والكلمات.',
+                'يخطئ في نطق الكلمات/ يعاني من سوء نطق الحروف.',
+                'يقرأ دون أن يبدي أي نوع من الفهم لما يقرأ.',
+                'يقرأ الكلمات بترتيب خاطئ.',
+                'يبدي ترددا عند الكلمات التي يستطيع قراءتها.',
+                'يجد صعوبة في التعرف على الحروف والمقاطع والكلمات.',
+                'يجد صعوبة في استنتاج الحقائق والمعاني الواردة في النص.',
+                'يفشل في إعادة مضمون قصة قصيرة بعد قراءتها.',
+                'يعجز عن استنتاج الفكرة الرئيسية لما يقرأ.',
+                'يقرأ بطريقة متقطعة: حرف حرف، مقطع مقطع، كلمة كلمة.',
+                'يقرأ بصوت مرتفع وحاد، ومتشنج.',
+                'يجد صعوبة في استخدام النقط والفواصل والوقف عند القراءة.'
+            ];
+
+            // ====== تنقّل الصفحات ======
+            function showPage(n) {
+                document.querySelectorAll('.page').forEach((p) => p.classList.remove('active'));
+                document.getElementById(`page${n}`).classList.add('active');
+                currentPage = n;
+                saveProgress(false);
+            }
+
+            // ====== إعداد التقرير والمعرّف ======
+            function genReportId() {
+                const t = new Date();
+                const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+                return `RD-${t.getFullYear()}${String(t.getMonth() + 1).padStart(2, '0')}${String(t.getDate()).padStart(2, '0')}-${rand}`;
+            }
+
+            // ====== بدء التقييم ======
+            function startAssessment() {
+                const fields = ['studentName', 'studentGender', 'studentGrade', 'studentBirthDate', 'studentSchool', 'evaluatorName', 'evaluatorJob'];
+                let ok = true;
+                for (const f of fields) {
+                    const el = document.getElementById(f);
+                    if (!el || !el.value.trim()) {
+                        ok = false;
+                        break;
+                    }
+                }
+                if (!ok) {
+                    document.getElementById('formError').style.display = 'block';
+                    return;
+                }
+
+                studentData = {
+                    name: document.getElementById('studentName').value.trim(),
+                    gender: document.getElementById('studentGender').value,
+                    grade: document.getElementById('studentGrade').value.trim(),
+                    birthDate: document.getElementById('studentBirthDate').value,
+                    school: document.getElementById('studentSchool').value.trim(),
+                    evaluatorName: document.getElementById('evaluatorName').value.trim(),
+                    evaluatorJob: document.getElementById('evaluatorJob').value.trim(),
+                    evaluationDate: new Date().toLocaleDateString('ar-EG'),
+                    reportId: document.getElementById('reportId').textContent || genReportId()
+                };
+
+                document.getElementById('formError').style.display = 'none';
+                document.getElementById('studentDataForm').style.display = 'none';
+                document.getElementById('questionsContainer').style.display = 'block';
+                document.getElementById('calculateBtn').style.display = 'inline-block';
+
+                generateQuestions();
+                saveProgress();
+            }
+
+            // ====== إنشاء الأسئلة ======
+            function generateQuestions() {
+                const container = document.getElementById('questionsForm');
+                container.innerHTML = '';
+                questions.forEach((q, i) => {
+                    const wrap = document.createElement('div');
+                    wrap.className = 'question';
+                    wrap.tabIndex = 0;
+                    wrap.innerHTML = `
+          <div class="question-number">${i + 1}</div>
+          <div class="question-text">${q}</div>
+          <div class="rating-buttons" role="radiogroup" aria-label="التقدير">
+            ${[4, 3, 2, 1, 0]
+                .map(
+                    (v) => `
+              <button class="rating-button" role="radio" aria-checked="false"
+                data-q="${i}" data-v="${v}" onclick="selectAnswer(${i},${v},this)">
+                ${labelFor(v)}<span class="muted" style="display:block;font-weight:600">(${v})</span>
+              </button>
+            `
+                )
+                .join('')}
+          </div>
+        `;
+                    container.appendChild(wrap);
+
+                    // إن وُجدت إجابة محفوظة فعّل الزر
+                    if (answers[i] !== undefined) {
+                        const btn = wrap.querySelector(`.rating-button[data-v="${answers[i]}"]`);
+                        if (btn) btn.classList.add('selected');
+                    }
+                });
+                updateProgress();
+            }
+
+            function labelFor(v) {
+                return v === 4 ? 'دائماً' : v === 3 ? 'غالباً' : v === 2 ? 'أحياناً' : v === 1 ? 'نادراً' : 'لا تنطبق';
+            }
+
+            // ====== اختيار إجابة ======
+            function selectAnswer(qIndex, value, btn) {
+                answers[qIndex] = value;
+
+                const qDiv = btn.closest('.question');
+                qDiv.querySelectorAll('.rating-button').forEach((b) => {
+                    b.classList.remove('selected');
+                    b.setAttribute('aria-checked', 'false');
+                });
+                btn.classList.add('selected');
+                btn.setAttribute('aria-checked', 'true');
+
+                updateProgress();
+                saveProgress(false);
+            }
+
+            // ====== التقدّم ======
+            function updateProgress() {
+                const answered = Object.keys(answers).length;
+                const pct = (answered / questions.length) * 100;
+                document.getElementById('progressFill').style.width = pct + '%';
+                document.getElementById('answeredCount').textContent = answered;
+            }
+
+            // ====== الحساب ======
+            function calculateResults() {
+                if (Object.keys(answers).length < questions.length) {
+                    // تمرير للمفقود
+                    const firstMissing = [...Array(questions.length).keys()].find((i) => answers[i] === undefined);
+                    if (firstMissing !== undefined) {
+                        const target = document.querySelector(`.question:nth-child(${firstMissing + 1})`);
+                        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        target.classList.add('pulse');
+                        setTimeout(() => target.classList.remove('pulse'), 1200);
+                    }
+                    alert('⚠️ يرجى الإجابة على جميع الأسئلة قبل المتابعة');
+                    return;
+                }
+
+                const total = Object.values(answers).reduce((s, v) => s + v, 0);
+                const max = questions.length * 4;
+                const percentage = Math.round((total / max) * 100);
+
+                let category, color, recs;
+                if (total < 20) {
+                    category = 'عادي / لا توجد صعوبة';
+                    color = 'var(--ok)';
+                    recs = ['الحفاظ على المستوى الحالي في القراءة', 'أنشطة إثرائية لتوسيع المفردات', 'تشجيع القراءة الحرة والممتعة', 'تقييم دوري كل 3–6 أشهر'];
+                } else if (total <= 40) {
+                    category = 'صعوبات خفيفة';
+                    color = 'var(--warn)';
+                    recs = ['تدريبات إضافية على مهارات القراءة الأساسية', 'استخدام استراتيجيات قراءة مبسطة وتقسيم النص', 'تحسين الطلاقة القرائية عبر القراءة الموجَّهة', 'التواصل المنتظم مع المعلم المختص', 'تدريب على استراتيجيات الفهم القرائي'];
+                } else if (total <= 60) {
+                    category = 'صعوبات متوسطة';
+                    color = 'var(--mid)';
+                    recs = ['خطة تدريبية مكثفة لمهارات القراءة', 'التدريب على الوعي الصوتي وتشفير/فك التشفير', 'جلسات منتظمة مع أخصائي صعوبات التعلم', 'استخدام وسائل مساعدة وتكنولوجيا داعمة', 'إشراك الأسرة ومتابعة أسبوعية'];
+                } else {
+                    category = 'صعوبات شديدة';
+                    color = 'var(--high)';
+                    recs = ['تحويل فوري لأخصائي صعوبات التعلم', 'برنامج علاجي فردي مكثّف', 'تقييم معرفي-لغوي شامل', 'تعديلات منهجية جوهرية ودعم متعدد الحواس', 'متابعة لصيقة وتوثيق تقدّم أسبوعي'];
+                }
+
+                generateResultsPage({ total, max, percentage, category, color, recs });
+                saveProgress();
+                showPage(4);
+            }
+
+            // ====== صفحة النتائج ======
+            function generateResultsPage({ total, max, percentage, category, color, recs }) {
+                const dist = { 4: 0, 3: 0, 2: 0, 1: 0, 0: 0 };
+                Object.values(answers).forEach((v) => dist[v]++);
+                const resultsContent = document.getElementById('resultsContent');
+
+                resultsContent.innerHTML = `
+        <div class="student-info-summary">
+          <h3 style="color:var(--primary); margin-bottom:10px">👤 معلومات التلميذ</h3>
+          <div class="info-grid">
+            ${infoItem('اسم التلميذ', studentData.name)}
+            ${infoItem('الجنس', studentData.gender)}
+            ${infoItem('الصف', studentData.grade)}
+            ${infoItem('تاريخ الميلاد', new Date(studentData.birthDate).toLocaleDateString('ar-EG'))}
+            ${infoItem('المدرسة', studentData.school)}
+            ${infoItem('القائم بالتقدير', studentData.evaluatorName)}
+            ${infoItem('الوظيفة', studentData.evaluatorJob)}
+            ${infoItem('تاريخ التقدير', studentData.evaluationDate)}
+            ${infoItem('رقم التقرير', studentData.reportId)}
+          </div>
+        </div>
+
+        <div class="result-card">
+          <div class="result-score">${total}</div>
+          <div style="opacity:.9">الدرجة الكلية من ${max}</div>
+          <div class="result-category" style="background:${color}">${category}</div>
+          <div>النسبة المئوية: <strong>${percentage}%</strong></div>
+        </div>
+
+        <div class="result-details">
+          <h3 style="color:var(--primary); margin-bottom:10px">📊 تحليل تفصيلي</h3>
+          ${row('إجمالي الدرجات', `<span style="color:${color}; font-weight:900">${total} من ${max}</span>`)}
+          ${row('متوسط الدرجة', (total / questions.length).toFixed(2))}
+          ${row('عدد الأسئلة', `${questions.length} سؤال`)}
+          ${row('التشخيص', `<span style="color:${color}; font-weight:900">${category}</span>`)}
+        </div>
+
+        <div class="result-details">
+          <h3 style="color:var(--primary); margin-bottom:12px">📋 تحليل توزيع الإجابات</h3>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px">
+            ${distCard('دائماً', dist[4], colorFor(4))}
+            ${distCard('غالباً', dist[3], colorFor(3))}
+            ${distCard('أحياناً', dist[2], colorFor(2))}
+            ${distCard('نادراً', dist[1], colorFor(1))}
+            ${distCard('لا تنطبق', dist[0], colorFor(0))}
+          </div>
+        </div>
+
+        <div class="recommendations">
+          <h3>💡 التوصيات والخطوات التالية</h3>
+          <ul>${recs.map((r) => `<li>${r}</li>`).join('')}</ul>
+        </div>
+
+        <div class="instructions" style="margin-top:14px">
+          <h3>⚠️ ملاحظات مهمة</h3>
+          <ul style="margin-right:18px; line-height:1.6">
+            <li>هذا التقرير أداة فحص أولية وليس تشخيصاً نهائياً</li>
+            <li>يُوصى بتقييم شامل متعدد الأدوات من قبل مختصين</li>
+            <li>يجب مراعاة العوامل البيئية/النفسية المؤثرة</li>
+            <li>المتابعة الدورية ضرورية لتقييم التحسن</li>
+          </ul>
+        </div>
+      `;
+            }
+
+            function infoItem(label, value) {
+                return `<div class="info-item"><div class="info-label">${label}</div><div class="info-value">${value || '—'}</div></div>`;
+            }
+            function row(k, v) {
+                return `<div class="detail-row"><strong>${k}</strong><span>${v}</span></div>`;
+            }
+            function colorFor(v) {
+                return v === 4 ? 'var(--high)' : v === 3 ? 'var(--mid)' : v === 2 ? 'var(--warn)' : v === 1 ? 'var(--ok)' : 'var(--primary)';
+            }
+            function distCard(label, count, color) {
+                const pct = Math.round((count / questions.length) * 100);
+                return `<div style="background:${color}; color:#fff; padding:14px; border-radius:10px; text-align:center">
+        <div style="font-weight:900; margin-bottom:4px">${label}</div>
+        <div style="font-size:1.4rem; font-weight:900">${count}</div>
+        <div style="opacity:.9">${pct}%</div>
+      </div>`;
+            }
+
+            // ====== طباعة وتنزيل ======
+            function printReport() {
+                window.print();
+            }
+            function downloadJSON() {
+                const payload = {
+                    reportId: studentData.reportId,
+                    student: studentData,
+                    answers,
+                    questions,
+                    computedAt: new Date().toISOString()
+                };
+                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `reading-report-${studentData.reportId}.json`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+            }
+
+            // ====== حفظ/استرجاع التقدّم ======
+            function saveProgress(showToast = true) {
+                const state = {
+                    currentPage,
+                    answers,
+                    studentData,
+                    reportId: document.getElementById('reportId')?.textContent || '',
+                    startTs
+                };
+                localStorage.setItem(LS_KEY, JSON.stringify(state));
+                if (showToast) toast('تم حفظ التقدّم ✅');
+            }
+
+            function resumeIfFound() {
+                const raw = localStorage.getItem(LS_KEY);
+                if (!raw) {
+                    toast('لا توجد جلسة محفوظة');
+                    return;
+                }
+                const state = JSON.parse(raw);
+                currentPage = state.currentPage || 1;
+                answers = state.answers || {};
+                studentData = state.studentData || {};
+                startTs = state.startTs || Date.now();
+
+                if (state.reportId) document.getElementById('reportId').textContent = state.reportId;
+
+                if (currentPage === 3) {
+                    document.getElementById('studentDataForm').style.display = Object.keys(studentData).length ? 'none' : 'block';
+                    if (Object.keys(studentData).length) {
+                        document.getElementById('questionsContainer').style.display = 'block';
+                        document.getElementById('calculateBtn').style.display = 'inline-block';
+                        generateQuestions();
+                    }
+                }
+                if (currentPage === 4) {
+                    // إعادة توليد النتائج من الحالة
+                    if (!studentData.reportId) studentData.reportId = state.reportId || genReportId();
+                    const total = Object.values(answers).reduce((s, v) => s + v, 0);
+                    const max = questions.length * 4;
+                    const percentage = Math.round((total / max) * 100);
+                    let category, color, recs;
+                    if (total < 20) {
+                        category = 'عادي / لا توجد صعوبة';
+                        color = 'var(--ok)';
+                        recs = ['الحفاظ على المستوى الحالي', 'أنشطة إثرائية', 'قراءة حرة', 'تقييم دوري'];
+                    } else if (total <= 40) {
+                        category = 'صعوبات خفيفة';
+                        color = 'var(--warn)';
+                        recs = ['تدريبات أساسية', 'استراتيجيات مبسطة', 'طلاقة قرائية', 'متابعة مع المعلم'];
+                    } else if (total <= 60) {
+                        category = 'صعوبات متوسطة';
+                        color = 'var(--mid)';
+                        recs = ['خطة مكثفة', 'وعي صوتي', 'جلسات مع الأخصائي', 'وسائل مساعدة'];
+                    } else {
+                        category = 'صعوبات شديدة';
+                        color = 'var(--high)';
+                        recs = ['تحويل فوري', 'برنامج فردي', 'تقييم شامل', 'تعديلات منهجية'];
+                    }
+                    generateResultsPage({ total, max, percentage, category, color, recs });
+                }
+
+                showPage(currentPage);
+                toast('تم استرجاع الجلسة ✅');
+            }
+
+            function clearProgress() {
+                localStorage.removeItem(LS_KEY);
+                toast('تم مسح البيانات');
+            }
+
+            function resetAll() {
+                answers = {};
+                studentData = {};
+                clearProgress();
+                document.getElementById('studentDataForm').style.display = 'block';
+                document.getElementById('questionsContainer').style.display = 'none';
+                document.getElementById('calculateBtn').style.display = 'none';
+                document.getElementById('progressFill').style.width = '0%';
+                document.getElementById('answeredCount').textContent = '0';
+                document.getElementById('reportId').textContent = genReportId();
+                showPage(1);
+            }
+
+            // ====== أدوات صغيرة ======
+            function toast(msg) {
+                // تنبيه خفيف
+                console.log(msg);
+            }
+
+            // ====== تهيئة ======
+            function init() {
+                document.getElementById('reportId').textContent = genReportId();
+                updateProgress();
+                // عدّاد الجلسة
+                tickInterval = setInterval(() => {
+                    const sec = Math.floor((Date.now() - startTs) / 1000);
+                    const mm = String(Math.floor(sec / 60)).padStart(2, '0');
+                    const ss = String(sec % 60).padStart(2, '0');
+                    const el = document.getElementById('sessionTime');
+                    if (el) el.textContent = `${mm}:${ss}`;
+                }, 1000);
+
+                // دعم لوحة المفاتيح للاختيار (Space/Enter)
+                document.addEventListener('keydown', (e) => {
+                    if (!(e.key === ' ' || e.key === 'Enter')) return;
+                    const active = document.activeElement;
+                    if (active && active.classList.contains('rating-button')) {
+                        e.preventDefault();
+                        const q = Number(active.dataset.q),
+                            v = Number(active.dataset.v);
+                        selectAnswer(q, v, active);
+                    }
+                });
+
+                // تحميل تلقائي لو وُجد
+                const raw = localStorage.getItem(LS_KEY);
+                if (raw) {
+                    // لا نسترجع تلقائياً حتى يضغط المستخدم (حفاظاً على الخصوصية)
+                    // لكن نُظهر شارة صغيرة في الصفحة الأولى
+                }
+            }
+
+            // تحديثات مرئية بسيطة
+            const stylePulse = document.createElement('style');
+            stylePulse.textContent = `.pulse{animation:pulse .9s ease-in-out 2}
+      @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(24,119,242,.4)}70%{box-shadow:0 0 0 12px rgba(24,119,242,0)}100%{box-shadow:0 0 0 0 rgba(24,119,242,0)}}`;
+            document.head.appendChild(stylePulse);
+
+            document.addEventListener('DOMContentLoaded', init);
+            window.addEventListener('beforeunload', () => saveProgress(false));
+        </script>
+    </body>
+</html>

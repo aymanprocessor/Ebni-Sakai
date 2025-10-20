@@ -1,0 +1,779 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>لعبة إكمال الحروف العربية</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                direction: rtl;
+            }
+
+            .container {
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+                padding: 30px;
+                max-width: 600px;
+                width: 90%;
+                text-align: center;
+            }
+
+            .header {
+                margin-bottom: 30px;
+            }
+
+            h1 {
+                color: #333;
+                font-size: 2.5em;
+                margin-bottom: 10px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .description {
+                color: #666;
+                font-size: 1.2em;
+                margin-bottom: 20px;
+            }
+
+            .level-selector {
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+                margin-bottom: 30px;
+                flex-wrap: wrap;
+            }
+
+            .level-btn {
+                padding: 15px 25px;
+                border: none;
+                border-radius: 12px;
+                font-size: 1.1em;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s;
+                min-width: 120px;
+            }
+
+            .level-btn:nth-child(1) {
+                background: linear-gradient(45deg, #4caf50, #45a049);
+                color: white;
+            }
+
+            .level-btn:nth-child(2) {
+                background: linear-gradient(45deg, #ff9800, #f57c00);
+                color: white;
+            }
+
+            .level-btn:nth-child(3) {
+                background: linear-gradient(45deg, #f44336, #d32f2f);
+                color: white;
+            }
+
+            .level-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .game-area {
+                display: none;
+            }
+
+            .progress-bar {
+                background: #e0e0e0;
+                border-radius: 10px;
+                height: 10px;
+                margin-bottom: 20px;
+                overflow: hidden;
+            }
+
+            .progress {
+                background: linear-gradient(90deg, #4caf50, #45a049);
+                height: 100%;
+                width: 0%;
+                transition: width 0.5s ease;
+            }
+
+            .score {
+                font-size: 1.2em;
+                margin-bottom: 20px;
+                color: #333;
+            }
+
+            .question-area {
+                background: #f8f9fa;
+                border-radius: 15px;
+                padding: 30px;
+                margin: 20px 0;
+                min-height: 200px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+
+            .word-display {
+                font-size: 4em;
+                font-weight: bold;
+                margin: 20px 0;
+                color: #333;
+                letter-spacing: 5px;
+            }
+
+            .emoji {
+                font-size: 3em;
+                margin: 10px 0;
+            }
+
+            .options {
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+                margin: 20px 0;
+                flex-wrap: wrap;
+            }
+
+            .option-btn {
+                padding: 20px 30px;
+                border: 2px solid #ddd;
+                border-radius: 12px;
+                background: white;
+                font-size: 2em;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s;
+                min-width: 80px;
+            }
+
+            .option-btn:hover {
+                background: #e3f2fd;
+                border-color: #2196f3;
+                transform: scale(1.05);
+            }
+
+            .free-input {
+                padding: 15px 20px;
+                border: 2px solid #ddd;
+                border-radius: 12px;
+                font-size: 2em;
+                text-align: center;
+                max-width: 100px;
+                margin: 0 auto;
+            }
+
+            .free-input:focus {
+                outline: none;
+                border-color: #2196f3;
+                box-shadow: 0 0 10px rgba(33, 150, 243, 0.3);
+            }
+
+            .controls {
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+                margin: 20px 0;
+                flex-wrap: wrap;
+            }
+
+            .control-btn {
+                padding: 12px 20px;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 1em;
+                transition: all 0.3s;
+            }
+
+            .hint-btn {
+                background: #ffc107;
+                color: #333;
+            }
+
+            .check-btn {
+                background: #4caf50;
+                color: white;
+            }
+
+            .next-btn {
+                background: #2196f3;
+                color: white;
+            }
+
+            .control-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            }
+
+            .message {
+                margin: 15px 0;
+                padding: 15px;
+                border-radius: 10px;
+                font-size: 1.2em;
+                font-weight: bold;
+            }
+
+            .success {
+                background: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+            }
+
+            .error {
+                background: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+            }
+
+            .hint {
+                background: #fff3cd;
+                color: #856404;
+                border: 1px solid #ffeaa7;
+            }
+
+            .ch {
+                display: inline-block;
+                margin: 0 2px;
+            }
+
+            .ch:nth-child(1) {
+                color: #e74c3c;
+            }
+            .ch:nth-child(2) {
+                color: #3498db;
+            }
+            .ch:nth-child(3) {
+                color: #2ecc71;
+            }
+            .ch:nth-child(4) {
+                color: #f39c12;
+            }
+            .ch:nth-child(5) {
+                color: #9b59b6;
+            }
+            .ch:nth-child(6) {
+                color: #1abc9c;
+            }
+            .ch:nth-child(7) {
+                color: #e67e22;
+            }
+            .ch:nth-child(8) {
+                color: #34495e;
+            }
+
+            .final-screen {
+                display: none;
+                text-align: center;
+            }
+
+            .final-score {
+                font-size: 2em;
+                color: #4caf50;
+                margin: 20px 0;
+            }
+
+            .restart-btn {
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                color: white;
+                border: none;
+                padding: 15px 30px;
+                border-radius: 10px;
+                font-size: 1.2em;
+                cursor: pointer;
+                transition: all 0.3s;
+            }
+
+            .restart-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            }
+
+            @keyframes glitter {
+                0% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+                50% {
+                    transform: scale(1.2);
+                    opacity: 0.8;
+                }
+                100% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+            }
+
+            @keyframes buzz {
+                0%,
+                100% {
+                    transform: translateX(0);
+                }
+                25% {
+                    transform: translateX(-5px);
+                }
+                75% {
+                    transform: translateX(5px);
+                }
+            }
+
+            .animate-success {
+                animation: glitter 0.6s ease-in-out;
+            }
+
+            .animate-error {
+                animation: buzz 0.5s ease-in-out;
+            }
+
+            .flash-success {
+                background: #d4edda !important;
+            }
+
+            .flash-error {
+                background: #f8d7da !important;
+            }
+
+            @media (max-width: 600px) {
+                .container {
+                    padding: 20px;
+                    margin: 10px;
+                }
+
+                h1 {
+                    font-size: 2em;
+                }
+
+                .word-display {
+                    font-size: 2.5em;
+                    letter-spacing: 3px;
+                }
+
+                .option-btn {
+                    padding: 15px 20px;
+                    font-size: 1.5em;
+                    min-width: 60px;
+                    .emoji:hover {
+                        transform: scale(1.1);
+                    }
+
+                    .emoji:active {
+                        transform: scale(0.95);
+                    }
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🎯 لعبة إكمال الحروف</h1>
+                <p class="description">اختر المستوى المناسب وأكمل الحروف المفقودة</p>
+            </div>
+
+            <div class="level-selector" id="levelSelector">
+                <button class="level-btn" onclick="startLevel(1)">
+                    المستوى الأول<br />
+                    <small>سهل - بدايات ونهايات</small>
+                </button>
+                <button class="level-btn" onclick="startLevel(2)">
+                    المستوى الثاني<br />
+                    <small>متوسط - وسط الكلمة</small>
+                </button>
+                <button class="level-btn" onclick="startLevel(3)">
+                    المستوى الثالث<br />
+                    <small>صعب - مزيج متقدم</small>
+                </button>
+            </div>
+
+            <div class="game-area" id="gameArea">
+                <div class="progress-bar">
+                    <div class="progress" id="progress"></div>
+                </div>
+
+                <div class="score" id="score">النقاط: 0 | السؤال: 1/7</div>
+
+                <div class="question-area" id="questionArea">
+                    <div class="emoji" id="emoji">🎯</div>
+                    <div class="word-display" id="wordDisplay">اختر مستوى للبدء</div>
+                    <div class="options" id="options"></div>
+                    <input type="text" class="free-input" id="freeInput" style="display: none" maxlength="1" />
+                </div>
+
+                <div class="controls">
+                    <button class="control-btn hint-btn" id="hintBtn" onclick="showHint()">💡 تلميح</button>
+                    <button class="control-btn check-btn" id="checkBtn" onclick="checkAnswer()">✓ تحقق</button>
+                </div>
+
+                <div class="message" id="message" style="display: none"></div>
+
+                <div style="margin-top: 20px">
+                    <button class="control-btn next-btn" onclick="init()" style="background: #6c757d">🏠 العودة للرئيسية</button>
+                </div>
+            </div>
+
+            <div class="final-screen" id="finalScreen">
+                <h2>🎉 أحسنت!</h2>
+                <div class="final-score" id="finalScore"></div>
+                <button class="restart-btn" onclick="init()">لعب مرة أخرى</button>
+            </div>
+        </div>
+
+        <script>
+            // Game data
+            const LEVEL1 = [
+                { word: 'سمكة', mask: 'س_كة', options: ['م', 'ن', 'ت'], answer: 'م', emoji: '🐟', hint: 'حيوان بحري' },
+                { word: 'بيت', mask: '_يت', options: ['ب', 'ت', 'ن'], answer: 'ب', emoji: '🏠', hint: 'مكان نسكن فيه' },
+                { word: 'قمر', mask: '_مر', options: ['ق', 'ك', 'ل'], answer: 'ق', emoji: '🌙', hint: 'يضيء في الليل' },
+                { word: 'باب', mask: 'با_', options: ['ب', 'ت', 'د'], answer: 'ب', emoji: '🚪', hint: 'ندخل منه للبيت' },
+                { word: 'نور', mask: 'نو_', options: ['ر', 'ل', 'م'], answer: 'ر', emoji: '💡', hint: 'يضيء المكان' },
+                { word: 'ورد', mask: '_رد', options: ['و', 'ي', 'ز'], answer: 'و', emoji: '🌹', hint: 'زهرة جميلة' },
+                { word: 'خبز', mask: '_بز', options: ['خ', 'غ', 'ج'], answer: 'خ', emoji: '🍞', hint: 'نأكله مع الطعام' },
+                { word: 'عين', mask: 'عي_', options: ['ن', 'م', 'ل'], answer: 'ن', emoji: '👁️', hint: 'نرى بها' },
+                { word: 'أسد', mask: '_سد', options: ['أ', 'ا', 'ع'], answer: 'أ', emoji: '🦁', hint: 'ملك الغابة' },
+                { word: 'نجم', mask: 'نج_', options: ['م', 'ن', 'ل'], answer: 'م', emoji: '⭐', hint: 'يلمع في السماء' }
+            ];
+
+            const LEVEL2 = [
+                { word: 'مدرسة', mask: 'مدر_سة', options: ['س', 'ز', 'ش'], answer: 'س', emoji: '🏫', hint: 'مكان نتعلم فيه' },
+                { word: 'كرسي', mask: 'كر_ي', options: ['س', 'ش', 'ص'], answer: 'س', emoji: '🪑', hint: 'نجلس عليه' },
+                { word: 'كتاب', mask: 'كت_ب', options: ['ا', 'و', 'ي'], answer: 'ا', emoji: '📖', hint: 'نقرأ منه' },
+                { word: 'تفاح', mask: 'تف_ح', options: ['ا', 'ي', 'و'], answer: 'ا', emoji: '🍎', hint: 'فاكهة حمراء' },
+                { word: 'شمس', mask: 'ش_س', options: ['م', 'ن', 'ل'], answer: 'م', emoji: '☀️', hint: 'تضيء النهار' },
+                { word: 'بطاطس', mask: 'ب_اطس', options: ['ط', 'ت', 'ظ'], answer: 'ط', emoji: '🥔', hint: 'خضار نأكلها مقلية' },
+                { word: 'طماطم', mask: 'طما_م', options: ['ط', 'ت', 'ض'], answer: 'ط', emoji: '🍅', hint: 'خضار حمراء للسلطة' },
+                { word: 'منزل', mask: 'من_ل', options: ['ز', 'س', 'ص'], answer: 'ز', emoji: '🏠', hint: 'بيت كبير' },
+                { word: 'حديقة', mask: 'حد_قة', options: ['ي', 'ا', 'و'], answer: 'ي', emoji: '🌳', hint: 'مكان الأشجار والزهور' },
+                { word: 'مطبخ', mask: 'م_بخ', options: ['ط', 'ت', 'ظ'], answer: 'ط', emoji: '👩‍🍳', hint: 'نطبخ فيه الطعام' }
+            ];
+
+            const LEVEL3 = [
+                { word: 'مراية', mask: 'مرا_ة', options: ['ي', 'ه', 'و'], answer: 'ي', emoji: '🪞', hint: 'ننظر فيها لنرى أنفسنا' },
+                { word: 'حقيبة', mask: 'حق_بة', options: ['ي', 'ا', 'و'], answer: 'ي', emoji: '🎒', hint: 'نحمل فيها الكتب' },
+                { word: 'كنيسة', mask: 'كني_ة', options: ['س', 'ز', 'ص'], answer: 'س', emoji: '⛪', hint: 'مكان عبادة المسيحيين' },
+                { word: 'فراولة', mask: 'ف_اولة', options: null, answer: 'ر', emoji: '🍓', hint: 'فاكهة حمراء صغيرة' },
+                { word: 'مفتاح', mask: 'مفتا_', options: null, answer: 'ح', emoji: '🔑', hint: 'نفتح به الأبواب' },
+                { word: 'تفاحة', mask: 'تفاح_', options: ['ة', 'ه', 'ا'], answer: 'ة', emoji: '🍎', hint: 'واحدة من التفاح' },
+                { word: 'حديقة', mask: 'حدي_ة', options: null, answer: 'ق', emoji: '🌳', hint: 'مكان الأشجار والزهور' },
+                { word: 'سيارة', mask: 'سيا_ة', options: ['ر', 'ز', 'ل'], answer: 'ر', emoji: '🚗', hint: 'وسيلة مواصلات' },
+                { word: 'مكتبة', mask: 'مكت_ة', options: null, answer: 'ب', emoji: '📚', hint: 'مكان الكتب الكثيرة' },
+                { word: 'طائرة', mask: 'طائ_ة', options: ['ر', 'ز', 'ل'], answer: 'ر', emoji: '✈️', hint: 'تطير في السماء' }
+            ];
+
+            let currentLevel = 1;
+            let currentQuestions = [];
+            let currentQuestion = 0;
+            let score = 0;
+            let attempts = 0;
+            let audioContext = null;
+
+            // Initialize audio context
+            function initAudio() {
+                try {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.log('Web Audio API not supported');
+                }
+            }
+
+            function playBuzzer() {
+                if (!audioContext) return;
+
+                try {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.type = 'sawtooth';
+                    oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.35);
+
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.35);
+                } catch (e) {
+                    // Fallback visual effect
+                    document.body.classList.add('flash-error');
+                    setTimeout(() => document.body.classList.remove('flash-error'), 200);
+                }
+            }
+
+            function playGlitter() {
+                if (!audioContext) return;
+
+                try {
+                    const frequencies = [600, 750, 900, 1200];
+                    frequencies.forEach((freq, index) => {
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+
+                        oscillator.type = 'sine';
+                        oscillator.frequency.setValueAtTime(freq, audioContext.currentTime + index * 0.12);
+
+                        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime + index * 0.12);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + index * 0.12 + 0.15);
+
+                        oscillator.start(audioContext.currentTime + index * 0.12);
+                        oscillator.stop(audioContext.currentTime + index * 0.12 + 0.15);
+                    });
+                } catch (e) {
+                    // Fallback visual effect
+                    document.body.classList.add('flash-success');
+                    setTimeout(() => document.body.classList.remove('flash-success'), 300);
+                }
+            }
+
+            function speakWord(word) {
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(word);
+                    utterance.lang = 'ar-SA';
+                    utterance.rate = 0.8;
+                    utterance.pitch = 1.1;
+                    speechSynthesis.speak(utterance);
+                }
+            }
+
+            function init() {
+                document.getElementById('levelSelector').style.display = 'flex';
+                document.getElementById('gameArea').style.display = 'none';
+                document.getElementById('finalScreen').style.display = 'none';
+
+                // Reset game state
+                currentLevel = 1;
+                currentQuestions = [];
+                currentQuestion = 0;
+                score = 0;
+                attempts = 0;
+
+                initAudio();
+            }
+
+            function startLevel(level) {
+                currentLevel = level;
+
+                // Select random questions from the chosen level
+                let sourceData;
+                switch (level) {
+                    case 1:
+                        sourceData = LEVEL1;
+                        break;
+                    case 2:
+                        sourceData = LEVEL2;
+                        break;
+                    case 3:
+                        sourceData = LEVEL3;
+                        break;
+                }
+
+                // Shuffle and pick 7 questions
+                currentQuestions = sourceData.sort(() => 0.5 - Math.random()).slice(0, 7);
+                currentQuestion = 0;
+                score = 0;
+                attempts = 0;
+
+                document.getElementById('levelSelector').style.display = 'none';
+                document.getElementById('gameArea').style.display = 'block';
+                document.getElementById('finalScreen').style.display = 'none';
+
+                renderQuestion();
+            }
+
+            function renderQuestion() {
+                if (currentQuestion >= currentQuestions.length) {
+                    showFinalScreen();
+                    return;
+                }
+
+                const question = currentQuestions[currentQuestion];
+
+                document.getElementById('emoji').textContent = question.emoji;
+                document.getElementById('wordDisplay').textContent = question.mask;
+                document.getElementById('score').textContent = `النقاط: ${score} | السؤال: ${currentQuestion + 1}/7`;
+
+                // Update progress bar
+                const progressPercent = (currentQuestion / currentQuestions.length) * 100;
+                document.getElementById('progress').style.width = progressPercent + '%';
+
+                // Clear previous options
+                const optionsDiv = document.getElementById('options');
+                const freeInput = document.getElementById('freeInput');
+                const message = document.getElementById('message');
+
+                optionsDiv.innerHTML = '';
+                freeInput.style.display = 'none';
+                freeInput.value = '';
+                message.style.display = 'none';
+
+                if (question.options) {
+                    // Show option buttons
+                    question.options.forEach((option) => {
+                        const btn = document.createElement('button');
+                        btn.className = 'option-btn';
+                        btn.textContent = option;
+                        btn.onclick = () => selectOption(option);
+                        optionsDiv.appendChild(btn);
+                    });
+                } else {
+                    // Show free input
+                    freeInput.style.display = 'block';
+                    freeInput.focus();
+                }
+
+                attempts = 0;
+            }
+
+            function selectOption(option) {
+                // Clear previous selections
+                document.querySelectorAll('.option-btn').forEach((btn) => {
+                    btn.style.background = 'white';
+                    btn.style.borderColor = '#ddd';
+                });
+
+                // Highlight selected option
+                event.target.style.background = '#e3f2fd';
+                event.target.style.borderColor = '#2196F3';
+
+                // Store selection
+                document.getElementById('freeInput').value = option;
+            }
+
+            function checkAnswer() {
+                const question = currentQuestions[currentQuestion];
+                const userAnswer = document.getElementById('freeInput').value.trim();
+                const messageDiv = document.getElementById('message');
+
+                if (!userAnswer) {
+                    showMessage('يرجى اختيار إجابة أولاً', 'error');
+                    return;
+                }
+
+                if (userAnswer === question.answer) {
+                    // Correct answer
+                    playGlitter();
+
+                    // Add score only on first attempt
+                    if (attempts === 0) {
+                        score++;
+                    }
+
+                    // Show colored word
+                    showColoredWord(question.word);
+                    showMessage('أحسنت! 🎉', 'success');
+
+                    // Speak the word
+                    setTimeout(() => speakWord(question.word), 300);
+
+                    // Auto advance after 1200ms
+                    setTimeout(() => {
+                        currentQuestion++;
+                        renderQuestion();
+                    }, 1200);
+                } else {
+                    // Wrong answer
+                    playBuzzer();
+                    attempts++;
+
+                    if (attempts >= 2) {
+                        // Show correct answer after 2 failed attempts
+                        showColoredWord(question.word);
+                        showMessage(`الإجابة الصحيحة: ${question.answer}`, 'error');
+
+                        setTimeout(() => {
+                            currentQuestion++;
+                            renderQuestion();
+                        }, 2000);
+                    } else {
+                        showMessage('إجابة خاطئة، حاول مرة أخرى', 'error');
+                        // Show hint after first wrong answer
+                        setTimeout(() => showHint(), 1000);
+                    }
+                }
+            }
+
+            function showColoredWord(word) {
+                const wordDisplay = document.getElementById('wordDisplay');
+                const coloredWord = word
+                    .split('')
+                    .map((char, index) => `<span class="ch">${char}</span>`)
+                    .join('');
+
+                wordDisplay.innerHTML = coloredWord;
+                wordDisplay.classList.add('animate-success');
+
+                setTimeout(() => wordDisplay.classList.remove('animate-success'), 600);
+            }
+
+            function showHint() {
+                const question = currentQuestions[currentQuestion];
+                if (question.hint) {
+                    showMessage(`💡 ${question.hint}`, 'hint');
+                }
+            }
+
+            function showMessage(text, type) {
+                const messageDiv = document.getElementById('message');
+                messageDiv.textContent = text;
+                messageDiv.className = `message ${type}`;
+                messageDiv.style.display = 'block';
+
+                if (type === 'error') {
+                    messageDiv.classList.add('animate-error');
+                    setTimeout(() => messageDiv.classList.remove('animate-error'), 500);
+                }
+            }
+
+            function showFinalScreen() {
+                document.getElementById('gameArea').style.display = 'none';
+                document.getElementById('finalScreen').style.display = 'block';
+
+                const percentage = Math.round((score / 7) * 100);
+                let message = '';
+
+                if (percentage >= 90) {
+                    message = 'ممتاز جداً! 🌟';
+                } else if (percentage >= 70) {
+                    message = 'أحسنت! 👏';
+                } else if (percentage >= 50) {
+                    message = 'جيد، يمكنك التحسن 💪';
+                } else {
+                    message = 'استمر في التدريب 📚';
+                }
+
+                document.getElementById('finalScore').innerHTML = `${message}<br>حصلت على ${score} من 7 نقاط<br>(${percentage}%)`;
+            }
+
+            // Keyboard support
+            document.addEventListener('keydown', (e) => {
+                if (document.getElementById('gameArea').style.display === 'none') return;
+
+                if (e.key === ' ' || e.key === 'Spacebar') {
+                    e.preventDefault();
+                    listenToWord();
+                } else if (e.key >= '1' && e.key <= '9') {
+                    const optionBtns = document.querySelectorAll('.option-btn');
+                    const index = parseInt(e.key) - 1;
+                    if (optionBtns[index]) {
+                        optionBtns[index].click();
+                    }
+                }
+            });
+
+            // Initialize the game
+            init();
+        </script>
+    </body>
+</html>

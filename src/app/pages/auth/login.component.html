@@ -1,0 +1,143 @@
+<div class="login-container">
+    <!-- Language Selector at Top -->
+    <div class="language-selector-top">
+        <app-language-selector></app-language-selector>
+    </div>
+
+    <!-- Split Layout Container -->
+    <div class="split-layout">
+        <!-- Left Side - Info/Image Section -->
+        <div class="info-section">
+            <!-- Animated Background Shapes -->
+            <div class="animated-background">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+            </div>
+
+            <div class="info-content">
+                <!-- Logo -->
+                <div class="brand-section">
+                    <img src="assets/images/Logo.png" alt="KidSkills Logo" class="brand-logo" />
+                    <h1 class="brand-title">KidSkills</h1>
+                    <p class="brand-tagline">{{ 'pages.login.subtitle' | translate }}</p>
+                </div>
+
+                <!-- Features List -->
+                <div class="features-list">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="pi pi-check-circle"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h3>{{ 'pages.login.features.assessment.title' | translate }}</h3>
+                            <p>{{ 'pages.login.features.assessment.desc' | translate }}</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="pi pi-star"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h3>{{ 'pages.login.features.games.title' | translate }}</h3>
+                            <p>{{ 'pages.login.features.games.desc' | translate }}</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="pi pi-chart-line"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h3>{{ 'pages.login.features.tracking.title' | translate }}</h3>
+                            <p>{{ 'pages.login.features.tracking.desc' | translate }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trust Badges -->
+                <div class="trust-badges">
+                    <div class="badge">
+                        <i class="pi pi-shield"></i>
+                        <span>{{ 'pages.login.secure' | translate }}</span>
+                    </div>
+                    <div class="badge">
+                        <i class="pi pi-users"></i>
+                        <span>{{ 'pages.login.trusted' | translate }}</span>
+                    </div>
+                    <div class="badge">
+                        <i class="pi pi-bolt"></i>
+                        <span>{{ 'pages.login.fast' | translate }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side - Login Form Section -->
+        <div class="form-section">
+            <div class="form-container">
+                <!-- Welcome Header -->
+                <div class="login-header">
+                    <h1 class="welcome-title">{{ 'pages.login.welcome' | translate }}</h1>
+                    <p class="welcome-subtitle">{{ 'pages.login.loginPrompt' | translate }}</p>
+                </div>
+
+                <!-- Login Form -->
+                <form [formGroup]="loginForm" class="login-form">
+                    <!-- Email Field -->
+                    <div class="form-field">
+                        <label for="email" class="field-label">
+                            <i class="pi pi-envelope"></i>
+                            {{ 'common.labels.email' | translate }}
+                        </label>
+                        <input pInputText id="email" formControlName="email" type="email" [placeholder]="'common.placeholders.enterEmail' | translate" class="w-full" />
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="form-field">
+                        <label for="password" class="field-label">
+                            <i class="pi pi-lock"></i>
+                            {{ 'common.labels.password' | translate }}
+                        </label>
+                        <p-password id="password" formControlName="password" [toggleMask]="true" [feedback]="false" [placeholder]="'common.placeholders.enterPassword' | translate" styleClass="w-full" [inputStyleClass]="'w-full'"></p-password>
+                    </div>
+
+                    <!-- Remember Me & Forgot Password -->
+                    <div class="form-options">
+                        <div class="remember-me">
+                            <p-checkbox formControlName="checked" id="rememberme" [binary]="true" class="custom-checkbox"></p-checkbox>
+                            <label for="rememberme" class="remember-label">
+                                {{ 'common.labels.rememberMe' | translate }}
+                            </label>
+                        </div>
+                        <a routerLink="/auth/forget-password" class="forgot-link">
+                            {{ 'common.labels.forgotPassword' | translate }}
+                        </a>
+                    </div>
+
+                    <!-- Login Button -->
+                    <p-button [label]="'common.buttons.login' | translate" icon="pi pi-sign-in" iconPos="right" (onClick)="onLogin()" styleClass="w-full login-button" [loading]="isLoading"></p-button>
+
+                    <!-- Divider -->
+                    <div class="divider-container">
+                        <p-divider>
+                            <span class="divider-text">{{ 'common.labels.or' | translate }}</span>
+                        </p-divider>
+                    </div>
+
+                    <!-- Social Login -->
+                    <div class="social-login">
+                        <p-button [label]="'common.buttons.loginWithGoogle' | translate" icon="pi pi-google" (onClick)="signInWithGoogle()" styleClass="w-full google-button" [loading]="isLoading" severity="secondary"></p-button>
+                    </div>
+
+                    <!-- Register Link -->
+                    <div class="register-section">
+                        <span class="register-text">{{ 'common.labels.createAnAccount' | translate }}</span>
+                        <a routerLink="/auth/register" class="register-link">
+                            {{ 'common.buttons.register' | translate }}
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

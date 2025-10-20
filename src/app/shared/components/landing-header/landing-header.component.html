@@ -1,0 +1,20 @@
+<!-- Top Navigation -->
+<header class="landing-nav">
+    <div class="nav-container">
+        <a class="logo" routerLink="/">
+            <img src="assets/images/Logo.png" alt="KidSkills Logo" />
+            <span class="logo-text">KidSkills</span>
+        </a>
+        <nav class="nav-links">
+            <a routerLink="/about-us" class="nav-link">{{ 'pages.home.nav.aboutUs' | translate }}</a>
+            <ng-container *ngIf="currentUser$ | async as user; else showAuthLinks">
+                <a routerLink="/app/dashboard" class="nav-link">{{ 'pages.home.nav.goToApp' | translate }}</a>
+            </ng-container>
+            <ng-template #showAuthLinks>
+                <a routerLink="/auth/login" class="nav-link">{{ 'pages.home.nav.login' | translate }}</a>
+                <a routerLink="/auth/register" class="btn-register">{{ 'pages.home.nav.getStarted' | translate }}</a>
+            </ng-template>
+            <app-language-selector></app-language-selector>
+        </nav>
+    </div>
+</header>

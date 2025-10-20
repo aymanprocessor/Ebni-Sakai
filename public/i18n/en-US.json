@@ -55,12 +55,12 @@
             "confirmPassword": "Confirm Password",
             "language": "Language",
             "rememberMe": "Remember Me",
-            "forgotPassword": "Forgot Password",
+            "forgotPassword": "Forgot Password?",
             "or": "Or",
             "alreadyHaveAccount": "Already have an account?",
             "firstName": "First Name",
             "lastName": "Last Name",
-            "createAnAccount": "Create a new account?",
+            "createAnAccount": "Don't have an account?",
             "gender": "Gender",
             "selectGender": "Select Gender",
             "years": "years",
@@ -84,6 +84,10 @@
             "isSubscribed": "Subscribed?",
             "at": "at",
             "details": "Details"
+        },
+        "placeholders": {
+            "enterEmail": "Enter your email address",
+            "enterPassword": "Enter your password"
         },
         "age": {
             "format": "{{years}} years, {{months}} months"
@@ -154,10 +158,48 @@
             "noUsers": "No Users"
         },
         "login": {
-            "welcome": "Welcome to Kid Skills"
+            "welcome": "Welcome Back!",
+            "subtitle": "Login to continue your journey with KidSkills",
+            "loginPrompt": "Please enter your credentials to continue",
+            "secure": "Secure Login",
+            "trusted": "Trusted by Families",
+            "fast": "Fast & Easy",
+            "features": {
+                "assessment": {
+                    "title": "AI-Powered Assessment",
+                    "desc": "Get personalized insights about your child's development"
+                },
+                "games": {
+                    "title": "Interactive Games",
+                    "desc": "Engaging activities designed by experts"
+                },
+                "tracking": {
+                    "title": "Progress Tracking",
+                    "desc": "Monitor your child's growth journey"
+                }
+            }
         },
         "register": {
-            "welcome": "Welcome to Kid Skills"
+            "welcome": "Create Your Account",
+            "subtitle": "Join KidSkills and start your child's learning journey",
+            "tagline": "Join thousands of families empowering their children",
+            "features": {
+                "easy": {
+                    "title": "Quick & Easy Setup",
+                    "desc": "Create your account in under 2 minutes"
+                },
+                "secure": {
+                    "title": "Safe & Secure",
+                    "desc": "Your data is protected with enterprise-level security"
+                },
+                "journey": {
+                    "title": "Start Your Journey",
+                    "desc": "Access expert tools and personalized learning paths"
+                }
+            },
+            "quick": "2-Min Setup",
+            "free": "Free to Start",
+            "private": "100% Private"
         },
         "dashboard": {
             "welcome": "Welcome,",
@@ -198,6 +240,25 @@
             "30MinMeeting": "Session is 30 minutes",
             "selectTimeslot": "Select Time Slot",
             "selectDate": "Select Date"
+        },
+        "aboutUs": {
+            "title": "About Kid Skills",
+            "subtitle": "Empowering children through evidence-based learning and playful education",
+            "missionTitle": "Mission",
+            "mission": "KidSkills is egyption digital platform dedicated to supporting children with learning difficults. We empower teachers, specialists, schools, parents, and children through inclusive, innovative, and accessible solutions. Our SaaS platform delivers AI-powered educational tools, interactive games, and assessment tests that make learning measurable, affordable, and sustainable. We are committed to sustainable growth by offering subscription models, building strong institutional partnerships, and unlocking future value through data insights and training programs. With a philosophy rooted in inclusion and innovation, we aim to be a trusted partner in education—promoting equality, accessibility, and social responsibility. Our identity is shaped by an inclusive and agile culture that values diversity, continuous training, and professional growth, with founders who themselves represent the power of overcoming barriers. By reducing reliance on paper and plastic tools, we not only lower costs for families but also contribute to environmental sustainability—ensuring that every child can learn, thrive, and belong.",
+            "visionTitle": "Vision",
+            "vision": "To become the trusted partner of specialists, schools, nurseries, and educational organizations, empowering them with powerful, organized digital tools that break every learning barrier and ensure every child's right to learn, grow, and belong.",
+            "valuesTitle": "Our Values",
+            "values": [
+                "Integrity – We act with honesty and transparency",
+                "Excellence – We strive for measurable quality",
+                "Accountability – We take responsibility for results",
+                "Teamwork – We grow through inclusion & collaboration",
+                "Innovation – We use AI to break barriers",
+                "Respect – We honor diversity & accessibility",
+                "Sustainability – We design for long-term impact",
+                "Customer Commitment – We put professionals, parents & children first"
+            ]
         },
         "session": {
             "title": "Session Management",
@@ -246,11 +307,150 @@
                 "invalidTimeRange": "Invalid time range",
                 "invalidDateRange": "Invalid date range"
             }
+        },
+        "selection": {
+            "title": "Choose What You Want",
+            "subtitle": "Choose between assessments or games to continue",
+            "assessmentsDesc": "Take assessments and surveys to evaluate child development",
+            "gamesDesc": "Explore fun educational games",
+            "startAssessments": "Start Assessments",
+            "startGames": "Start Games"
+        },
+        "gamesList": {
+            "title": "Educational Games",
+            "subtitle": "Choose a game to start fun and learning",
+            "back": "Back",
+            "searchPlaceholder": "Search for a game...",
+            "play": "Play Now",
+            "noResults": "No search results found"
+        },
+        "home": {
+            "nav": {
+                "aboutUs": "About Us",
+                "login": "Login",
+                "getStarted": "Get Started",
+                "goToApp": "Go to App"
+            },
+            "hero": {
+                "badge": "Egyptian Digital Platform",
+                "titlePart1": "Empowering Children with",
+                "titlePart2": "Learning Difficulties",
+                "description": "KidSkills is a comprehensive digital platform dedicated to supporting children with learning challenges. We provide AI-powered tools, interactive games, and expert support to help every child learn, grow, and thrive.",
+                "startTrial": "Start Free Trial",
+                "watchDemo": "Watch Demo",
+                "trust": {
+                    "evidenceBased": "Evidence-Based",
+                    "safeSecure": "Safe & Secure",
+                    "madeInEgypt": "Made in Egypt"
+                },
+                "floatingCards": {
+                    "interactiveLearning": "Interactive Learning",
+                    "trackProgress": "Track Progress",
+                    "expertSupport": "Expert Support"
+                }
+            },
+            "stats": {
+                "happyChildren": "Happy Children",
+                "familiesServed": "Families Served",
+                "expertSpecialists": "Expert Specialists",
+                "interactiveGames": "Interactive Games"
+            },
+            "sections": {
+                "features": {
+                    "badge": "Our Features",
+                    "title": "Comprehensive Tools for Learning Success",
+                    "description": "Everything you need to support children with learning difficulties in one powerful platform"
+                },
+                "howItWorks": {
+                    "badge": "How It Works",
+                    "title": "Get Started in 3 Simple Steps",
+                    "step1": {
+                        "title": "Create Account",
+                        "description": "Sign up and create your child's profile in minutes"
+                    },
+                    "step2": {
+                        "title": "Take Assessment",
+                        "description": "Complete our AI-powered assessment to identify learning needs"
+                    },
+                    "step3": {
+                        "title": "Start Learning",
+                        "description": "Access personalized games, activities, and expert support"
+                    }
+                },
+                "benefits": {
+                    "badge": "Why Choose Us",
+                    "title": "Built with Care, Powered by Technology"
+                }
+            },
+            "features": {
+                "aiAssessment": {
+                    "title": "AI-Powered Assessment",
+                    "description": "Evidence-based assessments that identify learning strengths and areas for growth"
+                },
+                "interactiveGames": {
+                    "title": "Interactive Games",
+                    "description": "Engaging educational games designed to make learning fun and effective"
+                },
+                "progressTracking": {
+                    "title": "Progress Tracking",
+                    "description": "Real-time insights and detailed reports for parents and specialists"
+                },
+                "expertSupport": {
+                    "title": "Expert Support",
+                    "description": "Connect with certified specialists and book personalized sessions"
+                }
+            },
+            "benefits": {
+                "evidenceBased": {
+                    "title": "Evidence-Based Approach",
+                    "description": "All our tools are backed by educational research and best practices"
+                },
+                "accessible": {
+                    "title": "Accessible Anywhere",
+                    "description": "Cloud-based platform accessible from any device, anytime"
+                },
+                "childCentered": {
+                    "title": "Child-Centered",
+                    "description": "Designed with empathy, focusing on each child's unique needs"
+                },
+                "safeSecure": {
+                    "title": "Safe & Secure",
+                    "description": "Your data is protected with industry-standard security measures"
+                }
+            },
+            "cta": {
+                "title": "Ready to Transform Your Child's Learning Journey?",
+                "description": "Join thousands of families who trust KidSkills for their children's education",
+                "startTrial": "Start Free Trial",
+                "contactUs": "Contact Us"
+            },
+            "footer": {
+                "tagline": "Empowering children with learning difficulties through innovative digital solutions",
+                "quickLinks": {
+                    "title": "Quick Links",
+                    "aboutUs": "About Us",
+                    "games": "Games",
+                    "getStarted": "Get Started"
+                },
+                "legal": {
+                    "title": "Legal",
+                    "privacyPolicy": "Privacy Policy",
+                    "termsOfUse": "Terms of Use"
+                },
+                "contact": {
+                    "title": "Contact",
+                    "location": "Cairo, Egypt"
+                },
+                "copyright": "© 2025 KidSkills. All rights reserved. Made with ❤️ in Egypt"
+            }
         }
     },
     "navigation": {
         "dashboard": "Dashboard",
         "users": "Users",
+        "permissions": "Permissions Management",
+        "userPermissions": "User Permissions",
+        "myAccess": "My Access",
         "timeSlots": "Time Slots",
         "appointments": "All Appointments",
         "myAppointments": "My Appointments",
@@ -261,7 +461,28 @@
         "sessions": "Sessions",
         "children": "Children",
         "survey": "Survey",
-        "user-profile": "Profile"
+        "user-profile": "Profile",
+        "scales": "Scales",
+        "games": "Games"
+    },
+    "MY_ACCESS": {
+        "TITLE": "My Access Permissions",
+        "TRIAL_LEFT": "{{days}} days left",
+        "TRIAL_SHORT": "{{days}} days left",
+        "TRIAL_EXPIRES": "Trial expires",
+        "PAY_NOW": "Pay Now",
+        "SUBTITLE": "View all games and scales you have access to",
+        "REFRESH": "Refresh Access",
+        "GAMES_ACCESSIBLE": "Games Accessible",
+        "SCALES_ACCESSIBLE": "Scales Accessible",
+        "VIEW_GAMES": "View Games",
+        "VIEW_SCALES": "View Scales",
+        "GAMES_LIST": "Games Access",
+        "SCALES_LIST": "Scales Access",
+        "FULL_ACCESS_MESSAGE": "You have full access to all games and scales",
+        "NO_ACCESS_TITLE": "No Access Granted",
+        "NO_ACCESS_MESSAGE": "You don't have access to any games or scales. Please contact your administrator.",
+        "CONTACT_ADMIN": "Contact Administrator"
     },
     "dateTime": {
         "formats": {
@@ -280,5 +501,15 @@
         "contactUs": "Contact Us",
         "aboutUs": "About Us",
         "madeby": "Made with ❤️ in Egypt by Kid Skills Team."
+    },
+    "subscription": {
+        "howToSubscribe": "How to Subscribe",
+        "trialEndsIn": "Your trial ends in {{days}} days",
+        "step1Title": "Contact Us",
+        "step1Desc": "Reach out to our team via email or phone",
+        "step2Title": "Choose Your Plan",
+        "step2Desc": "Select the subscription plan that fits your needs",
+        "step3Title": "Complete Payment",
+        "step3Desc": "Make payment and get instant access to all features"
     }
 }

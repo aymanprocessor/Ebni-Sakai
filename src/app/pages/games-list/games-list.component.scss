@@ -1,0 +1,83 @@
+.games-list-container {
+    min-height: calc(100vh - 200px);
+}
+
+/* Shimmer placeholder styles */
+.shimmer-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+    gap: 16px;
+    padding: 16px 0;
+}
+.shimmer-card {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 16px;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #fff, #fbfbff);
+    box-shadow: 0 6px 18px rgba(18, 38, 63, 0.04);
+}
+.shimmer-badge {
+    width: 72px;
+    height: 72px;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #eef2ff 0%, #f8fafc 50%, #eef2ff 100%);
+    position: relative;
+    overflow: hidden;
+}
+.shimmer-lines {
+    flex: 1;
+}
+.shimmer-line {
+    height: 12px;
+    background: linear-gradient(90deg, #f1f5f9 0%, #e2e8f0 50%, #f1f5f9 100%);
+    margin-bottom: 8px;
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+}
+.shimmer-line.short { width: 40%; }
+.shimmer-line.long { width: 80%; }
+.shimmer-card::before, .shimmer-badge::before, .shimmer-line::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -150px;
+    height: 100%;
+    width: 150px;
+    background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.6), rgba(255,255,255,0));
+    transform: skewX(-20deg);
+    animation: shimmer 1.2s infinite;
+}
+@keyframes shimmer {
+    to { transform: translateX(320px) skewX(-20deg); }
+}
+
+.game-card {
+    transition: transform 0.3s ease;
+
+    &:hover {
+        transform: translateY(-4px);
+    }
+}
+
+:host ::ng-deep {
+    .p-card {
+        border-radius: 0.75rem;
+        overflow: hidden;
+        border: 1px solid #e5e7eb;
+
+        .p-card-body {
+            padding: 0;
+        }
+
+        .p-card-content {
+            padding: 1rem;
+        }
+    }
+
+    .dark .p-card {
+        border-color: #374151;
+    }
+}

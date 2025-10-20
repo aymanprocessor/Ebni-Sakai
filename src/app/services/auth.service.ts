@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Auth, authState, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, User, GoogleAuthProvider, signInWithPopup } from '@angular/fire/auth';
-import { BehaviorSubject, from, map, Observable, of, switchMap, catchError, timeout, firstValueFrom, ReplaySubject, first, throwError, Subscription } from 'rxjs';
+import { BehaviorSubject, from, map, Observable, of, switchMap, catchError, timeout, firstValueFrom, first, throwError, Subscription } from 'rxjs';
 import { UserProfile } from '../models/user.model';
 import { doc, docData, Firestore, getDoc, setDoc } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
@@ -14,7 +14,7 @@ import { Logger } from './logger.service';
 })
 export class AuthService implements OnDestroy {
     currentUser$: BehaviorSubject<UserProfile | null> = new BehaviorSubject<UserProfile | null>(null);
-    private initializedSubject = new ReplaySubject<boolean>(1);
+    private initializedSubject = new BehaviorSubject<boolean>(false);
     initialized$ = this.initializedSubject.asObservable();
     private authStateSubscription?: Subscription;
 
@@ -37,11 +37,13 @@ export class AuthService implements OnDestroy {
                             map((userProfile) => {
                                 if (userProfile) {
                                     try {
-                                        localStorage.setItem('currentUser', JSON.stringify(userProfile));
+                                        // Normalize any Firestore Timestamp fields to JS Date so comparisons work
+                                        const normalized = this.normalizeUserDates(userProfile as any);
+                                        localStorage.setItem('currentUser', JSON.stringify(normalized));
+                                        return normalized;
                                     } catch (storageError) {
                                         console.warn('Failed to set localStorage:', storageError);
                                     }
-                                    return userProfile;
                                 }
                                 return null;
                             }),
@@ -71,27 +73,63 @@ export class AuthService implements OnDestroy {
                     Logger.log('Authentication state:', user);
                     this.currentUser$.next(user as UserProfile);
                     this.initializedSubject.next(true);
-                    this.initializedSubject.complete();
                 },
                 error: (err) => {
                     console.error('Subscription error:', err);
                     this.currentUser$.next(null);
                     this.initializedSubject.next(false);
-                    this.initializedSubject.complete();
                     this.sweetalert.showToast('Authentication service error', 'error');
                 }
             });
+    }
+
+    /**
+     * Normalize date-like fields returned from Firestore.
+     * Accepts Firestore Timestamp objects, numeric milliseconds, or ISO strings
+     * and converts them to JS Date instances in-place.
+     */
+    private normalizeUserDates(userProfile: any): any {
+        if (!userProfile) return userProfile;
+
+        const convert = (val: any) => {
+            if (!val) return null;
+            // Firestore Timestamp
+            if (typeof val?.toDate === 'function') return val.toDate();
+            // milliseconds since epoch
+            if (typeof val === 'number') return new Date(val);
+            // ISO string or other string supported by Date
+            if (typeof val === 'string') return new Date(val);
+            // Already Date
+            if (val instanceof Date) return val;
+            return null;
+        };
+
+        try {
+            userProfile.gameAccessExpires = convert(userProfile.gameAccessExpires) || null;
+            userProfile.scaleAccessExpires = convert(userProfile.scaleAccessExpires) || null;
+            userProfile.createdAt = convert(userProfile.createdAt) || userProfile.createdAt;
+            userProfile.lastLogin = convert(userProfile.lastLogin) || userProfile.lastLogin;
+            userProfile.updatedAt = convert(userProfile.updatedAt) || userProfile.updatedAt;
+        } catch (e) {
+            Logger.error('normalizeUserDates error', e);
+        }
+
+        return userProfile;
     }
     // Add a method to wait for initialization
     // Improved wait method with timeout
     waitForInitialization(timeoutMs = 5000): Promise<boolean> {
         return firstValueFrom(
             this.initialized$.pipe(
+                first((initialized) => initialized === true),
                 timeout({
                     each: timeoutMs,
                     with: () => throwError(() => new Error('Auth initialization timeout'))
                 }),
-                catchError(() => of(false))
+                catchError((error) => {
+                    console.error('Wait for initialization error:', error);
+                    return of(false);
+                })
             )
         );
     }
@@ -129,9 +167,9 @@ export class AuthService implements OnDestroy {
 
             if (user) {
                 // Store user profile with role in Firestore
-                await this.checkUserProfile(user);
-                // Ensure role is set correctly
-                await this.setUserRole(user.uid, 'user');
+                // Create profile and ensure role (default to specialist if not provided)
+                await this.checkUserProfile(user, role || 'specialist', registerData);
+                // Also set provided user data
                 await this.setUserData(user.uid, registerData);
             }
 
@@ -179,7 +217,15 @@ export class AuthService implements OnDestroy {
         try {
             const provider = new GoogleAuthProvider();
             const result = await signInWithPopup(this.auth, provider);
-            return result.user;
+            const user = result.user;
+
+            if (user) {
+                // Check/create user profile in Firestore and grant default access when creating
+                await this.checkUserProfile(user, 'specialist');
+                this.sweetalert.showToast('Login successful', 'success');
+            }
+
+            return user;
         } catch (error) {
             // Type guard to handle Firebase auth errors
             if (error instanceof FirebaseError) {
@@ -249,42 +295,51 @@ export class AuthService implements OnDestroy {
     }
 
     // Check if user profile exists, create if first login
-    private async checkUserProfile(user: User): Promise<void> {
+    // If `defaultRole` is provided it will be applied for new users. Optionally pass registerData to save names.
+    private async checkUserProfile(user: User, defaultRole: string = 'specialist', registerData?: RegisterModel): Promise<void> {
         try {
             const userDocRef = doc(this.firestore, `users/${user.uid}`);
             const userDoc = await getDoc(userDocRef);
 
             if (!userDoc.exists()) {
-                // First login - create profile
+                // First login - create profile with specialist role
                 const nameParts = user.displayName?.split(' ') || ['', ''];
+                // Compute 7-day expiry
+                const now = new Date();
+                const expires = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days
+
                 const newUser: UserProfile = {
                     uid: user.uid,
                     email: user.email || '',
-                    firstName: nameParts[0] || '',
-                    lastName: nameParts.slice(1).join(' ') || '',
+                    firstName: registerData?.firstName || nameParts[0] || '',
+                    lastName: registerData?.lastName || nameParts.slice(1).join(' ') || '',
                     photoURL: user.photoURL || '',
                     isNewUser: true,
-                    role: 'user',
+                    role: (defaultRole as any) || 'specialist', // default role
                     isSubscribed: false,
                     mobile: user.phoneNumber || '',
                     displayName: user.displayName || '',
-                    createdAt: new Date(),
-                    lastLogin: new Date(),
-                    updatedAt: new Date()
+                    createdAt: now,
+                    lastLogin: now,
+                    updatedAt: now,
+                    // Grant full access for games and scales for 7 days
+                    gamePermissions: Array.from({ length: 52 }, (_, i) => i + 1),
+                    scalePermissions: [1, 2, 3, 4, 5, 6, 7],
+                    gameAccessExpires: expires,
+                    scaleAccessExpires: expires
                 };
 
                 await setDoc(userDocRef, newUser);
-                // Redirect to profile completion
-                this.router.navigate(['/complete-profile']);
+                Logger.log('New user profile created with default role and 7-day access:', newUser.uid);
             } else {
-                // Update last login only, role is set separately by setUserRole
+                // Update last login for existing user
                 await setDoc(userDocRef, { lastLogin: new Date() }, { merge: true });
-                // We know user profile exists, redirect to dashboard
-                this.router.navigate(['/dashboard']);
+                Logger.log('Existing user profile updated');
             }
         } catch (error) {
             console.error('Error checking user profile:', error);
             this.sweetalert.showToast('Failed to process user profile', 'error');
+            throw error;
         }
     }
 
@@ -317,6 +372,35 @@ export class AuthService implements OnDestroy {
 
     isLoggedIn(): boolean {
         return !!this.auth.currentUser;
+    }
+
+    /**
+     * Refresh current user profile from Firestore
+     * This is useful after permission updates to reflect the latest data
+     */
+    async refreshCurrentUserProfile(): Promise<void> {
+        const firebaseUser = this.auth.currentUser;
+        if (!firebaseUser) {
+            Logger.warn('No user logged in to refresh');
+            return;
+        }
+
+        try {
+            const userDocRef = doc(this.firestore, `users/${firebaseUser.uid}`);
+            const userDoc = await getDoc(userDocRef);
+
+            if (userDoc.exists()) {
+                const userProfile = userDoc.data() as UserProfile;
+                this.currentUser$.next(userProfile);
+                localStorage.setItem('currentUser', JSON.stringify(userProfile));
+                Logger.log('User profile refreshed from Firestore');
+            } else {
+                Logger.warn('User profile not found in Firestore');
+            }
+        } catch (error) {
+            Logger.error('Error refreshing user profile:', error);
+            throw error;
+        }
     }
 
     // Check if user is an admin

@@ -1,0 +1,755 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>لعبة تفكيك الكلمات إلى أصوات</title>
+        <style>
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                font-size: 20px;
+                line-height: 1.6;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+            }
+
+            .container {
+                background: white;
+                border-radius: 20px;
+                padding: 30px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                max-width: 800px;
+                width: 100%;
+                text-align: center;
+            }
+
+            .screen {
+                display: none;
+            }
+
+            .screen.active {
+                display: block;
+            }
+
+            h1 {
+                color: #4a5568;
+                font-size: 2.5em;
+                margin-bottom: 20px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .description {
+                color: #666;
+                font-size: 1.1em;
+                margin-bottom: 30px;
+                line-height: 1.8;
+            }
+
+            .level-buttons {
+                display: flex;
+                justify-content: center;
+                gap: 20px;
+                margin: 30px 0;
+                flex-wrap: wrap;
+            }
+
+            .btn {
+                background: linear-gradient(45deg, #4caf50, #45a049);
+                color: white;
+                border: none;
+                padding: 15px 30px;
+                font-size: 1.2em;
+                border-radius: 10px;
+                cursor: pointer;
+                transition: all 0.3s;
+                min-width: 140px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            }
+
+            .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            }
+
+            .btn.secondary {
+                background: linear-gradient(45deg, #2196f3, #1976d2);
+            }
+
+            .btn.danger {
+                background: linear-gradient(45deg, #f44336, #d32f2f);
+            }
+
+            .word-display {
+                font-size: 4em;
+                margin: 20px 0;
+                min-height: 80px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 20px;
+            }
+
+            .word-text {
+                font-size: 2em;
+                color: #4a5568;
+                font-weight: bold;
+            }
+
+            .question {
+                font-size: 1.3em;
+                color: #333;
+                margin: 20px 0;
+                font-weight: bold;
+            }
+
+            .input-area {
+                margin: 30px 0;
+            }
+
+            .phoneme-input {
+                width: 100%;
+                padding: 15px;
+                font-size: 1.5em;
+                border: 3px solid #ddd;
+                border-radius: 10px;
+                text-align: center;
+                direction: rtl;
+            }
+
+            .phoneme-input:focus {
+                border-color: #4caf50;
+                outline: none;
+                box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+            }
+
+            .controls {
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+                margin: 20px 0;
+                flex-wrap: wrap;
+            }
+
+            .feedback {
+                margin: 20px 0;
+                padding: 20px;
+                border-radius: 10px;
+                font-size: 1.2em;
+                min-height: 60px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .feedback.success {
+                background: #d4edda;
+                color: #155724;
+                border: 2px solid #c3e6cb;
+            }
+
+            .feedback.error {
+                background: #f8d7da;
+                color: #721c24;
+                border: 2px solid #f5c6cb;
+            }
+
+            .colored-answer {
+                font-size: 1.5em;
+                margin: 15px 0;
+                padding: 15px;
+                background: #f8f9fa;
+                border-radius: 10px;
+                direction: rtl;
+            }
+
+            .phoneme-span {
+                padding: 8px 12px;
+                margin: 0 5px;
+                border-radius: 8px;
+                font-weight: bold;
+                display: inline-block;
+            }
+
+            .correct {
+                background: #28a745;
+                color: white;
+            }
+            .missing {
+                background: #ffc107;
+                color: #856404;
+                border: 2px dashed #856404;
+                font-style: italic;
+            }
+            .extra {
+                background: #dc3545;
+                color: white;
+                opacity: 0.7;
+            }
+
+            .progress-bar {
+                background: #e9ecef;
+                height: 20px;
+                border-radius: 10px;
+                margin: 20px 0;
+                overflow: hidden;
+            }
+
+            .progress-fill {
+                background: linear-gradient(45deg, #4caf50, #45a049);
+                height: 100%;
+                transition: width 0.5s ease;
+            }
+
+            .stats {
+                display: flex;
+                justify-content: space-between;
+                margin: 20px 0;
+                font-size: 1.1em;
+                font-weight: bold;
+                color: #4a5568;
+            }
+
+            .show-word-btn {
+                background: linear-gradient(45deg, #ff9800, #f57c00);
+                margin-bottom: 20px;
+            }
+
+            @media (max-width: 600px) {
+                .container {
+                    padding: 20px;
+                    margin: 10px;
+                }
+
+                h1 {
+                    font-size: 2em;
+                }
+
+                .word-display {
+                    font-size: 3em;
+                    flex-direction: column;
+                    gap: 10px;
+                }
+
+                .word-text {
+                    font-size: 1.5em;
+                }
+
+                .level-buttons {
+                    flex-direction: column;
+                    align-items: center;
+                }
+            }
+
+            /* Accessibility */
+            .sr-only {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                white-space: nowrap;
+                border: 0;
+            }
+
+            [role='status'] {
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <!-- شاشة البداية -->
+            <div id="start-screen" class="screen active">
+                <h1>🎯 لعبة تفكيك الكلمات إلى أصوات</h1>
+                <div class="description">
+                    تعلم كيف تقسم الكلمات إلى أصواتها الأساسية!<br />
+                    انطق كل كلمة واكتب الأصوات مفصولة بشرطة
+                </div>
+
+                <!-- مثال توضيحي -->
+                <div style="background: #f8f9fa; border: 3px solid #28a745; border-radius: 15px; padding: 25px; margin: 25px 0; direction: rtl">
+                    <h2 style="color: #28a745; margin-bottom: 15px">📚 مثال للتوضيح:</h2>
+                    <div style="font-size: 1.3em; margin-bottom: 15px">
+                        <span style="font-size: 2em">☀️</span>
+                        <span style="color: #4a5568; font-weight: bold; margin: 0 10px">شمس</span>
+                    </div>
+                    <div style="margin: 15px 0; font-size: 1.2em; color: #666">🗣️ انطق الكلمة ببطء: "شــ - مــ - س"</div>
+                    <div style="background: white; padding: 15px; border-radius: 10px; border: 2px dashed #28a745">
+                        <div style="margin-bottom: 10px; font-weight: bold">اكتب في الصندوق:</div>
+                        <div style="font-size: 1.5em; color: #28a745; font-weight: bold; text-align: center; background: #e8f5e8; padding: 10px; border-radius: 8px">ش - م - س</div>
+                    </div>
+                    <div style="margin-top: 15px; font-size: 1.1em; color: #666">
+                        ✅ كل صوت منفصل بشرطة<br />
+                        ✅ يمكنك استخدام المسافات أيضاً: ش م س
+                    </div>
+                </div>
+
+                <div class="level-buttons">
+                    <button class="btn" onclick="startLevel(1)">
+                        المستوى الأول<br />
+                        <small>كلمات بسيطة (3 أصوات)</small>
+                    </button>
+                    <button class="btn" onclick="startLevel(2)">
+                        المستوى الثاني<br />
+                        <small>كلمات متوسطة (4 أصوات)</small>
+                    </button>
+                    <button class="btn" onclick="startLevel(3)">
+                        المستوى الثالث<br />
+                        <small>مزيج متدرج</small>
+                    </button>
+                </div>
+            </div>
+
+            <!-- شاشة اللعبة -->
+            <div id="game-screen" class="screen">
+                <div class="stats">
+                    <span>السؤال: <span id="question-number">1</span> من 10</span>
+                    <span>النقاط: <span id="score">0</span></span>
+                </div>
+
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill" style="width: 10%"></div>
+                </div>
+
+                <button id="show-word-btn" class="btn show-word-btn" onclick="toggleWordDisplay()">إظهار الكلمة</button>
+
+                <div class="word-display">
+                    <span id="emoji-display">☀️</span>
+                    <span id="word-display" class="word-text" style="display: none">شمس</span>
+                </div>
+
+                <div class="question">انطق الكلمة واكتب الأصوات التي تسمعها مفصولة بشرطة</div>
+
+                <div class="input-area">
+                    <input type="text" id="phoneme-input" class="phoneme-input" placeholder="مثال: ش - م - س" aria-label="أدخل الأصوات مفصولة بشرطة" />
+                </div>
+
+                <div class="controls">
+                    <button class="btn" onclick="checkAnswer()">تحقق</button>
+                    <button class="btn secondary" onclick="speakWord()">إعادة الاستماع</button>
+                    <button class="btn secondary" onclick="showHint()">تلميح</button>
+                </div>
+
+                <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+                <div id="colored-answer" class="colored-answer"></div>
+
+                <div class="controls">
+                    <button class="btn danger" onclick="endGame()">إنهاء اللعبة</button>
+                    <button class="btn secondary" onclick="nextQuestion()" id="next-btn" style="display: none">السؤال التالي</button>
+                </div>
+            </div>
+
+            <!-- شاشة النهاية -->
+            <div id="end-screen" class="screen">
+                <h1>🎉 أحسنت!</h1>
+                <div class="description">
+                    لقد أنهيت اللعبة!<br />
+                    نقاطك النهائية: <span id="final-score">0</span> من 10
+                </div>
+
+                <div class="level-buttons">
+                    <button class="btn" onclick="restartGame()">العب مرة أخرى</button>
+                    <button class="btn secondary" onclick="backToStart()">العودة للبداية</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // بيانات المستويات
+            const levels = {
+                1: [
+                    { word: 'شمس', phonemes: ['ش', 'م', 'س'], hint: 'شيء في السماء', emoji: '☀️' },
+                    { word: 'باب', phonemes: ['ب', 'ا', 'ب'], hint: 'نفتحه للدخول', emoji: '🚪' },
+                    { word: 'بيت', phonemes: ['ب', 'ي', 'ت'], hint: 'مكان نسكن فيه', emoji: '🏠' },
+                    { word: 'كلب', phonemes: ['ك', 'ل', 'ب'], hint: 'حيوان أليف', emoji: '🐶' },
+                    { word: 'قمر', phonemes: ['ق', 'م', 'ر'], hint: 'نراه ليلاً', emoji: '🌙' },
+                    { word: 'نجم', phonemes: ['ن', 'ج', 'م'], hint: 'شيء لامع في السماء', emoji: '⭐' },
+                    { word: 'خبز', phonemes: ['خ', 'ب', 'ز'], hint: 'طعام نأكله', emoji: '🍞' },
+                    { word: 'ملح', phonemes: ['م', 'ل', 'ح'], hint: 'نضعه على الطعام', emoji: '🧂' },
+                    { word: 'نور', phonemes: ['ن', 'و', 'ر'], hint: 'يضيء الظلام', emoji: '💡' },
+                    { word: 'ورد', phonemes: ['و', 'ر', 'د'], hint: 'زهرة جميلة', emoji: '🌹' }
+                ],
+                2: [
+                    { word: 'موزة', phonemes: ['م', 'و', 'ز', 'ة'], hint: 'فاكهة صفراء', emoji: '🍌' },
+                    { word: 'كرسي', phonemes: ['ك', 'ر', 'س', 'ي'], hint: 'نجلس عليه', emoji: '🪑' },
+                    { word: 'كتاب', phonemes: ['ك', 'ت', 'ا', 'ب'], hint: 'نقرأ فيه', emoji: '📖' },
+                    { word: 'تفاح', phonemes: ['ت', 'ف', 'ا', 'ح'], hint: 'فاكهة حمراء', emoji: '🍎' },
+                    { word: 'طماط', phonemes: ['ط', 'م', 'ا', 'ط'], hint: 'خضروات حمراء', emoji: '🍅' },
+                    { word: 'مسطرة', phonemes: ['م', 'س', 'ط', 'ر'], hint: 'نرسم بها خطوط', emoji: '📏' },
+                    { word: 'حقيبة', phonemes: ['ح', 'ق', 'ي', 'ب'], hint: 'نحمل فيها الأشياء', emoji: '🎒' },
+                    { word: 'نافذة', phonemes: ['ن', 'ا', 'ف', 'ذ'], hint: 'نطل منها', emoji: '🪟' },
+                    { word: 'مدرس', phonemes: ['م', 'د', 'ر', 'س'], hint: 'يعلم الطلاب', emoji: '🧑‍🏫' },
+                    { word: 'مفتاح', phonemes: ['م', 'ف', 'ت', 'ا'], hint: 'نفتح به الباب', emoji: '🔑' }
+                ],
+                3: [
+                    { word: 'شمس', phonemes: ['ش', 'م', 'س'], hint: 'شيء في السماء', emoji: '☀️' },
+                    { word: 'باب', phonemes: ['ب', 'ا', 'ب'], hint: 'نفتحه للدخول', emoji: '🚪' },
+                    { word: 'موزة', phonemes: ['م', 'و', 'ز', 'ة'], hint: 'فاكهة صفراء', emoji: '🍌' },
+                    { word: 'كتاب', phonemes: ['ك', 'ت', 'ا', 'ب'], hint: 'نقرأ فيه', emoji: '📖' },
+                    { word: 'تفاحة', phonemes: ['ت', 'ف', 'ا', 'ح', 'ة'], hint: 'فاكهة حمراء', emoji: '🍎' },
+                    { word: 'بطاطس', phonemes: ['ب', 'ط', 'ا', 'ط', 'س'], hint: 'خضروات نأكلها', emoji: '🥔' },
+                    { word: 'فراشة', phonemes: ['ف', 'ر', 'ا', 'ش', 'ة'], hint: 'حشرة جميلة تطير', emoji: '🦋' },
+                    { word: 'مرايا', phonemes: ['م', 'ر', 'ا', 'ي', 'ا'], hint: 'ننظر فيها', emoji: '🪞' },
+                    { word: 'حديقة', phonemes: ['ح', 'د', 'ي', 'ق', 'ة'], hint: 'مكان فيه أشجار', emoji: '🌳' },
+                    { word: 'نجم', phonemes: ['ن', 'ج', 'م'], hint: 'شيء لامع في السماء', emoji: '⭐' }
+                ]
+            };
+
+            // متغيرات اللعبة
+            let currentLevel = 1;
+            let currentQuestionIndex = 0;
+            let currentQuestions = [];
+            let score = 0;
+            let questionsAnswered = 0;
+            let currentWord = null;
+            let showingWord = false;
+            let audioContext = null;
+
+            // الألوان للأصوات
+            const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F'];
+
+            // تهيئة Web Audio API
+            function initAudio() {
+                try {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.log('Web Audio API not supported');
+                }
+            }
+
+            // تشغيل صوت الجليتر (النجاح)
+            function playGlitter() {
+                if (!audioContext) return;
+
+                const frequencies = [600, 750, 900, 1200];
+                frequencies.forEach((freq, index) => {
+                    setTimeout(() => {
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+
+                        oscillator.frequency.value = freq;
+                        oscillator.type = 'sine';
+
+                        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.12);
+
+                        oscillator.start(audioContext.currentTime);
+                        oscillator.stop(audioContext.currentTime + 0.12);
+                    }, index * 80);
+                });
+            }
+
+            // تشغيل صوت الباز (الخطأ)
+            function playBuzzer() {
+                if (!audioContext) return;
+
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.value = 200;
+                oscillator.type = 'sawtooth';
+
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.35);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.35);
+            }
+
+            // بدء مستوى معين
+            function startLevel(level) {
+                initAudio();
+                currentLevel = level;
+                currentQuestionIndex = 0;
+                score = 0;
+                questionsAnswered = 0;
+
+                // اختيار 10 أسئلة عشوائية من المستوى
+                const levelWords = [...levels[level]];
+                currentQuestions = [];
+                for (let i = 0; i < 10; i++) {
+                    if (levelWords.length === 0) {
+                        levelWords.push(...levels[level]);
+                    }
+                    const randomIndex = Math.floor(Math.random() * levelWords.length);
+                    currentQuestions.push(levelWords.splice(randomIndex, 1)[0]);
+                }
+
+                showScreen('game-screen');
+                showQuestion();
+            }
+
+            // عرض السؤال الحالي
+            function showQuestion() {
+                currentWord = currentQuestions[currentQuestionIndex];
+
+                document.getElementById('emoji-display').textContent = currentWord.emoji;
+                document.getElementById('word-display').textContent = currentWord.word;
+                document.getElementById('word-display').style.display = 'none';
+                document.getElementById('show-word-btn').textContent = 'إظهار الكلمة';
+                showingWord = false;
+
+                document.getElementById('question-number').textContent = currentQuestionIndex + 1;
+                document.getElementById('score').textContent = score;
+                document.getElementById('phoneme-input').value = '';
+                document.getElementById('feedback').innerHTML = '';
+                document.getElementById('colored-answer').innerHTML = '';
+                document.getElementById('next-btn').style.display = 'none';
+
+                // تحديث شريط التقدم
+                const progress = ((currentQuestionIndex + 1) / 10) * 100;
+                document.getElementById('progress-fill').style.width = progress + '%';
+
+                // التركيز على حقل الإدخال
+                document.getElementById('phoneme-input').focus();
+            }
+
+            // إظهار/إخفاء الكلمة
+            function toggleWordDisplay() {
+                const wordElement = document.getElementById('word-display');
+                const btn = document.getElementById('show-word-btn');
+
+                if (showingWord) {
+                    wordElement.style.display = 'none';
+                    btn.textContent = 'إظهار الكلمة';
+                    showingWord = false;
+                } else {
+                    wordElement.style.display = 'inline';
+                    btn.textContent = 'إخفاء الكلمة';
+                    showingWord = true;
+                }
+            }
+
+            // نطق الكلمة
+            function speakWord() {
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(currentWord.word);
+                    utterance.lang = 'ar-SA';
+                    utterance.rate = 0.7;
+                    speechSynthesis.speak(utterance);
+                }
+            }
+
+            // إظهار التلميح
+            function showHint() {
+                const feedback = document.getElementById('feedback');
+                feedback.className = 'feedback';
+                feedback.innerHTML = `💡 تلميح: ${currentWord.hint}`;
+            }
+
+            // تطبيع الإدخال
+            function normalizeInput(input) {
+                // إزالة المسافات والرموز والفواصل
+                let normalized = input.replace(/[\s\-,،]+/g, ' ').trim();
+
+                // تقسيم على المسافات
+                let phonemes = normalized.split(/\s+/).filter((p) => p.length > 0);
+
+                // توحيد بعض الأحرف
+                phonemes = phonemes.map((p) => {
+                    return p
+                        .replace(/[أإآ]/g, 'ا')
+                        .replace(/ى/g, 'ي')
+                        .replace(/[ًٌٍَُِْـ]/g, ''); // إزالة التشكيل
+                });
+
+                return phonemes;
+            }
+
+            // فحص الإجابة مع مراعاة الحرف الخامس المُعطى
+            function checkAnswer() {
+                const input = document.getElementById('phoneme-input').value;
+                const userPhonemes = normalizeInput(input);
+                const correctPhonemes = currentWord.phonemes;
+
+                if (userPhonemes.length === 0) {
+                    document.getElementById('feedback').innerHTML = 'يرجى كتابة الأصوات أولاً';
+                    document.getElementById('feedback').className = 'feedback error';
+                    return;
+                }
+
+                // للكلمات ذات 5 أحرف أو أكثر، إذا لم يكتب الطفل الحرف الخامس، أضفه تلقائياً
+                if (correctPhonemes.length >= 5 && userPhonemes.length === 4) {
+                    userPhonemes.push(correctPhonemes[4]);
+                }
+
+                // مقارنة الإجابة
+                let isCorrect = userPhonemes.length === correctPhonemes.length;
+                if (isCorrect) {
+                    for (let i = 0; i < correctPhonemes.length; i++) {
+                        if (userPhonemes[i] !== correctPhonemes[i]) {
+                            isCorrect = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (isCorrect) {
+                    // إجابة صحيحة
+                    score++;
+                    playGlitter();
+                    const message = correctPhonemes.length >= 5 ? 'أحسنت! ركبت كل الأصوات صح مع الحرف الخامس 👏' : 'أحسنت! ركبت كل الأصوات صح 👏';
+                    document.getElementById('feedback').innerHTML = message;
+                    document.getElementById('feedback').className = 'feedback success';
+                    renderColoredAnswer(correctPhonemes, 'correct');
+
+                    setTimeout(() => {
+                        nextQuestion();
+                    }, 1200);
+                } else {
+                    // إجابة خاطئة
+                    playBuzzer();
+                    const message = correctPhonemes.length >= 5 ? 'تحقق من الأصوات مرة أخرى (تذكر: الحرف الخامس معطى)' : 'تحقق من الأصوات مرة أخرى';
+                    document.getElementById('feedback').innerHTML = message;
+                    document.getElementById('feedback').className = 'feedback error';
+                    renderComparisonAnswer(userPhonemes, correctPhonemes);
+
+                    setTimeout(() => {
+                        nextQuestion();
+                    }, 3000);
+                }
+
+                questionsAnswered++;
+                document.getElementById('score').textContent = score;
+            }
+
+            // عرض الإجابة الملونة
+            function renderColoredAnswer(phonemes, type) {
+                const container = document.getElementById('colored-answer');
+                container.innerHTML = '';
+
+                phonemes.forEach((phoneme, index) => {
+                    const span = document.createElement('span');
+                    span.textContent = phoneme;
+                    span.className = `phoneme-span ${type}`;
+                    span.style.backgroundColor = colors[index % colors.length];
+                    if (type === 'correct') {
+                        span.style.color = 'white';
+                    }
+                    container.appendChild(span);
+                });
+            }
+
+            // عرض مقارنة الإجابة
+            function renderComparisonAnswer(userPhonemes, correctPhonemes) {
+                const container = document.getElementById('colored-answer');
+                container.innerHTML = '<div><strong>الإجابة الصحيحة:</strong></div>';
+
+                const correctDiv = document.createElement('div');
+                correctDiv.style.marginTop = '10px';
+
+                correctPhonemes.forEach((phoneme, index) => {
+                    const span = document.createElement('span');
+                    span.textContent = phoneme;
+
+                    if (index < userPhonemes.length && userPhonemes[index] === phoneme) {
+                        span.className = 'phoneme-span correct';
+                    } else {
+                        span.className = 'phoneme-span missing';
+                    }
+
+                    correctDiv.appendChild(span);
+                });
+
+                container.appendChild(correctDiv);
+
+                if (userPhonemes.length > correctPhonemes.length) {
+                    const extraDiv = document.createElement('div');
+                    extraDiv.innerHTML = '<strong style="margin-top: 15px; display: block;">أصوات زائدة:</strong>';
+
+                    for (let i = correctPhonemes.length; i < userPhonemes.length; i++) {
+                        const span = document.createElement('span');
+                        span.textContent = userPhonemes[i];
+                        span.className = 'phoneme-span extra';
+                        extraDiv.appendChild(span);
+                    }
+
+                    container.appendChild(extraDiv);
+                }
+            }
+
+            // الانتقال للسؤال التالي
+            function nextQuestion() {
+                currentQuestionIndex++;
+
+                if (currentQuestionIndex >= 10) {
+                    endGame();
+                } else {
+                    showQuestion();
+                }
+            }
+
+            // إنهاء اللعبة
+            function endGame() {
+                document.getElementById('final-score').textContent = score;
+                showScreen('end-screen');
+            }
+
+            // إعادة بدء اللعبة
+            function restartGame() {
+                startLevel(currentLevel);
+            }
+
+            // العودة للبداية
+            function backToStart() {
+                showScreen('start-screen');
+            }
+
+            // عرض شاشة معينة
+            function showScreen(screenId) {
+                document.querySelectorAll('.screen').forEach((screen) => {
+                    screen.classList.remove('active');
+                });
+                document.getElementById(screenId).classList.add('active');
+            }
+
+            // اختصارات لوحة المفاتيح
+            document.addEventListener('keydown', function (e) {
+                if (document.getElementById('game-screen').classList.contains('active')) {
+                    if (e.key === 'Enter') {
+                        checkAnswer();
+                    } else if (e.key === ' ') {
+                        e.preventDefault();
+                        speakWord();
+                    }
+                }
+            });
+
+            // تهيئة اللعبة
+            document.addEventListener('DOMContentLoaded', function () {
+                // التركيز على حقل الإدخال عند ظهور شاشة اللعبة
+                const gameScreen = document.getElementById('game-screen');
+                const observer = new MutationObserver(function (mutations) {
+                    mutations.forEach(function (mutation) {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                            if (gameScreen.classList.contains('active')) {
+                                setTimeout(() => {
+                                    document.getElementById('phoneme-input').focus();
+                                }, 100);
+                            }
+                        }
+                    });
+                });
+                observer.observe(gameScreen, { attributes: true });
+            });
+        </script>
+    </body>
+</html>
