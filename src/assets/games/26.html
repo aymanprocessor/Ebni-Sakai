@@ -1,0 +1,834 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>التسلسل البصري - kidskills</title>
+        <style>
+            :root {
+                --primary-color: #9b59b6;
+                --secondary-color: #f1c40f;
+                --background: #f8f9fa;
+                --surface: #ffffff;
+                --text: #2c3e50;
+                --success: #27ae60;
+                --error: #e74c3c;
+            }
+
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family:
+                    system-ui,
+                    -apple-system,
+                    sans-serif;
+                font-size: 20px;
+                background: var(--background);
+                color: var(--text);
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 20px;
+                flex: 1;
+            }
+
+            .header {
+                text-align: center;
+                margin-bottom: 30px;
+            }
+
+            .title {
+                color: var(--primary-color);
+                font-size: 2.5em;
+                margin-bottom: 10px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .progress-container {
+                background: var(--surface);
+                border-radius: 15px;
+                padding: 20px;
+                margin-bottom: 30px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .progress-bar {
+                width: 100%;
+                height: 20px;
+                background: #ecf0f1;
+                border-radius: 10px;
+                overflow: hidden;
+                margin-bottom: 15px;
+            }
+
+            .progress-fill {
+                height: 100%;
+                background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+                transition: width 0.5s ease;
+                border-radius: 10px;
+            }
+
+            .stats {
+                display: flex;
+                justify-content: space-between;
+                font-weight: bold;
+            }
+
+            .game-area {
+                background: var(--surface);
+                border-radius: 20px;
+                padding: 30px;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+                margin-bottom: 30px;
+            }
+
+            .level-selector {
+                display: flex;
+                gap: 15px;
+                justify-content: center;
+                margin-bottom: 30px;
+                flex-wrap: wrap;
+            }
+
+            .btn {
+                background: var(--primary-color);
+                color: white;
+                border: none;
+                padding: 15px 25px;
+                border-radius: 12px;
+                font-size: 1.1em;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                font-weight: bold;
+                min-width: 120px;
+            }
+
+            .btn:hover {
+                background: #8e44ad;
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(155, 89, 182, 0.4);
+            }
+
+            .btn:active {
+                transform: translateY(0);
+            }
+
+            .btn.secondary {
+                background: var(--secondary-color);
+                color: var(--text);
+            }
+
+            .btn.secondary:hover {
+                background: #f39c12;
+            }
+
+            .btn:disabled {
+                background: #bdc3c7;
+                cursor: not-allowed;
+                transform: none;
+                box-shadow: none;
+            }
+
+            .activity-title {
+                text-align: center;
+                font-size: 1.5em;
+                color: var(--primary-color);
+                margin-bottom: 25px;
+                font-weight: bold;
+            }
+
+            .pattern-display {
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+                margin-bottom: 30px;
+                padding: 20px;
+                background: #f8f9fa;
+                border-radius: 15px;
+                border: 3px dashed var(--primary-color);
+            }
+
+            .pattern-item {
+                width: 60px;
+                height: 60px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2em;
+                background: var(--surface);
+                border-radius: 12px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .symbol-palette {
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+                margin-bottom: 30px;
+                flex-wrap: wrap;
+            }
+
+            .symbol-btn {
+                width: 70px;
+                height: 70px;
+                border: 3px solid var(--primary-color);
+                background: var(--surface);
+                border-radius: 15px;
+                font-size: 2.5em;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .symbol-btn:hover {
+                background: var(--primary-color);
+                color: white;
+                transform: scale(1.1);
+            }
+
+            .symbol-btn.selected {
+                background: var(--secondary-color);
+                border-color: var(--secondary-color);
+            }
+
+            .player-pattern {
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+                margin-bottom: 30px;
+                padding: 20px;
+                background: #f8f9fa;
+                border-radius: 15px;
+                min-height: 100px;
+                align-items: center;
+            }
+
+            .story-container {
+                display: flex;
+                justify-content: center;
+                gap: 20px;
+                margin-bottom: 30px;
+                flex-wrap: wrap;
+            }
+
+            .story-card {
+                width: 100px;
+                height: 100px;
+                background: var(--surface);
+                border: 3px solid var(--primary-color);
+                border-radius: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 3em;
+                cursor: move;
+                transition: all 0.3s ease;
+                user-select: none;
+            }
+
+            .story-card:hover {
+                transform: scale(1.05);
+                box-shadow: 0 6px 20px rgba(155, 89, 182, 0.3);
+            }
+
+            .story-card.dragging {
+                opacity: 0.5;
+                transform: rotate(5deg);
+            }
+
+            .drop-zone {
+                width: 100px;
+                height: 100px;
+                border: 3px dashed var(--primary-color);
+                border-radius: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #f8f9fa;
+                transition: all 0.3s ease;
+                position: relative;
+            }
+
+            .drop-zone.drag-over {
+                background: var(--secondary-color);
+                border-color: var(--secondary-color);
+            }
+
+            .drop-zone.filled {
+                border-style: solid;
+                background: var(--surface);
+            }
+
+            .action-buttons {
+                display: flex;
+                gap: 20px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .feedback {
+                text-align: center;
+                margin: 20px 0;
+                padding: 15px;
+                border-radius: 12px;
+                font-weight: bold;
+                font-size: 1.2em;
+            }
+
+            .feedback.success {
+                background: var(--success);
+                color: white;
+            }
+
+            .feedback.error {
+                background: var(--error);
+                color: white;
+            }
+
+            .footer {
+                text-align: center;
+                padding: 20px;
+                background: var(--primary-color);
+                color: white;
+                font-weight: bold;
+            }
+
+            .instructions-btn {
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                background: var(--secondary-color);
+                color: var(--text);
+                border: none;
+                border-radius: 50%;
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+                cursor: pointer;
+                z-index: 1000;
+                transition: all 0.3s ease;
+            }
+
+            .instructions-btn:hover {
+                transform: scale(1.1);
+                box-shadow: 0 4px 15px rgba(241, 196, 15, 0.4);
+            }
+
+            @media (max-width: 600px) {
+                .container {
+                    padding: 10px;
+                }
+
+                .story-container {
+                    gap: 10px;
+                }
+
+                .story-card,
+                .drop-zone {
+                    width: 80px;
+                    height: 80px;
+                    font-size: 2.5em;
+                }
+
+                .pattern-item {
+                    width: 50px;
+                    height: 50px;
+                    font-size: 1.5em;
+                }
+
+                .story-text {
+                    padding: 20px;
+                    font-size: 1em;
+                    max-height: 150px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <button class="instructions-btn" onclick="game.speak('استمع للتعليمات: انسخ النمط أو رتب القصة بالترتيب الصحيح. اضغط تحقق عند الانتهاء.')" title="اسمع التعليمات">🔊</button>
+
+        <div class="container">
+            <div class="header">
+                <h1 class="title">🧩 التسلسل البصري</h1>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="stats">
+                    <span>الجولة: <span id="currentRound">0</span>/6</span>
+                    <span>النقاط: <span id="score">0</span></span>
+                    <span>المستوى: <span id="currentLevel">-</span></span>
+                </div>
+            </div>
+
+            <div class="level-selector" id="levelSelector">
+                <button class="btn" onclick="game.startLevel(1)">مستوى 1</button>
+                <button class="btn" onclick="game.startLevel(2)">مستوى 2</button>
+                <button class="btn" onclick="game.startLevel(3)">مستوى 3</button>
+                <button class="btn secondary" onclick="game.startLevel('mix')">مزيج</button>
+            </div>
+
+            <div class="game-area" id="gameArea">
+                <p style="text-align: center; font-size: 1.3em; color: var(--primary-color)">🎮 اختر مستوى للبدء</p>
+            </div>
+
+            <div id="feedback" class="feedback" style="display: none"></div>
+        </div>
+
+        <div class="footer">صنع بحب من kidskills ❤️</div>
+
+        <script>
+            const game = (function () {
+                const gameData = {
+                    levels: {
+                        1: {
+                            patterns: [
+                                ['□', '○', '□'],
+                                ['○', '□', '○'],
+                                ['△', '○', '△'],
+                                ['□', '△', '□'],
+                                ['○', '△', '○']
+                            ],
+                            stories: [
+                                ['🌅', '🏃‍♂️', '🏠'],
+                                ['🍎', '🔪', '🍰'],
+                                ['🌱', '🌿', '🌸'],
+                                ['😴', '⏰', '😊'],
+                                ['🥚', '🐣', '🐓']
+                            ]
+                        },
+                        2: {
+                            patterns: [
+                                ['□', '○', '△', '□'],
+                                ['○', '△', '○', '△'],
+                                ['△', '□', '○', '△'],
+                                ['□', '○', '□', '○'],
+                                ['○', '□', '△', '○']
+                            ],
+                            stories: [
+                                ['🌧️', '☔', '🌈', '☀️'],
+                                ['🥛', '🍪', '🍰', '😋'],
+                                ['🌙', '😴', '⏰', '🌅'],
+                                ['🚗', '⛽', '🛣️', '🏠'],
+                                ['📚', '✏️', '📝', '🎓']
+                            ]
+                        },
+                        3: {
+                            patterns: [
+                                ['□', '○', '△', '◇', '□'],
+                                ['○', '△', '○', '△', '○'],
+                                ['△', '□', '○', '△', '□'],
+                                ['◇', '○', '△', '□', '◇'],
+                                ['□', '○', '△', '◇', '△']
+                            ],
+                            stories: [
+                                ['🌱', '🌿', '🌸', '🍎', '🥧'],
+                                ['☁️', '🌧️', '⚡', '🌈', '☀️'],
+                                ['🥚', '🐣', '🐥', '🐓', '🍳'],
+                                ['📖', '✏️', '📝', '🎨', '🖼️'],
+                                ['🚶‍♂️', '🏃‍♂️', '🚴‍♂️', '🏆', '🎉']
+                            ]
+                        }
+                    },
+                    symbols: ['□', '○', '△', '◇'],
+                    currentLevel: null,
+                    currentRound: 0,
+                    score: 0,
+                    currentActivity: null,
+                    currentPattern: null,
+                    currentStory: null,
+                    playerPattern: [],
+                    playerStory: [],
+                    selectedSymbol: null,
+                    audioContext: null
+                };
+
+                function init() {
+                    try {
+                        gameData.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    } catch (e) {
+                        console.log('Audio context not available');
+                    }
+                    updateUI();
+                }
+
+                function startLevel(level) {
+                    gameData.currentLevel = level;
+                    gameData.currentRound = 0;
+                    gameData.score = 0;
+                    nextRound();
+                }
+
+                function nextRound() {
+                    gameData.currentRound++;
+
+                    if (gameData.currentRound > 6) {
+                        endGame();
+                        return;
+                    }
+
+                    // تحديد النشاط
+                    if (gameData.currentLevel === 'mix') {
+                        gameData.currentActivity = Math.random() < 0.5 ? 'pattern' : 'story';
+                        const levelNum = Math.floor(Math.random() * 3) + 1;
+                        const levelData = gameData.levels[levelNum];
+
+                        if (gameData.currentActivity === 'pattern') {
+                            gameData.currentPattern = levelData.patterns[Math.floor(Math.random() * levelData.patterns.length)];
+                        } else {
+                            gameData.currentStory = levelData.stories[Math.floor(Math.random() * levelData.stories.length)];
+                        }
+                    } else {
+                        gameData.currentActivity = gameData.currentRound % 2 === 1 ? 'pattern' : 'story';
+                        const levelData = gameData.levels[gameData.currentLevel];
+
+                        if (gameData.currentActivity === 'pattern') {
+                            gameData.currentPattern = levelData.patterns[Math.floor(Math.random() * levelData.patterns.length)];
+                        } else {
+                            gameData.currentStory = levelData.stories[Math.floor(Math.random() * levelData.stories.length)];
+                        }
+                    }
+
+                    gameData.playerPattern = [];
+                    gameData.playerStory = [];
+                    gameData.selectedSymbol = null;
+
+                    renderGame();
+                    updateUI();
+                }
+
+                function renderGame() {
+                    const gameArea = document.getElementById('gameArea');
+
+                    if (gameData.currentActivity === 'pattern') {
+                        renderPatternGame(gameArea);
+                    } else {
+                        renderStoryGame(gameArea);
+                    }
+                }
+
+                function renderPatternGame(container) {
+                    container.innerHTML = `
+                    <div class="activity-title">انسخ النمط التالي:</div>
+
+                    <div class="pattern-display" id="targetPattern"></div>
+
+                    <div class="symbol-palette" id="symbolPalette"></div>
+
+                    <div class="player-pattern" id="playerPattern"></div>
+
+                    <div class="action-buttons">
+                        <button class="btn" onclick="game.checkPattern()">تحقق</button>
+                        <button class="btn secondary" onclick="game.clearPattern()">مسح</button>
+                    </div>
+                `;
+
+                    renderTargetPattern();
+                    renderSymbolPalette();
+                    renderPlayerPattern();
+                }
+
+                function renderTargetPattern() {
+                    const container = document.getElementById('targetPattern');
+                    container.innerHTML = gameData.currentPattern.map((symbol) => `<div class="pattern-item">${symbol}</div>`).join('');
+                }
+
+                function renderSymbolPalette() {
+                    const container = document.getElementById('symbolPalette');
+                    container.innerHTML = gameData.symbols.map((symbol) => `<div class="symbol-btn" onclick="game.selectSymbol('${symbol}')">${symbol}</div>`).join('');
+                }
+
+                function renderPlayerPattern() {
+                    const container = document.getElementById('playerPattern');
+                    const patternLength = gameData.currentPattern.length;
+
+                    let html = '';
+                    for (let i = 0; i < patternLength; i++) {
+                        const symbol = gameData.playerPattern[i] || '';
+                        html += `<div class="pattern-item" onclick="game.placeSymbol(${i})">${symbol}</div>`;
+                    }
+
+                    container.innerHTML = html;
+                }
+
+                function selectSymbol(symbol) {
+                    gameData.selectedSymbol = symbol;
+
+                    // إزالة التحديد السابق
+                    document.querySelectorAll('.symbol-btn').forEach((btn) => {
+                        btn.classList.remove('selected');
+                    });
+
+                    // تحديد الرمز الجديد
+                    event.target.classList.add('selected');
+                }
+
+                function placeSymbol(index) {
+                    if (gameData.selectedSymbol) {
+                        gameData.playerPattern[index] = gameData.selectedSymbol;
+                        renderPlayerPattern();
+                    }
+                }
+
+                function clearPattern() {
+                    gameData.playerPattern = [];
+                    gameData.selectedSymbol = null;
+
+                    document.querySelectorAll('.symbol-btn').forEach((btn) => {
+                        btn.classList.remove('selected');
+                    });
+
+                    renderPlayerPattern();
+                }
+
+                function checkPattern() {
+                    const isCorrect = JSON.stringify(gameData.playerPattern) === JSON.stringify(gameData.currentPattern);
+
+                    if (isCorrect) {
+                        gameData.score++;
+                        showFeedback('ممتاز! النمط صحيح! 🎉', 'success');
+                        playGlitter();
+                        setTimeout(() => {
+                            hideFeedback();
+                            nextRound();
+                        }, 1200);
+                    } else {
+                        showFeedback('حاول مرة أخرى! 🤔', 'error');
+                        playBuzzer();
+                        setTimeout(hideFeedback, 2000);
+                    }
+                }
+
+                function renderStoryGame(container) {
+                    container.innerHTML = `
+                    <div class="activity-title">رتب القصة بالترتيب الصحيح:</div>
+
+                    <div class="story-container" id="storyCards"></div>
+
+                    <div class="story-container" id="dropZones"></div>
+
+                    <div class="action-buttons">
+                        <button class="btn" onclick="game.checkStory()">تحقق</button>
+                        <button class="btn secondary" onclick="game.clearStory()">مسح</button>
+                    </div>
+                `;
+
+                    renderStoryCards();
+                    renderDropZones();
+                }
+
+                function renderStoryCards() {
+                    const container = document.getElementById('storyCards');
+                    const shuffledStory = [...gameData.currentStory].sort(() => Math.random() - 0.5);
+
+                    container.innerHTML = shuffledStory
+                        .map(
+                            (emoji, index) =>
+                                `<div class="story-card" draggable="true" data-emoji="${emoji}"
+                          ondragstart="game.handleDragStart(event)"
+                          ondragend="game.handleDragEnd(event)">${emoji}</div>`
+                        )
+                        .join('');
+                }
+
+                function renderDropZones() {
+                    const container = document.getElementById('dropZones');
+                    const storyLength = gameData.currentStory.length;
+
+                    let html = '';
+                    for (let i = 0; i < storyLength; i++) {
+                        const emoji = gameData.playerStory[i] || '';
+                        const filledClass = emoji ? 'filled' : '';
+                        html += `<div class="drop-zone ${filledClass}" data-index="${i}"
+                                  ondragover="game.handleDragOver(event)"
+                                  ondrop="game.handleDrop(event)">${emoji}</div>`;
+                    }
+
+                    container.innerHTML = html;
+                }
+
+                function handleDragStart(event) {
+                    event.dataTransfer.setData('text/plain', event.target.dataset.emoji);
+                    event.target.classList.add('dragging');
+                }
+
+                function handleDragEnd(event) {
+                    event.target.classList.remove('dragging');
+                }
+
+                function handleDragOver(event) {
+                    event.preventDefault();
+                    event.target.classList.add('drag-over');
+                }
+
+                function handleDrop(event) {
+                    event.preventDefault();
+                    event.target.classList.remove('drag-over');
+
+                    const emoji = event.dataTransfer.getData('text/plain');
+                    const index = parseInt(event.target.dataset.index);
+
+                    gameData.playerStory[index] = emoji;
+                    renderDropZones();
+
+                    // إخفاء البطاقة المستخدمة
+                    const usedCard = document.querySelector(`[data-emoji="${emoji}"]`);
+                    if (usedCard && usedCard.classList.contains('story-card')) {
+                        usedCard.style.visibility = 'hidden';
+                    }
+                }
+
+                function clearStory() {
+                    gameData.playerStory = [];
+
+                    // إظهار جميع البطاقات
+                    document.querySelectorAll('.story-card').forEach((card) => {
+                        card.style.visibility = 'visible';
+                    });
+
+                    renderDropZones();
+                }
+
+                function checkStory() {
+                    const isCorrect = JSON.stringify(gameData.playerStory) === JSON.stringify(gameData.currentStory);
+
+                    if (isCorrect) {
+                        gameData.score++;
+                        showFeedback('رائع! القصة مرتبة بشكل صحيح! 🎉', 'success');
+                        playGlitter();
+                        setTimeout(() => {
+                            hideFeedback();
+                            nextRound();
+                        }, 1200);
+                    } else {
+                        showFeedback('حاول مرة أخرى! 🤔', 'error');
+                        playBuzzer();
+                        setTimeout(hideFeedback, 2000);
+                    }
+                }
+
+                function showFeedback(message, type) {
+                    const feedback = document.getElementById('feedback');
+                    feedback.textContent = message;
+                    feedback.className = `feedback ${type}`;
+                    feedback.style.display = 'block';
+                }
+
+                function hideFeedback() {
+                    document.getElementById('feedback').style.display = 'none';
+                }
+
+                function endGame() {
+                    const gameArea = document.getElementById('gameArea');
+                    const percentage = Math.round((gameData.score / 6) * 100);
+
+                    gameArea.innerHTML = `
+                    <div style="text-align: center;">
+                        <h2 style="color: var(--primary-color); margin-bottom: 20px;">🏆 انتهت اللعبة!</h2>
+                        <p style="font-size: 1.5em; margin-bottom: 20px;">حصلت على ${gameData.score} من 6 نقاط</p>
+                        <p style="font-size: 1.3em; margin-bottom: 30px;">نسبة النجاح: ${percentage}%</p>
+                        <button class="btn" onclick="location.reload()">لعب مرة أخرى</button>
+                    </div>
+                `;
+
+                    playGlitter();
+                }
+
+                function updateUI() {
+                    document.getElementById('currentRound').textContent = gameData.currentRound;
+                    document.getElementById('score').textContent = gameData.score;
+                    document.getElementById('currentLevel').textContent = gameData.currentLevel || '-';
+
+                    const progress = (gameData.currentRound / 6) * 100;
+                    document.getElementById('progressFill').style.width = progress + '%';
+                }
+
+                function playGlitter() {
+                    if (!gameData.audioContext) return;
+
+                    const frequencies = [523, 659, 784, 880];
+                    frequencies.forEach((freq, index) => {
+                        setTimeout(() => {
+                            const oscillator = gameData.audioContext.createOscillator();
+                            const gainNode = gameData.audioContext.createGain();
+
+                            oscillator.connect(gainNode);
+                            gainNode.connect(gameData.audioContext.destination);
+
+                            oscillator.frequency.setValueAtTime(freq, gameData.audioContext.currentTime);
+                            oscillator.type = 'sine';
+
+                            gainNode.gain.setValueAtTime(0.3, gameData.audioContext.currentTime);
+                            gainNode.gain.exponentialRampToValueAtTime(0.01, gameData.audioContext.currentTime + 0.3);
+
+                            oscillator.start(gameData.audioContext.currentTime);
+                            oscillator.stop(gameData.audioContext.currentTime + 0.3);
+                        }, index * 100);
+                    });
+                }
+
+                function playBuzzer() {
+                    if (!gameData.audioContext) return;
+
+                    const oscillator = gameData.audioContext.createOscillator();
+                    const gainNode = gameData.audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(gameData.audioContext.destination);
+
+                    oscillator.frequency.setValueAtTime(200, gameData.audioContext.currentTime);
+                    oscillator.type = 'sawtooth';
+
+                    gainNode.gain.setValueAtTime(0.2, gameData.audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, gameData.audioContext.currentTime + 0.35);
+
+                    oscillator.start(gameData.audioContext.currentTime);
+                    oscillator.stop(gameData.audioContext.currentTime + 0.35);
+                }
+
+                function speak(text) {
+                    if ('speechSynthesis' in window) {
+                        const utterance = new SpeechSynthesisUtterance(text);
+                        utterance.lang = 'ar-SA';
+                        utterance.rate = 0.8;
+                        speechSynthesis.speak(utterance);
+                    }
+                }
+
+                // إرجاع الواجهة العامة
+                return {
+                    init,
+                    startLevel,
+                    nextRound,
+                    selectSymbol,
+                    placeSymbol,
+                    clearPattern,
+                    checkPattern,
+                    clearStory,
+                    checkStory,
+                    handleDragStart,
+                    handleDragEnd,
+                    handleDragOver,
+                    handleDrop,
+                    speak
+                };
+            })();
+
+            // بدء اللعبة عند تحميل الصفحة
+            document.addEventListener('DOMContentLoaded', game.init);
+        </script>
+    </body>
+</html>

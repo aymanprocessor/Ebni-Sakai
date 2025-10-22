@@ -1,0 +1,696 @@
+================================================================================
+                    KID SKILLS (EBNI-SAKAI)
+              PRODUCT DESCRIPTION - CORE FEATURES
+================================================================================
+
+Platform Overview
+-----------------
+Kid Skills is a bilingual (Arabic/English) child development platform that
+provides specialized educational games, diagnostic assessment scales, AI-powered
+specialist assistance, and subscription-based access management for therapists
+and families working with children who have learning differences.
+
+
+================================================================================
+                        FEATURE 1: EDUCATIONAL GAMES
+================================================================================
+
+Overview
+--------
+A comprehensive library of 52 Arabic-language educational games designed by
+learning disability specialists to target specific cognitive skills including
+attention, perception, memory, and reading abilities. Each game is carefully
+categorized and permission-controlled to ensure children receive appropriate
+interventions.
+
+Key Benefits
+------------
+• Structured therapeutic play for children with learning differences
+• Evidence-based cognitive skill development
+• Progress tracking through gameplay
+• Safe, age-appropriate educational content
+• Bilingual interface (Arabic/English) with RTL support
+
+Game Categories & Coverage
+---------------------------
+The 52 games are organized into four primary domains:
+
+1. ATTENTION (Games 1-13)
+   - Visual and auditory attention exercises
+   - Sustained attention training
+   - Attention flexibility and control
+   - Examples:
+     * Extract the Different (shapes, colors, sizes)
+     * Find the odd one out
+     * Cancellation tasks
+     * Visual matching activities
+     * Mazes for attention span increase
+
+2. PERCEPTION (Games 14-29)
+   - Visual Perception (Games 14-18)
+     * Visual discrimination for encrypted images
+     * Color, size, and shape differentiation
+     * Classification tasks (furniture, food, clothing)
+     * Shape-to-shadow matching
+     * Figure-ground perception
+
+   - Auditory Perception (Games 19-23)
+     * Color discrimination
+     * Object relationships
+     * Sequential processing
+
+   - Audio-Visual Perception (Games 24-29)
+     * Spatial relationships awareness
+     * Visual tracking and sequencing
+     * Pattern matching speed
+     * Shape constancy perception
+
+3. MEMORY (Games 30-42)
+   - Visual Memory (Games 30-34)
+     * Working memory training
+     * Card recall exercises
+     * Backward sequencing tasks
+     * Visual retention activities
+
+   - Auditory Memory (Games 35-39)
+     * Spatial memory
+     * Pattern copying
+     * Rhythmic sequencing
+     * Recall and delayed memory
+
+   - Audio-Visual Memory (Games 40-42)
+     * Visual memory cards
+     * Story event sequencing
+     * Working memory training
+
+4. READING & PHONOLOGICAL AWARENESS (Games 43-52)
+   - Phonological processing skills
+   - Syllable awareness and manipulation
+   - Phoneme segmentation and blending
+   - Rhyming activities
+   - Word decoding strategies
+   - Vocabulary and context comprehension
+   - Examples:
+     * Parts of speech games
+     * Syllable counting
+     * Word assembly from syllables
+     * Rhyme detection
+     * Word breakdown to sounds
+     * Missing letter identification
+     * Sound deletion tasks
+
+Technical Implementation
+------------------------
+• Permission-based access control per game
+• Role-specific game visibility (admin, specialist, paid user)
+• Real-time search and filtering by category or game number
+• Responsive grid layout (1-4 columns based on screen size)
+• Individual game routes for tracking and analytics
+• Shimmer loading states for smooth UX
+
+Access Control
+--------------
+Games are gated by a sophisticated permission system:
+• Admin users: Full access to all 52 games
+• Paid/Subscribed users: Full access to all 52 games
+• Specialists: Access based on role permissions configuration
+• Regular users: Limited access based on assigned permissions
+• Time-limited access: Support for expiring game permissions
+
+User Journey - Games
+--------------------
+1. Parent/specialist logs into Kid Skills platform
+2. Navigates to Games section from dashboard
+3. Views grid of accessible games (filtered by permissions)
+4. Can search/filter games by category or number
+5. Selects a game to play
+6. Child completes game with guidance
+7. Progress and performance tracked in backend
+8. Results feed into overall assessment and recommendations
+
+
+================================================================================
+                    FEATURE 2: ASSESSMENT SCALES
+================================================================================
+
+Overview
+--------
+Seven professionally developed Arabic assessment scales for diagnosing and
+measuring learning difficulties across multiple domains. These standardized
+instruments help specialists and parents identify specific areas of challenge
+and track progress over time.
+
+The Seven Scales
+----------------
+1. Scale 1: Attention Difficulties Scale (مقياس صعوبات الانتباه)
+   - Measures attention span, focus, and concentration challenges
+   - Identifies attention deficit patterns
+   - Guides intervention planning for attention-related issues
+
+2. Scale 2: Memory Difficulty Scale (مقياس صعوبه الذاكره)
+   - Assesses working memory, short-term, and long-term memory
+   - Identifies memory retention and recall challenges
+   - Helps design memory-strengthening interventions
+
+3. Scale 3: Auditory Perception Scale (مقياس الادراك الاستماعي)
+   - Evaluates auditory processing abilities
+   - Measures sound discrimination and auditory sequencing
+   - Critical for reading and language development assessment
+
+4. Scale 4: Reading Difficulty Scale (مقياس صعوبات القراءه)
+   - Comprehensive reading skills assessment
+   - Identifies decoding, fluency, and comprehension issues
+   - Targets phonological awareness and sight word recognition
+
+5. Scale 5: Writing Difficulty Scale (مقياس صعوبه الكتابه)
+   - Assesses handwriting, spelling, and written expression
+   - Identifies fine motor and orthographic challenges
+   - Guides writing intervention strategies
+
+6. Scale 6: Math Difficulty Scale (مقياس صعوبه الحساب)
+   - Evaluates number sense and mathematical reasoning
+   - Identifies calculation and problem-solving difficulties
+   - Assesses mathematical concept understanding
+
+7. Scale 7: Behavioral, Emotional & Social Difficulties Scale
+            (مقياس لصعوبات السلوك الانفعالي والاجتماعي)
+   - Measures social-emotional functioning
+   - Identifies behavioral regulation challenges
+   - Assesses peer interaction and emotional control
+
+Key Benefits
+------------
+• Standardized, culturally appropriate Arabic assessments
+• Multi-domain evaluation for comprehensive profiling
+• Evidence-based diagnostic tools
+• Clear reporting and score interpretation
+• Progress monitoring over time
+• Integration with therapy planning
+
+Technical Implementation
+------------------------
+• Two-column responsive grid layout
+• Permission-based scale visibility
+• Individual scale routes for administration
+• Shimmer loading states during permission resolution
+• Real-time access control based on user role and subscription status
+
+Access Control
+--------------
+Scales follow the same sophisticated permission model as games:
+• Admin users: Full access to all 7 scales
+• Paid/Subscribed users: Full access to all 7 scales
+• Specialists: Access based on role permissions
+• Regular users: Limited access based on assigned permissions
+• Time-limited access: Support for expiring scale permissions
+
+User Journey - Scales
+---------------------
+1. Specialist or parent accesses Scales section
+2. Views available scales (filtered by permissions)
+3. Selects appropriate scale based on child's needs
+4. Administers scale (questionnaire/assessment)
+5. System calculates and displays results
+6. Results inform intervention recommendations
+7. Progress tracked through repeated administrations
+8. Data integrated into child's comprehensive profile
+
+
+================================================================================
+              FEATURE 3: CHATGPT SPECIALIST ASSISTANCE
+================================================================================
+
+Overview
+--------
+An integrated AI assistant feature that provides instant access to a custom-
+trained ChatGPT model specifically designed for learning disability specialists.
+This tool offers on-demand guidance, intervention strategies, and professional
+support directly within the Kid Skills platform.
+
+What It Is
+----------
+• A curated ChatGPT assistant page (KidSkills LD Specialist Assistant)
+• Custom-trained on learning disability intervention strategies
+• Accessible via one-click button throughout the platform
+• Opens in a new browser tab for parallel work
+• Always available during assessment and therapy sessions
+
+Key Benefits
+------------
+• Instant access to AI-powered specialist knowledge
+• Real-time intervention strategy suggestions
+• Support during assessment interpretation
+• Help with therapy planning and session design
+• 24/7 availability for specialist guidance
+• No switching between multiple tools
+• Bilingual support for Arabic and English queries
+
+Use Cases
+---------
+1. Assessment Interpretation
+   - Specialist completes a scale assessment
+   - Opens ChatGPT Assistant for score interpretation guidance
+   - Receives evidence-based recommendations
+   - Integrates suggestions into therapy plan
+
+2. Game Selection Guidance
+   - Parent or therapist unsure which games to assign
+   - Asks ChatGPT Assistant about child's specific challenges
+   - Receives targeted game recommendations
+   - Implements suggested intervention sequence
+
+3. Intervention Strategy Support
+   - Specialist encounters challenging case
+   - Describes child's profile to ChatGPT Assistant
+   - Receives differentiated strategy suggestions
+   - Adapts approach based on AI recommendations
+
+4. Parent Education
+   - Parent wants to understand assessment results
+   - Uses ChatGPT Assistant to learn about specific difficulties
+   - Gets explanations in clear, accessible language
+   - Better equipped to support child at home
+
+Technical Implementation
+------------------------
+• Standalone button component (ChatgptAssistantButtonComponent)
+• Opens dedicated ChatGPT URL in new tab
+• Uses window.open with 'noopener' security flag
+• Translatable button label via ngx-translate
+• Click event handling with propagation control
+• Minimal UI footprint - simple button integration
+
+URL Configuration
+-----------------
+The assistant links to a dedicated ChatGPT custom GPT:
+https://chatgpt.com/g/g-68e8f9ed9ad881918a5be76d6f0c270b-kidskills-ld-specialist-assistant
+
+This ensures consistent, specialized guidance trained specifically for the
+Kid Skills context and learning disability intervention domain.
+
+Integration Points
+------------------
+• Available on ChatGPT Assistance dedicated page
+• Can be embedded in assessment result pages
+• Accessible from specialist dashboard
+• Available during game selection workflows
+• Integrated into session planning interfaces
+
+User Journey - ChatGPT Assistance
+----------------------------------
+1. User navigates to ChatGPT Assistance page
+2. Reads introductory explanation
+3. Clicks "Open Assistant" button
+4. New tab opens with KidSkills LD Specialist Assistant
+5. User describes their challenge or question
+6. ChatGPT provides specialized, contextual guidance
+7. User applies recommendations in Kid Skills platform
+8. Can keep assistant tab open for ongoing consultation
+
+
+================================================================================
+            FEATURE 4: SPECIALIST SUBSCRIPTION SYSTEM
+================================================================================
+
+Overview
+--------
+A comprehensive role-based access control and subscription management system
+that governs user permissions for games, scales, and platform features. This
+system enables flexible monetization, controlled feature access, and specialized
+roles for different user types.
+
+User Roles & Access Levels
+---------------------------
+The platform supports four primary user roles:
+
+1. ADMIN
+   - Full platform access
+   - User and specialist management
+   - Complete access to all 52 games
+   - Complete access to all 7 scales
+   - Analytics and reporting
+   - System configuration
+   - Permission assignment capabilities
+
+2. SPECIALIST
+   - Professional therapist/educator role
+   - Access based on role permissions configuration
+   - Can view assigned client cases
+   - Conduct virtual therapy sessions
+   - Review assessment results
+   - Session note management
+   - May have full or limited game/scale access based on clinic policy
+
+3. PAID USER / SUBSCRIBED USER
+   - Premium parent/caregiver account
+   - Full access to all 52 educational games
+   - Full access to all 7 assessment scales
+   - Unlimited child profiles
+   - Advanced reporting and progress tracking
+   - Priority booking for specialist sessions
+   - No ads or promotional content
+
+4. REGULAR USER (Free Tier)
+   - Limited access based on assigned permissions
+   - Restricted game library (admin-defined subset)
+   - Restricted scale access
+   - Basic child profile management
+   - Standard booking capabilities
+   - Incentivized to upgrade to paid subscription
+
+Subscription Features
+---------------------
+• isSubscribed flag on user profile
+• Automatic permission elevation when subscribed
+• Override of role-based restrictions for paid users
+• Subscription status visible in user management interface
+• Admin can manually toggle subscription status
+
+Permission System Architecture
+------------------------------
+The system employs a sophisticated multi-layer permission model:
+
+Layer 1: Role-Based Permissions
+- Each role has default game/scale permissions
+- Stored in Firestore 'permissions' collection
+- Centrally managed by administrators
+- Applies to all users of that role
+
+Layer 2: User-Specific Permissions
+- Individual users can have custom game/scale arrays
+- Stored directly on UserProfile document
+- Overrides role-based permissions when present
+- Examples:
+  * gamePermissions: [1, 5, 10, 15]  // Access to only these 4 games
+  * scalePermissions: [1, 3, 7]       // Access to only these 3 scales
+
+Layer 3: Time-Limited Access
+- Support for expiring permissions
+- gameAccessExpires: Date field on user profile
+- scaleAccessExpires: Date field on user profile
+- When expiry date passes, user-specific permissions ignored
+- Reverts to role-based permissions after expiry
+- Enables trial periods and temporary access grants
+
+Permission Resolution Logic
+---------------------------
+When determining if a user can access a game or scale:
+
+1. Check if user is Admin or isSubscribed → Grant full access
+2. Check if user.gamePermissions exists and not expired
+   → Use user-specific permissions
+3. Fall back to role-based permissions from permissions collection
+4. If no permissions found → Deny access (empty array)
+
+This cascading model ensures flexibility for:
+- Free trials with automatic expiration
+- Temporary specialist access grants
+- Promotional access campaigns
+- Gradual feature rollout to user segments
+
+Technical Implementation
+------------------------
+• UserProfile interface with subscription fields
+• PermissionService with Observable-based access control
+• Firebase Firestore for permission storage
+• Real-time permission updates via Firebase listeners
+• Permission caching for performance
+• Angular route guards for access enforcement:
+  * PaidUserGuard - Requires subscription or 'user' role
+  * SpecialistGuard - Requires 'specialist' role
+  * Admin guard - Requires 'admin' role
+
+Subscription Management Interface
+----------------------------------
+Admin users have access to user management tools including:
+• View all users in table format
+• See subscription status column
+• Toggle subscription checkbox per user
+• Update role assignments
+• View and edit custom permissions
+• Set permission expiry dates
+• Export user lists and reports
+
+Billing Integration (Future)
+-----------------------------
+The subscription system is designed to integrate with:
+• Stripe or local payment providers
+• Automated subscription renewal
+• Trial period management
+• Dunning and payment retry logic
+• Invoice generation
+• Revenue analytics
+
+Monetization Opportunities
+--------------------------
+1. Parent Subscriptions
+   - Monthly/annual family plans
+   - Tiered pricing based on child count
+   - Bundle pricing with specialist sessions
+
+2. Specialist/Clinic Licenses
+   - Per-specialist monthly subscription
+   - Clinic-wide enterprise licenses
+   - Volume discounts for large practices
+   - White-label options for clinic branding
+
+3. Pay-Per-Assessment
+   - One-time purchase for individual scales
+   - Assessment bundle packs
+   - Credit-based system
+
+4. Freemium Model
+   - Limited free access to build user base
+   - Conversion funnels to paid subscriptions
+   - Premium feature upsells
+
+User Journey - Subscription
+----------------------------
+Free User Upgrade Path:
+1. User signs up with free account
+2. Gets limited access to 3 sample games and 1 scale
+3. Sees premium feature prompts and upgrade buttons
+4. Clicks "Upgrade to Premium"
+5. Completes payment flow
+6. isSubscribed flag set to true
+7. Immediate access to all 52 games and 7 scales
+8. Receives confirmation email and onboarding guide
+
+Specialist Onboarding:
+1. Clinic admin creates specialist account
+2. Sets role to 'specialist'
+3. Assigns relevant permissions or sets subscription
+4. Specialist receives credentials
+5. Logs in and accesses assigned tools
+6. Begins seeing clients and using assessments
+
+
+================================================================================
+                          INTEGRATION & SYNERGY
+================================================================================
+
+How These Four Features Work Together
+--------------------------------------
+The Games, Scales, ChatGPT Assistance, and Specialist Subscription features
+form an integrated ecosystem for child development intervention:
+
+Example Workflow 1: New Family Onboarding
+------------------------------------------
+1. Parent creates free account (regular user role)
+2. Completes Scale 4 (Reading Difficulty) - available in free tier
+3. Results indicate moderate reading challenges
+4. Opens ChatGPT Assistance to understand results
+5. AI suggests specific games from the Reading category (Games 43-52)
+6. Parent attempts to access Game 44 (Syllable Counting)
+7. Blocked by permission system - upgrade prompt shown
+8. Parent subscribes to unlock all games
+9. isSubscribed flag set, Games 43-52 now accessible
+10. Child begins targeted intervention with recommended games
+11. Parent re-administers Scale 4 after 8 weeks to measure progress
+
+Example Workflow 2: Specialist Case Management
+-----------------------------------------------
+1. Specialist logs in with clinic-provided account
+2. Reviews new client referred for attention issues
+3. Administers Scale 1 (Attention Difficulties) - included in specialist role
+4. Opens ChatGPT Assistance tab for interpretation guidance
+5. AI recommends Games 1-13 (Attention category) as intervention
+6. Specialist verifies access to all attention games via subscription
+7. Creates session plan assigning Games 1, 3, 5, 7 to client
+8. Conducts virtual therapy session with child
+9. Child plays assigned games during session
+10. Specialist tracks progress through game performance data
+11. Re-assesses with Scale 1 monthly to document improvement
+
+Example Workflow 3: Trial & Conversion
+---------------------------------------
+1. School counselor creates free account to evaluate platform
+2. Has access to limited game set (Games 1-10) via trial permissions
+3. Uses all 7 scales (trial period with 30-day scaleAccessExpires date)
+4. Tries ChatGPT Assistance to explore intervention strategies
+5. After 30 days, scaleAccessExpires date passes
+6. Specialist loses scale access, retains limited game access
+7. Sees value demonstrated during trial
+8. Upgrades to paid specialist subscription
+9. Regains all scales plus access to all 52 games
+10. Brings entire caseload onto platform
+
+Technical Architecture Summary
+-------------------------------
+• Angular 19 frontend with PrimeNG UI components
+• Firebase backend (Firestore, Auth, Functions)
+• Permission-based routing with Angular guards
+• Real-time permission updates via Firebase observables
+• Responsive design with RTL support for Arabic
+• Scalable role and permission management
+• External AI integration via ChatGPT custom GPT
+
+
+================================================================================
+                        TARGET USERS & USE CASES
+================================================================================
+
+Primary User Groups
+-------------------
+1. Parents & Caregivers
+   - Managing children with learning differences
+   - Seeking evidence-based home interventions
+   - Tracking developmental progress
+   - Working with specialists or independently
+
+2. Learning Disability Specialists
+   - Child psychologists and educational therapists
+   - Special education teachers
+   - Speech-language pathologists
+   - Occupational therapists specializing in learning
+
+3. Educational Institutions
+   - Schools with learning support programs
+   - Special education departments
+   - Private tutoring centers
+   - Early intervention clinics
+
+4. Healthcare Providers
+   - Pediatric development clinics
+   - Neuropsychology practices
+   - Multi-disciplinary therapy centers
+
+Real-World Use Cases
+--------------------
+• Home-based learning intervention supplementing school support
+• Remote therapy sessions with game-based activities
+• Pre-referral screening in schools
+• Progress monitoring for IEP (Individualized Education Plan) goals
+• Parent education about child's learning profile
+• Specialist training and professional development
+• Research studies on intervention effectiveness
+
+
+================================================================================
+                    COMPETITIVE ADVANTAGES
+================================================================================
+
+What Makes Kid Skills Unique
+-----------------------------
+1. Arabic-First Design
+   - Built specifically for Arabic-speaking communities
+   - Culturally appropriate content and norms
+   - Full RTL interface support
+   - Native Arabic assessment tools
+
+2. Integrated Ecosystem
+   - Assessment, intervention, and AI guidance in one platform
+   - No need for multiple disparate tools
+   - Seamless workflow from diagnosis to treatment
+
+3. Flexible Permission System
+   - Sophisticated role and subscription management
+   - Time-limited trials and promotional access
+   - Granular control for institutions and clinics
+
+4. AI-Powered Support
+   - On-demand specialist guidance via ChatGPT
+   - Reduces specialist training time
+   - Improves intervention quality
+   - Accessible parent education
+
+5. Evidence-Based Content
+   - 52 games targeting specific cognitive domains
+   - Standardized assessment scales
+   - Structured intervention pathways
+
+
+================================================================================
+                        FUTURE ENHANCEMENTS
+================================================================================
+
+Planned Feature Additions
+--------------------------
+• Automated game recommendations based on assessment results
+• Progress dashboards with data visualization
+• Parent and specialist messaging system
+• Downloadable PDF assessment reports
+• Multi-child family account management
+• Clinic analytics and outcome tracking
+• Mobile app for iOS and Android
+• Offline mode for games and assessments
+• Integration with school information systems
+• Telehealth session recording and playback
+• Custom game creation tools for specialists
+
+
+================================================================================
+                        TECHNICAL SPECIFICATIONS
+================================================================================
+
+Platform Details
+----------------
+• Frontend: Angular 19, TypeScript 5.6
+• UI: PrimeNG 19, Tailwind CSS 3.4
+• Backend: Firebase (Firestore, Auth, Functions)
+• i18n: ngx-translate with Arabic and English
+• Authentication: Firebase Auth with Google OAuth
+• Hosting: Vercel (frontend), Firebase (backend)
+• Video: Zoom SDK 3.13 (for therapy sessions)
+
+Browser Support
+---------------
+• Chrome 90+
+• Firefox 88+
+• Safari 14+
+• Edge 90+
+
+Mobile Responsive
+-----------------
+• Responsive grid layouts (1-4 columns)
+• Touch-optimized game interfaces
+• Mobile-first design principles
+
+
+================================================================================
+                        CONTACT & SUPPORT
+================================================================================
+
+For More Information
+--------------------
+• GitHub: https://github.com/aymanprocessor/Ebni-Sakai
+• Live Demo: https://ebni-sakai.vercel.app
+
+Documentation
+-------------
+• Full developer documentation in repository README
+• API documentation for Firebase integration
+• Deployment guides for production setup
+
+License
+-------
+MIT License - see LICENSE.md in repository
+
+
+================================================================================
+                            END OF DOCUMENT
+================================================================================
+
+Document Version: 1.0
+Last Updated: October 20, 2025
+Platform Version: 19.0.0 (Angular 19)

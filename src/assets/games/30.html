@@ -1,0 +1,913 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>لعبة تدريب الذاكرة السمعية</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet" />
+        <style>
+            :root {
+                --blue-50: #f0f9ff;
+                --purple-50: #faf5ff;
+                --gray-800: #1f2937;
+                --gray-600: #4b5563;
+                --gray-700: #374151;
+                --gray-300: #d1d5db;
+                --gray-200: #e5e7eb;
+                --blue-600: #2563eb;
+                --green-600: #16a34a;
+                --purple-600: #9333ea;
+                --orange-600: #ea580c;
+                --green-500: #22c55e;
+                --blue-500: #3b82f6;
+                --orange-500: #f97316;
+                --yellow-100: #fefce8;
+                --yellow-300: #fde047;
+                --yellow-600: #ca8a04;
+                --yellow-800: #92400e;
+                --red-600: #dc2626;
+                --red-500: #ef4444;
+                --amber-800: #92400e;
+                --pink-500: #ec4899;
+            }
+
+            body {
+                font-family: 'Tajawal', sans-serif;
+                background-color: var(--blue-50);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                margin: 0;
+                padding: 1rem;
+            }
+
+            .container {
+                max-width: 48rem; /* 768px */
+                width: 100%;
+                padding: 1.5rem;
+                background: linear-gradient(to bottom right, var(--blue-50), var(--purple-50));
+                border-radius: 1rem;
+                box-shadow:
+                    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+                    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            }
+
+            .text-center {
+                text-align: center;
+            }
+
+            .mb-6 {
+                margin-bottom: 1.5rem;
+            }
+
+            .title {
+                font-size: 2.25rem;
+                font-weight: 800;
+                color: var(--gray-800);
+                margin-bottom: 0.5rem;
+            }
+
+            .subtitle {
+                color: var(--gray-600);
+                font-weight: 500;
+            }
+
+            .category-selection {
+                margin-bottom: 1.5rem;
+            }
+
+            .category-label {
+                display: block;
+                font-size: 1.125rem;
+                font-weight: 600;
+                color: var(--gray-700);
+                margin-bottom: 0.75rem;
+                text-align: center;
+            }
+
+            .flex-container {
+                display: flex;
+                gap: 1rem;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .btn {
+                padding: 0.75rem 1.5rem;
+                border-radius: 0.75rem;
+                font-weight: 500;
+                font-size: 1.125rem;
+                transition: all 0.3s ease;
+                cursor: pointer;
+                border: none;
+            }
+
+            .btn:hover {
+                transform: scale(1.05);
+                box-shadow:
+                    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            }
+
+            .btn-active {
+                color: white;
+                box-shadow:
+                    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            }
+
+            .btn-inactive {
+                background-color: var(--gray-200);
+                color: var(--gray-700);
+            }
+
+            .stats-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+                margin-bottom: 1.5rem;
+            }
+            @media (min-width: 768px) {
+                .stats-grid {
+                    grid-template-columns: repeat(3, 1fr);
+                }
+            }
+
+            .stat-card {
+                background-color: white;
+                border-radius: 0.75rem;
+                padding: 1rem;
+                text-align: center;
+                box-shadow:
+                    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            }
+
+            .stat-value {
+                font-size: 1.875rem;
+                font-weight: 700;
+            }
+
+            .stat-label {
+                font-size: 0.875rem;
+                color: var(--gray-600);
+                margin-top: 0.25rem;
+            }
+
+            .stat-level {
+                color: var(--blue-600);
+            }
+            .stat-score {
+                color: var(--green-600);
+            }
+            .stat-consecutive {
+                color: var(--purple-600);
+            }
+
+            .game-area {
+                background-color: white;
+                border-radius: 1rem;
+                padding: 2rem;
+                box-shadow:
+                    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+                    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+                margin-bottom: 1.5rem;
+            }
+
+            .start-btn {
+                background-color: var(--green-500);
+                color: white;
+                padding: 1.25rem 2.5rem;
+                border-radius: 9999px;
+                font-size: 1.25rem;
+                font-weight: 700;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                margin: 0 auto;
+                transition: all 0.3s ease;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            }
+
+            .start-btn:hover {
+                background-color: var(--green-600);
+                transform: scale(1.05);
+            }
+
+            .icon {
+                width: 1.5rem;
+                height: 1.5rem;
+            }
+
+            .icon-lg {
+                width: 4rem;
+                height: 4rem;
+            }
+
+            .audio-icon {
+                color: var(--blue-500);
+                margin: 0 auto 1rem;
+                animation: pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+            }
+
+            .game-status-text {
+                font-size: 1.25rem;
+                font-weight: 600;
+                color: var(--gray-700);
+            }
+
+            .sequence-display {
+                margin-top: 1rem;
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: var(--gray-800);
+                background-color: var(--gray-100);
+                border-radius: 0.5rem;
+                padding: 1rem;
+                letter-spacing: 0.05em;
+            }
+
+            .input-display {
+                min-height: 3.75rem;
+                background-color: var(--gray-100);
+                border-radius: 0.5rem;
+                padding: 1rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid var(--gray-300);
+                font-size: 1.25rem;
+                font-weight: 700;
+                color: var(--gray-800);
+            }
+
+            .input-buttons-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.75rem;
+                max-width: 32rem;
+                margin: 0 auto 1rem;
+            }
+            @media (min-width: 768px) {
+                .input-buttons-grid {
+                    grid-template-columns: repeat(4, 1fr);
+                }
+            }
+            @media (min-width: 1024px) {
+                .input-buttons-grid {
+                    grid-template-columns: repeat(5, 1fr);
+                }
+            }
+
+            .input-btn {
+                padding: 0.75rem 1rem;
+                border-radius: 0.5rem;
+                font-weight: 500;
+                transition: all 0.3s ease;
+                box-shadow:
+                    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+                cursor: pointer;
+                border: none;
+                font-size: 2rem; /* Make the emojis larger */
+                line-height: 1; /* Adjust line height to center emojis */
+            }
+            .input-btn:hover {
+                opacity: 0.8;
+                transform: scale(1.05);
+            }
+            .input-btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+            /* Color classes for the buttons */
+            .bg-red-500 {
+                background-color: var(--red-500);
+            }
+            .bg-blue-500 {
+                background-color: var(--blue-500);
+            }
+            .bg-green-500 {
+                background-color: var(--green-500);
+            }
+            .bg-yellow-500 {
+                background-color: var(--yellow-500);
+            }
+            .bg-orange-500 {
+                background-color: var(--orange-500);
+            }
+            .bg-purple-500 {
+                background-color: var(--purple-500);
+            }
+            .bg-pink-500 {
+                background-color: var(--pink-500);
+            }
+            .bg-amber-800 {
+                background-color: var(--amber-800);
+            }
+
+            /* Text color classes for better contrast */
+            .text-white {
+                color: white;
+            }
+            .text-dark {
+                color: var(--gray-800);
+            }
+
+            .clear-btn {
+                background-color: var(--orange-500);
+                color: white;
+                padding: 0.5rem 1.5rem;
+                border-radius: 0.5rem;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                margin: 1rem auto 0;
+                transition: all 0.3s ease;
+                box-shadow:
+                    0 1px 3px 0 rgba(0, 0, 0, 0.1),
+                    0 1px 2px 0 rgba(0, 0, 0, 0.06);
+                cursor: pointer;
+                border: none;
+            }
+            .clear-btn:hover {
+                background-color: var(--orange-600);
+            }
+            .clear-btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            .result-container {
+                text-align: center;
+            }
+            .result-icon {
+                width: 5rem;
+                height: 5rem;
+                margin: 0 auto 1rem;
+            }
+            .result-title {
+                font-size: 1.875rem;
+                font-weight: 700;
+            }
+            .result-subtitle {
+                font-size: 1.125rem;
+                color: var(--gray-600);
+                margin-top: 0.5rem;
+            }
+            .correct-color {
+                color: var(--green-600);
+            }
+            .wrong-color {
+                color: var(--red-600);
+            }
+
+            .control-buttons {
+                display: flex;
+                gap: 1rem;
+                justify-content: center;
+                margin-top: 1.5rem;
+            }
+
+            .control-btn {
+                background-color: var(--blue-500);
+                color: white;
+                padding: 0.75rem 1.5rem;
+                border-radius: 0.5rem;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                transition: all 0.3s ease;
+                cursor: pointer;
+                border: none;
+            }
+            .control-btn.reset {
+                background-color: var(--gray-500);
+            }
+            .control-btn.reset:hover {
+                background-color: var(--gray-600);
+            }
+            .control-btn:hover {
+                background-color: var(--blue-600);
+            }
+            .control-btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            .award-message {
+                margin-top: 1.5rem;
+                background: linear-gradient(to right, var(--yellow-100), var(--orange-100));
+                border: 1px solid var(--yellow-300);
+                border-radius: 0.75rem;
+                padding: 1rem;
+                text-align: center;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            }
+
+            .award-icon {
+                width: 2.5rem;
+                height: 2.5rem;
+                color: var(--yellow-600);
+                margin: 0 auto 0.5rem;
+                animation: bounce-slow 2s infinite;
+            }
+
+            .award-text {
+                color: var(--yellow-800);
+                font-size: 1.25rem;
+                font-weight: 600;
+            }
+
+            /* Animations */
+            @keyframes pulse {
+                0%,
+                100% {
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 0.5;
+                }
+            }
+
+            @keyframes shake {
+                0%,
+                100% {
+                    transform: translateX(0);
+                }
+                10%,
+                30%,
+                50%,
+                70%,
+                90% {
+                    transform: translateX(-5px);
+                }
+                20%,
+                40%,
+                60%,
+                80% {
+                    transform: translateX(5px);
+                }
+            }
+
+            @keyframes bounce-slow {
+                0%,
+                100% {
+                    transform: translateY(0);
+                }
+                50% {
+                    transform: translateY(-10px);
+                }
+            }
+
+            @keyframes fade-in-up {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="text-center mb-6">
+                <h1 class="title">🧠 لعبة تدريب الذاكرة السمعية</h1>
+                <p class="subtitle">استمع للسلسلة وأعدها بنفس الترتيب</p>
+            </div>
+
+            <!-- Category Selection -->
+            <div class="category-selection">
+                <label class="category-label">اختر الفئة:</label>
+                <div id="category-buttons" class="flex-container">
+                    <!-- Buttons will be generated here by JS -->
+                </div>
+            </div>
+
+            <!-- Game Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div id="currentLevel" class="stat-value stat-level">2</div>
+                    <div class="stat-label">المستوى الحالي</div>
+                </div>
+                <div class="stat-card">
+                    <div id="sessionScore" class="stat-value stat-score">0</div>
+                    <div class="stat-label">النقاط</div>
+                </div>
+                <div class="stat-card">
+                    <div id="consecutiveCorrect" class="stat-value stat-consecutive">0</div>
+                    <div class="stat-label">إجابات صحيحة متتالية</div>
+                </div>
+            </div>
+
+            <!-- Game Area -->
+            <div id="game-area" class="game-area">
+                <!-- Content will be rendered here by JS -->
+            </div>
+
+            <!-- Control Buttons -->
+            <div class="control-buttons">
+                <button id="speakAgainBtn" class="control-btn" disabled>
+                    <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728m-2.828-9.9L10 13l-4 4L2 14v-4l4-4 4-4-2-2z" />
+                    </svg>
+                    إعادة السمع
+                </button>
+                <button id="resetBtn" class="control-btn reset">
+                    <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v4l4-4m4 4l4-4m-4 4v4l4-4m-4 4l4-4m-4 4v4l4-4m-4 4l4-4" />
+                    </svg>
+                    إعادة تشغيل
+                </button>
+            </div>
+
+            <!-- Motivational Message -->
+            <div id="award-message" class="award-message" style="display: none">
+                <svg class="icon-lg award-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5-5-5m10 0l-5-5-5 5M12 21h7a2 2 0 002-2v-4a2 2 0 00-2-2h-7a2 2 0 00-2 2v4a2 2 0 002 2z" />
+                </svg>
+                <p class="award-text"></p>
+            </div>
+        </div>
+
+        <script>
+            const categories = {
+                numbers: {
+                    name: 'الأرقام',
+                    items: ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
+                    color: 'bg-blue-500'
+                },
+                colors: {
+                    name: 'الألوان',
+                    items: ['أحمر', 'أزرق', 'أخضر', 'أصفر', 'برتقالي', 'بنفسجي', 'وردي', 'بني'],
+                    itemColors: {
+                        أحمر: 'bg-red-500',
+                        أزرق: 'bg-blue-500',
+                        أخضر: 'bg-green-500',
+                        أصفر: 'bg-yellow-500',
+                        برتقالي: 'bg-orange-500',
+                        بنفسجي: 'bg-purple-500',
+                        وردي: 'bg-pink-500',
+                        بني: 'bg-amber-800'
+                    },
+                    color: 'bg-purple-500'
+                },
+                animals: {
+                    name: 'الحيوانات',
+                    items: ['قطة', 'كلب', 'أسد', 'فيل', 'نمر', 'دب', 'قرد', 'حصان'],
+                    itemEmojis: {
+                        قطة: '🐱',
+                        كلب: '🐶',
+                        أسد: '🦁',
+                        فيل: '🐘',
+                        نمر: '🐯',
+                        دب: '🐻',
+                        قرد: '🐒',
+                        حصان: '🐴'
+                    },
+                    color: 'bg-green-500'
+                }
+            };
+
+            // State variables
+            let gameState = 'ready'; // ready, playing, input, result
+            let currentLevel = 2;
+            let sequence = [];
+            let userInput = [];
+            let sessionScore = 0;
+            let consecutiveCorrect = 0;
+            let currentCategory = 'numbers';
+            let isSpeaking = false;
+
+            // DOM Elements
+            const gameArea = document.getElementById('game-area');
+            const categoryButtonsContainer = document.getElementById('category-buttons');
+            const speakAgainBtn = document.getElementById('speakAgainBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const currentLevelEl = document.getElementById('currentLevel');
+            const sessionScoreEl = document.getElementById('sessionScore');
+            const consecutiveCorrectEl = document.getElementById('consecutiveCorrect');
+            const awardMessageEl = document.getElementById('award-message');
+            const awardTextEl = awardMessageEl.querySelector('.award-text');
+
+            // Function to update the game state and render the UI
+            function setGameState(newState) {
+                gameState = newState;
+                renderGameArea();
+                updateControlButtons();
+            }
+
+            function updateStats() {
+                currentLevelEl.textContent = currentLevel;
+                sessionScoreEl.textContent = sessionScore;
+                consecutiveCorrectEl.textContent = consecutiveCorrect;
+            }
+
+            function generateSequence() {
+                const items = categories[currentCategory].items;
+                const newSequence = [];
+                for (let i = 0; i < currentLevel; i++) {
+                    const randomItem = items[Math.floor(Math.random() * items.length)];
+                    newSequence.push(randomItem);
+                }
+                sequence = newSequence;
+            }
+
+            function speakSequence() {
+                if (!('speechSynthesis' in window)) {
+                    setGameState('input');
+                    return;
+                }
+
+                isSpeaking = true;
+                const utterance = new SpeechSynthesisUtterance(sequence.join(', '));
+                utterance.lang = 'ar-SA';
+                utterance.rate = 0.8;
+                utterance.volume = 1;
+                utterance.onend = () => {
+                    isSpeaking = false;
+                    setGameState('input');
+                };
+                window.speechSynthesis.speak(utterance);
+            }
+
+            function playSuccessSound() {
+                if ('AudioContext' in window || 'webkitAudioContext' in window) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    const audioContext = new AudioContext();
+                    const frequencies = [523.25, 659.25, 783.99, 1046.5];
+
+                    frequencies.forEach((freq, index) => {
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+                        oscillator.frequency.setValueAtTime(freq, audioContext.currentTime + index * 0.1);
+                        oscillator.type = 'sine';
+                        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                        gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.1);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+                        oscillator.start(audioContext.currentTime);
+                        oscillator.stop(audioContext.currentTime + 0.5);
+                    });
+                }
+            }
+
+            function playErrorSound() {
+                if ('AudioContext' in window || 'webkitAudioContext' in window) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    const audioContext = new AudioContext();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+                    oscillator.frequency.linearRampToValueAtTime(100, audioContext.currentTime + 0.5);
+                    oscillator.type = 'sawtooth';
+                    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.4, audioContext.currentTime + 0.1);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.5);
+                }
+            }
+
+            function checkAnswer() {
+                const isCorrect = JSON.stringify(userInput) === JSON.stringify(sequence);
+
+                if (isCorrect) {
+                    playSuccessSound();
+                    sessionScore++;
+                    consecutiveCorrect++;
+
+                    if (consecutiveCorrect >= 3 && currentLevel < 10) {
+                        currentLevel++;
+                        consecutiveCorrect = 0;
+                        awardTextEl.textContent = `ممتاز! لقد تقدمت إلى المستوى ${currentLevel} 🏆✨`;
+                        awardMessageEl.style.display = 'block';
+                        setTimeout(() => (awardMessageEl.style.display = 'none'), 2500);
+                    }
+                } else {
+                    playErrorSound();
+                    consecutiveCorrect = 0;
+                    if (currentLevel > 2) {
+                        currentLevel--;
+                    }
+                }
+
+                setGameState('result');
+                updateStats();
+                setTimeout(() => {
+                    setGameState('ready');
+                }, 2000);
+            }
+
+            function handleInputChange(value) {
+                userInput.push(value);
+                renderInputState();
+                if (userInput.length === currentLevel) {
+                    checkAnswer();
+                }
+            }
+
+            function resetGame() {
+                currentLevel = 2;
+                sessionScore = 0;
+                consecutiveCorrect = 0;
+                userInput = [];
+                awardMessageEl.style.display = 'none';
+                setGameState('ready');
+                updateStats();
+            }
+
+            function clearInput() {
+                userInput = [];
+                renderInputState();
+            }
+
+            function renderReadyState() {
+                gameArea.innerHTML = `
+                <div class="text-center">
+                    <button id="startGameBtn" class="start-btn">
+                        <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3l14 9-14 9V3z"/>
+                        </svg>
+                        ابدأ المحاولة
+                    </button>
+                </div>
+            `;
+                document.getElementById('startGameBtn').addEventListener('click', () => {
+                    generateSequence();
+                    setGameState('playing');
+                    speakSequence();
+                });
+            }
+
+            function renderPlayingState() {
+                gameArea.innerHTML = `
+                <div class="text-center">
+                    <svg class="icon-lg audio-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728m-2.828-9.9L10 13l-4 4L2 14v-4l4-4 4-4-2-2z"/>
+                    </svg>
+                    <p class="game-status-text">استمع للسلسلة...</p>
+                    <div class="sequence-display">...</div>
+                </div>
+            `;
+            }
+
+            function renderInputState() {
+                const items = categories[currentCategory].items;
+                const itemButtons = items
+                    .map((item) => {
+                        let buttonContent = item;
+                        let dataAttribute = '';
+                        const itemColorClass = currentCategory === 'colors' ? categories.colors.itemColors[item] : 'bg-blue-500';
+                        const textColorClass = item === 'أصفر' || item === 'بني' ? 'text-dark' : 'text-white';
+
+                        if (currentCategory === 'animals') {
+                            buttonContent = categories.animals.itemEmojis[item];
+                            dataAttribute = `data-animal="${item}"`;
+                        }
+
+                        return `<button class="input-btn ${itemColorClass} ${textColorClass}" ${dataAttribute}>${buttonContent}</button>`;
+                    })
+                    .join('');
+
+                gameArea.innerHTML = `
+                <div class="text-center">
+                    <p class="game-status-text mb-4">أعد السلسلة بنفس الترتيب:</p>
+                    <div id="userInputDisplay" class="input-display mb-4">
+                        اختر العناصر...
+                    </div>
+                    <div id="inputButtons" class="input-buttons-grid">
+                        ${itemButtons}
+                    </div>
+                    <button id="clearInputBtn" class="clear-btn">
+                        <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v4l4-4m4 4l4-4m-4 4v4l4-4m-4 4l4-4m-4 4v4l4-4m-4 4l4-4"/>
+                        </svg>
+                        مسح
+                    </button>
+                </div>
+            `;
+
+                const userInputDisplay = document.getElementById('userInputDisplay');
+                const inputButtons = document.getElementById('inputButtons');
+                const clearInputBtn = document.getElementById('clearInputBtn');
+
+                function updateInputDisplay() {
+                    let displayText = userInput.join(' - ');
+                    if (currentCategory === 'animals') {
+                        displayText = userInput.map((animal) => categories.animals.itemEmojis[animal]).join(' - ');
+                    }
+                    userInputDisplay.textContent = userInput.length === 0 ? 'اختر العناصر...' : displayText;
+                }
+
+                inputButtons.addEventListener('click', (e) => {
+                    if (e.target.tagName === 'BUTTON' && userInput.length < currentLevel && !isSpeaking) {
+                        const value = e.target.dataset.animal || e.target.textContent;
+                        handleInputChange(value);
+                    }
+                });
+
+                clearInputBtn.addEventListener('click', clearInput);
+                updateInputDisplay();
+            }
+
+            function renderResultState() {
+                const isCorrect = JSON.stringify(userInput) === JSON.stringify(sequence);
+                gameArea.innerHTML = `
+                <div class="result-container">
+                    ${
+                        isCorrect
+                            ? `
+                        <svg class="icon-lg result-icon correct-color animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <p class="result-title correct-color">ممتاز! 🎉✨</p>
+                        <p class="result-subtitle">السلسلة صحيحة</p>
+                    `
+                            : `
+                        <svg class="icon-lg result-icon wrong-color animate-shake" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <p class="result-title wrong-color">حاول مرة أخرى 🔄</p>
+                        <p class="result-subtitle">
+                            السلسلة الصحيحة: <span style="font-weight: 700; color: var(--gray-800);">${sequence.join(' - ')}</span>
+                        </p>
+                    `
+                    }
+                </div>
+            `;
+            }
+
+            function renderGameArea() {
+                switch (gameState) {
+                    case 'ready':
+                        renderReadyState();
+                        break;
+                    case 'playing':
+                        renderPlayingState();
+                        break;
+                    case 'input':
+                        renderInputState();
+                        break;
+                    case 'result':
+                        renderResultState();
+                        break;
+                }
+            }
+
+            function renderCategoryButtons() {
+                categoryButtonsContainer.innerHTML = Object.entries(categories)
+                    .map(
+                        ([key, cat]) => `
+                <button
+                    class="btn ${key === currentCategory ? 'btn-active' : 'btn-inactive'}"
+                    style="background-color: ${key === currentCategory ? 'var(--' + cat.color.split('-')[1] + '-' + cat.color.split('-')[2] + ')' : ''};"
+                    data-category="${key}"
+                >
+                    ${cat.name}
+                </button>
+            `
+                    )
+                    .join('');
+
+                document.querySelectorAll('#category-buttons button').forEach((button) => {
+                    button.addEventListener('click', () => {
+                        currentCategory = button.dataset.category;
+                        resetGame();
+                        renderCategoryButtons();
+                    });
+                });
+            }
+
+            function updateControlButtons() {
+                speakAgainBtn.disabled = gameState !== 'input' || isSpeaking;
+            }
+
+            // Event Listeners for global buttons
+            speakAgainBtn.addEventListener('click', () => {
+                speakSequence();
+            });
+
+            resetBtn.addEventListener('click', resetGame);
+
+            // Initial render
+            window.onload = () => {
+                renderCategoryButtons();
+                renderGameArea();
+                updateStats();
+                updateControlButtons();
+            };
+        </script>
+    </body>
+</html>

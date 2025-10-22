@@ -1,0 +1,989 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>🔄 لعبة السلسلة العكسية</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                padding: 20px;
+                direction: rtl;
+            }
+
+            .container {
+                max-width: 1000px;
+                margin: 0 auto;
+                background: linear-gradient(135deg, #eff6ff 0%, #faf5ff 50%, #fdf2f8 100%);
+                border-radius: 20px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                padding: 30px;
+            }
+
+            .header {
+                text-align: center;
+                margin-bottom: 30px;
+            }
+
+            .header h1 {
+                font-size: 2.5em;
+                color: #1f2937;
+                margin-bottom: 10px;
+            }
+
+            .header p {
+                font-size: 1.1em;
+                color: #6b7280;
+            }
+
+            .category-section {
+                margin-bottom: 30px;
+            }
+
+            .category-label {
+                display: block;
+                font-size: 1.3em;
+                font-weight: 600;
+                text-align: center;
+                margin-bottom: 15px;
+                color: #374151;
+            }
+
+            .category-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+
+            .category-btn {
+                padding: 15px;
+                border: none;
+                border-radius: 12px;
+                font-size: 0.95em;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+
+            .category-btn:hover {
+                transform: scale(1.05);
+            }
+
+            .category-btn.active {
+                color: white;
+                box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .stats-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 15px;
+                margin-bottom: 30px;
+            }
+
+            .stat-card {
+                background: white;
+                border-radius: 12px;
+                padding: 15px;
+                text-align: center;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+
+            .stat-value {
+                font-size: 2em;
+                font-weight: bold;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 5px;
+            }
+
+            .stat-label {
+                font-size: 0.85em;
+                color: #6b7280;
+                margin-top: 5px;
+            }
+
+            .visual-cards {
+                background: white;
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 20px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+
+            .visual-cards h3 {
+                text-align: center;
+                color: #374151;
+                margin-bottom: 15px;
+            }
+
+            .visual-cards-grid {
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+                flex-wrap: wrap;
+            }
+
+            .visual-card {
+                background: linear-gradient(135deg, white, #f3f4f6);
+                border-radius: 15px;
+                padding: 20px;
+                border: 2px solid #e5e7eb;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                transition: transform 0.3s ease;
+                text-align: center;
+                min-width: 100px;
+            }
+
+            .visual-card:hover {
+                transform: scale(1.05);
+            }
+
+            .visual-card-emoji {
+                font-size: 3em;
+                margin-bottom: 10px;
+            }
+
+            .visual-card-text {
+                font-size: 1em;
+                font-weight: 600;
+                color: #374151;
+            }
+
+            .visual-card-number {
+                font-size: 0.8em;
+                color: #9ca3af;
+                margin-top: 5px;
+            }
+
+            .game-area {
+                background: white;
+                border-radius: 12px;
+                padding: 30px;
+                margin-bottom: 30px;
+                box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+                min-height: 300px;
+            }
+
+            .game-content {
+                text-align: center;
+            }
+
+            .btn-primary {
+                background: linear-gradient(135deg, #10b981, #059669);
+                color: white;
+                padding: 20px 40px;
+                border: none;
+                border-radius: 15px;
+                font-size: 1.3em;
+                font-weight: bold;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                transition: all 0.3s ease;
+                box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .btn-primary:hover {
+                transform: scale(1.05);
+                box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+            }
+
+            .btn-secondary {
+                background: #6b7280;
+                color: white;
+                padding: 12px 24px;
+                border: none;
+                border-radius: 10px;
+                font-size: 1em;
+                font-weight: 600;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+
+            .btn-secondary:hover {
+                background: #4b5563;
+                transform: scale(1.05);
+            }
+
+            .btn-secondary:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            .toggle-visual-btn {
+                margin-bottom: 20px;
+                padding: 12px 24px;
+                border: none;
+                border-radius: 10px;
+                font-weight: 600;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                transition: all 0.3s ease;
+            }
+
+            .toggle-visual-btn.active {
+                background: #10b981;
+                color: white;
+            }
+
+            .toggle-visual-btn:not(.active) {
+                background: #d1d5db;
+                color: #374151;
+            }
+
+            .volume-icon {
+                font-size: 5em;
+                animation: pulse 2s infinite;
+            }
+
+            @keyframes pulse {
+                0%,
+                100% {
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 0.5;
+                }
+            }
+
+            .sequence-display {
+                background: linear-gradient(135deg, #dbeafe, #e9d5ff);
+                border: 2px solid #93c5fd;
+                border-radius: 12px;
+                padding: 20px;
+                margin-top: 20px;
+            }
+
+            .sequence-title {
+                font-weight: 600;
+                color: #1e40af;
+                margin-bottom: 10px;
+            }
+
+            .sequence-content {
+                font-size: 1.2em;
+                color: #1f2937;
+            }
+
+            .input-display {
+                background: linear-gradient(135deg, #fef3c7, #fed7aa);
+                border: 2px solid #fbbf24;
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 20px;
+                min-height: 100px;
+            }
+
+            .input-title {
+                font-weight: 600;
+                color: #92400e;
+                margin-bottom: 10px;
+            }
+
+            .input-content {
+                font-size: 1.2em;
+                color: #1f2937;
+            }
+
+            .items-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 15px;
+                max-width: 700px;
+                margin: 0 auto 20px;
+            }
+
+            .item-btn {
+                padding: 15px;
+                border: none;
+                border-radius: 15px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                color: white;
+            }
+
+            .item-btn:hover:not(:disabled) {
+                transform: scale(1.05);
+                box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+            }
+
+            .item-btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            .item-btn.used {
+                background: #d1d5db !important;
+                color: #6b7280 !important;
+            }
+
+            .item-emoji {
+                font-size: 2em;
+                margin-bottom: 5px;
+            }
+
+            .item-text {
+                font-size: 0.95em;
+            }
+
+            .result-success {
+                color: #10b981;
+                animation: bounce 1s infinite;
+            }
+
+            .result-error {
+                color: #ef4444;
+            }
+
+            @keyframes bounce {
+                0%,
+                100% {
+                    transform: translateY(0);
+                }
+                50% {
+                    transform: translateY(-10px);
+                }
+            }
+
+            .result-icon {
+                font-size: 5em;
+                margin-bottom: 20px;
+            }
+
+            .result-title {
+                font-size: 2em;
+                font-weight: bold;
+                margin-bottom: 15px;
+            }
+
+            .result-subtitle {
+                font-size: 1.2em;
+                margin-bottom: 15px;
+            }
+
+            .stars-display {
+                display: flex;
+                justify-content: center;
+                gap: 10px;
+                margin: 20px 0;
+            }
+
+            .star {
+                font-size: 2.5em;
+                animation: spin 1s infinite;
+            }
+
+            @keyframes spin {
+                from {
+                    transform: rotate(0deg);
+                }
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+
+            .error-details {
+                background: #fee2e2;
+                border-radius: 12px;
+                padding: 20px;
+                margin-top: 20px;
+            }
+
+            .error-details p {
+                color: #374151;
+                margin: 10px 0;
+            }
+
+            .controls {
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+                margin-bottom: 30px;
+            }
+
+            .achievement-banner {
+                border-radius: 15px;
+                padding: 20px;
+                text-align: center;
+                margin-top: 20px;
+                animation: pulse 2s infinite;
+                box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .achievement-consecutive {
+                background: linear-gradient(135deg, #fef3c7, #fed7aa, #fecaca);
+                border: 2px solid #fbbf24;
+            }
+
+            .achievement-master {
+                background: linear-gradient(135deg, #e9d5ff, #ddd6fe);
+                border: 2px solid #a78bfa;
+            }
+
+            .achievement-icon {
+                font-size: 3em;
+                margin-bottom: 10px;
+            }
+
+            .achievement-text {
+                font-size: 1.2em;
+                font-weight: bold;
+            }
+
+            .hidden {
+                display: none !important;
+            }
+
+            @media (max-width: 768px) {
+                .category-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+
+                .stats-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+
+                .items-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+
+                .header h1 {
+                    font-size: 1.8em;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🔄 لعبة السلسلة العكسية</h1>
+                <p>استمع للكلمات وأعدها بالعكس</p>
+            </div>
+
+            <div class="category-section">
+                <label class="category-label">اختر المجموعة:</label>
+                <div class="category-grid" id="categoryGrid"></div>
+            </div>
+
+            <div class="stats-grid" id="statsGrid"></div>
+
+            <div id="visualCardsContainer" class="hidden"></div>
+
+            <div class="game-area">
+                <div class="game-content" id="gameContent"></div>
+            </div>
+
+            <div class="controls" id="controls"></div>
+
+            <div id="achievementContainer"></div>
+        </div>
+
+        <script>
+            // Game State
+            let gameState = 'ready'; // ready, playing, input, result
+            let currentLevel = 1;
+            let currentDifficulty = 2;
+            let sequence = [];
+            let userInput = [];
+            let category = 'body';
+            let visualAidsEnabled = true;
+            let showVisualCards = false;
+            let totalStars = 0;
+            let sessionStars = 0;
+            let sessionHistory = [];
+            let consecutiveCorrect = 0;
+
+            // Categories Data
+            const categories = {
+                body: {
+                    name: '🫱 أجزاء الجسم',
+                    items: ['رأس', 'عين', 'أنف', 'فم', 'يد', 'رجل', 'أذن', 'شعر'],
+                    emojis: ['🗣️', '👁️', '👃', '👄', '✋', '🦵', '👂', '💇'],
+                    color: 'linear-gradient(135deg, #f472b6, #fb7185)'
+                },
+                fruits: {
+                    name: '🍎 الفواكه',
+                    items: ['تفاح', 'موز', 'برتقال', 'عنب', 'فراولة', 'خوخ', 'أناناس', 'كيوي'],
+                    emojis: ['🍎', '🍌', '🍊', '🍇', '🍓', '🍑', '🍍', '🥝'],
+                    color: 'linear-gradient(135deg, #4ade80, #10b981)'
+                },
+                vegetables: {
+                    name: '🥕 الخضروات',
+                    items: ['جزر', 'خيار', 'طماطم', 'بصل', 'فلفل', 'خس', 'بطاطس', 'باذنجان'],
+                    emojis: ['🥕', '🥒', '🍅', '🧅', '🌶️', '🥬', '🥔', '🍆'],
+                    color: 'linear-gradient(135deg, #fb923c, #f59e0b)'
+                },
+                animals: {
+                    name: '🐱 الحيوانات',
+                    items: ['قطة', 'كلب', 'أسد', 'فيل', 'حصان', 'دجاجة', 'سمكة', 'فراشة'],
+                    emojis: ['🐱', '🐶', '🦁', '🐘', '🐴', '🐔', '🐟', '🦋'],
+                    color: 'linear-gradient(135deg, #60a5fa, #06b6d4)'
+                },
+                clothes: {
+                    name: '👕 الملابس',
+                    items: ['قميص', 'بنطال', 'حذاء', 'قبعة', 'جوارب', 'معطف', 'فستان', 'حقيبة'],
+                    emojis: ['👕', '👖', '👟', '🧢', '🧦', '🧥', '👗', '🎒'],
+                    color: 'linear-gradient(135deg, #a78bfa, #6366f1)'
+                }
+            };
+
+            // Sound Functions
+            function playButtonSound() {
+                if ('AudioContext' in window || 'webkitAudioContext' in window) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    const audioContext = new AudioContext();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                    oscillator.type = 'sine';
+                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.1);
+                }
+            }
+
+            function playSuccessSound() {
+                if ('AudioContext' in window || 'webkitAudioContext' in window) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    const audioContext = new AudioContext();
+                    const frequencies = [523.25, 659.25, 783.99, 1046.5];
+
+                    frequencies.forEach((freq, index) => {
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+
+                        oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+                        oscillator.type = 'sine';
+                        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                        gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.1 + index * 0.15);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4 + index * 0.15);
+
+                        oscillator.start(audioContext.currentTime + index * 0.15);
+                        oscillator.stop(audioContext.currentTime + 0.5 + index * 0.15);
+                    });
+                }
+            }
+
+            function playErrorSound() {
+                if ('AudioContext' in window || 'webkitAudioContext' in window) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    const audioContext = new AudioContext();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+                    oscillator.frequency.linearRampToValueAtTime(100, audioContext.currentTime + 0.5);
+                    oscillator.type = 'sawtooth';
+                    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.4, audioContext.currentTime + 0.1);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.5);
+                }
+            }
+
+            // Game Functions
+            function generateSequence() {
+                const items = categories[category].items;
+                const newSequence = [];
+                const usedIndices = [];
+
+                for (let i = 0; i < currentDifficulty; i++) {
+                    let randomIndex;
+                    do {
+                        randomIndex = Math.floor(Math.random() * items.length);
+                    } while (usedIndices.includes(randomIndex));
+
+                    usedIndices.push(randomIndex);
+                    newSequence.push(items[randomIndex]);
+                }
+
+                sequence = newSequence;
+                return newSequence;
+            }
+
+            function speakSequence(seq) {
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(seq.join(' ... '));
+                    utterance.lang = 'ar-SA';
+                    utterance.rate = 0.7;
+                    window.speechSynthesis.speak(utterance);
+
+                    setTimeout(
+                        () => {
+                            gameState = 'input';
+                            render();
+                        },
+                        seq.length * 1200 + 1500
+                    );
+                } else {
+                    setTimeout(() => {
+                        gameState = 'input';
+                        render();
+                    }, 3000);
+                }
+            }
+
+            function startGame() {
+                const newSequence = generateSequence();
+                userInput = [];
+                gameState = 'playing';
+                showVisualCards = visualAidsEnabled;
+                render();
+                speakSequence(newSequence);
+            }
+
+            function handleInputChange(value) {
+                playButtonSound();
+                userInput.push(value);
+                render();
+
+                if (userInput.length === currentDifficulty) {
+                    checkAnswer(userInput);
+                }
+            }
+
+            function checkAnswer(input) {
+                const reversedSequence = [...sequence].reverse();
+                const isCorrect = JSON.stringify(input) === JSON.stringify(reversedSequence);
+                sessionHistory.push(isCorrect);
+
+                if (isCorrect) {
+                    playSuccessSound();
+                    const starsEarned = currentDifficulty;
+                    sessionStars += starsEarned;
+                    totalStars += starsEarned;
+                    consecutiveCorrect += 1;
+
+                    // Check difficulty increase
+                    if (calculateSuccessRate(sessionHistory) >= 0.75 && consecutiveCorrect >= 1) {
+                        if (currentDifficulty < 8) {
+                            currentDifficulty += 1;
+                            consecutiveCorrect = 0;
+
+                            if (currentDifficulty >= 4) {
+                                visualAidsEnabled = false;
+                            }
+                        } else if (currentLevel < Object.keys(categories).length) {
+                            currentLevel += 1;
+                            currentDifficulty = 2;
+                            visualAidsEnabled = true;
+                            consecutiveCorrect = 0;
+                        }
+                    }
+                } else {
+                    playErrorSound();
+                    consecutiveCorrect = 0;
+
+                    // Decrease difficulty on repeated errors
+                    const recentHistory = sessionHistory.slice(-5);
+                    if (calculateSuccessRate(recentHistory) < 0.5 && currentDifficulty > 2) {
+                        currentDifficulty -= 1;
+                        visualAidsEnabled = true;
+                    }
+                }
+
+                gameState = 'result';
+                render();
+
+                setTimeout(() => {
+                    gameState = 'ready';
+                    showVisualCards = false;
+                    render();
+                }, 2500);
+            }
+
+            function calculateSuccessRate(history) {
+                if (history.length === 0) return 0;
+                const recent = history.slice(-8);
+                return recent.filter((x) => x).length / recent.length;
+            }
+
+            function resetGame() {
+                currentLevel = 1;
+                currentDifficulty = 2;
+                sessionStars = 0;
+                sessionHistory = [];
+                consecutiveCorrect = 0;
+                gameState = 'ready';
+                visualAidsEnabled = true;
+                showVisualCards = false;
+                playButtonSound();
+                render();
+            }
+
+            function clearInput() {
+                userInput = [];
+                render();
+            }
+
+            function toggleVisualAids() {
+                visualAidsEnabled = !visualAidsEnabled;
+                playButtonSound();
+                render();
+            }
+
+            function selectCategory(key) {
+                category = key;
+                playButtonSound();
+                render();
+            }
+
+            // Render Functions
+            function renderCategories() {
+                const grid = document.getElementById('categoryGrid');
+                grid.innerHTML = '';
+
+                Object.entries(categories).forEach(([key, cat]) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'category-btn' + (category === key ? ' active' : '');
+                    btn.style.background = category === key ? cat.color : 'white';
+                    btn.style.color = category === key ? 'white' : '#374151';
+                    btn.textContent = cat.name;
+                    btn.onclick = () => selectCategory(key);
+                    grid.appendChild(btn);
+                });
+            }
+
+            function renderStats() {
+                const grid = document.getElementById('statsGrid');
+                grid.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value" style="color: #6366f1;">${currentLevel}</div>
+                    <div class="stat-label">المستوى</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: #a78bfa;">${currentDifficulty}</div>
+                    <div class="stat-label">الصعوبة</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: #fbbf24;">⭐ ${sessionStars}</div>
+                    <div class="stat-label">نجوم الجلسة</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: #f97316;">🏆 ${totalStars}</div>
+                    <div class="stat-label">إجمالي النجوم</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: #10b981;">${Math.round(calculateSuccessRate(sessionHistory) * 100)}%</div>
+                    <div class="stat-label">نسبة النجاح</div>
+                </div>
+            `;
+            }
+
+            function renderVisualCards() {
+                const container = document.getElementById('visualCardsContainer');
+
+                if (showVisualCards && gameState === 'playing') {
+                    container.className = 'visual-cards';
+                    container.innerHTML = `
+                    <h3>👁️ البطاقات المرئية</h3>
+                    <div class="visual-cards-grid">
+                        ${sequence
+                            .map((item, index) => {
+                                const emoji = categories[category].emojis[categories[category].items.indexOf(item)];
+                                return `
+                                <div class="visual-card">
+                                    <div class="visual-card-emoji">${emoji}</div>
+                                    <div class="visual-card-text">${item}</div>
+                                    <div class="visual-card-number">#${index + 1}</div>
+                                </div>
+                            `;
+                            })
+                            .join('')}
+                    </div>
+                `;
+                } else {
+                    container.className = 'hidden';
+                    container.innerHTML = '';
+                }
+            }
+
+            function renderGameContent() {
+                const content = document.getElementById('gameContent');
+
+                if (gameState === 'ready') {
+                    content.innerHTML = `
+                    <div>
+                        <button class="toggle-visual-btn ${visualAidsEnabled ? 'active' : ''}" onclick="toggleVisualAids()">
+                            ${visualAidsEnabled ? '👁️' : '🚫'} البطاقات المرئية
+                        </button>
+                    </div>
+                    <button class="btn-primary" onclick="startGame()">
+                        ▶️ ابدأ المحاولة
+                    </button>
+                `;
+                } else if (gameState === 'playing') {
+                    content.innerHTML = `
+                    <div class="volume-icon">🔊</div>
+                    <p style="font-size: 1.3em; margin-bottom: 20px;">استمع للكلمات...</p>
+                    <div class="sequence-display">
+                        <div class="sequence-title">السلسلة الأصلية:</div>
+                        <div class="sequence-content">${sequence.join(' → ')}</div>
+                    </div>
+                `;
+                } else if (gameState === 'input') {
+                    content.innerHTML = `
+                    <p style="font-size: 1.3em; margin-bottom: 20px; font-weight: 600;">
+                        أعد الكلمات <span style="color: #ef4444;">بالعكس</span>:
+                    </p>
+
+                    <div class="input-display">
+                        <div class="input-title">إجابتك (بالعكس):</div>
+                        <div class="input-content">${userInput.length === 0 ? 'اختر الكلمات...' : userInput.join(' ← ')}</div>
+                    </div>
+
+                    <div class="items-grid">
+                        ${categories[category].items
+                            .map((item, index) => {
+                                const emoji = categories[category].emojis[index];
+                                const isDisabled = userInput.length >= currentDifficulty;
+                                const isUsed = userInput.includes(item);
+                                return `
+                                <button
+                                    class="item-btn ${isUsed ? 'used' : ''}"
+                                    style="background: ${!isUsed && !isDisabled ? categories[category].color : ''}"
+                                    ${isDisabled || isUsed ? 'disabled' : ''}
+                                    onclick="handleInputChange('${item}')"
+                                >
+                                    <div class="item-emoji">${emoji}</div>
+                                    <div class="item-text">${item}</div>
+                                </button>
+                            `;
+                            })
+                            .join('')}
+                    </div>
+
+                    <button class="btn-secondary" style="background: #f97316; margin-top: 10px;" onclick="clearInput()">
+                        🔄 مسح الإجابة
+                    </button>
+                `;
+                } else if (gameState === 'result') {
+                    const reversedSequence = [...sequence].reverse();
+                    const isCorrect = JSON.stringify(userInput) === JSON.stringify(reversedSequence);
+
+                    if (isCorrect) {
+                        content.innerHTML = `
+                        <div class="result-success">
+                            <div class="result-icon">✅</div>
+                            <p class="result-title">رائع جداً! 🎉✨</p>
+                            <p class="result-subtitle">السلسلة العكسية صحيحة!</p>
+                            <div class="stars-display">
+                                ${Array(currentDifficulty)
+                                    .fill('⭐')
+                                    .map((star) => `<span class="star">${star}</span>`)
+                                    .join('')}
+                            </div>
+                            <div style="font-size: 1.5em; margin-top: 10px; animation: bounce 1s infinite;">⭐ +${currentDifficulty} نجوم!</div>
+                        </div>
+                    `;
+                    } else {
+                        content.innerHTML = `
+                        <div class="result-error">
+                            <div class="result-icon">❌</div>
+                            <p class="result-title">حاول مرة أخرى 🔄</p>
+                            <div class="error-details">
+                                <p><strong>السلسلة الأصلية:</strong> ${sequence.join(' → ')}</p>
+                                <p><strong>الإجابة الصحيحة:</strong> ${reversedSequence.join(' ← ')}</p>
+                            </div>
+                            <div style="font-size: 1.3em; margin-top: 15px;">💪 لا تستسلم!</div>
+                        </div>
+                    `;
+                    }
+                }
+            }
+
+            function renderControls() {
+                const controls = document.getElementById('controls');
+                controls.innerHTML = `
+                <button
+                    class="btn-secondary"
+                    style="background: #3b82f6;"
+                    ${gameState !== 'input' || sequence.length === 0 ? 'disabled' : ''}
+                    onclick="speakSequence(sequence); playButtonSound();"
+                >
+                    🔊 إعادة السمع
+                </button>
+
+                <button class="btn-secondary" onclick="resetGame()">
+                    🔄 إعادة تشغيل
+                </button>
+            `;
+            }
+
+            function renderAchievements() {
+                const container = document.getElementById('achievementContainer');
+                let html = '';
+
+                if (consecutiveCorrect >= 2) {
+                    html += `
+                    <div class="achievement-banner achievement-consecutive">
+                        <div class="achievement-icon">🏆</div>
+                        <p class="achievement-text" style="color: #92400e;">مبهر! إجابات صحيحة متتالية! 🏆</p>
+                        <div style="display: flex; justify-content: center; gap: 5px; margin-top: 10px;">
+                            ${Array(5).fill('⭐').join('')}
+                        </div>
+                    </div>
+                `;
+                }
+
+                if (totalStars >= 50) {
+                    html += `
+                    <div class="achievement-banner achievement-master">
+                        <div class="achievement-icon">🏅</div>
+                        <p class="achievement-text" style="color: #5b21b6;">بطل الذاكرة! جمعت ${totalStars} نجمة!</p>
+                    </div>
+                `;
+                }
+
+                container.innerHTML = html;
+            }
+
+            function render() {
+                renderCategories();
+                renderStats();
+                renderVisualCards();
+                renderGameContent();
+                renderControls();
+                renderAchievements();
+            }
+
+            // Initialize
+            render();
+        </script>
+    </body>
+</html>

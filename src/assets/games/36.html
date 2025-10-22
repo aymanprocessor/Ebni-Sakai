@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>لعبة ذاكرة المواقع - 10 مستويات</title>
+        <title>🧠 لعبة عمود الذاكرة البصرية</title>
         <style>
             * {
                 margin: 0;
@@ -13,10 +13,9 @@
 
             body {
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 min-height: 100vh;
-                color: white;
-                padding: 20px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+                padding: 24px;
             }
 
             .container {
@@ -24,1465 +23,1310 @@
                 margin: 0 auto;
             }
 
-            .header {
+            header {
                 text-align: center;
-                margin-bottom: 30px;
+                margin-bottom: 32px;
             }
 
-            .title {
-                font-size: 2.8rem;
-                margin-bottom: 15px;
-                text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4);
-                background: linear-gradient(45deg, #ffd93d, #ff6b6b);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
-            }
-
-            .level-info {
-                background: rgba(255, 255, 255, 0.2);
-                padding: 15px 30px;
-                border-radius: 25px;
-                backdrop-filter: blur(10px);
-                display: inline-block;
+            h1 {
+                font-size: 3rem;
                 font-weight: bold;
-                font-size: 1.2rem;
-                border: 2px solid rgba(255, 255, 255, 0.3);
-            }
-
-            .control-panel {
-                background: rgba(255, 255, 255, 0.15);
-                backdrop-filter: blur(15px);
-                border-radius: 20px;
-                padding: 25px;
-                margin-bottom: 25px;
-                border: 1px solid rgba(255, 255, 255, 0.2);
-            }
-
-            .stats {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-                gap: 15px;
-                margin-bottom: 20px;
-            }
-
-            .stat-card {
-                background: rgba(255, 255, 255, 0.1);
-                padding: 15px;
-                border-radius: 15px;
-                text-align: center;
-                border: 1px solid rgba(255, 255, 255, 0.2);
-                transition: transform 0.3s ease;
-            }
-
-            .stat-card:hover {
-                transform: translateY(-5px);
-            }
-
-            .stat-label {
-                font-size: 0.9rem;
-                opacity: 0.8;
-                margin-bottom: 8px;
-            }
-
-            .stat-value {
-                font-size: 1.8rem;
-                font-weight: bold;
-                color: #ffd93d;
-                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-            }
-
-            .controls {
-                display: flex;
-                gap: 15px;
-                justify-content: center;
-                flex-wrap: wrap;
-                margin-bottom: 20px;
-            }
-
-            .btn {
-                padding: 15px 30px;
-                border: none;
-                border-radius: 25px;
-                font-size: 1.1rem;
-                font-weight: bold;
-                cursor: pointer;
-                transition: all 0.3s ease;
                 color: white;
-                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-                position: relative;
-                overflow: hidden;
-            }
-
-            .btn::before {
-                content: '';
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                width: 0;
-                height: 0;
-                background: rgba(255, 255, 255, 0.2);
-                border-radius: 50%;
-                transform: translate(-50%, -50%);
-                transition: all 0.3s ease;
-            }
-
-            .btn:hover::before {
-                width: 200px;
-                height: 200px;
-            }
-
-            .btn-primary {
-                background: linear-gradient(45deg, #4ecdc4, #44a08d);
-            }
-            .btn-secondary {
-                background: linear-gradient(45deg, #ff6b6b, #ffd93d);
-            }
-            .btn-success {
-                background: linear-gradient(45deg, #56ab2f, #a8e6cf);
-            }
-            .btn-warning {
-                background: linear-gradient(45deg, #ffa726, #ff7043);
-            }
-
-            .btn:hover:not(:disabled) {
-                transform: translateY(-3px);
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-            }
-
-            .btn:disabled {
-                opacity: 0.5;
-                cursor: not-allowed;
-                transform: none;
-            }
-
-            .phase-indicator {
-                text-align: center;
-                padding: 18px;
-                border-radius: 18px;
-                font-weight: bold;
-                font-size: 1.3rem;
-                margin: 15px 0;
-                background: linear-gradient(45deg, rgba(255, 217, 61, 0.3), rgba(255, 107, 107, 0.3));
-                border: 2px solid #ffd93d;
-                backdrop-filter: blur(10px);
-            }
-
-            .game-area {
-                background: rgba(255, 255, 255, 0.1);
-                backdrop-filter: blur(15px);
-                border-radius: 25px;
-                padding: 35px;
-                min-height: 650px;
-                border: 1px solid rgba(255, 255, 255, 0.2);
-            }
-
-            .scene-container {
-                position: relative;
-                width: 100%;
-                max-width: 800px;
-                height: 500px;
-                margin: 0 auto 30px auto;
-                border-radius: 25px;
-                overflow: hidden;
-                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-                border: 3px solid rgba(255, 255, 255, 0.3);
-            }
-
-            .scene {
-                width: 100%;
-                height: 100%;
-                position: relative;
-                transition: all 0.5s ease;
-            }
-
-            .object {
-                position: absolute;
-                width: 80px;
-                height: 80px;
-                font-size: 4rem;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                filter: drop-shadow(4px 4px 8px rgba(0, 0, 0, 0.6));
-                transition: all 0.3s ease;
-                user-select: none;
-                z-index: 10;
-                animation: popIn 0.5s ease-out;
-            }
-
-            @keyframes popIn {
-                0% {
-                    transform: scale(0);
-                }
-                80% {
-                    transform: scale(1.1);
-                }
-                100% {
-                    transform: scale(1);
-                }
-            }
-
-            .drop-zone {
-                position: absolute;
-                width: 100px;
-                height: 100px;
-                border: 3px dashed rgba(255, 255, 255, 0.7);
-                border-radius: 50%;
-                background: rgba(255, 255, 255, 0.1);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                transform: translate(-50%, -50%);
-                transition: all 0.3s ease;
-                font-size: 1.1rem;
-                color: rgba(255, 255, 255, 0.9);
-                font-weight: bold;
-                backdrop-filter: blur(5px);
-            }
-
-            .drop-zone.drag-over {
-                border-color: #ffd93d;
-                background: rgba(255, 217, 61, 0.4);
-                box-shadow: 0 0 30px rgba(255, 217, 61, 0.9);
-                transform: translate(-50%, -50%) scale(1.3);
-            }
-
-            .drop-zone.correct {
-                border-color: #56ab2f;
-                background: rgba(86, 171, 47, 0.5);
-                animation: correctPulse 0.8s ease-in-out;
-            }
-
-            .drop-zone.wrong {
-                border-color: #ff6b6b;
-                background: rgba(255, 107, 107, 0.5);
-                animation: wrongShake 0.8s ease-in-out;
-            }
-
-            @keyframes correctPulse {
-                0%,
-                100% {
-                    transform: translate(-50%, -50%) scale(1.3);
-                }
-                50% {
-                    transform: translate(-50%, -50%) scale(1.6);
-                }
-            }
-
-            @keyframes wrongShake {
-                0%,
-                100% {
-                    transform: translate(-50%, -50%);
-                }
-                25% {
-                    transform: translate(-60%, -45%);
-                }
-                75% {
-                    transform: translate(-40%, -55%);
-                }
-            }
-
-            .objects-panel {
-                background: rgba(255, 255, 255, 0.15);
-                border-radius: 20px;
-                padding: 30px;
-                margin: 25px 0;
-                text-align: center;
-                backdrop-filter: blur(10px);
-                border: 1px solid rgba(255, 255, 255, 0.2);
-            }
-
-            .objects-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-                gap: 25px;
-                max-width: 700px;
-                margin: 25px auto 0;
-            }
-
-            .draggable-object {
-                width: 100px;
-                height: 100px;
-                background: linear-gradient(45deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
-                border-radius: 18px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 4rem;
-                cursor: grab;
-                transition: all 0.3s ease;
-                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-                user-select: none;
-                border: 2px solid rgba(255, 255, 255, 0.5);
-            }
-
-            .draggable-object:hover:not(.used) {
-                transform: scale(1.15) rotate(5deg);
-                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-            }
-
-            .draggable-object:active {
-                cursor: grabbing;
-            }
-
-            .draggable-object.used {
-                opacity: 0.3;
-                cursor: not-allowed;
-                transform: scale(0.9);
-            }
-
-            .countdown {
-                text-align: center;
-                font-size: 6rem;
-                font-weight: bold;
-                color: #ff6b6b;
-                text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.6);
-                margin: 80px 0;
-                animation: countdownPulse 1s infinite;
-            }
-
-            @keyframes countdownPulse {
-                0% {
-                    transform: scale(1);
-                }
-                50% {
-                    transform: scale(1.2);
-                }
-                100% {
-                    transform: scale(1);
-                }
-            }
-
-            .progress-section {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 30px;
-                margin: 40px 0;
-                flex-wrap: wrap;
+                margin-bottom: 16px;
+                text-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
             }
 
             .progress-bar {
-                width: 350px;
-                height: 30px;
                 background: rgba(255, 255, 255, 0.2);
-                border-radius: 20px;
-                overflow: hidden;
-                border: 2px solid rgba(255, 255, 255, 0.3);
+                backdrop-filter: blur(10px);
+                border-radius: 16px;
+                padding: 24px;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
             }
 
-            .progress-fill {
-                height: 100%;
-                background: linear-gradient(90deg, #4ecdc4, #44a08d, #56ab2f);
-                width: 0%;
-                transition: width 1s ease;
-                position: relative;
-            }
-
-            .progress-fill::after {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: -100%;
-                width: 100%;
-                height: 100%;
-                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-                animation: progressShine 2s infinite;
-            }
-
-            @keyframes progressShine {
-                0% {
-                    left: -100%;
-                }
-                100% {
-                    left: 100%;
-                }
-            }
-
-            .stars {
+            .progress-content {
                 display: flex;
-                gap: 15px;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 16px;
+            }
+
+            .level-info,
+            .score-info {
+                color: white;
+            }
+
+            .level-title {
+                font-size: 1.5rem;
+                font-weight: bold;
+                margin-bottom: 8px;
+            }
+
+            .score-info {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+            }
+
+            .stars-container {
+                display: flex;
+                align-items: center;
+                gap: 8px;
             }
 
             .star {
-                font-size: 3rem;
-                color: #ffd93d;
-                text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4);
-                opacity: 0.3;
-                transition: all 0.6s ease;
+                font-size: 2rem;
+                transition: all 0.3s ease;
             }
 
-            .star.earned {
-                opacity: 1;
-                transform: scale(1.3) rotate(360deg);
-                animation: starGlow 2s infinite alternate;
+            .star.active {
+                color: #fbbf24;
+                animation: pulse 2s infinite;
             }
 
-            @keyframes starGlow {
-                0% {
-                    filter: drop-shadow(0 0 10px #ffd93d);
-                }
-                100% {
-                    filter: drop-shadow(0 0 20px #ffd93d);
-                }
+            .star.inactive {
+                color: #9ca3af;
             }
 
-            .hints-panel {
-                background: rgba(255, 255, 255, 0.1);
-                border-radius: 18px;
-                padding: 25px;
-                margin: 25px 0;
-                text-align: center;
+            .score-display {
+                font-size: 1.5rem;
+                font-weight: bold;
+                color: #fbbf24;
+            }
+
+            main {
+                background: rgba(255, 255, 255, 0.15);
                 backdrop-filter: blur(10px);
-                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 24px;
+                padding: 32px;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+                min-height: 600px;
             }
 
-            .hint-text {
-                font-size: 1.2rem;
-                margin-bottom: 15px;
-                min-height: 60px;
+            .game-content {
+                text-align: center;
+            }
+
+            .large-icon {
+                font-size: 8rem;
+                margin-bottom: 24px;
+                animation: bounce 1s infinite;
+            }
+
+            .welcome-title {
+                font-size: 2.5rem;
+                color: white;
+                font-weight: bold;
+                margin-bottom: 24px;
+            }
+
+            .achievement-box {
+                background: linear-gradient(to right, #10b981, #3b82f6);
+                border-radius: 16px;
+                padding: 24px;
+                margin: 0 auto 24px;
+                max-width: 400px;
+            }
+
+            .achievement-stats {
+                display: flex;
+                justify-content: center;
+                gap: 32px;
+            }
+
+            .stat-value {
+                font-size: 2rem;
+                color: #fbbf24;
+            }
+
+            .instructions-box {
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 12px;
+                padding: 24px;
+                max-width: 700px;
+                margin: 0 auto 32px;
+                color: white;
+            }
+
+            .instructions-title {
+                font-size: 1.25rem;
+                margin-bottom: 12px;
+            }
+
+            .instructions-list {
+                font-size: 1.125rem;
+                line-height: 2;
+            }
+
+            .start-button {
+                background: linear-gradient(to right, #10b981, #3b82f6);
+                color: white;
+                padding: 24px 48px;
+                border-radius: 24px;
+                font-size: 2rem;
+                font-weight: bold;
+                border: none;
+                cursor: pointer;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+                transition: all 0.3s ease;
+                animation: pulse 2s infinite;
+            }
+
+            .start-button:hover {
+                transform: scale(1.05);
+            }
+
+            .column-container {
+                display: flex;
+                justify-content: center;
+                gap: 48px;
+                align-items: flex-start;
+                flex-wrap: wrap;
+            }
+
+            .column-section {
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 16px;
+                padding: 24px;
+            }
+
+            .column-title {
+                color: white;
+                font-size: 1.5rem;
+                font-weight: bold;
+                text-align: center;
+                margin-bottom: 16px;
+            }
+
+            .column {
+                background: linear-gradient(to bottom, #fcd34d, #fbbf24);
+                border-radius: 12px;
+                padding: 16px;
+                min-height: 400px;
+                width: 128px;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-end;
+                align-items: center;
+                border: 4px solid #d97706;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+                position: relative;
+                transition: all 0.3s ease;
+            }
+
+            .column.complete {
+                border-color: #10b981;
+                box-shadow: 0 0 20px #10b981;
+            }
+
+            .column-base {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 24px;
+                background: #92400e;
+                border-bottom-left-radius: 8px;
+                border-bottom-right-radius: 8px;
+            }
+
+            .column-items {
+                display: flex;
+                flex-direction: column-reverse;
+                align-items: center;
+                z-index: 1;
+                width: 100%;
+            }
+
+            .column-placeholder {
+                color: #92400e;
+                font-size: 0.875rem;
+                text-align: center;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) rotate(90deg);
+                white-space: nowrap;
+            }
+
+            .shape {
+                margin: 4px auto;
+                cursor: grab;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            }
+
+            .shape.draggable:hover {
+                transform: scale(1.05);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            }
+
+            .shape.dragging {
+                opacity: 0.5;
+                transform: rotate(5deg) scale(1.1);
+            }
+
+            .shape-circle,
+            .shape-bead {
+                border-radius: 50%;
+                border: 4px solid white;
+            }
+
+            .shape-square {
+                border: 4px solid white;
+                border-radius: 4px;
+            }
+
+            .shape-triangle {
+                width: 0;
+                height: 0;
+                filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+            }
+
+            .shape-star {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                animation: fadeIn 0.5s ease;
+                color: white;
+                font-size: 1.25rem;
+                clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
             }
 
-            @keyframes fadeIn {
-                0% {
-                    opacity: 0;
-                    transform: translateY(10px);
-                }
+            .shape-pool {
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 16px;
+                padding: 24px;
+                max-width: 500px;
+            }
+
+            .shape-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 24px;
+                justify-items: center;
+            }
+
+            .shape-instructions {
+                margin-top: 24px;
+                text-align: center;
+                color: rgba(255, 255, 255, 0.8);
+                font-size: 0.875rem;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 8px;
+                padding: 12px;
+                line-height: 1.6;
+            }
+
+            .control-buttons {
+                display: flex;
+                justify-content: center;
+                gap: 16px;
+                margin-top: 32px;
+                flex-wrap: wrap;
+            }
+
+            .control-button {
+                padding: 12px 24px;
+                border-radius: 12px;
+                font-size: 1.125rem;
+                font-weight: bold;
+                border: none;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                color: white;
+            }
+
+            .control-button:hover:not(:disabled) {
+                transform: scale(1.05);
+            }
+
+            .control-button:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            .button-reset {
+                background: #ef4444;
+            }
+
+            .button-reset:hover:not(:disabled) {
+                background: #dc2626;
+            }
+
+            .button-undo {
+                background: #eab308;
+            }
+
+            .button-undo:hover:not(:disabled) {
+                background: #ca8a04;
+            }
+
+            .success-content,
+            .failure-content {
+                position: relative;
+                z-index: 10;
+            }
+
+            .success-icon,
+            .failure-icon {
+                font-size: 9rem;
+                margin-bottom: 24px;
+                animation: bounce 1s infinite;
+            }
+
+            .success-title {
+                font-size: 4rem;
+                color: white;
+                font-weight: bold;
+                margin-bottom: 24px;
+                text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            }
+
+            .failure-title {
+                font-size: 2.5rem;
+                color: #fdba74;
+                font-weight: bold;
+                margin-bottom: 24px;
+            }
+
+            .rewards-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 40px;
+                margin-bottom: 32px;
+                flex-wrap: wrap;
+            }
+
+            .reward-badge {
+                border-radius: 50%;
+                padding: 32px;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            }
+
+            .reward-stars {
+                background: linear-gradient(to right, #fbbf24, #fb923c);
+                animation: spin 2s linear infinite;
+            }
+
+            .reward-points {
+                background: linear-gradient(to right, #10b981, #3b82f6);
+                animation: bounce 1s infinite;
+            }
+
+            .reward-value {
+                font-size: 3rem;
+                color: white;
+                font-weight: bold;
+            }
+
+            .reward-plus {
+                color: white;
+                font-size: 4rem;
+                animation: pulse 2s infinite;
+            }
+
+            .next-level-box,
+            .tips-box {
+                background: rgba(255, 255, 255, 0.3);
+                backdrop-filter: blur(10px);
+                border-radius: 24px;
+                padding: 32px;
+                max-width: 500px;
+                margin: 0 auto 32px;
+                color: white;
+            }
+
+            .tips-box {
+                background: linear-gradient(to right, #3b82f6, #8b5cf6);
+            }
+
+            .retry-buttons {
+                display: flex;
+                justify-content: center;
+                gap: 24px;
+                flex-wrap: wrap;
+            }
+
+            .retry-button {
+                padding: 20px 40px;
+                border-radius: 16px;
+                font-size: 1.5rem;
+                font-weight: bold;
+                border: none;
+                cursor: pointer;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+                transition: all 0.3s ease;
+                color: white;
+            }
+
+            .retry-button:hover {
+                transform: scale(1.05);
+            }
+
+            .button-retry {
+                background: linear-gradient(to right, #3b82f6, #06b6d4);
+            }
+
+            .button-review {
+                background: linear-gradient(to right, #eab308, #f97316);
+            }
+
+            nav {
+                margin-top: 32px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .nav-button {
+                background: #4b5563;
+                color: white;
+                padding: 12px 24px;
+                border-radius: 12px;
+                font-weight: bold;
+                border: none;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .nav-button:hover:not(:disabled) {
+                background: #374151;
+                transform: scale(1.05);
+            }
+
+            .nav-button:disabled {
+                background: #9ca3af;
+                cursor: not-allowed;
+            }
+
+            .progress-indicator {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .level-dot {
+                width: 48px;
+                height: 48px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.25rem;
+                font-weight: bold;
+                transition: all 0.3s ease;
+            }
+
+            .level-dot.current {
+                background: white;
+                color: #8b5cf6;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                transform: scale(1.1);
+            }
+
+            .level-dot.completed {
+                background: #10b981;
+                color: white;
+            }
+
+            .level-dot.locked {
+                background: rgba(255, 255, 255, 0.3);
+                color: white;
+            }
+
+            .level-connector {
+                width: 32px;
+                height: 4px;
+                background: rgba(255, 255, 255, 0.3);
+            }
+
+            footer {
+                margin-top: 32px;
+                text-align: center;
+            }
+
+            .info-box {
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                border-radius: 16px;
+                padding: 24px;
+                max-width: 800px;
+                margin: 0 auto;
+                color: white;
+            }
+
+            @keyframes pulse {
+                0%,
                 100% {
                     opacity: 1;
-                    transform: translateY(0);
                 }
-            }
-
-            .modal {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.8);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 2000;
-                backdrop-filter: blur(5px);
-            }
-
-            .modal-content {
-                background: linear-gradient(45deg, #4ecdc4, #44a08d);
-                padding: 60px;
-                border-radius: 30px;
-                text-align: center;
-                box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6);
-                max-width: 600px;
-                width: 90%;
-                border: 3px solid rgba(255, 255, 255, 0.3);
-            }
-
-            .modal h2 {
-                font-size: 2.5rem;
-                margin-bottom: 25px;
-                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-            }
-
-            .celebration {
-                font-size: 5rem;
-                margin-bottom: 30px;
-                animation: bounce 1s infinite;
+                50% {
+                    opacity: 0.5;
+                }
             }
 
             @keyframes bounce {
                 0%,
                 100% {
-                    transform: translateY(0);
+                    transform: translateY(-25%);
+                    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
                 }
                 50% {
-                    transform: translateY(-30px);
+                    transform: translateY(0);
+                    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
                 }
             }
 
-            .difficulty-indicator {
-                position: absolute;
-                top: 20px;
-                right: 20px;
-                background: rgba(255, 255, 255, 0.2);
-                padding: 10px 20px;
-                border-radius: 20px;
-                font-weight: bold;
-                backdrop-filter: blur(10px);
+            @keyframes spin {
+                from {
+                    transform: rotate(0deg);
+                }
+                to {
+                    transform: rotate(360deg);
+                }
             }
 
-            .timer-display {
-                position: absolute;
-                top: 20px;
-                left: 20px;
-                background: rgba(255, 107, 107, 0.3);
-                padding: 10px 20px;
-                border-radius: 20px;
-                font-weight: bold;
-                font-size: 1.5rem;
-                backdrop-filter: blur(10px);
-                border: 2px solid #ff6b6b;
+            [draggable='true'] {
+                user-select: none;
+                -webkit-user-select: none;
             }
 
             .hidden {
-                display: none !important;
+                display: none;
             }
 
             @media (max-width: 768px) {
-                .title {
-                    font-size: 2.2rem;
+                h1 {
+                    font-size: 2rem;
                 }
-
-                .scene-container {
-                    height: 400px;
+                .welcome-title {
+                    font-size: 1.75rem;
                 }
-
-                .object,
-                .draggable-object {
-                    width: 70px;
-                    height: 70px;
-                    font-size: 3rem;
+                .success-title {
+                    font-size: 2.5rem;
                 }
-
-                .stats {
-                    grid-template-columns: repeat(2, 1fr);
-                }
-
-                .progress-section {
+                .column-container {
                     flex-direction: column;
-                    gap: 20px;
+                    align-items: center;
                 }
-
-                .progress-bar {
-                    width: 280px;
+                .shape-grid {
+                    grid-template-columns: repeat(2, 1fr);
                 }
             }
         </style>
     </head>
     <body>
         <div class="container">
-            <div class="header">
-                <h1 class="title">🏠 لعبة ذاكرة المواقع المطورة 🧠</h1>
-                <div class="level-info">
-                    <span id="levelDisplay">المستوى 1: غرفة النوم البسيطة</span>
-                </div>
-            </div>
+            <header>
+                <h1>🧠 لعبة عمود الذاكرة البصرية</h1>
 
-            <div class="control-panel">
-                <div class="stats">
-                    <div class="stat-card">
-                        <div class="stat-label">المستوى</div>
-                        <div class="stat-value" id="currentLevel">1</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">الأشياء</div>
-                        <div class="stat-value" id="objectsCount">2</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">وقت العرض</div>
-                        <div class="stat-value" id="studyTime">12</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">النجاح</div>
-                        <div class="stat-value" id="successRate">0%</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">النجوم</div>
-                        <div class="stat-value" id="totalStars">0</div>
+                <div class="progress-bar">
+                    <div class="progress-content">
+                        <div class="level-info">
+                            <div class="level-title" id="levelTitle"></div>
+                            <div id="stageInfo"></div>
+                        </div>
+
+                        <div class="score-info">
+                            <div class="stars-container">
+                                <div id="starsDisplay"></div>
+                                <span id="starsText"></span>
+                            </div>
+                            <div class="score-display" id="scoreDisplay">0 نقطة</div>
+                        </div>
                     </div>
                 </div>
+            </header>
 
-                <div class="controls">
-                    <button class="btn btn-primary" id="startBtn">🎯 بدء المستوى</button>
-                    <button class="btn btn-secondary" id="nextBtn">⬆️ المستوى التالي</button>
-                    <button class="btn btn-success" id="hintBtn">💡 تلميح</button>
-                    <button class="btn btn-warning" id="resetBtn">🔄 إعادة البدء</button>
+            <main id="gameArea"></main>
+
+            <nav>
+                <button class="nav-button" id="prevButton">← المرحلة السابقة</button>
+                <div class="progress-indicator" id="progressIndicator"></div>
+                <button class="nav-button" id="nextButton">المرحلة التالية →</button>
+            </nav>
+
+            <footer>
+                <div class="info-box">
+                    <div style="font-size: 1.125rem; margin-bottom: 12px">🏗️ <strong>لعبة عمود الذاكرة:</strong> اسحب واتركت لبناء العمود!</div>
+                    <div style="margin-bottom: 8px">احفظ الترتيب • اسحب القطع • ابني العمود من الأسفل للأعلى</div>
+                    <div style="font-size: 0.875rem; opacity: 0.8">مصممة لتطوير الذاكرة البصرية والمهارات الحركية للأطفال</div>
                 </div>
-
-                <div class="phase-indicator" id="phaseIndicator">📚 اضغط "بدء المستوى" لمشاهدة الأشياء</div>
-            </div>
-
-            <div class="game-area">
-                <div class="timer-display hidden" id="timerDisplay">⏰ 12</div>
-                <div class="difficulty-indicator" id="difficultyIndicator">سهل 🟢</div>
-                <div class="countdown hidden" id="countdown">3</div>
-
-                <div class="scene-container">
-                    <div class="scene" id="scene"></div>
-                </div>
-
-                <div class="objects-panel hidden" id="objectsPanel">
-                    <h3>🎯 اسحب الأشياء إلى مواقعها الصحيحة</h3>
-                    <div class="objects-grid" id="objectsGrid"></div>
-                </div>
-
-                <div class="hints-panel">
-                    <div class="hint-text" id="hintText">💡 استخدم التلميحات للحصول على مساعدة إضافية</div>
-                </div>
-
-                <div class="progress-section">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progressFill"></div>
-                    </div>
-                    <div class="stars" id="stars">
-                        <span class="star">⭐</span>
-                        <span class="star">⭐</span>
-                        <span class="star">⭐</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal hidden" id="modal">
-            <div class="modal-content">
-                <div class="celebration">🎉</div>
-                <h2 id="modalTitle">مبروك!</h2>
-                <div id="modalMessage">لقد أكملت المستوى بنجاح!</div>
-                <button class="btn btn-primary" id="continueBtn" style="margin-top: 25px">المتابعة</button>
-            </div>
+            </footer>
         </div>
 
         <script>
-            // Game variables
-            let currentLevel = 1;
-            let gamePhase = 'waiting';
-            let studyTimer = null;
-            let distractionTimer = null;
-            let autoStartTimer = null;
-            let correctPlacements = 0;
-            let totalAttempts = 0;
-            let hintsUsed = 0;
-            let starsEarned = 0;
-            let totalStarsCollected = 0;
+            // Game State
+            let gameState = {
+                level: 1,
+                stage: 1,
+                state: 'welcome',
+                pattern: [],
+                userAnswer: [],
+                score: 0,
+                stars: 0,
+                message: '',
+                draggedItem: null
+            };
 
-            // Sound context
-            let audioContext = null;
-
-            // Auto-start configuration
-            const AUTO_START_DELAY = 2000; // 2 seconds delay before auto-start
-
-            // Initialize audio context
-            function initAudio() {
-                if (!audioContext) {
-                    try {
-                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    } catch (e) {
-                        console.log('Audio not supported');
+            // Game Settings
+            const gameSettings = {
+                1: {
+                    name: 'الخرز الملونة',
+                    icon: '🔴',
+                    stages: {
+                        1: { items: 3, time: 3000, shapes: ['bead'], colors: ['#FF6B6B', '#4ECDC4'] },
+                        2: { items: 3, time: 2500, shapes: ['bead'], colors: ['#FF6B6B', '#4ECDC4', '#45B7D1'] },
+                        3: { items: 4, time: 3000, shapes: ['bead'], colors: ['#FF6B6B', '#4ECDC4', '#45B7D1'] },
+                        4: { items: 4, time: 2500, shapes: ['bead'], colors: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4'] },
+                        5: { items: 5, time: 3000, shapes: ['bead'], colors: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4'] }
+                    }
+                },
+                2: {
+                    name: 'الأشكال الهندسية',
+                    icon: '🔷',
+                    stages: {
+                        1: { items: 3, time: 2500, shapes: ['circle', 'square'], colors: ['#FF6B6B', '#4ECDC4'] },
+                        2: { items: 4, time: 2500, shapes: ['circle', 'square', 'triangle'], colors: ['#FF6B6B', '#4ECDC4', '#45B7D1'] },
+                        3: { items: 4, time: 2000, shapes: ['circle', 'square', 'triangle'], colors: ['#FF6B6B', '#4ECDC4', '#45B7D1'] },
+                        4: { items: 5, time: 2500, shapes: ['circle', 'square', 'triangle'], colors: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4'] },
+                        5: { items: 5, time: 2000, shapes: ['circle', 'square', 'triangle'], colors: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4'] }
+                    }
+                },
+                3: {
+                    name: 'التحدي المتقدم',
+                    icon: '⭐',
+                    stages: {
+                        1: { items: 4, time: 2000, shapes: ['circle', 'square', 'triangle', 'star'], colors: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4'] },
+                        2: { items: 5, time: 2000, shapes: ['circle', 'square', 'triangle', 'star'], colors: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57'] },
+                        3: { items: 6, time: 1500, shapes: ['circle', 'square', 'triangle', 'star'], colors: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57'] },
+                        4: { items: 6, time: 1500, shapes: ['circle', 'square', 'triangle', 'star'], colors: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57', '#FF9FF3'] },
+                        5: { items: 7, time: 1500, shapes: ['circle', 'square', 'triangle', 'star'], colors: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57', '#FF9FF3'] }
                     }
                 }
-            }
+            };
 
-            // Enhanced sound functions
-            function playSound(frequency, duration, type = 'sine') {
-                initAudio();
-                if (!audioContext) return;
-
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-
-                oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
-                oscillator.type = type;
-
-                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
-
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + duration);
-            }
-
-            function playSuccessSound() {
-                playSound(659, 0.2); // E5
-                setTimeout(() => playSound(784, 0.2), 100); // G5
-                setTimeout(() => playSound(1047, 0.3), 200); // C6
-            }
-
-            function playErrorSound() {
-                playSound(220, 0.3, 'square'); // A3
-            }
-
-            function playButtonSound() {
-                playSound(440, 0.1); // A4
-            }
-
-            function playCountdownSound() {
-                playSound(800, 0.2);
-            }
-
-            // Game data with 10 levels
-            const levels = [
-                {
-                    name: 'غرفة النوم البسيطة',
-                    background: 'linear-gradient(135deg, #8EC5FC 0%, #E0C3FC 100%)',
-                    objects: 2,
-                    studyTime: 12,
-                    distractionTime: 3,
-                    difficulty: 'سهل 🟢',
-                    items: ['🛏️', '🕯️'],
-                    positions: [
-                        { left: '25%', top: '40%' },
-                        { left: '70%', top: '30%' }
-                    ],
-                    hints: ['🛏️ السرير موجود في الجانب الأيسر من الغرفة', '🕯️ الشمعة بجانب النافذة في الجانب الأيمن العلوي']
-                },
-                {
-                    name: 'المطبخ الصغير',
-                    background: 'linear-gradient(135deg, #FFF3B4 0%, #FFAAA5 100%)',
-                    objects: 3,
-                    studyTime: 10,
-                    distractionTime: 3,
-                    difficulty: 'سهل 🟢',
-                    items: ['🍎', '☕', '🥄'],
-                    positions: [
-                        { left: '30%', top: '45%' },
-                        { left: '60%', top: '25%' },
-                        { left: '45%', top: '65%' }
-                    ],
-                    hints: ['🍎 التفاحة على طاولة الطعام في الوسط الأيسر', '☕ فنجان القهوة في الأعلى بجانب الموقد الأيمن']
-                },
-                {
-                    name: 'الحديقة الخضراء',
-                    background: 'linear-gradient(135deg, #92FE9D 0%, #00C9FF 100%)',
-                    objects: 3,
-                    studyTime: 9,
-                    distractionTime: 4,
-                    difficulty: 'سهل 🟢',
-                    items: ['🌸', '🦋', '🌳'],
-                    positions: [
-                        { left: '30%', top: '40%' },
-                        { left: '60%', top: '25%' },
-                        { left: '75%', top: '70%' }
-                    ],
-                    hints: ['🌸 الوردة الجميلة في وسط الحديقة على اليسار', '🦋 الفراشة الملونة تطير في الأعلى وسط الحديقة']
-                },
-                {
-                    name: 'غرفة الأطفال المرحة',
-                    background: 'linear-gradient(135deg, #FFD3A5 0%, #FD9853 100%)',
-                    objects: 4,
-                    studyTime: 8,
-                    distractionTime: 4,
-                    difficulty: 'متوسط 🟡',
-                    items: ['🧸', '🎨', '📚', '🚗'],
-                    positions: [
-                        { left: '20%', top: '50%' },
-                        { left: '45%', top: '25%' },
-                        { left: '70%', top: '60%' },
-                        { left: '55%', top: '75%' }
-                    ],
-                    hints: ['🧸 الدبدوب الصغير على الأريكة في الجانب الأيسر', '📚 الكتب الملونة مرتبة على الرف في الجانب الأيمن']
-                },
-                {
-                    name: 'الصف الدراسي المنظم',
-                    background: 'linear-gradient(135deg, #A8EDEA 0%, #FED6E3 100%)',
-                    objects: 4,
-                    studyTime: 7,
-                    distractionTime: 4,
-                    difficulty: 'متوسط 🟡',
-                    items: ['📏', '🍎', '🖍️', '📖'],
-                    positions: [
-                        { left: '25%', top: '30%' },
-                        { left: '50%', top: '55%' },
-                        { left: '75%', top: '35%' },
-                        { left: '40%', top: '70%' }
-                    ],
-                    hints: ['📏 المسطرة على مكتب المعلم في المقدمة اليسرى', '🖍️ الأقلام الملونة في علبة على الجانب الأيمن العلوي']
-                },
-                {
-                    name: 'الصالة العائلية الكبيرة',
-                    background: 'linear-gradient(135deg, #D299C2 0%, #FED6E3 100%)',
-                    objects: 5,
-                    studyTime: 6,
-                    distractionTime: 5,
-                    difficulty: 'متوسط 🟡',
-                    items: ['📺', '🛋️', '🕰️', '🖼️', '🌱'],
-                    positions: [
-                        { left: '50%', top: '25%' },
-                        { left: '30%', top: '60%' },
-                        { left: '70%', top: '20%' },
-                        { left: '15%', top: '30%' },
-                        { left: '80%', top: '65%' }
-                    ],
-                    hints: ['📺 التلفاز الكبير معلق في منتصف الحائط الأمامي', '🕰️ الساعة الأنيقة على الحائط الأيمن في الأعلى']
-                },
-                {
-                    name: 'متجر الألعاب الملون',
-                    background: 'linear-gradient(135deg, #FF9A9E 0%, #FECFEF 50%, #FECFEF 100%)',
-                    objects: 5,
-                    studyTime: 5,
-                    distractionTime: 5,
-                    difficulty: 'صعب 🟠',
-                    items: ['🎈', '🎯', '🧩', '🎪', '🎭'],
-                    positions: [
-                        { left: '20%', top: '25%' },
-                        { left: '45%', top: '45%' },
-                        { left: '70%', top: '25%' },
-                        { left: '30%', top: '70%' },
-                        { left: '65%', top: '70%' }
-                    ],
-                    hints: ['🎈 البالونات الملونة في الزاوية اليسرى العلوية من المتجر', '🎪 خيمة السيرك الصغيرة في الجانب الأيسر السفلي']
-                },
-                {
-                    name: 'المكتبة الهادئة',
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    objects: 6,
-                    studyTime: 4,
-                    distractionTime: 5,
-                    difficulty: 'صعب 🟠',
-                    items: ['📚', '🖊️', '💡', '🗂️', '🪑', '🌿'],
-                    positions: [
-                        { left: '15%', top: '30%' },
-                        { left: '35%', top: '50%' },
-                        { left: '55%', top: '20%' },
-                        { left: '75%', top: '45%' },
-                        { left: '25%', top: '75%' },
-                        { left: '70%', top: '75%' }
-                    ],
-                    hints: ['📚 رف الكتب الكبير في الجانب الأيسر من المكتبة', '💡 مصباح القراءة المضيء في منطقة القراءة العلوية']
-                },
-                {
-                    name: 'المختبر العلمي',
-                    background: 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)',
-                    objects: 6,
-                    studyTime: 4,
-                    distractionTime: 6,
-                    difficulty: 'صعب 🟠',
-                    items: ['🧪', '🔬', '⚗️', '📊', '🧬', '🥽'],
-                    positions: [
-                        { left: '20%', top: '40%' },
-                        { left: '45%', top: '25%' },
-                        { left: '70%', top: '35%' },
-                        { left: '30%', top: '65%' },
-                        { left: '60%', top: '70%' },
-                        { left: '80%', top: '60%' }
-                    ],
-                    hints: ['🔬 المجهر العلمي على الطاولة المركزية في الأعلى', '🧪 أنبوب الاختبار في الجانب الأيسر من المختبر']
-                },
-                {
-                    name: 'القصر السحري',
-                    background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-                    objects: 7,
-                    studyTime: 3,
-                    distractionTime: 6,
-                    difficulty: 'صعب جداً 🔴',
-                    items: ['👑', '🗡️', '💎', '🏺', '🕯️', '📜', '🔮'],
-                    positions: [
-                        { left: '15%', top: '25%' },
-                        { left: '35%', top: '45%' },
-                        { left: '55%', top: '20%' },
-                        { left: '75%', top: '40%' },
-                        { left: '25%', top: '70%' },
-                        { left: '50%', top: '75%' },
-                        { left: '80%', top: '70%' }
-                    ],
-                    hints: ['👑 التاج الذهبي اللامع في الزاوية اليسرى العلوية من القصر', '🔮 الكرة البلورية السحرية في الزاوية اليمنى السفلى']
-                }
+            const encouragementMessages = [
+                '🌟 رائع جداً! عقلك نشيط ومتألق!',
+                '🎉 مذهل! أنت بطل الذاكرة!',
+                '⭐ ممتاز! ذاكرتك قوية كالحديد!',
+                '🏆 عبقري! أداؤك يستحق التصفيق!',
+                '🎯 إنجاز رائع! أنت محترف حقيقي!',
+                '🔥 لا يُصدق! قوة تركيزك مدهشة!',
+                '💎 بطولي! أنت نجم متألق!',
+                '🚀 خارق! عقلك يعمل كالصاروخ!',
+                '🌈 إبداعي! أنت تجعلني فخوراً!',
+                '⚡ سريع البديهة! ذكاؤك يتوهج!'
             ];
 
-            // Get current level data
-            function getCurrentLevel() {
-                return levels[currentLevel - 1] || levels[0];
-            }
+            // Generate random pattern
+            function generatePattern() {
+                const currentSettings = gameSettings[gameState.level].stages[gameState.stage];
+                const newPattern = [];
 
-            // Start level automatically
-            function autoStartLevel() {
-                if (gamePhase !== 'waiting') return;
+                for (let i = 0; i < currentSettings.items; i++) {
+                    const shape = currentSettings.shapes[Math.floor(Math.random() * currentSettings.shapes.length)];
+                    const color = currentSettings.colors[Math.floor(Math.random() * currentSettings.colors.length)];
 
-                document.getElementById('phaseIndicator').textContent = '⏰ سيبدأ المستوى تلقائياً خلال ثوان...';
-
-                let countdown = 3;
-                const countdownElement = document.getElementById('phaseIndicator');
-
-                autoStartTimer = setInterval(() => {
-                    countdownElement.textContent = `🚀 بدء المستوى خلال ${countdown}...`;
-                    playCountdownSound();
-                    countdown--;
-
-                    if (countdown < 0) {
-                        clearInterval(autoStartTimer);
-                        startLevel();
-                    }
-                }, 1000);
-            }
-
-            // Start level
-            function startLevel() {
-                if (gamePhase !== 'waiting') return;
-
-                // Clear any existing auto-start timer
-                if (autoStartTimer) {
-                    clearInterval(autoStartTimer);
-                    autoStartTimer = null;
+                    newPattern.push({
+                        id: `pattern-${i}`,
+                        shape: shape,
+                        color: color,
+                        position: i
+                    });
                 }
 
-                playButtonSound();
-                gamePhase = 'studying';
-                const level = getCurrentLevel();
-
-                // Disable start button and enable it again after level completion
-                const startBtn = document.getElementById('startBtn');
-                startBtn.disabled = true;
-                startBtn.textContent = '⏳ جاري اللعب...';
-
-                document.getElementById('phaseIndicator').textContent = '👀 شاهد الأشياء واحفظ مواقعها بعناية!';
-                document.getElementById('timerDisplay').classList.remove('hidden');
-
-                // Reset hint button
-                const hintBtn = document.getElementById('hintBtn');
-                hintBtn.disabled = false;
-                hintBtn.textContent = '💡 تلميح';
-
-                showStudyPhase();
+                return newPattern;
             }
 
-            // Show study phase
-            function showStudyPhase() {
-                const level = getCurrentLevel();
-                const scene = document.getElementById('scene');
+            // Create shape element
+            function createShapeElement(item, isInColumn = false, isDraggable = false) {
+                const size = isInColumn ? 50 : 60;
+                const div = document.createElement('div');
+                div.className = 'shape';
 
-                scene.style.background = level.background;
-                scene.innerHTML = '';
-
-                // Add objects with animation delay
-                level.items.forEach((item, index) => {
-                    setTimeout(() => {
-                        const object = document.createElement('div');
-                        object.className = 'object';
-                        object.textContent = item;
-                        object.style.left = level.positions[index].left;
-                        object.style.top = level.positions[index].top;
-                        scene.appendChild(object);
-                        playSound(600 + index * 100, 0.1);
-                    }, index * 200);
-                });
-
-                // Start timer
-                let timeLeft = level.studyTime;
-                document.getElementById('timerDisplay').textContent = `⏰ ${timeLeft}`;
-
-                studyTimer = setInterval(() => {
-                    timeLeft--;
-                    document.getElementById('timerDisplay').textContent = `⏰ ${timeLeft}`;
-
-                    if (timeLeft <= 3 && timeLeft > 0) {
-                        playCountdownSound();
-                    }
-
-                    if (timeLeft <= 0) {
-                        clearInterval(studyTimer);
-                        document.getElementById('timerDisplay').classList.add('hidden');
-                        startDistraction();
-                    }
-                }, 1000);
-            }
-
-            // Start distraction phase
-            function startDistraction() {
-                gamePhase = 'distraction';
-                document.getElementById('scene').innerHTML = '';
-                document.getElementById('phaseIndicator').textContent = '🔢 عد تنازلياً وركز!';
-
-                const level = getCurrentLevel();
-                let timeLeft = level.distractionTime;
-                const countdownEl = document.getElementById('countdown');
-
-                countdownEl.classList.remove('hidden');
-                countdownEl.textContent = timeLeft;
-
-                distractionTimer = setInterval(() => {
-                    timeLeft--;
-                    if (timeLeft > 0) {
-                        countdownEl.textContent = timeLeft;
-                        playCountdownSound();
-                    } else {
-                        countdownEl.classList.add('hidden');
-                        clearInterval(distractionTimer);
-                        startRecall();
-                    }
-                }, 1000);
-            }
-
-            // Start recall phase
-            function startRecall() {
-                gamePhase = 'recall';
-                document.getElementById('phaseIndicator').textContent = '🎯 اسحب الأشياء إلى مواقعها الصحيحة!';
-
-                setupDropZones();
-                setupDraggableObjects();
-                document.getElementById('objectsPanel').classList.remove('hidden');
-            }
-
-            // Setup drop zones
-            function setupDropZones() {
-                const level = getCurrentLevel();
-                const scene = document.getElementById('scene');
-                scene.innerHTML = '';
-
-                level.positions.forEach((position, index) => {
-                    const dropZone = document.createElement('div');
-                    dropZone.className = 'drop-zone';
-                    dropZone.style.left = position.left;
-                    dropZone.style.top = position.top;
-                    dropZone.dataset.position = index;
-                    dropZone.textContent = index + 1;
-
-                    dropZone.addEventListener('dragover', (e) => {
-                        e.preventDefault();
-                        dropZone.classList.add('drag-over');
-                    });
-
-                    dropZone.addEventListener('dragleave', () => {
-                        dropZone.classList.remove('drag-over');
-                    });
-
-                    dropZone.addEventListener('drop', (e) => {
-                        e.preventDefault();
-                        dropZone.classList.remove('drag-over');
-                        handleDrop(e, dropZone);
-                    });
-
-                    scene.appendChild(dropZone);
-                });
-            }
-
-            // Setup draggable objects with touch support
-            function setupDraggableObjects() {
-                const level = getCurrentLevel();
-                const grid = document.getElementById('objectsGrid');
-                grid.innerHTML = '';
-
-                const shuffled = [...level.items].sort(() => Math.random() - 0.5);
-
-                shuffled.forEach((item) => {
-                    const originalIndex = level.items.indexOf(item);
-                    const draggable = document.createElement('div');
-                    draggable.className = 'draggable-object';
-                    draggable.textContent = item;
-                    draggable.draggable = true;
-                    draggable.dataset.item = item;
-                    draggable.dataset.originalIndex = originalIndex;
-
-                    // Desktop drag events
-                    draggable.addEventListener('dragstart', (e) => {
-                        playButtonSound();
-                        e.dataTransfer.setData(
-                            'text/plain',
-                            JSON.stringify({
-                                item: item,
-                                originalIndex: originalIndex
-                            })
-                        );
-                    });
-
-                    // Touch events for mobile
-                    let isDragging = false;
-                    let startX, startY;
-                    let draggedElement = null;
-
-                    draggable.addEventListener('touchstart', (e) => {
-                        if (draggable.classList.contains('used')) return;
-
-                        e.preventDefault();
-                        playButtonSound();
-                        isDragging = true;
-
-                        const touch = e.touches[0];
-                        startX = touch.clientX;
-                        startY = touch.clientY;
-
-                        draggedElement = draggable.cloneNode(true);
-                        draggedElement.style.position = 'fixed';
-                        draggedElement.style.zIndex = '3000';
-                        draggedElement.style.pointerEvents = 'none';
-                        draggedElement.style.transform = 'scale(1.2)';
-                        draggedElement.style.opacity = '0.8';
-                        document.body.appendChild(draggedElement);
-
-                        updateDraggedElementPosition(touch.clientX, touch.clientY);
-                    });
-
-                    draggable.addEventListener('touchmove', (e) => {
-                        if (!isDragging || !draggedElement) return;
-                        e.preventDefault();
-
-                        const touch = e.touches[0];
-                        updateDraggedElementPosition(touch.clientX, touch.clientY);
-
-                        // Highlight drop zones
-                        const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
-                        const dropZone = elementBelow?.closest('.drop-zone');
-
-                        document.querySelectorAll('.drop-zone').forEach((zone) => {
-                            zone.classList.remove('drag-over');
-                        });
-
-                        if (dropZone && !dropZone.classList.contains('filled')) {
-                            dropZone.classList.add('drag-over');
+                if (isDraggable) {
+                    div.classList.add('draggable');
+                    div.draggable = true;
+                    div.addEventListener('dragstart', (e) => {
+                        if (gameState.state === 'playing') {
+                            playPickupSound();
+                            gameState.draggedItem = item;
+                            div.classList.add('dragging');
+                            e.dataTransfer.setData('text/plain', JSON.stringify(item));
+                            e.dataTransfer.effectAllowed = 'copy';
                         }
                     });
+                    div.addEventListener('dragend', () => {
+                        gameState.draggedItem = null;
+                        div.classList.remove('dragging');
+                    });
+                }
 
-                    draggable.addEventListener('touchend', (e) => {
-                        if (!isDragging || !draggedElement) return;
+                switch (item.shape) {
+                    case 'bead':
+                    case 'circle':
+                        div.classList.add('shape-circle');
+                        div.style.cssText = `width: ${size}px; height: ${size}px; background-color: ${item.color};`;
+                        break;
+                    case 'square':
+                        div.classList.add('shape-square');
+                        div.style.cssText = `width: ${size}px; height: ${size}px; background-color: ${item.color};`;
+                        break;
+                    case 'triangle':
+                        div.classList.add('shape-triangle');
+                        div.style.cssText = `border-left: ${size / 2}px solid transparent; border-right: ${size / 2}px solid transparent; border-bottom: ${size}px solid ${item.color}; margin: ${isInColumn ? '4px auto' : '8px'};`;
+                        break;
+                    case 'star':
+                        div.classList.add('shape-star');
+                        div.style.cssText = `width: ${size}px; height: ${size}px; background-color: ${item.color};`;
+                        div.textContent = '✦';
+                        break;
+                }
 
-                        const touch = e.changedTouches[0];
-                        const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
-                        const dropZone = elementBelow?.closest('.drop-zone');
+                return div;
+            }
 
-                        if (dropZone && !dropZone.classList.contains('filled')) {
-                            // Create a fake drop event
-                            const fakeDropEvent = {
-                                preventDefault: () => {},
-                                dataTransfer: {
-                                    getData: () =>
-                                        JSON.stringify({
-                                            item: item,
-                                            originalIndex: originalIndex
-                                        })
-                                }
-                            };
-                            handleDrop(fakeDropEvent, dropZone);
-                        }
+            // Create shape pool
+            function createShapePool() {
+                const currentSettings = gameSettings[gameState.level].stages[gameState.stage];
+                const pool = [];
 
-                        // Cleanup
-                        isDragging = false;
-                        if (draggedElement) {
-                            document.body.removeChild(draggedElement);
-                            draggedElement = null;
-                        }
-
-                        document.querySelectorAll('.drop-zone').forEach((zone) => {
-                            zone.classList.remove('drag-over');
+                currentSettings.shapes.forEach((shape) => {
+                    currentSettings.colors.forEach((color) => {
+                        pool.push({
+                            id: `pool-${shape}-${color}`,
+                            shape,
+                            color
                         });
                     });
-
-                    function updateDraggedElementPosition(x, y) {
-                        if (draggedElement) {
-                            draggedElement.style.left = x - 40 + 'px';
-                            draggedElement.style.top = y - 40 + 'px';
-                        }
-                    }
-
-                    grid.appendChild(draggable);
                 });
+
+                return pool;
             }
 
-            // Handle drop
-            function handleDrop(e, dropZone) {
-                if (dropZone.classList.contains('filled')) return;
+            // Check answer
+            function checkAnswer() {
+                if (gameState.userAnswer.length !== gameState.pattern.length) return;
 
-                const data = JSON.parse(e.dataTransfer.getData('text/plain'));
-                const targetPosition = parseInt(dropZone.dataset.position);
+                const isCorrect = gameState.userAnswer.every((item, index) => item.shape === gameState.pattern[index].shape && item.color === gameState.pattern[index].color);
 
-                dropZone.classList.add('filled');
-                dropZone.textContent = data.item;
-                dropZone.style.fontSize = '3.5rem';
-
-                totalAttempts++;
-
-                if (targetPosition === data.originalIndex) {
-                    // Correct!
-                    dropZone.classList.add('correct');
-                    correctPlacements++;
-                    earnStar();
+                if (isCorrect) {
+                    const earnedStars = 3;
+                    const earnedPoints = earnedStars * 10;
+                    gameState.score += earnedPoints;
+                    gameState.stars += earnedStars;
+                    gameState.message = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
+                    gameState.state = 'success';
                     playSuccessSound();
+                    render();
 
-                    // Mark object as used
-                    const objects = document.querySelectorAll('.draggable-object');
-                    objects.forEach((obj) => {
-                        if (obj.dataset.item === data.item) {
-                            obj.classList.add('used');
-                            obj.draggable = false;
-                        }
-                    });
-
-                    if (correctPlacements === getCurrentLevel().objects) {
-                        setTimeout(completeLevel, 1500);
-                    }
-                } else {
-                    // Wrong
-                    dropZone.classList.add('wrong');
-                    playErrorSound();
                     setTimeout(() => {
-                        dropZone.classList.remove('filled', 'wrong');
-                        dropZone.textContent = targetPosition + 1;
-                        dropZone.style.fontSize = '';
-                    }, 1500);
-                }
-
-                updateProgress();
-                updateStats();
-            }
-
-            // Complete level
-            function completeLevel() {
-                gamePhase = 'completed';
-                totalStarsCollected += starsEarned;
-                const modal = document.getElementById('modal');
-
-                playSound(523, 0.3); // C5
-                setTimeout(() => playSound(659, 0.3), 150); // E5
-                setTimeout(() => playSound(784, 0.5), 300); // G5
-
-                if (currentLevel === levels.length) {
-                    document.getElementById('modalTitle').textContent = '🏆 تهانينا! أكملت جميع المستويات!';
-                    document.getElementById('modalMessage').textContent = `مجموع النجوم: ${totalStarsCollected} ⭐`;
-                } else {
-                    document.getElementById('modalTitle').textContent = `✨ رائع! أكملت ${getCurrentLevel().name}`;
-                    document.getElementById('modalMessage').textContent = `حصلت على ${starsEarned} نجوم من 3! 🌟`;
-                }
-
-                modal.classList.remove('hidden');
-            }
-
-            // Earn star
-            function earnStar() {
-                const stars = document.querySelectorAll('.star');
-                if (starsEarned < stars.length) {
-                    stars[starsEarned].classList.add('earned');
-                    starsEarned++;
-                    playSound(880, 0.3); // A5
-                }
-            }
-
-            // Update progress
-            function updateProgress() {
-                const progress = (correctPlacements / getCurrentLevel().objects) * 100;
-                document.getElementById('progressFill').style.width = progress + '%';
-            }
-
-            // Update stats
-            function updateStats() {
-                document.getElementById('currentLevel').textContent = currentLevel;
-                document.getElementById('objectsCount').textContent = getCurrentLevel().objects;
-                document.getElementById('totalStars').textContent = totalStarsCollected;
-
-                const rate = totalAttempts > 0 ? Math.round((correctPlacements / totalAttempts) * 100) : 0;
-                document.getElementById('successRate').textContent = rate + '%';
-            }
-
-            // Update level display
-            function updateLevelDisplay() {
-                const level = getCurrentLevel();
-                document.getElementById('levelDisplay').textContent = `المستوى ${currentLevel}: ${level.name}`;
-                document.getElementById('studyTime').textContent = level.studyTime;
-                document.getElementById('difficultyIndicator').textContent = level.difficulty;
-            }
-
-            // Reset level
-            function resetLevel() {
-                if (studyTimer) clearInterval(studyTimer);
-                if (distractionTimer) clearInterval(distractionTimer);
-                if (autoStartTimer) clearInterval(autoStartTimer);
-
-                gamePhase = 'waiting';
-                correctPlacements = 0;
-                totalAttempts = 0;
-                hintsUsed = 0;
-                starsEarned = 0;
-
-                // Reset start button
-                const startBtn = document.getElementById('startBtn');
-                startBtn.disabled = false;
-                startBtn.textContent = '🎯 بدء يدوي';
-
-                // Reset hint button
-                const hintBtn = document.getElementById('hintBtn');
-                hintBtn.disabled = false;
-                hintBtn.textContent = '💡 تلميح';
-
-                document.getElementById('objectsPanel').classList.add('hidden');
-                document.getElementById('countdown').classList.add('hidden');
-                document.getElementById('modal').classList.add('hidden');
-                document.getElementById('timerDisplay').classList.add('hidden');
-                document.getElementById('phaseIndicator').textContent = '🎮 استعد! سيبدأ المستوى قريباً...';
-                document.getElementById('hintText').textContent = '💡 استخدم التلميحات للحصول على مساعدة إضافية';
-
-                const scene = document.getElementById('scene');
-                scene.innerHTML = '';
-                scene.style.background = getCurrentLevel().background;
-
-                const stars = document.querySelectorAll('.star');
-                stars.forEach((star) => star.classList.remove('earned'));
-
-                updateProgress();
-                updateStats();
-                updateLevelDisplay();
-
-                // Auto-start the level after a short delay
-                setTimeout(autoStartLevel, AUTO_START_DELAY);
-            }
-
-            // Next level
-            function nextLevel() {
-                playButtonSound();
-                if (currentLevel < levels.length) {
-                    currentLevel++;
-                } else {
-                    currentLevel = 1;
-                    totalStarsCollected = 0;
-                }
-                resetLevel();
-            }
-
-            // Show hint
-            function showHint() {
-                if (gamePhase !== 'recall' || hintsUsed >= 2) return;
-
-                playButtonSound();
-                const level = getCurrentLevel();
-                const hintBtn = document.getElementById('hintBtn');
-
-                if (hintsUsed < level.hints.length) {
-                    document.getElementById('hintText').textContent = level.hints[hintsUsed];
-                    hintsUsed++;
-
-                    // Update hint button text
-                    if (hintsUsed >= level.hints.length) {
-                        hintBtn.disabled = true;
-                        hintBtn.textContent = '❌ نفدت التلميحات';
-                    } else {
-                        hintBtn.textContent = `💡 تلميح (${2 - hintsUsed} متبقي)`;
-                    }
-                }
-            }
-
-            // Reset game
-            function resetGame() {
-                playButtonSound();
-                currentLevel = 1;
-                totalStarsCollected = 0;
-                resetLevel();
-            }
-
-            // Event listeners
-            document.addEventListener('DOMContentLoaded', () => {
-                updateLevelDisplay();
-                updateStats();
-
-                const scene = document.getElementById('scene');
-                scene.style.background = getCurrentLevel().background;
-
-                // Button event listeners with sound effects
-                document.getElementById('startBtn').addEventListener('click', startLevel);
-                document.getElementById('nextBtn').addEventListener('click', nextLevel);
-                document.getElementById('hintBtn').addEventListener('click', showHint);
-                document.getElementById('resetBtn').addEventListener('click', resetGame);
-                document.getElementById('continueBtn').addEventListener('click', () => {
-                    playButtonSound();
-                    document.getElementById('modal').classList.add('hidden');
-                    if (currentLevel === levels.length && starsEarned > 0) {
-                        nextLevel();
-                    } else if (currentLevel < levels.length) {
-                        nextLevel();
-                    } else {
-                        resetGame();
-                    }
-                });
-
-                // Add hover sound effects to buttons (desktop only)
-                const buttons = document.querySelectorAll('.btn');
-                buttons.forEach((btn) => {
-                    btn.addEventListener('mouseenter', () => {
-                        if (!btn.disabled && window.innerWidth > 768) {
-                            playSound(330, 0.05); // E4
+                        if (gameState.stage < 5) {
+                            gameState.stage++;
+                        } else if (gameState.level < 3) {
+                            gameState.level++;
+                            gameState.stage = 1;
                         }
+                        gameState.state = 'welcome';
+                        render();
+                    }, 3000);
+                } else {
+                    gameState.state = 'failure';
+                    playFailSound();
+                    render();
+                }
+            }
+
+            // Start game
+            function startGame() {
+                const newPattern = generatePattern();
+                gameState.pattern = newPattern;
+                gameState.userAnswer = [];
+                gameState.state = 'showing';
+                playShowSound();
+                render();
+
+                const showTime = gameSettings[gameState.level].stages[gameState.stage].time;
+
+                setTimeout(() => {
+                    gameState.state = 'playing';
+                    render();
+                }, showTime);
+            }
+
+            // Sound Functions
+            function playSuccessSound() {
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const frequencies = [523.25, 659.25, 783.99, 1046.5, 1318.51];
+
+                    frequencies.forEach((freq, index) => {
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+
+                        oscillator.frequency.value = freq;
+                        oscillator.type = 'sine';
+
+                        gainNode.gain.setValueAtTime(0, audioContext.currentTime + index * 0.1);
+                        gainNode.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + index * 0.1 + 0.02);
+                        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + index * 0.1 + 0.5);
+
+                        oscillator.start(audioContext.currentTime + index * 0.1);
+                        oscillator.stop(audioContext.currentTime + index * 0.1 + 0.5);
                     });
-                });
-
-                // Auto-start the first level
-                setTimeout(() => {
-                    autoStartLevel();
-                }, AUTO_START_DELAY);
-            });
-
-            // Prevent default drag behavior and improve mobile experience
-            document.addEventListener('dragstart', (e) => {
-                if (e.target.tagName === 'IMG') {
-                    e.preventDefault();
+                } catch (e) {
+                    console.log('Audio not supported');
                 }
-            });
+            }
 
-            // Prevent text selection during drag operations
-            document.addEventListener('selectstart', (e) => {
-                if (e.target.classList.contains('draggable-object') || e.target.classList.contains('object')) {
-                    e.preventDefault();
+            function playFailSound() {
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.5);
+                    oscillator.type = 'sawtooth';
+
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.5);
+                } catch (e) {
+                    console.log('Audio not supported');
                 }
-            });
+            }
 
-            // Prevent context menu on long press (mobile)
-            document.addEventListener('contextmenu', (e) => {
-                if (e.target.classList.contains('draggable-object') || e.target.classList.contains('drop-zone')) {
-                    e.preventDefault();
+            function playPickupSound() {
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.value = 600;
+                    oscillator.type = 'sine';
+
+                    gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2);
+
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.2);
+                } catch (e) {
+                    console.log('Audio not supported');
                 }
-            });
+            }
 
-            // Prevent page refresh on pull-to-refresh (mobile)
-            document.body.addEventListener(
-                'touchstart',
-                (e) => {
-                    if (e.touches.length === 1 && window.scrollY === 0) {
-                        e.preventDefault();
+            function playDropSound() {
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.value = 400;
+                    oscillator.type = 'sine';
+
+                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                } catch (e) {
+                    console.log('Audio not supported');
+                }
+            }
+
+            function playShowSound() {
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.value = 440;
+                    oscillator.type = 'sine';
+
+                    gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                } catch (e) {
+                    console.log('Audio not supported');
+                }
+            }
+
+            function playDeleteSound() {
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.value = 250;
+                    oscillator.type = 'triangle';
+
+                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                } catch (e) {
+                    console.log('Audio not supported');
+                }
+            }
+
+            // Navigation
+            function goToLevel(newLevel, newStage) {
+                if (newLevel >= 1 && newLevel <= 3 && newStage >= 1 && newStage <= 5) {
+                    gameState.level = newLevel;
+                    gameState.stage = newStage;
+                    gameState.state = 'welcome';
+                    render();
+                }
+            }
+
+            // Update header display
+            function updateHeader() {
+                const levelTitle = document.getElementById('levelTitle');
+                const stageInfo = document.getElementById('stageInfo');
+                const starsDisplay = document.getElementById('starsDisplay');
+                const starsText = document.getElementById('starsText');
+                const scoreDisplay = document.getElementById('scoreDisplay');
+
+                levelTitle.textContent = `${gameSettings[gameState.level].icon} المستوى ${gameState.level}: ${gameSettings[gameState.level].name}`;
+                stageInfo.textContent = `المرحلة ${gameState.stage} من 5`;
+
+                // Display stars
+                starsDisplay.innerHTML = '';
+                for (let i = 1; i <= 5; i++) {
+                    const star = document.createElement('span');
+                    star.className = 'star';
+                    star.textContent = '⭐';
+                    if (i <= (gameState.stars % 5 === 0 && gameState.stars > 0 ? 5 : gameState.stars % 5)) {
+                        star.classList.add('active');
+                    } else {
+                        star.classList.add('inactive');
                     }
-                },
-                { passive: false }
-            );
+                    starsDisplay.appendChild(star);
+                }
 
-            document.body.addEventListener(
-                'touchmove',
-                (e) => {
-                    if (e.touches.length === 1) {
-                        e.preventDefault();
+                const starsCount = gameState.stars % 5 || (gameState.stars > 0 ? 5 : 0);
+                const starsMultiplier = Math.floor(gameState.stars / 5);
+                starsText.textContent = `${starsMultiplier > 0 ? starsMultiplier + '×5 + ' : ''}${starsCount} نجوم`;
+
+                scoreDisplay.textContent = `${gameState.score} نقطة`;
+            }
+
+            // Update navigation
+            function updateNavigation() {
+                const prevButton = document.getElementById('prevButton');
+                const nextButton = document.getElementById('nextButton');
+                const progressIndicator = document.getElementById('progressIndicator');
+
+                prevButton.disabled = gameState.level === 1 && gameState.stage === 1;
+                nextButton.disabled = gameState.level === 3 && gameState.stage === 5;
+
+                prevButton.onclick = () => {
+                    if (gameState.stage > 1) {
+                        goToLevel(gameState.level, gameState.stage - 1);
+                    } else if (gameState.level > 1) {
+                        goToLevel(gameState.level - 1, 5);
                     }
-                },
-                { passive: false }
-            );
+                };
 
-            // Enable audio on first user interaction
-            document.addEventListener(
-                'click',
-                () => {
-                    initAudio();
-                },
-                { once: true }
-            );
+                nextButton.onclick = () => {
+                    if (gameState.stage < 5) {
+                        goToLevel(gameState.level, gameState.stage + 1);
+                    } else if (gameState.level < 3) {
+                        goToLevel(gameState.level + 1, 1);
+                    }
+                };
 
-            document.addEventListener(
-                'touchstart',
-                () => {
-                    initAudio();
-                },
-                { once: true }
-            );
+                // Progress dots
+                progressIndicator.innerHTML = '';
+                for (let i = 1; i <= 3; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'level-dot';
+                    dot.textContent = gameSettings[i].icon;
 
-            // Handle orientation change
-            window.addEventListener('orientationchange', () => {
-                setTimeout(() => {
-                    // Recalculate layout after orientation change
-                    const scene = document.getElementById('scene');
-                    scene.style.height = '';
+                    if (i === gameState.level) {
+                        dot.classList.add('current');
+                    } else if (i < gameState.level) {
+                        dot.classList.add('completed');
+                    } else {
+                        dot.classList.add('locked');
+                    }
+
+                    progressIndicator.appendChild(dot);
+
+                    if (i < 3) {
+                        const connector = document.createElement('div');
+                        connector.className = 'level-connector';
+                        progressIndicator.appendChild(connector);
+                    }
+                }
+            }
+
+            // Render game
+            function render() {
+                const gameArea = document.getElementById('gameArea');
+                gameArea.innerHTML = '';
+
+                updateHeader();
+                updateNavigation();
+
+                const content = document.createElement('div');
+                content.className = 'game-content';
+
+                if (gameState.state === 'welcome') {
+                    content.innerHTML = `
+          <div class="large-icon">🎯</div>
+          <h2 class="welcome-title">مستعد لبناء عمود الذاكرة؟</h2>
+          ${
+              gameState.score > 0
+                  ? `
+            <div class="achievement-box">
+              <div style="color: white; font-size: 1.5rem; font-weight: bold; margin-bottom: 8px;">🏆 إنجازاتك</div>
+              <div class="achievement-stats">
+                <div>
+                  <div class="stat-value">${gameState.stars}</div>
+                  <div style="font-size: 0.875rem; color: white;">نجمة</div>
+                </div>
+                <div>
+                  <div class="stat-value">${gameState.score}</div>
+                  <div style="font-size: 0.875rem; color: white;">نقطة</div>
+                </div>
+              </div>
+            </div>
+          `
+                  : ''
+          }
+          <div class="instructions-box">
+            <div class="instructions-title">🏗️ كيفية اللعب:</div>
+            <div class="instructions-list">
+              <div>• احفظ ترتيب ${gameSettings[gameState.level].stages[gameState.stage].items} قطع في العمود</div>
+              <div>• اسحب القطع من الأسفل واتركها في العمود</div>
+              <div>• ابني العمود بنفس الترتيب من الأسفل للأعلى!</div>
+            </div>
+            <div style="color: #fbbf24; font-weight: bold; margin-top: 12px;">
+              ⏰ زمن المشاهدة: ${gameSettings[gameState.level].stages[gameState.stage].time / 1000} ثانية
+            </div>
+          </div>
+        `;
+
+                    const button = document.createElement('button');
+                    button.className = 'start-button';
+                    button.textContent = '🚀 ابدأ البناء!';
+                    button.onclick = startGame;
+                    content.appendChild(button);
+                } else if (gameState.state === 'showing') {
+                    content.innerHTML = `
+          <h2 class="welcome-title">احفظ ترتيب القطع في العمود! 👀</h2>
+          <div style="display: flex; justify-content: center;">
+            <div id="showColumn" class="column">
+              <div class="column-base"></div>
+              <div class="column-items" id="showColumnItems"></div>
+            </div>
+          </div>
+          <div style="color: white; font-size: 1.5rem; margin-top: 24px; animation: pulse 2s infinite;">
+            ⏰ ركز على الترتيب من الأسفل إلى الأعلى!
+          </div>
+        `;
+
                     setTimeout(() => {
-                        const rect = scene.getBoundingClientRect();
-                        scene.style.height = rect.height + 'px';
+                        const columnItems = document.getElementById('showColumnItems');
+                        if (columnItems) {
+                            gameState.pattern.forEach((item, index) => {
+                                columnItems.appendChild(createShapeElement({ ...item, id: `show-${index}` }, true));
+                            });
+                        }
                     }, 100);
-                }, 500);
-            });
+                } else if (gameState.state === 'playing') {
+                    content.innerHTML = `
+          <h2 class="welcome-title">اسحب القطع وابني العمود! 🏗️</h2>
+          <div class="column-container">
+            <div class="column-section">
+              <h3 class="column-title">عمود البناء (${gameState.userAnswer.length}/${gameState.pattern.length})</h3>
+              <div id="buildColumn" class="column">
+                <div class="column-base"></div>
+                <div class="column-items" id="buildColumnItems"></div>
+                ${gameState.userAnswer.length === 0 ? '<div class="column-placeholder">اسحب القطع هنا</div>' : ''}
+              </div>
+            </div>
+            <div class="shape-pool">
+              <h3 class="column-title">اسحب من هنا:</h3>
+              <div class="shape-grid" id="shapeGrid"></div>
+              <div class="shape-instructions">
+                💡 اسحب القطع من هنا واتركها في العمود<br>
+                🔄 ابدأ من القطعة الأولى (الأسفل) إلى الأخيرة (الأعلى)
+              </div>
+            </div>
+          </div>
+        `;
 
-            // Handle window resize
-            window.addEventListener('resize', () => {
-                // Debounce resize events
-                clearTimeout(window.resizeTimeout);
-                window.resizeTimeout = setTimeout(() => {
-                    // Update layout if needed
-                    updateProgress();
-                }, 250);
-            });
+                    setTimeout(() => {
+                        const buildColumn = document.getElementById('buildColumn');
+                        const buildColumnItems = document.getElementById('buildColumnItems');
+                        const shapeGrid = document.getElementById('shapeGrid');
+
+                        // Setup drop zone
+                        buildColumn.addEventListener('dragover', (e) => {
+                            e.preventDefault();
+                            e.dataTransfer.dropEffect = 'copy';
+                        });
+
+                        buildColumn.addEventListener('drop', (e) => {
+                            e.preventDefault();
+                            playDropSound();
+
+                            const droppedItem = JSON.parse(e.dataTransfer.getData('text/plain'));
+                            const newItem = {
+                                ...droppedItem,
+                                id: `answer-${gameState.userAnswer.length}`
+                            };
+
+                            gameState.userAnswer.push(newItem);
+
+                            if (gameState.userAnswer.length === gameState.pattern.length) {
+                                buildColumn.classList.add('complete');
+                                setTimeout(checkAnswer, 500);
+                            }
+
+                            render();
+                        });
+
+                        // Display user answer
+                        gameState.userAnswer.forEach((item, index) => {
+                            buildColumnItems.appendChild(createShapeElement({ ...item, id: `built-${index}` }, true));
+                        });
+
+                        // Display shape pool
+                        const pool = createShapePool();
+                        pool.forEach((item) => {
+                            shapeGrid.appendChild(createShapeElement(item, false, true));
+                        });
+                    }, 100);
+
+                    const controlButtons = document.createElement('div');
+                    controlButtons.className = 'control-buttons';
+                    controlButtons.innerHTML = `
+          <button class="control-button button-reset">هدم العمود 🗑️</button>
+          <button class="control-button button-undo" ${gameState.userAnswer.length === 0 ? 'disabled' : ''}>إزالة الأخيرة ↶</button>
+        `;
+                    content.appendChild(controlButtons);
+
+                    setTimeout(() => {
+                        document.querySelector('.button-reset').onclick = () => {
+                            playDeleteSound();
+                            gameState.userAnswer = [];
+                            render();
+                        };
+                        document.querySelector('.button-undo').onclick = () => {
+                            if (gameState.userAnswer.length > 0) {
+                                playDeleteSound();
+                                gameState.userAnswer.pop();
+                                render();
+                            }
+                        };
+                    }, 100);
+                } else if (gameState.state === 'success') {
+                    content.innerHTML = `
+          <div class="success-content">
+            <div class="success-icon">🏆</div>
+            <h1 class="success-title">${gameState.message}</h1>
+            <div class="rewards-container">
+              <div class="reward-badge reward-stars">
+                <div class="reward-value">+3⭐</div>
+              </div>
+              <div class="reward-plus">+</div>
+              <div class="reward-badge reward-points">
+                <div class="reward-value">+30🏅</div>
+              </div>
+            </div>
+            <div class="next-level-box">
+              <div style="font-size: 2rem; font-weight: bold; margin-bottom: 16px;">🚀 المرحلة التالية:</div>
+              <div style="font-size: 1.5rem; margin-bottom: 16px;">
+                ${
+                    gameState.stage < 5
+                        ? `المستوى ${gameState.level} - المرحلة ${gameState.stage + 1}`
+                        : gameState.level < 3
+                          ? `${gameSettings[gameState.level + 1].icon} ${gameSettings[gameState.level + 1].name}`
+                          : '🎯 مبروك! لقد أكملت جميع التحديات!'
+                }
+              </div>
+              <div style="background: rgba(255,255,255,0.2); border-radius: 16px; padding: 16px;">
+                <div style="color: #fbbf24; font-size: 1.125rem; font-weight: bold;">إجمالي الإنجازات:</div>
+                <div style="font-size: 1.125rem;">⭐ ${gameState.stars} نجمة | 🏅 ${gameState.score} نقطة</div>
+              </div>
+            </div>
+            <div style="margin-top: 32px; color: white; font-size: 1.5rem; animation: pulse 2s infinite;">
+              ⏰ الانتقال تلقائياً خلال لحظات...
+            </div>
+          </div>
+        `;
+                } else if (gameState.state === 'failure') {
+                    content.innerHTML = `
+          <div class="failure-content">
+            <div class="failure-icon">😊</div>
+            <h2 class="failure-title">لا بأس! البناء يحتاج تدريب! 🏗️</h2>
+            <div class="tips-box">
+              <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 16px;">🧠 نصائح البناء:</div>
+              <div style="font-size: 1.125rem; line-height: 2;">
+                <div>• ركز على القطعة السفلى أولاً</div>
+                <div>• تذكر الألوان والأشكال معاً</div>
+                <div>• ابني من الأسفل إلى الأعلى</div>
+              </div>
+              <div style="color: #bfdbfe; font-size: 0.875rem; margin-top: 16px;">
+                🎯 كل محاولة تقوي ذاكرتك!
+              </div>
+            </div>
+            <div class="retry-buttons">
+              <button class="retry-button button-retry">محاولة جديدة 🔄</button>
+              <button class="retry-button button-review">شاهد العمود مرة أخرى 👁️</button>
+            </div>
+          </div>
+        `;
+
+                    setTimeout(() => {
+                        document.querySelector('.button-retry').onclick = startGame;
+                        document.querySelector('.button-review').onclick = () => {
+                            gameState.state = 'showing';
+                            render();
+                            setTimeout(() => {
+                                gameState.state = 'playing';
+                                render();
+                            }, gameSettings[gameState.level].stages[gameState.stage].time + 1000);
+                        };
+                    }, 100);
+                }
+
+                gameArea.appendChild(content);
+            }
+
+            // Initialize game
+            render();
         </script>
     </body>
 </html>

@@ -1,0 +1,1059 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>🎵 لعبة التسلسل الإيقاعي</title>
+        <style>
+            :root {
+                --purple: #7c3aed;
+                --pink: #ec4899;
+                --yellow: #f59e0b;
+                --blue: #3b82f6;
+                --red: #ef4444;
+                --green: #10b981;
+                --card: #ffffff;
+                --text: #1f2937;
+                --muted: #6b7280;
+                --bg1: #a78bfa;
+                --bg2: #f472b6;
+                --bg3: #fbbf24;
+            }
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                margin: 0;
+                font-family:
+                    system-ui,
+                    -apple-system,
+                    Segoe UI,
+                    Roboto,
+                    Helvetica,
+                    Arial,
+                    sans-serif;
+                background: linear-gradient(135deg, #60a5fa, #a78bfa 40%, #f472b6);
+                min-height: 100vh;
+                color: var(--text);
+            }
+            .container {
+                max-width: 1100px;
+                margin: auto;
+                padding: 16px;
+            }
+            .card {
+                background: var(--card);
+                border-radius: 20px;
+                padding: 20px;
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+            }
+            .title {
+                color: #fff;
+                text-align: center;
+                margin: 12px 0 6px;
+                font-size: 32px;
+                font-weight: 800;
+            }
+            .subtitle {
+                color: #fff;
+                text-align: center;
+                font-size: 18px;
+                margin: 0 0 24px;
+            }
+            .btn {
+                border: none;
+                border-radius: 16px;
+                padding: 14px 22px;
+                font-weight: 800;
+                color: #fff;
+                cursor: pointer;
+                transition:
+                    transform 0.1s,
+                    filter 0.2s;
+                box-shadow: 0 10px 16px rgba(0, 0, 0, 0.12);
+            }
+            .btn:active {
+                transform: scale(0.98);
+            }
+            .btn.green {
+                background: linear-gradient(90deg, #10b981, #059669);
+            }
+            .btn.blue {
+                background: linear-gradient(90deg, #3b82f6, #2563eb);
+            }
+            .btn.orange {
+                background: linear-gradient(90deg, #f59e0b, #d97706);
+            }
+            .btn.purple {
+                background: linear-gradient(90deg, #8b5cf6, #7c3aed);
+            }
+            .btn.disabled {
+                filter: grayscale(0.7);
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+            .grid {
+                display: grid;
+                gap: 16px;
+            }
+            .grid-5 {
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            }
+            .level {
+                text-align: center;
+                border-radius: 24px;
+                padding: 22px;
+                cursor: pointer;
+                transition:
+                    transform 0.2s,
+                    box-shadow 0.2s,
+                    border 0.2s;
+                border: 2px solid #e5e7eb;
+                background: linear-gradient(135deg, #fff, #f3f4f6);
+            }
+            .level:hover {
+                transform: scale(1.03);
+                box-shadow: 0 12px 18px rgba(0, 0, 0, 0.12);
+            }
+            .level.lock {
+                opacity: 0.6;
+                cursor: not-allowed;
+                background: linear-gradient(135deg, #d1d5db, #9ca3af);
+            }
+            .level.active {
+                border: 4px solid #f59e0b;
+                background: linear-gradient(135deg, #fde68a, #fdba74);
+            }
+            .stars {
+                display: flex;
+                gap: 4px;
+                justify-content: center;
+                align-items: center;
+                margin: 6px 0;
+            }
+            .star {
+                font-size: 18px;
+                opacity: 0.35;
+            }
+            .star.on {
+                opacity: 1;
+                filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.9));
+            }
+            .pill {
+                display: inline-block;
+                background: #22c55e;
+                color: #fff;
+                padding: 4px 10px;
+                border-radius: 999px;
+                font-size: 12px;
+                font-weight: 800;
+            }
+            .muted {
+                color: var(--muted);
+            }
+            .input {
+                width: 100%;
+                max-width: 420px;
+                margin: 10px auto;
+                padding: 14px 16px;
+                border-radius: 14px;
+                border: 2px solid #d8b4fe;
+                outline: none;
+                font-size: 20px;
+                text-align: center;
+                display: block;
+            }
+            .headerBar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 10px;
+            }
+            .badge {
+                background: #f3f4f6;
+                border-radius: 12px;
+                padding: 8px 12px;
+                font-weight: 700;
+            }
+            .seqRow {
+                display: flex;
+                justify-content: center;
+                gap: 14px;
+                flex-wrap: wrap;
+            }
+            .seqItem {
+                width: 96px;
+                height: 96px;
+                border-radius: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 36px;
+                border: 4px solid #e5e7eb;
+                background: #f3f4f6;
+                transition:
+                    transform 0.2s,
+                    box-shadow 0.2s;
+            }
+            .pulse {
+                animation: pulse 1s infinite;
+            }
+            @keyframes pulse {
+                0% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.12);
+                }
+                100% {
+                    transform: scale(1);
+                }
+            }
+            .bounce {
+                animation: bounce 1s infinite;
+            }
+            @keyframes bounce {
+                0%,
+                100% {
+                    transform: translateY(0);
+                }
+                50% {
+                    transform: translateY(-8px);
+                }
+            }
+            .ping {
+                position: relative;
+            }
+            .ping::after {
+                content: '';
+                position: absolute;
+                inset: -6px;
+                border-radius: 20px;
+                border: 3px solid rgba(251, 191, 36, 0.7);
+                animation: ping 1s infinite;
+            }
+            @keyframes ping {
+                0% {
+                    transform: scale(0.9);
+                    opacity: 0.9;
+                }
+                100% {
+                    transform: scale(1.2);
+                    opacity: 0;
+                }
+            }
+            .row {
+                display: flex;
+                gap: 12px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            .actionBtn {
+                min-width: 160px;
+                border-radius: 18px;
+                border: 4px solid transparent;
+                color: #fff;
+                font-weight: 900;
+                padding: 22px 12px;
+                text-align: center;
+                cursor: pointer;
+                transition:
+                    transform 0.12s,
+                    filter 0.2s,
+                    border 0.2s;
+            }
+            .actionBtn .emo {
+                font-size: 56px;
+                display: block;
+                margin-bottom: 6px;
+            }
+            .yellow {
+                background: #fbbf24;
+            }
+            .blue {
+                background: #60a5fa;
+            }
+            .red {
+                background: #f87171;
+            }
+            .actionBtn:hover {
+                transform: scale(1.03);
+                border-color: #fff;
+            }
+            .shake {
+                animation: shake 0.5s;
+            }
+            @keyframes shake {
+                10%,
+                90% {
+                    transform: translateX(-1px);
+                }
+                20%,
+                80% {
+                    transform: translateX(2px);
+                }
+                30%,
+                50%,
+                70% {
+                    transform: translateX(-4px);
+                }
+                40%,
+                60% {
+                    transform: translateX(4px);
+                }
+            }
+            .notice {
+                border-radius: 16px;
+                padding: 18px;
+                font-weight: 800;
+                text-align: center;
+            }
+            .notice.ok {
+                background: #ecfdf5;
+                color: #065f46;
+                border: 4px solid #6ee7b7;
+            }
+            .notice.err {
+                background: #fee2e2;
+                color: #991b1b;
+                border: 4px solid #fca5a5;
+            }
+            .sidebar .block {
+                background: #f9fafb;
+                border-radius: 16px;
+                padding: 16px;
+            }
+            .progressItem {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-radius: 12px;
+                padding: 10px;
+            }
+            .progressItem.active {
+                background: #fef3c7;
+            }
+            /* Overlay modal */
+            .overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.7);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 16px;
+                z-index: 50;
+            }
+            .modal {
+                max-width: 900px;
+                width: 100%;
+                max-height: 90vh;
+                overflow: auto;
+                border: 4px solid #93c5fd;
+                background: linear-gradient(135deg, #fff, #eff6ff);
+                border-radius: 24px;
+                padding: 24px;
+                box-shadow: 0 16px 28px rgba(0, 0, 0, 0.25);
+            }
+            .cele-bg {
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+            }
+            .cele {
+                position: absolute;
+                font-size: 28px;
+                animation: bounce calc(2s + (var(--r) * 1s)) infinite;
+                left: var(--l);
+                top: var(--t);
+            }
+            .sr-only {
+                position: absolute !important;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                white-space: nowrap;
+                border: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app"></div>
+
+        <script>
+            // ---------------- State ----------------
+            const actions = {
+                clap: { name: 'صفّق', emoji: '👏', color: 'yellow', sound: 'صفّق' },
+                knock: { name: 'طرُق', emoji: '👊', color: 'blue', sound: 'طرُق' },
+                stop: { name: 'قف', emoji: '✋', color: 'red', sound: 'قف' }
+            };
+
+            const levelConfig = {
+                1: {
+                    pages: [
+                        { sequence: ['clap', 'stop'], speed: 1200 },
+                        { sequence: ['knock', 'clap'], speed: 1200 },
+                        { sequence: ['clap', 'knock', 'stop'], speed: 1300 },
+                        { sequence: ['stop', 'clap', 'knock'], speed: 1300 }
+                    ]
+                },
+                2: {
+                    pages: [
+                        { sequence: ['knock', 'stop', 'clap'], speed: 1100 },
+                        { sequence: ['clap', 'knock', 'stop', 'clap'], speed: 1200 },
+                        { sequence: ['stop', 'knock', 'clap', 'stop'], speed: 1200 },
+                        { sequence: ['clap', 'stop', 'knock', 'clap', 'stop'], speed: 1300 }
+                    ]
+                },
+                3: {
+                    pages: [
+                        { sequence: ['knock', 'clap', 'stop', 'knock'], speed: 1000 },
+                        { sequence: ['clap', 'knock', 'stop', 'clap', 'knock'], speed: 1100 },
+                        { sequence: ['stop', 'clap', 'knock', 'stop', 'clap'], speed: 1100 },
+                        { sequence: ['knock', 'stop', 'clap', 'knock', 'stop', 'clap'], speed: 1200 }
+                    ]
+                },
+                4: {
+                    pages: [
+                        { sequence: ['clap', 'knock', 'stop', 'knock', 'clap'], speed: 900 },
+                        { sequence: ['stop', 'clap', 'knock', 'stop', 'clap', 'knock'], speed: 1000 },
+                        { sequence: ['knock', 'clap', 'stop', 'knock', 'clap', 'stop'], speed: 1000 },
+                        { sequence: ['clap', 'stop', 'knock', 'clap', 'stop', 'knock', 'clap'], speed: 1100 }
+                    ]
+                },
+                5: {
+                    pages: [
+                        { sequence: ['knock', 'clap', 'stop', 'knock', 'clap', 'stop'], speed: 800 },
+                        { sequence: ['clap', 'stop', 'knock', 'clap', 'stop', 'knock', 'clap'], speed: 900 },
+                        { sequence: ['stop', 'knock', 'clap', 'stop', 'knock', 'clap', 'stop'], speed: 900 },
+                        { sequence: ['clap', 'knock', 'stop', 'clap', 'knock', 'stop', 'clap', 'knock'], speed: 1000 }
+                    ]
+                }
+            };
+
+            let gameState = 'menu';
+            let playerName = '';
+            let currentLevel = 1;
+            let currentPage = 1;
+            let progress = {};
+            let currentSequence = [];
+            let playerSequence = [];
+            let isPlaying = false;
+            let currentActionIndex = -1;
+            let attempts = 0;
+            let isCorrect = null;
+            let showInstructions = false;
+
+            // Load / init progress
+            function initProgress() {
+                const saved = localStorage.getItem('rhythmGameProgress');
+                if (saved) {
+                    progress = JSON.parse(saved);
+                } else {
+                    progress = {};
+                    for (let l = 1; l <= 5; l++) {
+                        progress[l] = {};
+                        for (let p = 1; p <= 4; p++) progress[l][p] = 0;
+                    }
+                    localStorage.setItem('rhythmGameProgress', JSON.stringify(progress));
+                }
+            }
+            initProgress();
+
+            function saveProgress(level, page, stars) {
+                const newStars = Math.max(progress[level]?.[page] || 0, stars);
+                progress[level] = { ...(progress[level] || {}), [page]: newStars };
+                localStorage.setItem('rhythmGameProgress', JSON.stringify(progress));
+            }
+
+            // Utilities
+            function speak(text) {
+                try {
+                    if ('speechSynthesis' in window) {
+                        const u = new SpeechSynthesisUtterance(text);
+                        u.lang = 'ar-SA';
+                        u.rate = 0.8;
+                        u.pitch = 1.2;
+                        u.volume = 1;
+                        const voices = speechSynthesis.getVoices();
+                        const arF = voices.find((v) => v.lang?.includes('ar') && v.name?.toLowerCase().includes('female'));
+                        if (arF) u.voice = arF;
+                        speechSynthesis.speak(u);
+                    }
+                } catch (e) {}
+                console.log('Speaking:', text);
+            }
+            const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+            function isLevelUnlocked(level) {
+                if (level === 1) return true;
+                const prev = level - 1;
+                const prevProg = progress[prev];
+                if (!prevProg) return false;
+                const total = Object.values(prevProg).reduce((s, v) => s + v, 0);
+                return total >= 6;
+            }
+            function getLevelStars(level) {
+                const lp = progress[level];
+                if (!lp) return 0;
+                return Object.values(lp).reduce((s, v) => s + v, 0);
+            }
+            function totalStarsAll() {
+                return Object.values(progress).reduce((t, lv) => t + Object.values(lv || {}).reduce((s, v) => s + v, 0), 0);
+            }
+
+            function generateSequence() {
+                const cfg = levelConfig[currentLevel]?.pages[currentPage - 1];
+                if (!cfg) return;
+                currentSequence = [...cfg.sequence];
+                playerSequence = [];
+                attempts = 0;
+                isCorrect = null;
+                currentActionIndex = -1;
+            }
+
+            async function playSequence() {
+                if (isPlaying) return;
+                isPlaying = true;
+                currentActionIndex = -1;
+                const cfg = levelConfig[currentLevel]?.pages[currentPage - 1];
+                const speed = cfg?.speed || 1000;
+
+                speak('استمع جيداً للتسلسل وركز');
+                await sleep(1200);
+
+                for (let i = 0; i < currentSequence.length; i++) {
+                    await sleep(250);
+                    currentActionIndex = i;
+                    renderPlaying(); // to highlight
+                    const el = document.querySelector(`[data-seq-index="${i}"]`);
+                    if (el) {
+                        el.classList.add('ping');
+                    }
+                    speak(actions[currentSequence[i]].sound);
+                    await sleep(speed);
+                    if (el) {
+                        el.classList.remove('ping');
+                    }
+                    currentActionIndex = -1;
+                    renderPlaying();
+                    await sleep(150);
+                }
+                await sleep(300);
+                speak('الآن دورك! كرر نفس التسلسل بالضغط على الأزرار');
+                isPlaying = false;
+                renderPlaying();
+            }
+
+            function handlePlayerAction(actionKey) {
+                if (isPlaying) return;
+                playerSequence = [...playerSequence, actionKey];
+                speak(actions[actionKey].sound);
+                // visual micro feedback
+                const btn = document.querySelector(`[data-action="${actionKey}"]`);
+                if (btn) {
+                    btn.classList.add('pulse');
+                    setTimeout(() => btn.classList.remove('pulse'), 300);
+                }
+                renderPlaying();
+
+                if (playerSequence.length === currentSequence.length) {
+                    const ok = JSON.stringify(playerSequence) === JSON.stringify(currentSequence);
+                    isCorrect = ok;
+                    if (ok) {
+                        const stars = attempts === 0 ? 2 : 1;
+                        setTimeout(() => speak('رائع!'), 300);
+                        setTimeout(() => speak('أحسنت يا بطل!'), 1000);
+                        setTimeout(() => speak('استمر هكذا!'), 1700);
+                        saveProgress(currentLevel, currentPage, stars);
+                        setTimeout(() => {
+                            gameState = 'result';
+                            render();
+                        }, 2200);
+                    } else {
+                        speak('حاول مرة أخرى يا شاطر');
+                        attempts += 1;
+                        playerSequence = [];
+                        setTimeout(() => {
+                            isCorrect = null;
+                            renderPlaying();
+                        }, 1200);
+                    }
+                    renderPlaying();
+                }
+            }
+
+            function resetGame() {
+                playerSequence = [];
+                attempts = 0;
+                isCorrect = null;
+                currentActionIndex = -1;
+                renderPlaying();
+            }
+
+            function startGame() {
+                if (!playerName.trim()) return;
+                generateSequence();
+                gameState = 'playing';
+                render();
+            }
+
+            // ---------------- Rendering ----------------
+            const app = document.getElementById('app');
+
+            function starBar(count, total = 8) {
+                let s = '';
+                for (let i = 0; i < total; i++) {
+                    s += `<span class="star ${i < count ? 'on' : ''}">⭐</span>`;
+                }
+                return `<div class="stars" aria-hidden="true">${s}</div>`;
+            }
+
+            function renderMenu() {
+                app.innerHTML = `
+        <main class="container">
+          <h1 class="title">🎵 لعبة التسلسل الإيقاعي</h1>
+          <p class="subtitle">صفّق - طرُق - قف</p>
+
+          <section class="card" style="text-align:center;margin-bottom:16px">
+            <label class="sr-only" for="playerName">ما اسمك؟</label>
+            <div style="font-size:22px;color:#6d28d9;font-weight:900;margin-bottom:8px">ما اسمك؟</div>
+            <input id="playerName" class="input" placeholder="اكتب اسمك هنا" value="${playerName}"/>
+          </section>
+
+          <section class="grid grid-5" style="margin-bottom:18px">
+            ${[1, 2, 3, 4, 5]
+                .map((level) => {
+                    const unlocked = isLevelUnlocked(level);
+                    const stars = getLevelStars(level);
+                    const age = ['3-4', '4-5', '5-6', '6-7', '7+'][level - 1];
+                    const names = ['المبتدئ', 'الممارس', 'الماهر', 'الخبير', 'البطل'][level - 1];
+                    return `
+                <div class="level ${!unlocked ? 'lock' : ''} ${currentLevel === level && unlocked ? 'active' : ''}"
+                     data-level="${level}">
+                  <div style="font-weight:900;font-size:22px;color:${unlocked ? (currentLevel === level ? '#fff' : '#7c3aed') : '#6b7280'}">
+                    ${unlocked ? '🔓' : '🔒'} المستوى ${level}
+                  </div>
+                  <div style="font-weight:800;color:${unlocked ? (currentLevel === level ? '#fff' : '#2563eb') : '#6b7280'}">${names}</div>
+                  <div class="muted" style="margin:6px 0">${'سن ' + age + ' سنة'}</div>
+                  ${starBar(stars)}
+                  <div style="font-weight:800;color:${unlocked ? (currentLevel === level ? '#fff' : '#7c3aed') : '#6b7280'}">${stars}/8 نجوم</div>
+                  ${stars === 8 ? `<div style="margin-top:6px"><span class="pill bounce">✨ مكتمل!</span></div>` : ''}
+                  ${!unlocked ? `<div class="muted" style="margin-top:6px;font-size:12px">يحتاج ${Math.max(0, 6 - getLevelStars(level - 1))} نجوم</div>` : ''}
+                </div>
+              `;
+                })
+                .join('')}
+          </section>
+
+          <section class="row" style="justify-content:center;margin-bottom:14px">
+            <button id="startBtn" class="btn green ${!playerName.trim() || !isLevelUnlocked(currentLevel) ? 'disabled' : ''}">
+              🚀 ابدأ المغامرة!
+            </button>
+            <button id="howBtn" class="btn blue">📚 كيف ألعب؟</button>
+          </section>
+
+          ${
+              playerName
+                  ? `
+          <section class="card" style="background:rgba(255,255,255,.25);backdrop-filter:blur(6px)">
+            <h3 style="text-align:center;color:#fff;font-weight:900;font-size:22px;margin:0 0 10px">إحصائياتك يا ${playerName}</h3>
+            <div class="grid" style="grid-template-columns:repeat(5,1fr);gap:10px">
+              ${[1, 2, 3, 4, 5]
+                  .map((l) => {
+                      const st = getLevelStars(l);
+                      return `<div style="text-align:center;color:#fff">
+                    <div style="font-size:14px;font-weight:800">المستوى ${l}</div>
+                    <div style="font-size:18px;font-weight:900;color:#fde68a">${st}/8 ⭐</div>
+                </div>`;
+                  })
+                  .join('')}
+            </div>
+            <div style="text-align:center;margin-top:8px;color:#fff;font-weight:900">
+              مجموع النجوم: ${totalStarsAll()}/40 ⭐
+            </div>
+          </section>`
+                  : ''
+          }
+
+          ${showInstructions ? renderInstructionsModal() : ''}
+        </main>
+      `;
+
+                // Listeners
+                document.getElementById('playerName').addEventListener('input', (e) => {
+                    playerName = e.target.value;
+                    renderMenu();
+                });
+                document.querySelectorAll('.level').forEach((el) => {
+                    const level = +el.getAttribute('data-level');
+                    el.addEventListener('click', () => {
+                        if (!isLevelUnlocked(level)) return;
+                        currentLevel = level;
+                        renderMenu();
+                    });
+                });
+                const start = document.getElementById('startBtn');
+                if (start)
+                    start.addEventListener('click', () => {
+                        if (!start.classList.contains('disabled')) startGame();
+                    });
+                document.getElementById('howBtn').addEventListener('click', () => {
+                    showInstructions = true;
+                    renderMenu();
+                });
+            }
+
+            function renderInstructionsModal() {
+                return `
+        <div class="overlay" role="dialog" aria-modal="true">
+          <div class="modal">
+            <div style="text-align:center;margin-bottom:10px">
+              <div style="font-size:52px">🎮</div>
+              <h2 style="color:#2563eb;font-size:28px;margin:6px 0 4px;font-weight:900">دليل اللعبة الشامل</h2>
+              <p class="muted">تعلم كيف تلعب وتصبح بطلاً!</p>
+            </div>
+            <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">
+              <div class="card block" style="border:2px solid #facc15;background:#fffbeb">
+                <h3 style="color:#92400e;font-size:20px;font-weight:900;margin:0 0 8px">🎯 الهدف من اللعبة</h3>
+                <ul>
+                  <li>تقوية الذاكرة السمعية</li>
+                  <li>تطوير التسلسل الحركي</li>
+                  <li>تحسين الانتباه والتركيز</li>
+                  <li>بناء الثقة بالنفس</li>
+                </ul>
+              </div>
+              <div class="card block" style="border:2px solid #93c5fd;background:#eff6ff">
+                <h3 style="color:#1d4ed8;font-size:20px;font-weight:900;margin:0 0 8px">🎮 خطوات اللعب</h3>
+                <ol>
+                  <li>اختر اسمك ومستواك</li>
+                  <li>اضغط "اعد التشغيل"</li>
+                  <li>استمع بعناية للتسلسل</li>
+                  <li>كرر نفس التسلسل بالأزرار</li>
+                  <li>اجمع النجوم وتقدم!</li>
+                </ol>
+              </div>
+              <div class="card block" style="border:2px solid #86efac;background:#ecfdf5">
+                <h3 style="color:#065f46;font-size:20px;font-weight:900;margin:0 0 8px">⭐ نظام النجوم</h3>
+                <div class="card" style="display:flex;align-items:center;justify-content:space-between">
+                  <span>المحاولة الأولى</span><span>⭐ ⭐</span>
+                </div>
+                <div class="card" style="margin-top:8px;display:flex;align-items:center;justify-content:space-between">
+                  <span>المحاولة الثانية</span><span>⭐</span>
+                </div>
+                <p style="text-align:center;font-weight:900;color:#16a34a;margin-top:8px">🔓 تحتاج 6 نجوم لفتح المستوى التالي</p>
+              </div>
+              <div class="card block" style="border:2px solid #d8b4fe;background:#faf5ff">
+                <h3 style="color:#6d28d9;font-size:20px;font-weight:900;margin:0 0 8px">🎵 الحركات الثلاث</h3>
+                ${[
+                    { emoji: '👏', name: 'صفّق', desc: 'اضرب كفيك معاً', bg: '#fef3c7' },
+                    { emoji: '👊', name: 'طرُق', desc: 'اطرق بيدك على الطاولة', bg: '#dbeafe' },
+                    { emoji: '✋', name: 'قف', desc: 'ارفع يدك للإشارة بالتوقف', bg: '#fee2e2' }
+                ]
+                    .map(
+                        (a) => `
+                  <div class="card" style="display:flex;gap:10px;align-items:center;background:${a.bg}">
+                    <div style="font-size:34px">${a.emoji}</div>
+                    <div><div style="font-weight:900">${a.name}</div><div class="muted" style="font-size:13px">${a.desc}</div></div>
+                  </div>`
+                    )
+                    .join('')}
+              </div>
+            </div>
+            <div class="card" style="margin-top:12px;background:linear-gradient(90deg,#ffe4e6,#fef3c7);border:2px solid #f9a8d4">
+              <h3 style="text-align:center;color:#be185d;font-size:20px;margin:0 0 6px;font-weight:900">💡 نصائح للنجاح</h3>
+              <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
+                <ul>
+                  <li>🎧 استمع بانتباه كامل</li>
+                  <li>🧠 ركز على ترتيب الأصوات</li>
+                  <li>🔄 لا تخف من إعادة الاستماع</li>
+                </ul>
+                <ul>
+                  <li>💪 تدرب باستمرار</li>
+                  <li>😊 لا تيأس من الأخطاء</li>
+                  <li>🏆 احتفل بكل إنجاز</li>
+                </ul>
+              </div>
+            </div>
+            <div style="text-align:center;margin-top:10px">
+              <button id="closeIns" class="btn purple">🚀 فهمت! دعني ألعب الآن!</button>
+            </div>
+          </div>
+        </div>
+      `;
+            }
+
+            function renderPlaying() {
+                const starsForTry = Math.max(0, 2 - attempts);
+                app.innerHTML = `
+        <main class="container">
+          <section class="card headerBar" style="margin-bottom:12px">
+            <div style="display:flex;align-items:center;gap:10px">
+              <button id="backMenu" class="btn" style="background:#6b7280">🏠</button>
+              <div>
+                <div style="color:#7c3aed;font-weight:900">مرحباً ${playerName || 'اللاعب'}!</div>
+                <div class="muted">المستوى ${currentLevel} - الصفحة ${currentPage}</div>
+              </div>
+            </div>
+            <div class="badge">⭐ ${starsForTry}/2</div>
+          </section>
+
+          <div class="grid" style="grid-template-columns:1fr 320px;gap:16px">
+            <section>
+              <div class="card" style="margin-bottom:12px">
+                <h3 style="text-align:center;color:#7c3aed;margin:6px 0 14px;font-size:22px;font-weight:900">
+                  ${isPlaying ? 'استمع للتسلسل 🎵' : 'كرر التسلسل'}
+                </h3>
+                <div class="seqRow" style="margin-bottom:12px">
+                  ${currentSequence
+                      .map(
+                          (act, idx) => `
+                    <div class="seqItem ${currentActionIndex === idx ? 'pulse' : ''} ${currentActionIndex === idx ? colorClass(act) : ''}"
+                         data-seq-index="${idx}" aria-label="${actions[act].name}">
+                      <span class="${currentActionIndex === idx ? 'bounce' : ''}">${actions[act].emoji}</span>
+                    </div>`
+                      )
+                      .join('')}
+                </div>
+
+                <div style="text-align:center;margin:6px 0 8px" class="muted">تقدمك:</div>
+                <div class="seqRow" style="margin-bottom:14px">
+                  ${currentSequence
+                      .map((_, i) => {
+                          const filled = i < playerSequence.length;
+                          const correct = filled && playerSequence[i] === currentSequence[i];
+                          return `
+                      <div class="seqItem" style="width:72px;height:72px;border-width:2px;${filled ? (correct ? 'background:#dcfce7;border-color:#86efac;color:#16a34a' : 'background:#fee2e2;border-color:#fca5a5;color:#ef4444') : ''}">
+                        ${filled ? actions[playerSequence[i]].emoji : '<span class="muted">?</span>'}
+                      </div>`;
+                      })
+                      .join('')}
+                </div>
+
+                <div class="row" style="margin-bottom:4px">
+                  <button id="playBtn" class="btn blue ${isPlaying ? 'disabled' : ''}">▶️ اعد التشغيل</button>
+                  <button id="resetBtn" class="btn orange">🔄 البداية من جديد</button>
+                </div>
+              </div>
+
+              <div class="grid" style="grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+                ${Object.entries(actions)
+                    .map(
+                        ([k, a]) => `
+                  <button class="actionBtn ${a.color}" data-action="${k}" ${isPlaying ? 'disabled' : ''}>
+                    <span class="emo">${a.emoji}</span>
+                    <span>${a.name}</span>
+                  </button>`
+                    )
+                    .join('')}
+              </div>
+
+              ${
+                  isCorrect !== null
+                      ? `
+                <div class="notice ${isCorrect ? 'ok' : 'err'}" style="margin-top:12px">
+                  <span style="font-size:28px">${isCorrect ? '🎉' : '😊'}</span>
+                  ${isCorrect ? ' أحسنت! ممتاز جداً!' : ' لا بأس، حاول مرة أخرى!'}
+                  <span style="font-size:28px">${isCorrect ? '🌟' : '💪'}</span>
+                  ${isCorrect ? '<div style="margin-top:6px;color:#10b981">استعد للمستوى التالي!</div>' : ''}
+                </div>
+              `
+                      : ''
+              }
+            </section>
+
+            <aside class="sidebar">
+              <div class="card block">
+                <h4 style="color:#7c3aed;margin:0 0 8px;font-weight:900">⚙️ تعليمات المعلم</h4>
+                <div class="card" style="background:#eff6ff;margin-bottom:8px"><b style="color:#2563eb">الخطوة 1:</b> اضغط "اعد التشغيل" ليسمع الطفل التسلسل</div>
+                <div class="card" style="background:#ecfdf5;margin-bottom:8px"><b style="color:#059669">الخطوة 2:</b> اطلب من الطفل تكرار نفس التسلسل</div>
+                <div class="card" style="background:#fffbeb;margin-bottom:8px"><b style="color:#d97706">الخطوة 3:</b> راقب الأداء وشجع الطفل</div>
+                <div class="card" style="background:#faf5ff"><b style="color:#7c3aed">نصائح:</b>
+                  <ul style="font-size:13px;margin:6px 0 0">
+                    <li>امدح الطفل عند المحاولة</li>
+                    <li>كن صبوراً مع الأخطاء</li>
+                    <li>شجع على إعادة المحاولة</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="card block" style="margin-top:12px">
+                <h4 style="color:#7c3aed;margin:0 0 8px;font-weight:900">🏆 التقدم</h4>
+                <div>
+                  ${[1, 2, 3, 4]
+                      .map((p) => {
+                          const st = progress[currentLevel]?.[p] || 0;
+                          return `<div class="progressItem ${p === currentPage ? 'active' : ''}">
+                      <span style="font-weight:700">الصفحة ${p}</span>
+                      <span>${'⭐'.repeat(st)}${'☆'.repeat(2 - st)}</span>
+                    </div>`;
+                      })
+                      .join('')}
+                </div>
+              </div>
+            </aside>
+          </div>
+        </main>
+      `;
+
+                // Listeners
+                document.getElementById('backMenu').addEventListener('click', () => {
+                    gameState = 'menu';
+                    render();
+                });
+                document.getElementById('playBtn').addEventListener('click', () => {
+                    if (!isPlaying) playSequence();
+                });
+                document.getElementById('resetBtn').addEventListener('click', () => {
+                    resetGame();
+                });
+
+                document.querySelectorAll('.actionBtn').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        if (isPlaying) return;
+                        handlePlayerAction(btn.getAttribute('data-action'));
+                    });
+                });
+            }
+
+            function colorClass(act) {
+                const a = actions[act].color;
+                if (a === 'yellow') return '';
+                if (a === 'blue') return '';
+                if (a === 'red') return '';
+                return '';
+            }
+
+            function renderResult() {
+                const stars = progress[currentLevel]?.[currentPage] || 0;
+                const isLastPage = currentPage === 4;
+                const canGoNext = !isLastPage || (isLastPage && isLevelUnlocked(currentLevel + 1));
+                const totalStars = getLevelStars(currentLevel);
+
+                // celebration emojis
+                const cele = Array.from({ length: 18 })
+                    .map(
+                        () =>
+                            `<div class="cele" style="--l:${Math.random() * 100}%;--t:${Math.random() * 100}%;--r:${Math.random() * 2}">
+          ${['⭐', '🎉', '👏', '🌟', '💫'][Math.floor(Math.random() * 5)]}
+        </div>`
+                    )
+                    .join('');
+
+                app.innerHTML = `
+        <main class="container" style="position:relative;display:flex;min-height:80vh;align-items:center;justify-content:center">
+          <div class="cele-bg">${cele}</div>
+          <section class="card" style="border:4px solid #f59e0b;text-align:center;max-width:520px">
+            <div style="font-size:70px" class="bounce">🏆</div>
+            <h2 style="color:#059669;font-size:28px;margin:8px 0" class="pulse">أحسنت ${playerName || ''}!</h2>
+            <div class="row" style="justify-content:center;margin:8px 0 14px">
+              ${[1, 2]
+                  .map(
+                      (i) => `
+                <div class="${i <= stars ? 'ping' : ''}">
+                  <span style="font-size:46px;${i <= stars ? 'filter:drop-shadow(0 0 6px #fde68a)' : ''}">⭐</span>
+                </div>`
+                  )
+                  .join('')}
+            </div>
+            <div class="card" style="background:linear-gradient(90deg,#dbeafe,#ede9fe);margin:10px 0">
+              <p style="font-size:20px;font-weight:900;color:#374151;margin:6px 0">🌟 حصلت على ${stars} نجمة!</p>
+              <p class="muted" style="margin:0 0 6px">مجموع نجوم المستوى: ${totalStars}/8</p>
+              ${
+                  isLastPage && totalStars >= 6 && currentLevel < 5
+                      ? `
+                <div class="card" style="background:#fef3c7;border:2px solid #f59e0b"><b class="bounce" style="color:#b45309">🎊 مبروك! فتحت المستوى التالي!</b></div>
+              `
+                      : ''
+              }
+            </div>
+
+            <div class="grid" style="grid-template-columns:1fr;gap:10px">
+              ${!isLastPage ? `<button id="nextPage" class="btn blue">🚀 الصفحة التالية</button>` : ''}
+              ${isLastPage && canGoNext && currentLevel < 5 ? `<button id="nextLevel" class="btn green pulse">🌟 المستوى التالي!</button>` : ''}
+              <button id="replay" class="btn orange">🔄 إعادة اللعب</button>
+              <button id="toMenu" class="btn purple">🏠 القائمة الرئيسية</button>
+            </div>
+
+            <div class="card" style="margin-top:12px;background:linear-gradient(90deg,#ffe4e6,#fef3c7);border:2px solid #f9a8d4">
+              <p style="margin:0;font-weight:900;color:#be185d">
+                ${stars === 2 ? 'ممتاز جداً! أنت بطل حقيقي! 🏆' : 'أحسنت! تحسن رائع! 💪'}
+              </p>
+            </div>
+          </section>
+        </main>
+      `;
+
+                // Listeners
+                const nextPageBtn = document.getElementById('nextPage');
+                if (nextPageBtn)
+                    nextPageBtn.addEventListener('click', () => {
+                        currentPage += 1;
+                        gameState = 'playing';
+                        speak('استعد للصفحة التالية!');
+                        generateSequence();
+                        render();
+                    });
+
+                const nextLevelBtn = document.getElementById('nextLevel');
+                if (nextLevelBtn)
+                    nextLevelBtn.addEventListener('click', () => {
+                        currentLevel += 1;
+                        currentPage = 1;
+                        gameState = 'playing';
+                        speak('مرحباً بك في المستوى الجديد!');
+                        generateSequence();
+                        render();
+                    });
+
+                document.getElementById('replay').addEventListener('click', () => {
+                    resetGame();
+                    gameState = 'playing';
+                    speak('لنلعب مرة أخرى!');
+                    generateSequence();
+                    render();
+                });
+                document.getElementById('toMenu').addEventListener('click', () => {
+                    gameState = 'menu';
+                    speak('العودة للقائمة الرئيسية');
+                    render();
+                });
+            }
+
+            function render() {
+                if (gameState === 'menu') {
+                    renderMenu();
+                } else if (gameState === 'playing') {
+                    if (!currentSequence.length) generateSequence();
+                    renderPlaying();
+                } else if (gameState === 'result') {
+                    renderResult();
+                }
+            }
+
+            // initial
+            render();
+
+            // instructions modal close listener (delegated)
+            document.addEventListener('click', (e) => {
+                if (e.target && e.target.id === 'closeIns') {
+                    showInstructions = false;
+                    speak('الآن أنت مستعد للعب!');
+                    render();
+                }
+            });
+
+            // Keyboard support (optional)
+            document.addEventListener('keydown', (e) => {
+                // map: A=clap, S=knock, D=stop
+                if (gameState !== 'playing' || isPlaying) return;
+                if (e.key.toLowerCase() === 'a') handlePlayerAction('clap');
+                if (e.key.toLowerCase() === 's') handlePlayerAction('knock');
+                if (e.key.toLowerCase() === 'd') handlePlayerAction('stop');
+            });
+        </script>
+    </body>
+</html>

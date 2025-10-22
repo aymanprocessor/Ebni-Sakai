@@ -1,0 +1,297 @@
+/*
+ * WhatsApp Button - Additional Style Variations
+ *
+ * Copy any of these variations to whatsapp-button.component.scss
+ * to customize the button appearance
+ */
+
+/* ========================================
+   VARIATION 1: Button with Text Label
+   ======================================== */
+.whatsapp-float-button-with-text {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background-color: #25D366;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 12px 24px 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+    transition: all 0.3s ease;
+    z-index: 9999;
+
+    i {
+        font-size: 24px;
+    }
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+        background-color: #20ba5a;
+    }
+}
+
+/* Usage in HTML:
+<button class="whatsapp-float-button-with-text" (click)="openWhatsApp()">
+    <i class="fab fa-whatsapp"></i>
+    <span>تواصل معنا</span>
+</button>
+*/
+
+
+/* ========================================
+   VARIATION 2: Square Button
+   ======================================== */
+.whatsapp-float-button-square {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background-color: #25D366;
+    color: white;
+    border: none;
+    border-radius: 12px; /* Square with rounded corners */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+    transition: all 0.3s ease;
+    z-index: 9999;
+
+    &:hover {
+        transform: scale(1.1) rotate(5deg);
+        box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+    }
+}
+
+
+/* ========================================
+   VARIATION 3: Gradient Button
+   ======================================== */
+.whatsapp-float-button-gradient {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #25D366 0%, #1da851 100%);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+    transition: all 0.3s ease;
+    z-index: 9999;
+
+    &:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+        background: linear-gradient(135deg, #2ae371 0%, #25D366 100%);
+    }
+}
+
+
+/* ========================================
+   VARIATION 4: Outlined Button
+   ======================================== */
+.whatsapp-float-button-outlined {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background-color: white;
+    color: #25D366;
+    border: 3px solid #25D366;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    z-index: 9999;
+
+    &:hover {
+        background-color: #25D366;
+        color: white;
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+    }
+}
+
+
+/* ========================================
+   VARIATION 5: With Notification Badge
+   ======================================== */
+.whatsapp-float-button-with-badge {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background-color: #25D366;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+    transition: all 0.3s ease;
+    z-index: 9999;
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        width: 12px;
+        height: 12px;
+        background-color: #ff4444;
+        border: 2px solid white;
+        border-radius: 50%;
+        animation: pulse-badge 2s infinite;
+    }
+
+    &:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+    }
+}
+
+@keyframes pulse-badge {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+}
+
+
+/* ========================================
+   VARIATION 6: Minimal Flat Design
+   ======================================== */
+.whatsapp-float-button-minimal {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 56px;
+    height: 56px;
+    background-color: #25D366;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    cursor: pointer;
+    box-shadow: none;
+    transition: all 0.2s ease;
+    z-index: 9999;
+
+    &:hover {
+        background-color: #20ba5a;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    &:active {
+        transform: scale(0.95);
+    }
+}
+
+
+/* ========================================
+   VARIATION 7: Slide-in Animation
+   ======================================== */
+.whatsapp-float-button-slide {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background-color: #25D366;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+    transition: all 0.3s ease;
+    z-index: 9999;
+    animation: slide-in-right 0.5s ease-out;
+
+    &:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+    }
+}
+
+@keyframes slide-in-right {
+    from {
+        transform: translateX(100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+
+/* ========================================
+   ADDITIONAL UTILITY CLASSES
+   ======================================== */
+
+/* Hide on specific screen sizes */
+.whatsapp-hide-mobile {
+    @media (max-width: 768px) {
+        display: none !important;
+    }
+}
+
+.whatsapp-hide-desktop {
+    @media (min-width: 769px) {
+        display: none !important;
+    }
+}
+
+/* Position variations */
+.whatsapp-bottom-left {
+    right: auto !important;
+    left: 30px !important;
+}
+
+.whatsapp-top-right {
+    bottom: auto !important;
+    top: 30px !important;
+}
+
+.whatsapp-top-left {
+    bottom: auto !important;
+    right: auto !important;
+    top: 30px !important;
+    left: 30px !important;
+}

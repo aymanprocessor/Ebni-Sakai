@@ -1,0 +1,1210 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>لعبة استخراج الكلمة أو الرمز المحدد من المتعدد</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Arial', sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            }
+
+            .game-container {
+                background: white;
+                border-radius: 20px;
+                padding: 30px;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+                max-width: 800px;
+                width: 100%;
+                text-align: center;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .game-container::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 5px;
+                background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+            }
+
+            .header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 30px;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .home-btn {
+                background: #6c757d;
+                color: white;
+                border: none;
+                padding: 10px 15px;
+                border-radius: 10px;
+                cursor: pointer;
+                font-size: 18px;
+                transition: all 0.3s ease;
+            }
+
+            .home-btn:hover {
+                background: #5a6268;
+                transform: translateY(-2px);
+            }
+
+            .level-info h2 {
+                color: #333;
+                font-size: 20px;
+                margin-bottom: 5px;
+            }
+
+            .level-info p {
+                color: #666;
+                font-size: 14px;
+            }
+
+            .score {
+                font-size: 18px;
+                font-weight: bold;
+                color: #333;
+            }
+
+            .progress-bar {
+                background: #e9ecef;
+                border-radius: 15px;
+                height: 15px;
+                margin-bottom: 30px;
+                overflow: hidden;
+                box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .progress-fill {
+                height: 100%;
+                border-radius: 15px;
+                transition: width 0.5s ease;
+                background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            }
+
+            .target-section {
+                margin-bottom: 40px;
+            }
+
+            .target-section h3 {
+                color: #333;
+                font-size: 24px;
+                margin-bottom: 20px;
+            }
+
+            .target-display {
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                border-radius: 20px;
+                padding: 40px;
+                margin-bottom: 20px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                border: 3px solid transparent;
+            }
+
+            .target-display:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+                border-color: #4ecdc4;
+            }
+
+            .target-display:active {
+                transform: scale(0.95);
+            }
+
+            .target-symbol {
+                font-size: 80px;
+                margin-bottom: 15px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            }
+
+            .target-instruction {
+                color: white;
+                font-size: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .instruction-box {
+                background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+                border-radius: 15px;
+                padding: 20px;
+                margin-bottom: 20px;
+                border: 2px solid #e17055;
+            }
+
+            .instruction-box p {
+                color: #d63031;
+                font-size: 18px;
+                font-weight: bold;
+            }
+
+            .sentence-box {
+                background: #f8f9fa;
+                border-radius: 15px;
+                padding: 25px;
+                margin-bottom: 25px;
+                border: 2px solid #dee2e6;
+            }
+
+            .sentence-box h4 {
+                color: #333;
+                font-size: 18px;
+                margin-bottom: 15px;
+            }
+
+            .sentence-words {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .word-btn {
+                background: linear-gradient(135deg, #74b9ff, #0984e3);
+                color: white;
+                border: none;
+                padding: 12px 18px;
+                border-radius: 10px;
+                cursor: pointer;
+                font-size: 16px;
+                font-weight: bold;
+                transition: all 0.3s ease;
+                border: 2px solid transparent;
+            }
+
+            .word-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 16px rgba(116, 185, 255, 0.4);
+                border-color: #00b894;
+            }
+
+            .word-btn:active {
+                transform: scale(0.95);
+            }
+
+            .word-btn.correct {
+                background: linear-gradient(135deg, #00b894, #00a085);
+                border-color: #00b894;
+                box-shadow: 0 0 20px rgba(0, 184, 148, 0.6);
+            }
+
+            .word-btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+            .options-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 15px;
+                margin-bottom: 30px;
+            }
+
+            .option-btn {
+                background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+                color: white;
+                border: none;
+                padding: 30px 15px;
+                border-radius: 15px;
+                cursor: pointer;
+                font-size: 36px;
+                font-weight: bold;
+                transition: all 0.3s ease;
+                border: 3px solid transparent;
+                min-height: 120px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .option-btn:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 15px 30px rgba(108, 92, 231, 0.4);
+                border-color: #00b894;
+            }
+
+            .option-btn:active {
+                transform: scale(0.95);
+            }
+
+            .option-btn.correct {
+                background: linear-gradient(135deg, #00b894, #00a085);
+                border-color: #00b894;
+                box-shadow: 0 0 30px rgba(0, 184, 148, 0.8);
+            }
+
+            .option-btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+            .feedback {
+                margin-top: 30px;
+                padding: 30px;
+                border-radius: 20px;
+                animation: feedbackPop 0.5s ease;
+            }
+
+            @keyframes feedbackPop {
+                0% {
+                    transform: scale(0.8);
+                    opacity: 0;
+                }
+                100% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+            }
+
+            .feedback.correct {
+                background: linear-gradient(135deg, #00b894, #00a085);
+                color: white;
+            }
+
+            .feedback.incorrect {
+                background: linear-gradient(135deg, #e17055, #d63031);
+                color: white;
+            }
+
+            .feedback-icon {
+                font-size: 60px;
+                margin-bottom: 15px;
+                animation: bounce 0.6s ease infinite alternate;
+            }
+
+            @keyframes bounce {
+                0% {
+                    transform: translateY(0px);
+                }
+                100% {
+                    transform: translateY(-10px);
+                }
+            }
+
+            .feedback h4 {
+                font-size: 24px;
+                margin-bottom: 10px;
+            }
+
+            .feedback p {
+                font-size: 16px;
+                margin-bottom: 15px;
+            }
+
+            .celebration {
+                display: flex;
+                justify-content: center;
+                gap: 10px;
+                margin-top: 10px;
+            }
+
+            .celebration span {
+                font-size: 24px;
+                animation: celebrate 0.8s ease infinite alternate;
+            }
+
+            .celebration span:nth-child(2) {
+                animation-delay: 0.2s;
+            }
+
+            .celebration span:nth-child(3) {
+                animation-delay: 0.4s;
+            }
+
+            @keyframes celebrate {
+                0% {
+                    transform: scale(1);
+                }
+                100% {
+                    transform: scale(1.2);
+                }
+            }
+
+            .level-indicators {
+                display: flex;
+                justify-content: center;
+                gap: 10px;
+                margin-top: 30px;
+            }
+
+            .level-dot {
+                width: 15px;
+                height: 15px;
+                border-radius: 50%;
+                transition: all 0.3s ease;
+            }
+
+            .level-dot.current {
+                background: #74b9ff;
+                box-shadow: 0 0 15px rgba(116, 185, 255, 0.6);
+            }
+
+            .level-dot.completed {
+                background: #00b894;
+                box-shadow: 0 0 15px rgba(0, 184, 148, 0.6);
+            }
+
+            .level-dot.upcoming {
+                background: #ddd;
+            }
+
+            .level-text {
+                text-align: center;
+                margin-top: 10px;
+                color: #666;
+                font-size: 14px;
+            }
+
+            .home-screen {
+                text-align: center;
+            }
+
+            .home-title {
+                color: #333;
+                font-size: 28px;
+                margin-bottom: 15px;
+            }
+
+            .home-subtitle {
+                color: #666;
+                font-size: 18px;
+                margin-bottom: 10px;
+            }
+
+            .home-credit {
+                color: #999;
+                font-size: 14px;
+                margin-bottom: 40px;
+            }
+
+            .home-icon {
+                font-size: 80px;
+                margin-bottom: 20px;
+                color: #feca57;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            }
+
+            .level-buttons {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+                max-width: 400px;
+                margin: 0 auto;
+            }
+
+            .level-btn {
+                padding: 20px 30px;
+                border: none;
+                border-radius: 15px;
+                font-size: 18px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                color: white;
+            }
+
+            .level-btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            }
+
+            .level-btn:active {
+                transform: scale(0.98);
+            }
+
+            .level-btn.beginner {
+                background: linear-gradient(135deg, #00b894, #00a085);
+            }
+
+            .level-btn.intermediate {
+                background: linear-gradient(135deg, #fdcb6e, #e17055);
+            }
+
+            .level-btn.advanced {
+                background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+            }
+
+            .completion-screen {
+                text-align: center;
+            }
+
+            .completion-icon {
+                font-size: 100px;
+                margin-bottom: 20px;
+                color: #feca57;
+                animation: rotate 2s ease infinite;
+            }
+
+            @keyframes rotate {
+                0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+
+            .completion-title {
+                color: #333;
+                font-size: 32px;
+                margin-bottom: 15px;
+            }
+
+            .completion-subtitle {
+                color: #666;
+                font-size: 20px;
+                margin-bottom: 25px;
+            }
+
+            .final-score {
+                background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+                border-radius: 15px;
+                padding: 20px;
+                margin-bottom: 30px;
+                border: 2px solid #e17055;
+            }
+
+            .final-score p {
+                color: #d63031;
+                font-size: 20px;
+                font-weight: bold;
+            }
+
+            .play-again-btn {
+                background: linear-gradient(135deg, #74b9ff, #0984e3);
+                color: white;
+                border: none;
+                padding: 20px 40px;
+                border-radius: 15px;
+                font-size: 18px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .play-again-btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 10px 20px rgba(116, 185, 255, 0.4);
+            }
+
+            @media (max-width: 768px) {
+                .game-container {
+                    padding: 20px;
+                    margin: 10px;
+                }
+
+                .header {
+                    flex-direction: column;
+                    gap: 15px;
+                }
+
+                .target-symbol {
+                    font-size: 60px;
+                }
+
+                .options-grid {
+                    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+                    gap: 10px;
+                }
+
+                .option-btn {
+                    padding: 20px 10px;
+                    font-size: 28px;
+                    min-height: 100px;
+                }
+
+                .sentence-words {
+                    gap: 8px;
+                }
+
+                .word-btn {
+                    padding: 10px 14px;
+                    font-size: 14px;
+                }
+
+                .home-title {
+                    font-size: 24px;
+                }
+
+                .home-icon {
+                    font-size: 60px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="game-container" id="gameContainer">
+            <!-- Home Screen -->
+            <div id="homeScreen" class="home-screen">
+                <div class="home-icon">⭐</div>
+                <h1 class="home-title">استخراج الكلمة أو الرمز المحدد من المتعدد</h1>
+                <p class="home-subtitle">التدريب على تركيز الانتباه</p>
+                <p class="home-credit">صنع بحب من kidskills</p>
+
+                <div class="level-buttons">
+                    <button class="level-btn beginner" onclick="startLevel(1)">🟢 المستوى الأول - مبتدئ</button>
+                    <button class="level-btn intermediate" onclick="startLevel(2)">🟡 المستوى الثاني - متوسط</button>
+                    <button class="level-btn advanced" onclick="startLevel(4)">🟣 المستوى الرابع - متقدم</button>
+                </div>
+            </div>
+
+            <!-- Game Screen -->
+            <div id="gameScreen" style="display: none">
+                <div class="header">
+                    <button class="home-btn" onclick="goHome()">🏠</button>
+                    <div class="level-info">
+                        <h2 id="levelTitle"></h2>
+                        <p id="pageInfo"></p>
+                    </div>
+                    <div class="score">النقاط: <span id="scoreValue">0</span></div>
+                </div>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+
+                <div class="target-section">
+                    <h3>ابحث عن:</h3>
+                    <div class="target-display" onclick="speakTarget()">
+                        <div class="target-symbol" id="targetSymbol"></div>
+                        <div class="target-instruction">🔊 انقر لسماع الصوت</div>
+                    </div>
+
+                    <div class="instruction-box">
+                        <p id="instructionText"></p>
+                    </div>
+
+                    <div id="sentenceBox" class="sentence-box" style="display: none">
+                        <h4>الجملة:</h4>
+                        <div class="sentence-words" id="sentenceWords"></div>
+                    </div>
+                </div>
+
+                <div id="optionsGrid" class="options-grid"></div>
+
+                <div id="feedback" class="feedback" style="display: none"></div>
+
+                <div class="level-indicators">
+                    <div class="level-dot" id="dot1"></div>
+                    <div class="level-dot" id="dot2"></div>
+                    <div class="level-dot" id="dot3"></div>
+                    <div class="level-dot" id="dot4"></div>
+                </div>
+                <div class="level-text">مستوى <span id="currentLevelText">1</span> من 4</div>
+            </div>
+
+            <!-- Completion Screen -->
+            <div id="completionScreen" class="completion-screen" style="display: none">
+                <div class="completion-icon">🏆</div>
+                <h1 class="completion-title">🎉 مبروك!</h1>
+                <p class="completion-subtitle">لقد أكملت جميع المستويات!</p>
+                <div class="final-score">
+                    <p>النتيجة النهائية: <span id="finalScore">0</span>/20 ⭐</p>
+                </div>
+                <button class="play-again-btn" onclick="goHome()">العب مرة أخرى 🔄</button>
+            </div>
+        </div>
+
+        <script>
+            // Game state
+            let currentLevel = 0;
+            let currentPage = 0;
+            let score = 0;
+            let showingFeedback = false;
+
+            // Game data
+            const gameData = {
+                1: {
+                    title: 'المستوى الأول - الأشكال والحيوانات',
+                    difficulty: 'مبتدئ',
+                    pages: [
+                        {
+                            target: '🐱',
+                            targetName: 'قطة',
+                            instruction: 'اختر القطة من بين الحيوانات التالية',
+                            options: ['🐶', '🐸', '🐱', '🐅', '🦁'],
+                            correct: 2
+                        },
+                        {
+                            target: '❤️',
+                            targetName: 'قلب',
+                            instruction: 'اختر القلب من بين الأشكال التالية',
+                            options: ['⭐', '❤️', '⬜', '⭕', '➡️'],
+                            correct: 1
+                        },
+                        {
+                            target: '🦁',
+                            targetName: 'أسد',
+                            instruction: 'اختر الأسد من بين الحيوانات التالية',
+                            options: ['🐘', '🐠', '🐶', '🦁', '🐱'],
+                            correct: 3
+                        },
+                        {
+                            target: '🦈',
+                            targetName: 'سمكة القرش',
+                            instruction: 'اختر سمكة القرش من بين الكائنات البحرية التالية',
+                            options: ['🦈', '🐡', '🐠', '🐙', '🐬'],
+                            correct: 0
+                        },
+                        {
+                            target: '☀️',
+                            targetName: 'شمس',
+                            instruction: 'اختر الشمس من بين الأشكال السماوية التالية',
+                            options: ['🌙', '⭐', '☁️', '☀️', '⚡'],
+                            correct: 3
+                        }
+                    ]
+                },
+                2: {
+                    title: 'المستوى الثاني - الأرقام والحروف',
+                    difficulty: 'متوسط',
+                    pages: [
+                        {
+                            target: '2',
+                            targetName: 'رقم اثنان إنجليزي',
+                            instruction: 'اختر الرقم 2 من بين الأرقام التالية',
+                            options: ['1', '2', '4', '5', '3'],
+                            correct: 1
+                        },
+                        {
+                            target: '٧',
+                            targetName: 'رقم سبعة عربي',
+                            instruction: 'اختر الرقم ٧ من بين الأرقام العربية التالية',
+                            options: ['٢', '٤', '٧', '٩', '٦'],
+                            correct: 2
+                        },
+                        {
+                            target: 'ب',
+                            targetName: 'حرف الباء',
+                            instruction: 'اختر حرف الباء من بين الحروف العربية التالية',
+                            options: ['ب', 'ت', 'ث', 'ج', 'أ'],
+                            correct: 0
+                        },
+                        {
+                            target: 'د',
+                            targetName: 'حرف الدال',
+                            instruction: 'اختر حرف الدال من بين الحروف العربية التالية',
+                            options: ['ذ', 'ر', 'ز', 'د', 'س'],
+                            correct: 3
+                        },
+                        {
+                            target: 'B',
+                            targetName: 'حرف B إنجليزي',
+                            instruction: 'اختر حرف B من بين الحروف الإنجليزية التالية',
+                            options: ['A', 'C', 'B', 'E', 'D'],
+                            correct: 2
+                        }
+                    ]
+                },
+                4: {
+                    title: 'المستوى الرابع - اختيار كلمة من الجملة',
+                    difficulty: 'متقدم',
+                    pages: [
+                        {
+                            target: 'أحمد',
+                            targetName: 'كلمة أحمد',
+                            instruction: 'اختر كلمة أحمد من الجملة التالية',
+                            sentence: 'ذهب أحمد إلى المدرسة صباحاً وهو في قمة سعادته',
+                            sentenceWords: ['ذهب', 'أحمد', 'إلى', 'المدرسة', 'صباحاً', 'وهو', 'في', 'قمة', 'سعادته'],
+                            correctWord: 'أحمد'
+                        },
+                        {
+                            target: 'القطة',
+                            targetName: 'كلمة القطة',
+                            instruction: 'اختر كلمة القطة من الجملة التالية',
+                            sentence: 'تجلس القطة الصغيرة تحت الشجرة في الحديقة الجميلة',
+                            sentenceWords: ['تجلس', 'القطة', 'الصغيرة', 'تحت', 'الشجرة', 'في', 'الحديقة', 'الجميلة'],
+                            correctWord: 'القطة'
+                        },
+                        {
+                            target: 'الكتاب',
+                            targetName: 'كلمة الكتاب',
+                            instruction: 'اختر كلمة الكتاب من الجملة التالية',
+                            sentence: 'يقرأ الطفل الكتاب الملون بعناية كبيرة ويستمتع بالصور',
+                            sentenceWords: ['يقرأ', 'الطفل', 'الكتاب', 'الملون', 'بعناية', 'كبيرة', 'ويستمتع', 'بالصور'],
+                            correctWord: 'الكتاب'
+                        },
+                        {
+                            target: 'الحديقة',
+                            targetName: 'كلمة الحديقة',
+                            instruction: 'اختر كلمة الحديقة من الجملة التالية',
+                            sentence: 'تلعب الأطفال في الحديقة الواسعة ويمرحون مع أصدقائهم',
+                            sentenceWords: ['تلعب', 'الأطفال', 'في', 'الحديقة', 'الواسعة', 'ويمرحون', 'مع', 'أصدقائهم'],
+                            correctWord: 'الحديقة'
+                        },
+                        {
+                            target: 'الطائرة',
+                            targetName: 'كلمة الطائرة',
+                            instruction: 'اختر كلمة الطائرة من الجملة التالية',
+                            sentence: 'تحلق الطائرة عالياً في السماء الزرقاء الصافية والغيوم البيضاء',
+                            sentenceWords: ['تحلق', 'الطائرة', 'عالياً', 'في', 'السماء', 'الزرقاء', 'الصافية', 'والغيوم', 'البيضاء'],
+                            correctWord: 'الطائرة'
+                        }
+                    ]
+                }
+            };
+
+            // Sound effects
+            function playSound(type) {
+                try {
+                    if (type === 'success') {
+                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        const frequencies = [523, 659, 784, 1047, 1319];
+
+                        frequencies.forEach((freq, index) => {
+                            setTimeout(() => {
+                                const oscillator = audioContext.createOscillator();
+                                const gainNode = audioContext.createGain();
+
+                                oscillator.connect(gainNode);
+                                gainNode.connect(audioContext.destination);
+
+                                oscillator.type = 'sine';
+                                oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+
+                                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+                                oscillator.start(audioContext.currentTime);
+                                oscillator.stop(audioContext.currentTime + 0.3);
+                            }, index * 80);
+                        });
+                    } else if (type === 'error') {
+                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+
+                        oscillator.type = 'sawtooth';
+                        oscillator.frequency.setValueAtTime(150, audioContext.currentTime);
+                        oscillator.frequency.setValueAtTime(100, audioContext.currentTime + 0.2);
+
+                        gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+
+                        oscillator.start(audioContext.currentTime);
+                        oscillator.stop(audioContext.currentTime + 0.4);
+                    }
+                } catch (error) {
+                    console.log('Audio not supported');
+                }
+            }
+
+            // Text-to-speech
+            function speakTarget() {
+                try {
+                    if ('speechSynthesis' in window) {
+                        window.speechSynthesis.cancel();
+
+                        setTimeout(() => {
+                            const currentData = gameData[currentLevel].pages[currentPage];
+                            const utterance = new SpeechSynthesisUtterance();
+
+                            let textToSpeak = '';
+                            const target = currentData.target;
+
+                            switch (target) {
+                                case '🐱':
+                                    textToSpeak = 'قطة';
+                                    break;
+                                case '❤️':
+                                    textToSpeak = 'قلب';
+                                    break;
+                                case '🦁':
+                                    textToSpeak = 'أسد';
+                                    break;
+                                case '🦈':
+                                    textToSpeak = 'سمكة القرش';
+                                    break;
+                                case '☀️':
+                                    textToSpeak = 'شمس';
+                                    break;
+                                case '2':
+                                    textToSpeak = 'رقم اثنان';
+                                    break;
+                                case '٧':
+                                    textToSpeak = 'رقم سبعة';
+                                    break;
+                                case 'ب':
+                                    textToSpeak = 'حرف الباء';
+                                    break;
+                                case 'د':
+                                    textToSpeak = 'حرف الدال';
+                                    break;
+                                case 'B':
+                                    textToSpeak = 'حرف بي';
+                                    break;
+                                case 'أسد':
+                                    textToSpeak = 'كلمة أسد';
+                                    break;
+                                case 'شجرة':
+                                    textToSpeak = 'كلمة شجرة';
+                                    break;
+                                case 'بيت':
+                                    textToSpeak = 'كلمة بيت';
+                                    break;
+                                case 'سيارة':
+                                    textToSpeak = 'كلمة سيارة';
+                                    break;
+                                case 'كتاب':
+                                    textToSpeak = 'كلمة كتاب';
+                                    break;
+                                case 'أحمد':
+                                    textToSpeak = 'كلمة أحمد';
+                                    break;
+                                case 'القطة':
+                                    textToSpeak = 'كلمة القطة';
+                                    break;
+                                case 'الكتاب':
+                                    textToSpeak = 'كلمة الكتاب';
+                                    break;
+                                case 'الحديقة':
+                                    textToSpeak = 'كلمة الحديقة';
+                                    break;
+                                case 'الطائرة':
+                                    textToSpeak = 'كلمة الطائرة';
+                                    break;
+                                default:
+                                    textToSpeak = currentData.targetName || target;
+                            }
+
+                            utterance.text = textToSpeak;
+
+                            const voices = window.speechSynthesis.getVoices();
+                            const arabicVoice = voices.find((voice) => voice.lang.includes('ar') || voice.lang.includes('AR'));
+
+                            const englishVoice = voices.find((voice) => voice.lang.includes('en') && voice.name.toLowerCase().includes('female'));
+
+                            if (arabicVoice) {
+                                utterance.voice = arabicVoice;
+                                utterance.lang = 'ar-SA';
+                            } else if (englishVoice) {
+                                utterance.voice = englishVoice;
+                                utterance.lang = 'en-US';
+                            } else {
+                                utterance.lang = 'ar-SA';
+                            }
+
+                            utterance.rate = 0.7;
+                            utterance.pitch = 1.3;
+                            utterance.volume = 1.0;
+
+                            window.speechSynthesis.speak(utterance);
+                            console.log(`Speaking: ${textToSpeak}`);
+                        }, 100);
+                    } else {
+                        console.log('Speech synthesis not supported');
+                    }
+                } catch (error) {
+                    console.log('Speech error:', error);
+                }
+            }
+
+            // Load voices
+            function loadVoices() {
+                if ('speechSynthesis' in window) {
+                    const voices = window.speechSynthesis.getVoices();
+                    console.log('Available voices:', voices.length);
+                }
+            }
+
+            // Initialize voices
+            if ('speechSynthesis' in window) {
+                if (window.speechSynthesis.getVoices().length > 0) {
+                    loadVoices();
+                } else {
+                    window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
+                }
+            }
+
+            // Start level
+            function startLevel(level) {
+                currentLevel = level;
+                currentPage = 0;
+                score = 0;
+                showingFeedback = false;
+
+                document.getElementById('homeScreen').style.display = 'none';
+                document.getElementById('gameScreen').style.display = 'block';
+                document.getElementById('completionScreen').style.display = 'none';
+
+                updateLevelIndicators();
+                loadPage();
+
+                // Test speech synthesis
+                if ('speechSynthesis' in window) {
+                    const testUtterance = new SpeechSynthesisUtterance('مرحبا');
+                    testUtterance.volume = 0.1;
+                    window.speechSynthesis.speak(testUtterance);
+                }
+            }
+
+            // Go home
+            function goHome() {
+                currentLevel = 0;
+                currentPage = 0;
+                score = 0;
+                showingFeedback = false;
+
+                document.getElementById('homeScreen').style.display = 'block';
+                document.getElementById('gameScreen').style.display = 'none';
+                document.getElementById('completionScreen').style.display = 'none';
+            }
+
+            // Load current page
+            function loadPage() {
+                const levelData = gameData[currentLevel];
+                const pageData = levelData.pages[currentPage];
+
+                // Update header
+                document.getElementById('levelTitle').textContent = levelData.title;
+                document.getElementById('pageInfo').textContent = `الصفحة ${currentPage + 1} من 5`;
+                document.getElementById('scoreValue').textContent = score;
+                document.getElementById('currentLevelText').textContent = currentLevel;
+
+                // Update progress bar
+                const progress = ((currentPage + 1) / 5) * 100;
+                document.getElementById('progressFill').style.width = progress + '%';
+
+                // Update target
+                document.getElementById('targetSymbol').textContent = pageData.target;
+                document.getElementById('instructionText').textContent = '📝 ' + pageData.instruction;
+
+                // Handle sentence for level 4
+                const sentenceBox = document.getElementById('sentenceBox');
+                const optionsGrid = document.getElementById('optionsGrid');
+
+                if (currentLevel === 4) {
+                    sentenceBox.style.display = 'block';
+                    optionsGrid.style.display = 'none';
+                    loadSentenceWords(pageData);
+                } else {
+                    sentenceBox.style.display = 'none';
+                    optionsGrid.style.display = 'grid';
+                    loadOptions(pageData);
+                }
+
+                // Hide feedback
+                document.getElementById('feedback').style.display = 'none';
+                showingFeedback = false;
+
+                // Speak target after a delay
+                setTimeout(() => {
+                    speakTarget();
+                }, 1000);
+            }
+
+            // Load sentence words for level 4
+            function loadSentenceWords(pageData) {
+                const wordsContainer = document.getElementById('sentenceWords');
+                wordsContainer.innerHTML = '';
+
+                pageData.sentenceWords.forEach((word, index) => {
+                    const wordBtn = document.createElement('button');
+                    wordBtn.className = 'word-btn';
+                    wordBtn.textContent = word;
+                    wordBtn.onclick = () => handleWordClick(word);
+                    wordsContainer.appendChild(wordBtn);
+                });
+            }
+
+            // Load options for other levels
+            function loadOptions(pageData) {
+                const optionsGrid = document.getElementById('optionsGrid');
+                optionsGrid.innerHTML = '';
+
+                pageData.options.forEach((option, index) => {
+                    const optionBtn = document.createElement('button');
+                    optionBtn.className = 'option-btn';
+                    optionBtn.textContent = option;
+                    optionBtn.onclick = () => handleOptionClick(index);
+                    optionsGrid.appendChild(optionBtn);
+                });
+            }
+
+            // Handle word click for level 4
+            function handleWordClick(selectedWord) {
+                if (showingFeedback) return;
+
+                const pageData = gameData[currentLevel].pages[currentPage];
+                const isCorrect = selectedWord === pageData.correctWord;
+
+                handleAnswer(isCorrect, selectedWord, null);
+            }
+
+            // Handle option click for other levels
+            function handleOptionClick(selectedIndex) {
+                if (showingFeedback) return;
+
+                const pageData = gameData[currentLevel].pages[currentPage];
+                const isCorrect = selectedIndex === pageData.correct;
+
+                handleAnswer(isCorrect, null, selectedIndex);
+            }
+
+            // Handle answer
+            function handleAnswer(isCorrect, selectedWord, selectedIndex) {
+                showingFeedback = true;
+
+                // Disable all buttons
+                const buttons = document.querySelectorAll('.word-btn, .option-btn');
+                buttons.forEach((btn) => (btn.disabled = true));
+
+                // Highlight correct answer
+                if (currentLevel === 4) {
+                    // Highlight correct word
+                    const wordBtns = document.querySelectorAll('.word-btn');
+                    const pageData = gameData[currentLevel].pages[currentPage];
+                    wordBtns.forEach((btn) => {
+                        if (btn.textContent === pageData.correctWord) {
+                            btn.classList.add('correct');
+                        }
+                    });
+                } else {
+                    // Highlight correct option
+                    const optionBtns = document.querySelectorAll('.option-btn');
+                    const pageData = gameData[currentLevel].pages[currentPage];
+                    optionBtns[pageData.correct].classList.add('correct');
+                }
+
+                // Show feedback
+                showFeedback(isCorrect);
+
+                if (isCorrect) {
+                    score++;
+                    document.getElementById('scoreValue').textContent = score;
+                    playSound('success');
+
+                    // Auto advance after 2 seconds
+                    setTimeout(() => {
+                        if (currentPage < 4) {
+                            currentPage++;
+                            loadPage();
+                        } else if (currentLevel < 4) {
+                            // Move to next level (but we only have 1, 2, 4)
+                            if (currentLevel === 1) {
+                                currentLevel = 2;
+                            } else if (currentLevel === 2) {
+                                currentLevel = 4;
+                            } else {
+                                showCompletion();
+                                return;
+                            }
+                            currentPage = 0;
+                            updateLevelIndicators();
+                            loadPage();
+                        } else {
+                            showCompletion();
+                        }
+                    }, 2000);
+                } else {
+                    playSound('error');
+
+                    // Hide feedback after 1.5 seconds and stay on same page
+                    setTimeout(() => {
+                        document.getElementById('feedback').style.display = 'none';
+                        showingFeedback = false;
+
+                        // Re-enable buttons
+                        const buttons = document.querySelectorAll('.word-btn, .option-btn');
+                        buttons.forEach((btn) => {
+                            btn.disabled = false;
+                            btn.classList.remove('correct');
+                        });
+                    }, 1500);
+                }
+            }
+
+            // Show feedback
+            function showFeedback(isCorrect) {
+                const feedbackEl = document.getElementById('feedback');
+                feedbackEl.style.display = 'block';
+                feedbackEl.className = 'feedback ' + (isCorrect ? 'correct' : 'incorrect');
+
+                if (isCorrect) {
+                    feedbackEl.innerHTML = `
+                    <div class="feedback-icon">✅</div>
+                    <h4>أحسنت! 🎉</h4>
+                    <p>ممتاز! 🌟</p>
+                    <div class="celebration">
+                        <span>👏</span>
+                        <span>👏</span>
+                        <span>👏</span>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <span style="background: #feca57; color: #333; padding: 8px 16px; border-radius: 20px; font-weight: bold;">
+                            +1 نقطة! ⭐
+                        </span>
+                    </div>
+                `;
+                } else {
+                    feedbackEl.innerHTML = `
+                    <div class="feedback-icon">❌</div>
+                    <h4>حاول مرة أخرى! 🔄</h4>
+                    <p>تركز أكثر وستنجح! 💪</p>
+                    <div style="margin-top: 15px;">
+                        <span style="font-size: 36px; color: #fff;">🚫</span>
+                    </div>
+                `;
+                }
+            }
+
+            // Update level indicators
+            function updateLevelIndicators() {
+                const dots = ['dot1', 'dot2', 'dot3', 'dot4'];
+                const levels = [1, 2, 3, 4];
+
+                dots.forEach((dotId, index) => {
+                    const dot = document.getElementById(dotId);
+                    const level = levels[index];
+
+                    if (level === currentLevel) {
+                        dot.className = 'level-dot current';
+                    } else if (level === 1 || (level === 2 && currentLevel > 1) || (level === 4 && currentLevel === 4)) {
+                        dot.className = 'level-dot completed';
+                    } else {
+                        dot.className = 'level-dot upcoming';
+                    }
+                });
+            }
+
+            // Show completion screen
+            function showCompletion() {
+                document.getElementById('gameScreen').style.display = 'none';
+                document.getElementById('completionScreen').style.display = 'block';
+                document.getElementById('finalScore').textContent = score;
+            }
+
+            // Initialize
+            window.onload = function () {
+                goHome();
+            };
+        </script>
+    </body>
+</html>

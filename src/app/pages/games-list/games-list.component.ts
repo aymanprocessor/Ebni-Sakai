@@ -114,7 +114,7 @@ export class GamesListComponent implements OnInit {
             1: 'لعبه استخراج المختلف (اشكال-الوان-احجام)',
             2: 'استخراج الصوره التي لا تنتمي للمجموعه',
             3: 'نشاط الشطب',
-            4: 'اكمل العنصر الناقص من المجموعه',
+            4: 'اختر الشكل المنتمي للمجموعة',
             5: 'نشاط التطابق البصري',
             6: 'نشاط اوجد الاختلافات بين الصورتين',
             7: 'لعبه المتاهات لزياده مده الانتباه',
@@ -200,16 +200,9 @@ export class GamesListComponent implements OnInit {
         if (this.selectedCategory) {
             const cat = this.categories.find((c) => c.key === this.selectedCategory);
             if (cat) {
-                if (this.selectedSubcat) {
-                    const sub = cat.subcats.find((s) => s.key === this.selectedSubcat);
-                    if (sub) {
-                        list = list.filter((g) => sub.ids.includes(g.id));
-                    }
-                } else {
-                    // if no subcat selected, include all ids from category
-                    const allIds = cat.subcats.flatMap((s) => s.ids);
-                    list = list.filter((g) => allIds.includes(g.id));
-                }
+                // Subcategory filtering disabled by request: include all ids from category regardless of selectedSubcat
+                const allIds = cat.subcats.flatMap((s) => s.ids);
+                list = list.filter((g) => allIds.includes(g.id));
             }
         }
 
@@ -228,8 +221,8 @@ export class GamesListComponent implements OnInit {
     }
 
     selectSubcat(subKey: string | null) {
-        this.selectedSubcat = subKey;
-        this.filterGames();
+        // Subcategory selection is disabled — keep property for compatibility but do not trigger filtering
+        this.selectedSubcat = null;
     }
 
     navigateToGame(gameRoute: string) {

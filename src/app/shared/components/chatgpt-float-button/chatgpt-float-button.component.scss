@@ -1,0 +1,57 @@
+.chatgpt-float-button {
+    /* Match WhatsApp button size on desktop: 60x60, icon ~32px */
+    position: fixed;
+    bottom: 100px; /* 30px (whatsapp bottom) + 60px (whatsapp height) + 10px gap */
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #6c63ff 0%, #8a7bff 100%);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(108, 99, 255, 0.35);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    z-index: 10000;
+    outline: none;
+
+    i {
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    &:hover {
+        transform: translateY(-3px) scale(1.03);
+        box-shadow: 0 10px 26px rgba(108, 99, 255, 0.45);
+    }
+
+    &:active { transform: scale(0.98); }
+
+    &:focus { outline: 3px solid rgba(108, 99, 255, 0.25); outline-offset: 2px; }
+
+    &.pulse { animation: pulse-cg 2s infinite; }
+}
+
+@keyframes pulse-cg {
+    0% { box-shadow: 0 6px 18px rgba(108, 99, 255, 0.35); }
+    50% { box-shadow: 0 12px 30px rgba(108, 99, 255, 0.45); }
+    100% { box-shadow: 0 6px 18px rgba(108, 99, 255, 0.35); }
+}
+
+/* Tablet: match WhatsApp tablet size and spacing (whatsapp bottom:20, size:56) */
+@media (max-width: 768px) {
+    .chatgpt-float-button { bottom: 86px; right: 20px; width: 56px; height: 56px; font-size: 28px; }
+}
+
+/* Mobile: match WhatsApp mobile size and spacing (whatsapp bottom:16, size:52) */
+@media (max-width: 480px) {
+    .chatgpt-float-button { bottom: 78px; right: 16px; width: 52px; height: 52px; font-size: 26px; }
+}
+
+[dir='rtl'] .chatgpt-float-button { right: auto; left: 30px; }

@@ -85,6 +85,7 @@ import { Popover } from 'primeng/popover';
                             <i class="pi pi-inbox"></i>
                             <span>{{ 'topbar.messages' | translate }}</span>
                         </button>
+                        <!-- ChatGPT assistant is available as a floating button (bottom corner) -->
                         <button type="button" (click)="op.toggle($event)" class="layout-topbar-action relative">
                             <i class="pi pi-user"></i>
                             <span>{{ 'topbar.profile' | translate }}</span>

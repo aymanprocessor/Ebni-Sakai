@@ -1,0 +1,1231 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>لعبة تصنيف الملابس حسب الفصول</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Arial', sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                color: #333;
+                padding: 20px;
+            }
+
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+
+            /* شاشة القائمة الرئيسية */
+            .main-menu {
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                padding: 40px;
+                text-align: center;
+                animation: fadeIn 0.5s ease-in;
+            }
+
+            .game-title {
+                font-size: 3em;
+                color: #333;
+                margin-bottom: 30px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .total-score {
+                font-size: 1.8em;
+                color: #6c5ce7;
+                margin-bottom: 30px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .levels-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 20px;
+                margin-bottom: 30px;
+            }
+
+            .level-card {
+                padding: 30px;
+                border-radius: 15px;
+                color: white;
+                cursor: pointer;
+                transition: transform 0.3s ease;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .level-card:hover {
+                transform: translateY(-5px);
+            }
+
+            .level-card.locked {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            .level-1 {
+                background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            }
+
+            .level-2 {
+                background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            }
+
+            .level-3 {
+                background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            }
+
+            .level-pages {
+                display: flex;
+                gap: 10px;
+                margin-top: 15px;
+            }
+
+            .page-btn {
+                background: rgba(255, 255, 255, 0.2);
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 8px;
+                cursor: pointer;
+                flex: 1;
+                transition: background 0.3s ease;
+            }
+
+            .page-btn:hover {
+                background: rgba(255, 255, 255, 0.3);
+            }
+
+            .page-btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            .seasons-guide {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+
+            .season-item {
+                padding: 20px;
+                border-radius: 12px;
+                text-align: center;
+                border: 3px solid;
+            }
+
+            .summer {
+                background: #fff3cd;
+                border-color: #ffc107;
+                color: #856404;
+            }
+
+            .winter {
+                background: #d1ecf1;
+                border-color: #17a2b8;
+                color: #0c5460;
+            }
+
+            .spring {
+                background: #d4edda;
+                border-color: #28a745;
+                color: #155724;
+            }
+
+            .autumn {
+                background: #f8d7da;
+                border-color: #dc3545;
+                color: #721c24;
+            }
+
+            /* شاشة اللعب */
+            .game-screen {
+                display: none;
+                animation: fadeIn 0.5s ease-in;
+            }
+
+            .game-header {
+                background: white;
+                border-radius: 15px;
+                padding: 20px;
+                margin-bottom: 20px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .level-info {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .level-badge {
+                padding: 8px 16px;
+                border-radius: 8px;
+                color: white;
+                font-weight: bold;
+            }
+
+            .score-info {
+                text-align: center;
+            }
+
+            .progress-bar {
+                width: 150px;
+                height: 8px;
+                background: #e0e0e0;
+                border-radius: 4px;
+                overflow: hidden;
+                margin-top: 5px;
+            }
+
+            .progress-fill {
+                height: 100%;
+                background: linear-gradient(90deg, #2ecc71, #3498db);
+                border-radius: 4px;
+                transition: width 0.3s ease;
+                width: 0%;
+            }
+
+            .game-controls {
+                display: flex;
+                gap: 10px;
+            }
+
+            .control-btn {
+                background: #6c7ae0;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 8px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                transition: background 0.3s ease;
+            }
+
+            .control-btn:hover {
+                background: #5a67d8;
+            }
+
+            .control-btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            .game-content {
+                display: grid;
+                grid-template-columns: 2fr 1fr;
+                gap: 20px;
+            }
+
+            .clothes-area {
+                background: white;
+                border-radius: 15px;
+                padding: 25px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .clothes-grid {
+                display: grid;
+                gap: 15px;
+                max-height: 400px;
+                overflow-y: auto;
+                padding: 10px;
+            }
+
+            .clothes-grid.level-1 {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .clothes-grid.level-2 {
+                grid-template-columns: repeat(5, 1fr);
+            }
+
+            .clothes-grid.level-3 {
+                grid-template-columns: repeat(6, 1fr);
+            }
+
+            .clothes-item {
+                background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+                border: 3px solid #ffc107;
+                border-radius: 12px;
+                padding: 15px;
+                text-align: center;
+                cursor: grab;
+                transition: all 0.3s ease;
+                user-select: none;
+            }
+
+            .clothes-item:hover {
+                transform: scale(1.05);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .clothes-item:active {
+                cursor: grabbing;
+            }
+
+            .clothes-item.dragging {
+                opacity: 0.5;
+                transform: rotate(5deg);
+            }
+
+            .clothes-emoji {
+                font-size: 2.5em;
+                margin-bottom: 8px;
+                display: block;
+            }
+
+            .clothes-name {
+                font-size: 0.9em;
+                font-weight: bold;
+                color: #333;
+                line-height: 1.2;
+            }
+
+            .categories-area {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .category-box {
+                border-radius: 15px;
+                padding: 20px;
+                min-height: 120px;
+                border: 4px dashed;
+                transition: all 0.3s ease;
+                position: relative;
+            }
+
+            .category-box.drag-over {
+                border-style: solid;
+                transform: scale(1.02);
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            }
+
+            .category-header {
+                text-align: center;
+                margin-bottom: 15px;
+            }
+
+            .category-icon {
+                font-size: 2em;
+                margin-bottom: 5px;
+                display: block;
+            }
+
+            .category-name {
+                color: white;
+                font-weight: bold;
+                font-size: 1.2em;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            }
+
+            .category-hint {
+                color: white;
+                font-size: 0.8em;
+                opacity: 0.8;
+            }
+
+            .placed-items {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+                margin-top: 10px;
+            }
+
+            .placed-item {
+                background: rgba(255, 255, 255, 0.9);
+                border-radius: 8px;
+                padding: 8px;
+                text-align: center;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                animation: placeItem 0.3s ease-out;
+            }
+
+            .placed-item-emoji {
+                font-size: 1.2em;
+                margin-bottom: 3px;
+                display: block;
+            }
+
+            .placed-item-name {
+                font-size: 0.7em;
+                font-weight: bold;
+                color: #333;
+            }
+
+            .empty-category {
+                text-align: center;
+                color: rgba(255, 255, 255, 0.7);
+                font-style: italic;
+                padding: 20px;
+            }
+
+            /* شاشات النجاح */
+            .success-screen {
+                display: none;
+                background: white;
+                border-radius: 20px;
+                padding: 40px;
+                text-align: center;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                animation: bounceIn 0.6s ease-out;
+            }
+
+            .success-icon {
+                font-size: 5em;
+                margin-bottom: 20px;
+                animation: bounce 1s infinite;
+            }
+
+            .success-title {
+                font-size: 2.5em;
+                color: #2ecc71;
+                margin-bottom: 20px;
+            }
+
+            .success-score {
+                font-size: 1.8em;
+                color: #6c5ce7;
+                margin-bottom: 30px;
+            }
+
+            .success-buttons {
+                display: flex;
+                gap: 15px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .success-btn {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 10px;
+                cursor: pointer;
+                font-size: 1.1em;
+                transition: transform 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .success-btn:hover {
+                transform: translateY(-2px);
+            }
+
+            .success-btn.next-level {
+                background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            }
+
+            /* الرسوم المتحركة */
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            @keyframes bounceIn {
+                0% {
+                    opacity: 0;
+                    transform: scale(0.3);
+                }
+                50% {
+                    opacity: 1;
+                    transform: scale(1.05);
+                }
+                70% {
+                    transform: scale(0.9);
+                }
+                100% {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+
+            @keyframes bounce {
+                0%,
+                20%,
+                50%,
+                80%,
+                100% {
+                    transform: translateY(0);
+                }
+                40% {
+                    transform: translateY(-10px);
+                }
+                60% {
+                    transform: translateY(-5px);
+                }
+            }
+
+            @keyframes placeItem {
+                from {
+                    opacity: 0;
+                    transform: scale(0.5) rotate(10deg);
+                }
+                to {
+                    opacity: 1;
+                    transform: scale(1) rotate(0deg);
+                }
+            }
+
+            @keyframes shake {
+                0%,
+                100% {
+                    transform: translateX(0);
+                }
+                25% {
+                    transform: translateX(-5px);
+                }
+                75% {
+                    transform: translateX(5px);
+                }
+            }
+
+            .shake {
+                animation: shake 0.5s ease-in-out;
+            }
+
+            /* استجابة للشاشات الصغيرة */
+            @media (max-width: 768px) {
+                .game-content {
+                    grid-template-columns: 1fr;
+                }
+
+                .categories-area {
+                    grid-template-columns: repeat(2, 1fr);
+                    display: grid;
+                }
+
+                .clothes-grid.level-1,
+                .clothes-grid.level-2,
+                .clothes-grid.level-3 {
+                    grid-template-columns: repeat(3, 1fr);
+                }
+
+                .game-header {
+                    flex-direction: column;
+                    text-align: center;
+                }
+
+                .placed-items {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+
+            /* إخفاء scrollbar */
+            .clothes-grid::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            .clothes-grid::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 4px;
+            }
+
+            .clothes-grid::-webkit-scrollbar-thumb {
+                background: #888;
+                border-radius: 4px;
+            }
+
+            .clothes-grid::-webkit-scrollbar-thumb:hover {
+                background: #555;
+            }
+
+            .instructions {
+                background: #fff3cd;
+                border: 2px solid #ffc107;
+                border-radius: 10px;
+                padding: 15px;
+                margin-top: 20px;
+                text-align: center;
+                color: #856404;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <!-- شاشة القائمة الرئيسية -->
+            <div id="mainMenu" class="main-menu">
+                <h1 class="game-title">👗 لعبة تصنيف الملابس حسب الفصول</h1>
+
+                <div class="total-score">
+                    <span>⭐</span>
+                    النقاط الإجمالية: <span id="totalScoreDisplay">0</span>
+                </div>
+
+                <div class="levels-grid">
+                    <div class="level-card level-1" data-level="1">
+                        <h3>مستوى سهل - صيف وشتاء</h3>
+                        <p>8 قطع ملابس في كل صفحة</p>
+                        <p>2 صفحات</p>
+                        <div class="level-pages">
+                            <button class="page-btn" onclick="startLevel(1, 1)">الصفحة 1</button>
+                            <button class="page-btn" onclick="startLevel(1, 2)">الصفحة 2</button>
+                        </div>
+                        <div id="level1Complete" style="display: none; color: #ffd700; margin-top: 10px">🏆 مكتمل</div>
+                    </div>
+
+                    <div class="level-card level-2 locked" data-level="2">
+                        <div style="text-align: center; margin-bottom: 15px">🔒</div>
+                        <h3>مستوى متوسط - ربيع وخريف</h3>
+                        <p>10 قطع ملابس في كل صفحة</p>
+                        <p>2 صفحات</p>
+                        <div class="level-pages">
+                            <button class="page-btn" onclick="startLevel(2, 1)" disabled>الصفحة 1</button>
+                            <button class="page-btn" onclick="startLevel(2, 2)" disabled>الصفحة 2</button>
+                        </div>
+                        <div id="level2Complete" style="display: none; color: #ffd700; margin-top: 10px">🏆 مكتمل</div>
+                    </div>
+
+                    <div class="level-card level-3 locked" data-level="3">
+                        <div style="text-align: center; margin-bottom: 15px">🔒</div>
+                        <h3>مستوى صعب - جميع الفصول</h3>
+                        <p>12 قطعة ملابس في كل صفحة</p>
+                        <p>2 صفحات</p>
+                        <div class="level-pages">
+                            <button class="page-btn" onclick="startLevel(3, 1)" disabled>الصفحة 1</button>
+                            <button class="page-btn" onclick="startLevel(3, 2)" disabled>الصفحة 2</button>
+                        </div>
+                        <div id="level3Complete" style="display: none; color: #ffd700; margin-top: 10px">🏆 مكتمل</div>
+                    </div>
+                </div>
+
+                <div class="seasons-guide">
+                    <div class="season-item summer">
+                        <div style="font-size: 2em; margin-bottom: 10px">☀️</div>
+                        <div style="font-weight: bold">صيف</div>
+                        <div style="font-size: 0.8em">المستوى الأول</div>
+                    </div>
+                    <div class="season-item winter">
+                        <div style="font-size: 2em; margin-bottom: 10px">❄️</div>
+                        <div style="font-weight: bold">شتاء</div>
+                        <div style="font-size: 0.8em">المستوى الأول</div>
+                    </div>
+                    <div class="season-item spring">
+                        <div style="font-size: 2em; margin-bottom: 10px">🌸</div>
+                        <div style="font-weight: bold">ربيع</div>
+                        <div style="font-size: 0.8em">المستوى 2 و 3</div>
+                    </div>
+                    <div class="season-item autumn">
+                        <div style="font-size: 2em; margin-bottom: 10px">🍂</div>
+                        <div style="font-weight: bold">خريف</div>
+                        <div style="font-size: 0.8em">المستوى 2 و 3</div>
+                    </div>
+                </div>
+
+                <div style="background: #fff3cd; padding: 20px; border-radius: 15px; color: #856404">
+                    <p style="font-weight: bold; margin-bottom: 10px">💡 كيفية اللعب:</p>
+                    <p>
+                        المستوى الأول: تعلم الفرق بين ملابس الصيف والشتاء<br />
+                        المستوى الثاني: تعلم الفرق بين ملابس الربيع والخريف<br />
+                        المستوى الثالث: تحدي نهائي مع جميع فصول السنة!<br />
+                        🔊 استمع للأصوات عند الإجابة الصحيحة والخاطئة!
+                    </p>
+                </div>
+            </div>
+
+            <!-- شاشة اللعب -->
+            <div id="gameScreen" class="game-screen">
+                <div class="game-header">
+                    <div class="level-info">
+                        <div id="levelBadge" class="level-badge">مستوى 1</div>
+                        <span id="pageInfo">الصفحة 1/2</span>
+                    </div>
+
+                    <div class="score-info">
+                        <div style="display: flex; align-items: center; gap: 8px">
+                            <span style="font-size: 1.5em">⭐</span>
+                            <span style="font-size: 1.3em; font-weight: bold">النقاط: <span id="currentScore">0</span></span>
+                        </div>
+                        <div style="font-size: 0.9em; color: #666">التقدم: <span id="progressText">0%</span></div>
+                        <div class="progress-bar">
+                            <div id="progressFill" class="progress-fill"></div>
+                        </div>
+                    </div>
+
+                    <div class="game-controls">
+                        <button id="prevPageBtn" class="control-btn" onclick="changePage(-1)">← السابقة</button>
+                        <button id="nextPageBtn" class="control-btn" onclick="changePage(1)">التالية →</button>
+                        <button class="control-btn" onclick="backToMenu()">🏠 الرئيسية</button>
+                    </div>
+                </div>
+
+                <div class="game-content">
+                    <div class="clothes-area">
+                        <h2 style="text-align: center; margin-bottom: 20px; color: #333">👗 اسحب الملابس إلى الفصل المناسب</h2>
+                        <div id="clothesGrid" class="clothes-grid level-1">
+                            <!-- سيتم إضافة الملابس هنا بواسطة JavaScript -->
+                        </div>
+                        <div id="emptyMessage" style="display: none; text-align: center; padding: 40px; color: #666">
+                            <div style="font-size: 3em; margin-bottom: 10px">🎉</div>
+                            <p style="font-size: 1.2em">تم وضع جميع الملابس!</p>
+                        </div>
+                    </div>
+
+                    <div id="categoriesArea" class="categories-area">
+                        <!-- سيتم إضافة الفئات هنا بواسطة JavaScript -->
+                    </div>
+                </div>
+
+                <div class="instructions">
+                    <p id="instructionText">🎯 المستوى السهل - الصفحة 1 • اسحب كل قطعة ملابس إلى الفصل المناسب • كل إجابة صحيحة = 10 نقاط</p>
+                </div>
+            </div>
+
+            <!-- شاشة اكتمال الصفحة -->
+            <div id="pageCompleteScreen" class="success-screen">
+                <div class="success-icon">🎉</div>
+                <h2 class="success-title">أحسنت!</h2>
+                <p id="pageCompleteText" style="font-size: 1.3em; margin-bottom: 20px">أكملت الصفحة بنجاح!</p>
+                <div class="success-score">النقاط: <span id="pageScore">0</span></div>
+                <div class="success-buttons">
+                    <button class="success-btn next-level" onclick="goToNextPage()">الصفحة التالية →</button>
+                </div>
+            </div>
+
+            <!-- شاشة اكتمال المستوى -->
+            <div id="levelCompleteScreen" class="success-screen">
+                <div class="success-icon">🏆</div>
+                <h2 class="success-title">مبروك!</h2>
+                <p id="levelCompleteText" style="font-size: 1.3em; margin-bottom: 20px">أكملت المستوى بنجاح!</p>
+                <div class="success-score">النقاط: <span id="levelScore">0</span></div>
+                <div class="success-buttons">
+                    <button class="success-btn" onclick="backToMenu()">🏠 القائمة الرئيسية</button>
+                    <button id="nextLevelBtn" class="success-btn next-level" style="display: none" onclick="goToNextLevel()">المستوى التالي →</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // بيانات اللعبة
+            const clothesData = {
+                1: {
+                    // مستوى 1 - سهل (صيف وشتاء)
+                    1: [
+                        // الصفحة 1
+                        { id: 'tshirt', name: 'تيشيرت', emoji: '👕', category: 'summer' },
+                        { id: 'shorts', name: 'شورت', emoji: '🩳', category: 'summer' },
+                        { id: 'sandals', name: 'صندل', emoji: '👡', category: 'summer' },
+                        { id: 'sunglasses', name: 'نظارة شمسية', emoji: '🕶️', category: 'summer' },
+                        { id: 'coat', name: 'معطف', emoji: '🧥', category: 'winter' },
+                        { id: 'scarf', name: 'شال', emoji: '🧣', category: 'winter' },
+                        { id: 'boots', name: 'بوت', emoji: '👢', category: 'winter' },
+                        { id: 'hat', name: 'قبعة', emoji: '🎩', category: 'winter' }
+                    ],
+                    2: [
+                        // الصفحة 2
+                        { id: 'bikini', name: 'مايوه', emoji: '👙', category: 'summer' },
+                        { id: 'tank_top', name: 'فانلة', emoji: '👚', category: 'summer' },
+                        { id: 'flip_flops', name: 'شبشب', emoji: '🩴', category: 'summer' },
+                        { id: 'cap', name: 'كاب', emoji: '🧢', category: 'summer' },
+                        { id: 'sweater', name: 'سويتر', emoji: '👘', category: 'winter' },
+                        { id: 'gloves', name: 'جوانتي', emoji: '🧤', category: 'winter' },
+                        { id: 'wool_socks', name: 'شراب صوف', emoji: '🧦', category: 'winter' },
+                        { id: 'winter_hat', name: 'قبعة صوف', emoji: '🧣', category: 'winter' }
+                    ]
+                },
+                2: {
+                    // مستوى 2 - متوسط (ربيع وخريف)
+                    1: [
+                        // الصفحة 1
+                        { id: 'light_jacket', name: 'جاكيت خفيف', emoji: '🧥', category: 'spring' },
+                        { id: 'jeans', name: 'جينز', emoji: '👖', category: 'spring' },
+                        { id: 'sneakers', name: 'حذاء رياضي', emoji: '👟', category: 'spring' },
+                        { id: 'light_shirt', name: 'قميص خفيف', emoji: '👔', category: 'spring' },
+                        { id: 'spring_dress', name: 'فستان ربيعي', emoji: '👗', category: 'spring' },
+                        { id: 'cardigan', name: 'كارديجان', emoji: '👕', category: 'autumn' },
+                        { id: 'long_pants', name: 'بنطلون طويل', emoji: '👖', category: 'autumn' },
+                        { id: 'ankle_boots', name: 'حذاء قصير', emoji: '👠', category: 'autumn' },
+                        { id: 'light_scarf', name: 'شال خفيف', emoji: '🧣', category: 'autumn' },
+                        { id: 'vest', name: 'سترة', emoji: '🦺', category: 'autumn' }
+                    ],
+                    2: [
+                        // الصفحة 2
+                        { id: 'windbreaker', name: 'جاكيت مطر', emoji: '🥽', category: 'spring' },
+                        { id: 'cotton_shirt', name: 'قميص قطني', emoji: '👔', category: 'spring' },
+                        { id: 'light_shoes', name: 'حذاء خفيف', emoji: '👞', category: 'spring' },
+                        { id: 'spring_skirt', name: 'تنورة ربيعية', emoji: '👗', category: 'spring' },
+                        { id: 'baseball_cap', name: 'كاب رياضي', emoji: '🧢', category: 'spring' },
+                        { id: 'pullover', name: 'بلوفر', emoji: '👘', category: 'autumn' },
+                        { id: 'corduroy_pants', name: 'بنطلون مخمل', emoji: '👖', category: 'autumn' },
+                        { id: 'leather_shoes', name: 'حذاء جلد', emoji: '👞', category: 'autumn' },
+                        { id: 'beret', name: 'بيريه', emoji: '🎩', category: 'autumn' },
+                        { id: 'blazer', name: 'بليزر', emoji: '👔', category: 'autumn' }
+                    ]
+                },
+                3: {
+                    // مستوى 3 - صعب (جميع الفصول)
+                    1: [
+                        // الصفحة 1
+                        { id: 'polo_shirt', name: 'بولو شيرت', emoji: '👕', category: 'summer' },
+                        { id: 'bermuda', name: 'برمودا', emoji: '🩳', category: 'summer' },
+                        { id: 'espadrilles', name: 'حذاء قماش', emoji: '👡', category: 'summer' },
+                        { id: 'hoodie', name: 'هودي', emoji: '👘', category: 'spring' },
+                        { id: 'chinos', name: 'تشينو', emoji: '👖', category: 'spring' },
+                        { id: 'canvas_shoes', name: 'حذاء كانفاس', emoji: '👟', category: 'spring' },
+                        { id: 'wool_coat', name: 'معطف صوف', emoji: '🧥', category: 'autumn' },
+                        { id: 'turtleneck', name: 'تيرتل نيك', emoji: '👔', category: 'autumn' },
+                        { id: 'oxford_shoes', name: 'هاف بوت', emoji: '🥾', category: 'autumn' },
+                        { id: 'puffer_jacket', name: 'جاكيت منفوخ', emoji: '🧥', category: 'winter' },
+                        { id: 'thermal_wear', name: 'ملابس حرارية', emoji: '🩱', category: 'winter' },
+                        { id: 'snow_boots', name: 'بوت ثلج', emoji: '👢', category: 'winter' }
+                    ],
+                    2: [
+                        // الصفحة 2
+                        { id: 'summer_dress', name: 'فستان صيفي', emoji: '👗', category: 'summer' },
+                        { id: 'swim_shorts', name: 'شورت سباحة', emoji: '🩳', category: 'summer' },
+                        { id: 'sun_hat', name: 'قبعة شمس', emoji: '👒', category: 'summer' },
+                        { id: 'beach_sandals', name: 'صندل بحر', emoji: '👡', category: 'summer' },
+                        { id: 'raincoat', name: 'معطف مطر', emoji: '🧥', category: 'spring' },
+                        { id: 'denim_jacket', name: 'جاكيت جينز', emoji: '🧥', category: 'spring' },
+                        { id: 'loafers', name: 'حذاء لوفر', emoji: '👞', category: 'spring' },
+                        { id: 'spring_coat', name: 'معطف ربيعي', emoji: '🧥', category: 'spring' },
+                        { id: 'tweed_jacket', name: 'جاكيت تويد', emoji: '👔', category: 'autumn' },
+                        { id: 'knee_boots', name: 'بوت للركبة', emoji: '👢', category: 'autumn' },
+                        { id: 'flannel_shirt', name: 'قميص فانيلا', emoji: '👔', category: 'autumn' },
+                        { id: 'autumn_scarf', name: 'شال خريفي', emoji: '🧣', category: 'autumn' },
+                        { id: 'parka', name: 'باركا', emoji: '🧥', category: 'winter' },
+                        { id: 'ugg_boots', name: 'بوت فرو', emoji: '👢', category: 'winter' },
+                        { id: 'wool_sweater', name: 'سويتر صوف', emoji: '👘', category: 'winter' },
+                        { id: 'ear_muffs', name: 'غطاء أذن', emoji: '🎧', category: 'winter' }
+                    ]
+                }
+            };
+
+            const categories = {
+                summer: { name: 'صيف ☀️', style: 'background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); border-color: #f39c12;', icon: '☀️' },
+                winter: { name: 'شتاء ❄️', style: 'background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); border-color: #3498db;', icon: '❄️' },
+                spring: { name: 'ربيع 🌸', style: 'background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); border-color: #2ecc71;', icon: '🌸' },
+                autumn: { name: 'خريف 🍂', style: 'background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); border-color: #e74c3c;', icon: '🍂' }
+            };
+
+            // متغيرات اللعبة
+            let currentLevel = 1;
+            let currentPage = 1;
+            let currentScore = 0;
+            let totalScore = parseInt(localStorage.getItem('clothesGameTotalScore') || '0');
+            let completedLevels = JSON.parse(localStorage.getItem('clothesGameCompletedLevels') || '[]');
+            let placedItems = {};
+            let draggedItem = null;
+
+            // تحديث النتيجة الإجمالية في القائمة
+            document.getElementById('totalScoreDisplay').textContent = totalScore;
+
+            // تحديث حالة المستويات المكتملة
+            completedLevels.forEach((level) => {
+                document.getElementById(`level${level}Complete`).style.display = 'block';
+                if (level < 3) {
+                    const nextLevelCard = document.querySelector(`[data-level="${level + 1}"]`);
+                    nextLevelCard.classList.remove('locked');
+                    nextLevelCard.querySelectorAll('.page-btn').forEach((btn) => (btn.disabled = false));
+                    nextLevelCard.querySelector('div[style*="🔒"]').style.display = 'none';
+                }
+            });
+
+            // وظائف الصوت
+            function playCorrectSound() {
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+                    oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
+                    oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2); // G5
+
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.4);
+                } catch (error) {
+                    console.log('Audio not supported');
+                }
+            }
+
+            function playIncorrectSound() {
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.setValueAtTime(220, audioContext.currentTime); // A3
+                    oscillator.frequency.setValueAtTime(196, audioContext.currentTime + 0.2); // G3
+
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.6);
+
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.6);
+                } catch (error) {
+                    console.log('Audio not supported');
+                }
+            }
+
+            function playCelebrationSound() {
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
+
+                    notes.forEach((frequency, index) => {
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+
+                        oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime + index * 0.2);
+                        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime + index * 0.2);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + index * 0.2 + 0.3);
+
+                        oscillator.start(audioContext.currentTime + index * 0.2);
+                        oscillator.stop(audioContext.currentTime + index * 0.2 + 0.3);
+                    });
+                } catch (error) {
+                    console.log('Audio not supported');
+                }
+            }
+
+            // دوال اللعبة الرئيسية
+            function startLevel(level, page) {
+                currentLevel = level;
+                currentPage = page;
+                currentScore = 0;
+                placedItems = {};
+
+                document.getElementById('mainMenu').style.display = 'none';
+                document.getElementById('gameScreen').style.display = 'block';
+                document.getElementById('pageCompleteScreen').style.display = 'none';
+                document.getElementById('levelCompleteScreen').style.display = 'none';
+
+                setupGame();
+            }
+
+            function setupGame() {
+                // تحديث المعلومات في الهيدر
+                const levelNames = {
+                    1: 'مستوى سهل - صيف وشتاء',
+                    2: 'مستوى متوسط - ربيع وخريف',
+                    3: 'مستوى صعب - جميع الفصول'
+                };
+
+                const levelBadge = document.getElementById('levelBadge');
+                levelBadge.textContent = levelNames[currentLevel];
+                levelBadge.className = `level-badge level-${currentLevel}`;
+
+                document.getElementById('pageInfo').textContent = `الصفحة ${currentPage}/2`;
+                document.getElementById('currentScore').textContent = currentScore;
+
+                // تحديث أزرار التنقل
+                document.getElementById('prevPageBtn').disabled = currentPage === 1;
+                document.getElementById('nextPageBtn').disabled = currentPage === 2;
+
+                // تحديث التعليمات
+                let challengeText = '';
+                if (currentLevel === 3 && currentPage === 2) {
+                    challengeText = ' - التحدي النهائي!';
+                }
+                document.getElementById('instructionText').innerHTML = `🎯 ${levelNames[currentLevel]} - الصفحة ${currentPage}${challengeText}<br/>اسحب كل قطعة ملابس إلى الفصل المناسب • كل إجابة صحيحة = 10 نقاط`;
+
+                setupClothes();
+                setupCategories();
+                updateProgress();
+            }
+
+            function setupClothes() {
+                const clothesGrid = document.getElementById('clothesGrid');
+                clothesGrid.innerHTML = '';
+                clothesGrid.className = `clothes-grid level-${currentLevel}`;
+
+                const clothes = clothesData[currentLevel][currentPage];
+
+                clothes.forEach((item) => {
+                    const clothesDiv = document.createElement('div');
+                    clothesDiv.className = 'clothes-item';
+                    clothesDiv.draggable = true;
+                    clothesDiv.id = item.id;
+                    clothesDiv.innerHTML = `
+                    <span class="clothes-emoji">${item.emoji}</span>
+                    <span class="clothes-name">${item.name}</span>
+                `;
+
+                    clothesDiv.addEventListener('dragstart', (e) => {
+                        draggedItem = item;
+                        clothesDiv.classList.add('dragging');
+                        e.dataTransfer.effectAllowed = 'move';
+                    });
+
+                    clothesDiv.addEventListener('dragend', () => {
+                        clothesDiv.classList.remove('dragging');
+                    });
+
+                    clothesGrid.appendChild(clothesDiv);
+                });
+            }
+
+            function setupCategories() {
+                const categoriesArea = document.getElementById('categoriesArea');
+                categoriesArea.innerHTML = '';
+
+                let levelCategories = [];
+                if (currentLevel === 1) {
+                    levelCategories = ['summer', 'winter'];
+                } else if (currentLevel === 2) {
+                    levelCategories = ['spring', 'autumn'];
+                } else if (currentLevel === 3) {
+                    levelCategories = ['summer', 'spring', 'autumn', 'winter'];
+                }
+
+                levelCategories.forEach((categoryKey) => {
+                    const category = categories[categoryKey];
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.className = 'category-box';
+                    categoryDiv.style.cssText = category.style;
+                    categoryDiv.id = `category-${categoryKey}`;
+
+                    categoryDiv.innerHTML = `
+                    <div class="category-header">
+                        <span class="category-icon">${category.icon}</span>
+                        <div class="category-name">${category.name}</div>
+                        <div class="category-hint">🔊 اسحب هنا</div>
+                    </div>
+                    <div id="placed-${categoryKey}" class="placed-items"></div>
+                    <div id="empty-${categoryKey}" class="empty-category">
+                        اسحب ملابس ${category.name} هنا
+                    </div>
+                `;
+
+                    categoryDiv.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        categoryDiv.classList.add('drag-over');
+                    });
+
+                    categoryDiv.addEventListener('dragleave', () => {
+                        categoryDiv.classList.remove('drag-over');
+                    });
+
+                    categoryDiv.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        categoryDiv.classList.remove('drag-over');
+                        handleDrop(categoryKey);
+                    });
+
+                    categoriesArea.appendChild(categoryDiv);
+                });
+            }
+
+            function handleDrop(targetCategory) {
+                if (!draggedItem) return;
+
+                if (draggedItem.category === targetCategory) {
+                    // إجابة صحيحة
+                    playCorrectSound();
+                    currentScore += 10;
+                    document.getElementById('currentScore').textContent = currentScore;
+
+                    // إضافة العنصر إلى الفئة
+                    const placedArea = document.getElementById(`placed-${targetCategory}`);
+                    const emptyArea = document.getElementById(`empty-${targetCategory}`);
+
+                    const placedItem = document.createElement('div');
+                    placedItem.className = 'placed-item';
+                    placedItem.innerHTML = `
+                    <span class="placed-item-emoji">${draggedItem.emoji}</span>
+                    <span class="placed-item-name">${draggedItem.name}</span>
+                `;
+
+                    placedArea.appendChild(placedItem);
+                    emptyArea.style.display = 'none';
+
+                    // إزالة العنصر من منطقة الملابس
+                    document.getElementById(draggedItem.id).remove();
+
+                    // التحقق من اكتمال الصفحة
+                    checkPageComplete();
+                } else {
+                    // إجابة خاطئة
+                    playIncorrectSound();
+                    const categoryDiv = document.getElementById(`category-${targetCategory}`);
+                    categoryDiv.classList.add('shake');
+                    setTimeout(() => categoryDiv.classList.remove('shake'), 500);
+                }
+
+                draggedItem = null;
+                updateProgress();
+            }
+
+            function updateProgress() {
+                const totalItems = clothesData[currentLevel][currentPage].length;
+                const remainingItems = document.getElementById('clothesGrid').children.length;
+                const placedCount = totalItems - remainingItems;
+                const progress = Math.round((placedCount / totalItems) * 100);
+
+                document.getElementById('progressText').textContent = `${progress}%`;
+                document.getElementById('progressFill').style.width = `${progress}%`;
+
+                if (remainingItems === 0) {
+                    document.getElementById('emptyMessage').style.display = 'block';
+                }
+            }
+
+            function checkPageComplete() {
+                const remainingItems = document.getElementById('clothesGrid').children.length;
+
+                if (remainingItems === 0) {
+                    setTimeout(() => {
+                        if (currentPage === 2) {
+                            // اكتمال المستوى
+                            completeLevel();
+                        } else {
+                            // اكتمال الصفحة
+                            completePage();
+                        }
+                    }, 1000);
+                }
+            }
+
+            function completePage() {
+                document.getElementById('pageCompleteText').textContent = `أكملت الصفحة ${currentPage} من المستوى ${currentLevel}`;
+                document.getElementById('pageScore').textContent = currentScore;
+                document.getElementById('gameScreen').style.display = 'none';
+                document.getElementById('pageCompleteScreen').style.display = 'block';
+            }
+
+            function completeLevel() {
+                playCelebrationSound();
+
+                // إضافة المستوى إلى المكتملة
+                if (!completedLevels.includes(currentLevel)) {
+                    completedLevels.push(currentLevel);
+                    localStorage.setItem('clothesGameCompletedLevels', JSON.stringify(completedLevels));
+                }
+
+                // تحديث النتيجة الإجمالية
+                totalScore += currentScore;
+                localStorage.setItem('clothesGameTotalScore', totalScore.toString());
+
+                // عرض شاشة اكتمال المستوى
+                const levelNames = {
+                    1: 'المستوى السهل',
+                    2: 'المستوى المتوسط',
+                    3: 'المستوى الصعب'
+                };
+
+                document.getElementById('levelCompleteText').textContent = `أكملت ${levelNames[currentLevel]} بنجاح!`;
+                document.getElementById('levelScore').textContent = currentScore;
+
+                // إظهار زر المستوى التالي إذا كان متاحاً
+                if (currentLevel < 3) {
+                    document.getElementById('nextLevelBtn').style.display = 'inline-flex';
+                } else {
+                    document.getElementById('nextLevelBtn').style.display = 'none';
+                }
+
+                document.getElementById('gameScreen').style.display = 'none';
+                document.getElementById('levelCompleteScreen').style.display = 'block';
+            }
+
+            function goToNextPage() {
+                currentPage++;
+                currentScore = 0;
+                placedItems = {};
+                document.getElementById('pageCompleteScreen').style.display = 'none';
+                document.getElementById('gameScreen').style.display = 'block';
+                setupGame();
+            }
+
+            function goToNextLevel() {
+                currentLevel++;
+                currentPage = 1;
+                currentScore = 0;
+                placedItems = {};
+                document.getElementById('levelCompleteScreen').style.display = 'none';
+                document.getElementById('gameScreen').style.display = 'block';
+                setupGame();
+            }
+
+            function changePage(direction) {
+                const newPage = currentPage + direction;
+                if (newPage >= 1 && newPage <= 2) {
+                    currentPage = newPage;
+                    currentScore = 0;
+                    placedItems = {};
+                    setupGame();
+                }
+            }
+
+            function backToMenu() {
+                document.getElementById('gameScreen').style.display = 'none';
+                document.getElementById('pageCompleteScreen').style.display = 'none';
+                document.getElementById('levelCompleteScreen').style.display = 'none';
+                document.getElementById('mainMenu').style.display = 'block';
+
+                // تحديث النتيجة الإجمالية
+                document.getElementById('totalScoreDisplay').textContent = totalScore;
+
+                // تحديث المستويات المكتملة
+                completedLevels.forEach((level) => {
+                    document.getElementById(`level${level}Complete`).style.display = 'block';
+                    if (level < 3) {
+                        const nextLevelCard = document.querySelector(`[data-level="${level + 1}"]`);
+                        nextLevelCard.classList.remove('locked');
+                        nextLevelCard.querySelectorAll('.page-btn').forEach((btn) => (btn.disabled = false));
+                        const lockIcon = nextLevelCard.querySelector('div[style*="🔒"]');
+                        if (lockIcon) lockIcon.style.display = 'none';
+                    }
+                });
+            }
+
+            // إعداد الأحداث عند تحميل الصفحة
+            document.addEventListener('DOMContentLoaded', () => {
+                // منع السحب الافتراضي للمتصفح
+                document.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                });
+
+                document.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                });
+
+                // إعداد اللعبة للمرة الأولى
+                console.log('لعبة تصنيف الملابس جاهزة!');
+            });
+        </script>
+    </body>
+</html>

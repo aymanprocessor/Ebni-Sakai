@@ -1,0 +1,834 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>لعبة مطابقة الألوان</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
+            body {
+                font-family: 'Tajawal', sans-serif;
+                margin: 0;
+                padding: 0;
+                direction: rtl;
+                background-color: #f3f4f6;
+            }
+
+            .spinner {
+                border: 4px solid rgba(255, 255, 255, 0.3);
+                border-top: 4px solid #fff;
+                border-radius: 50%;
+                width: 24px;
+                height: 24px;
+                animation: spin 1s linear infinite;
+            }
+
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+
+            .celebration-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.7);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 50;
+            }
+
+            .celebration-content {
+                background: #fff;
+                padding: 2.5rem;
+                border-radius: 1rem;
+                text-align: center;
+                animation: bounceIn 0.8s;
+            }
+
+            @keyframes bounceIn {
+                0% {
+                    transform: scale(0.3);
+                    opacity: 0;
+                }
+                50% {
+                    transform: scale(1.1);
+                    opacity: 1;
+                }
+                80% {
+                    transform: scale(0.9);
+                }
+                100% {
+                    transform: scale(1);
+                }
+            }
+
+            .star-icon {
+                color: #f59e0b;
+            }
+
+            .lucide-icon {
+                stroke-width: 2;
+                stroke: currentColor;
+                fill: none;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+            }
+
+            /* CSS for the SVG shapes, since we are not using React components */
+            .shape-container {
+                width: 80px;
+                height: 80px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+            }
+
+            .svg-shape {
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                border: 2px solid white;
+            }
+
+            .source-item {
+                cursor: pointer;
+            }
+
+            .source-item.selected {
+                border-color: #3b82f6;
+                background-color: #eff6ff;
+                transform: scale(1.05);
+                box-shadow:
+                    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+                    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+                -webkit-box-shadow:
+                    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+                    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            }
+
+            .source-item.completed {
+                opacity: 0.5;
+                cursor: not-allowed;
+                background-color: #d1fae5;
+                border-color: #6ee7b7;
+                transform: scale(0.95);
+            }
+
+            .target-item.clickable {
+                cursor: pointer;
+            }
+
+            .target-item.completed {
+                opacity: 0.5;
+                cursor: not-allowed;
+                background-color: #d1fae5;
+                border-color: #6ee7b7;
+                transform: scale(0.95);
+            }
+        </style>
+    </head>
+    <body class="bg-gradient-to-br from-blue-50 to-purple-50 p-4">
+        <!-- شريط التحكم -->
+        <div class="bg-white rounded-xl shadow-lg p-4 mb-6">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
+                <div class="flex items-center gap-4">
+                    <h1 id="level-name" class="text-xl font-bold text-purple-800"></h1>
+                    <div class="flex items-center gap-2 bg-yellow-100 rounded-lg px-3 py-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide-icon text-yellow-500">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
+                        <span id="star-count" class="font-bold text-yellow-700">0</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 flex-wrap justify-center">
+                    <!-- التحكم في المستوى -->
+                    <button id="prev-level" class="p-2 rounded-lg bg-blue-200 hover:bg-blue-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" title="المستوى السابق">
+                        <span>➡️</span>
+                    </button>
+                    <span id="level-display" class="px-3 py-1 bg-blue-100 rounded-lg text-blue-800 font-bold text-sm"></span>
+                    <button id="next-level" class="p-2 rounded-lg bg-blue-200 hover:bg-blue-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" title="المستوى التالي">
+                        <span>⬅️</span>
+                    </button>
+
+                    <div class="w-px h-6 bg-gray-300 mx-1"></div>
+
+                    <!-- التحكم في الصفحة -->
+                    <button id="prev-page" class="p-2 rounded-lg bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" title="الصفحة السابقة">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide-icon">
+                            <path d="m15 18-6-6 6-6" />
+                        </svg>
+                    </button>
+                    <span id="page-display" class="px-3 py-1 bg-purple-200 rounded-lg text-purple-800 font-bold"></span>
+                    <button id="next-page" class="p-2 rounded-lg bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" title="الصفحة التالية">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide-icon">
+                            <path d="m9 18 6-6-6-6" />
+                        </svg>
+                    </button>
+
+                    <div class="w-px h-6 bg-gray-300 mx-1"></div>
+
+                    <!-- أزرار إضافية -->
+                    <button id="sound-toggle" class="p-2 rounded-lg transition-colors bg-green-200 text-green-800 hover:bg-green-300" title="إيقاف الصوت">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide-icon">
+                            <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+                        </svg>
+                    </button>
+
+                    <button id="reset-stage" class="p-2 rounded-lg bg-orange-200 hover:bg-orange-300 text-orange-800 transition-colors" title="إعادة تعيين المرحلة">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide-icon">
+                            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.79-2.88L3 17.5" />
+                            <path d="M3 3v4h4" />
+                            <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.79-2.88L21 16.5" />
+                            <path d="M21 21v-4h-4" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- شريط التقدم -->
+            <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                <div id="progress-bar" class="bg-gradient-to-r from-green-400 to-green-500 h-4 rounded-full transition-all duration-700 ease-out relative" style="width: 0%">
+                    <div class="absolute inset-0 bg-white opacity-20 animate-pulse"></div>
+                </div>
+            </div>
+
+            <div id="progress-text" class="mt-2 text-center text-sm text-gray-600"></div>
+        </div>
+
+        <!-- منطقة اللعب الرئيسية -->
+        <div id="game-container" class="bg-white rounded-xl shadow-lg p-6">
+            <div id="intro-message" class="text-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">🎯 وصّل الدوائر بالأشكال المطابقة</h2>
+                <p class="text-gray-600">اختر دائرة من اليسار، ثم اختر الشكل المطابق لها من اليمين</p>
+            </div>
+
+            <div id="game-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                <!-- قسم الدوائر المصدر -->
+                <div id="sources-container" class="space-y-4">
+                    <div class="bg-blue-100 rounded-lg p-3 text-center">
+                        <h3 class="font-bold text-blue-800 text-lg">🔵 الدوائر متعددة الألوان</h3>
+                        <p class="text-blue-600 text-sm mt-1">اختر دائرة للبدء</p>
+                    </div>
+                    <div id="sources-list" class="space-y-3"></div>
+                </div>
+
+                <!-- قسم الأشكال المستهدفة -->
+                <div id="targets-container" class="space-y-4">
+                    <div class="bg-purple-100 rounded-lg p-3 text-center">
+                        <h3 class="font-bold text-purple-800 text-lg">🔷 الأشكال المطابقة</h3>
+                        <p class="text-purple-600 text-sm mt-1">وصّل كل دائرة بالشكل المقابل لها</p>
+                    </div>
+                    <div id="targets-list" class="space-y-3"></div>
+                </div>
+            </div>
+
+            <!-- قسم التوجيه والتعليمات -->
+            <div id="guidance-section" class="mt-8 space-y-4">
+                <!-- رسائل التوجيه الديناميكية -->
+                <div id="guidance-message" class="text-center"></div>
+
+                <!-- خطوات اللعب -->
+                <div class="flex flex-wrap justify-center gap-4 text-sm">
+                    <div class="bg-blue-50 py-3 px-4 rounded-lg border-l-4 border-blue-400 flex-1 min-w-48">
+                        <div class="font-bold text-blue-700 mb-1">الخطوة 1️⃣</div>
+                        <div class="text-gray-700">اختر دائرة من اليسار</div>
+                    </div>
+
+                    <div class="bg-purple-50 py-3 px-4 rounded-lg border-l-4 border-purple-400 flex-1 min-w-48">
+                        <div class="font-bold text-purple-700 mb-1">الخطوة 2️⃣</div>
+                        <div class="text-gray-700">اختر الشكل المطابق لها من اليمين</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- نافذة النهاية / التهنئة -->
+        <div id="end-modal" class="hidden celebration-modal">
+            <div class="celebration-content">
+                <div class="text-6xl mb-4">🎉</div>
+                <h1 class="text-3xl font-bold text-purple-800 mb-4">تهانينا!</h1>
+                <p class="text-xl text-gray-600 mb-6">لقد أكملت جميع المستويات بنجاح!</p>
+                <div class="flex items-center justify-center gap-2 mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide-icon text-yellow-500">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
+                    <span id="final-star-count" class="text-2xl font-bold text-yellow-600"></span>
+                    <span class="text-lg text-gray-600">نجمة</span>
+                </div>
+                <button id="restart-button" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-lg transition-colors">🎮 ابدأ من جديد</button>
+            </div>
+        </div>
+
+        <script>
+            // بيانات اللعبة
+            const gameData = {
+                1: {
+                    name: 'الألوان الأساسية',
+                    pages: [
+                        {
+                            sources: [
+                                { id: 'source-1', colors: ['#FF0000', '#0000FF'], name: 'أحمر وأزرق' },
+                                { id: 'source-2', colors: ['#FFFF00', '#FF0000'], name: 'أصفر وأحمر' },
+                                { id: 'source-3', colors: ['#0000FF', '#FFFF00'], name: 'أزرق وأصفر' }
+                            ],
+                            targets: [
+                                { id: 'target-1', colors: ['#FF0000', '#0000FF'], shape: 'square', name: 'مربع أحمر وأزرق' },
+                                { id: 'target-2', colors: ['#FFFF00', '#FF0000'], shape: 'square', name: 'مربع أصفر وأحمر' },
+                                { id: 'target-3', colors: ['#0000FF', '#FFFF00'], shape: 'square', name: 'مربع أزرق وأصفر' }
+                            ]
+                        },
+                        {
+                            sources: [
+                                { id: 'source-1', colors: ['#FF0000', '#0000FF', '#FFFF00'], name: 'أحمر وأزرق وأصفر' },
+                                { id: 'source-2', colors: ['#0000FF', '#FFFF00', '#FF0000'], name: 'أزرق وأصفر وأحمر' },
+                                { id: 'source-3', colors: ['#FFFF00', '#FF0000', '#0000FF'], name: 'أصفر وأحمر وأزرق' }
+                            ],
+                            targets: [
+                                { id: 'target-1', colors: ['#FF0000', '#0000FF', '#FFFF00'], shape: 'triangle', name: 'مثلث' },
+                                { id: 'target-2', colors: ['#0000FF', '#FFFF00', '#FF0000'], shape: 'triangle', name: 'مثلث' },
+                                { id: 'target-3', colors: ['#FFFF00', '#FF0000', '#0000FF'], shape: 'triangle', name: 'مثلث' }
+                            ]
+                        },
+                        {
+                            sources: [
+                                { id: 'source-1', colors: ['#FF0000', '#0000FF'], name: 'أحمر وأزرق' },
+                                { id: 'source-2', colors: ['#FFFF00', '#FF0000'], name: 'أصفر وأحمر' },
+                                { id: 'source-3', colors: ['#0000FF', '#FFFF00'], name: 'أزرق وأصفر' },
+                                { id: 'source-4', colors: ['#FF0000', '#FFFF00'], name: 'أحمر وأصفر' }
+                            ],
+                            targets: [
+                                { id: 'target-1', colors: ['#FF0000', '#0000FF'], shape: 'hexagon', name: 'سداسي' },
+                                { id: 'target-2', colors: ['#FFFF00', '#FF0000'], shape: 'hexagon', name: 'سداسي' },
+                                { id: 'target-3', colors: ['#0000FF', '#FFFF00'], shape: 'hexagon', name: 'سداسي' },
+                                { id: 'target-4', colors: ['#FF0000', '#FFFF00'], shape: 'hexagon', name: 'سداسي' }
+                            ]
+                        }
+                    ]
+                },
+                2: {
+                    name: 'الألوان الثانوية',
+                    pages: [
+                        {
+                            sources: [
+                                { id: 'source-1', colors: ['#FFA500', '#008000'], name: 'برتقالي وأخضر' },
+                                { id: 'source-2', colors: ['#800080', '#FFA500'], name: 'بنفسجي وبرتقالي' },
+                                { id: 'source-3', colors: ['#008000', '#800080'], name: 'أخضر وبنفسجي' }
+                            ],
+                            targets: [
+                                { id: 'target-1', colors: ['#FFA500', '#008000'], shape: 'square', name: 'مربع' },
+                                { id: 'target-2', colors: ['#800080', '#FFA500'], shape: 'square', name: 'مربع' },
+                                { id: 'target-3', colors: ['#008000', '#800080'], shape: 'square', name: 'مربع' }
+                            ]
+                        },
+                        {
+                            sources: [
+                                { id: 'source-1', colors: ['#FFA500', '#008000', '#800080'], name: 'ثلاثة ألوان' },
+                                { id: 'source-2', colors: ['#008000', '#800080', '#FFA500'], name: 'ثلاثة ألوان' },
+                                { id: 'source-3', colors: ['#800080', '#FFA500', '#008000'], name: 'ثلاثة ألوان' }
+                            ],
+                            targets: [
+                                { id: 'target-1', colors: ['#FFA500', '#008000', '#800080'], shape: 'triangle', name: 'مثلث' },
+                                { id: 'target-2', colors: ['#008000', '#800080', '#FFA500'], shape: 'triangle', name: 'مثلث' },
+                                { id: 'target-3', colors: ['#800080', '#FFA500', '#008000'], shape: 'triangle', name: 'مثلث' }
+                            ]
+                        },
+                        {
+                            sources: [
+                                { id: 'source-1', colors: ['#FFA500', '#008000'], name: 'برتقالي وأخضر' },
+                                { id: 'source-2', colors: ['#800080', '#FFA500'], name: 'بنفسجي وبرتقالي' },
+                                { id: 'source-3', colors: ['#008000', '#800080'], name: 'أخضر وبنفسجي' },
+                                { id: 'source-4', colors: ['#FFA500', '#800080'], name: 'برتقالي وبنفسجي' }
+                            ],
+                            targets: [
+                                { id: 'target-1', colors: ['#FFA500', '#008000'], shape: 'hexagon', name: 'سداسي' },
+                                { id: 'target-2', colors: ['#800080', '#FFA500'], shape: 'hexagon', name: 'سداسي' },
+                                { id: 'target-3', colors: ['#008000', '#800080'], shape: 'hexagon', name: 'سداسي' },
+                                { id: 'target-4', colors: ['#FFA500', '#800080'], shape: 'hexagon', name: 'سداسي' }
+                            ]
+                        }
+                    ]
+                },
+                3: {
+                    name: 'جميع الألوان',
+                    pages: [
+                        {
+                            sources: [
+                                { id: 'source-1', colors: ['#FF0000', '#FFA500'], name: 'أحمر وبرتقالي' },
+                                { id: 'source-2', colors: ['#0000FF', '#008000'], name: 'أزرق وأخضر' },
+                                { id: 'source-3', colors: ['#FFFF00', '#800080'], name: 'أصفر وبنفسجي' }
+                            ],
+                            targets: [
+                                { id: 'target-1', colors: ['#FF0000', '#FFA500'], shape: 'triangle', name: 'مثلث' },
+                                { id: 'target-2', colors: ['#0000FF', '#008000'], shape: 'triangle', name: 'مثلث' },
+                                { id: 'target-3', colors: ['#FFFF00', '#800080'], shape: 'triangle', name: 'مثلث' }
+                            ]
+                        },
+                        {
+                            sources: [
+                                { id: 'source-1', colors: ['#FF0000', '#008000', '#0000FF'], name: 'ثلاثة ألوان مختلطة' },
+                                { id: 'source-2', colors: ['#FFFF00', '#800080', '#FFA500'], name: 'ثلاثة ألوان مختلطة' },
+                                { id: 'source-3', colors: ['#FFA500', '#FF0000', '#008000'], name: 'ثلاثة ألوان مختلطة' },
+                                { id: 'source-4', colors: ['#0000FF', '#FFFF00', '#800080'], name: 'ثلاثة ألوان مختلطة' }
+                            ],
+                            targets: [
+                                { id: 'target-1', colors: ['#FF0000', '#008000', '#0000FF'], shape: 'hexagon', name: 'سداسي' },
+                                { id: 'target-2', colors: ['#FFFF00', '#800080', '#FFA500'], shape: 'hexagon', name: 'سداسي' },
+                                { id: 'target-3', colors: ['#FFA500', '#FF0000', '#008000'], shape: 'hexagon', name: 'سداسي' },
+                                { id: 'target-4', colors: ['#0000FF', '#FFFF00', '#800080'], shape: 'hexagon', name: 'سداسي' }
+                            ]
+                        },
+                        {
+                            sources: [
+                                { id: 'source-1', colors: ['#FF0000', '#FFFF00', '#0000FF'], name: 'نجمة ملونة' },
+                                { id: 'source-2', colors: ['#FFA500', '#800080', '#008000'], name: 'نجمة ملونة' },
+                                { id: 'source-3', colors: ['#008000', '#FF0000', '#800080'], name: 'نجمة ملونة' },
+                                { id: 'source-4', colors: ['#0000FF', '#FFA500', '#FFFF00'], name: 'نجمة ملونة' },
+                                { id: 'source-5', colors: ['#800080', '#008000', '#FF0000'], name: 'نجمة ملونة' }
+                            ],
+                            targets: [
+                                { id: 'target-1', colors: ['#FF0000', '#FFFF00', '#0000FF'], shape: 'star', name: 'نجمة' },
+                                { id: 'target-2', colors: ['#FFA500', '#800080', '#008000'], shape: 'star', name: 'نجمة' },
+                                { id: 'target-3', colors: ['#008000', '#FF0000', '#800080'], shape: 'star', name: 'نجمة' },
+                                { id: 'target-4', colors: ['#0000FF', '#FFA500', '#FFFF00'], shape: 'star', name: 'نجمة' },
+                                { id: 'target-5', colors: ['#800080', '#008000', '#FF0000'], shape: 'star', name: 'نجمة' }
+                            ]
+                        }
+                    ]
+                }
+            };
+
+            // حالة اللعبة
+            let currentLevel = 1;
+            let currentPage = 1;
+            let stars = 0;
+            let completedPairs = [];
+            let selectedSourceId = null;
+            let soundEnabled = true;
+
+            // العناصر
+            const levelNameEl = document.getElementById('level-name');
+            const starCountEl = document.getElementById('star-count');
+            const levelDisplayEl = document.getElementById('level-display');
+            const pageDisplayEl = document.getElementById('page-display');
+            const progressBarEl = document.getElementById('progress-bar');
+            const progressTextEl = document.getElementById('progress-text');
+            const sourcesListEl = document.getElementById('sources-list');
+            const targetsListEl = document.getElementById('targets-list');
+            const guidanceMessageEl = document.getElementById('guidance-message');
+            const endModalEl = document.getElementById('end-modal');
+            const finalStarCountEl = document.getElementById('final-star-count');
+
+            // الأزرار
+            const prevLevelBtn = document.getElementById('prev-level');
+            const nextLevelBtn = document.getElementById('next-level');
+            const prevPageBtn = document.getElementById('prev-page');
+            const nextPageBtn = document.getElementById('next-page');
+            const soundToggleBtn = document.getElementById('sound-toggle');
+            const resetStageBtn = document.getElementById('reset-stage');
+            const restartButtonEl = document.getElementById('restart-button');
+
+            // أصوات اللعبة
+            const playSound = (frequency, duration = 0.3) => {
+                if (!soundEnabled) return;
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + duration);
+                } catch (error) {
+                    console.log('لا يمكن تشغيل الصوت');
+                }
+            };
+
+            const playSuccessSound = () => {
+                playSound(523.25);
+                setTimeout(() => playSound(659.25), 100);
+                setTimeout(() => playSound(783.99), 200);
+            };
+
+            const playErrorSound = () => {
+                playSound(220);
+                setTimeout(() => playSound(110), 150);
+            };
+
+            // رسوم الأشكال كـ SVG
+            const getCircleSVG = (colors, size = 80) => {
+                const circles = colors
+                    .map((color, index) => {
+                        const circleSize = size - index * 12;
+                        return `<div class="absolute rounded-full border-2 border-white shadow-md" style="background-color: ${color}; width: ${circleSize}px; height: ${circleSize}px;"></div>`;
+                    })
+                    .join('');
+                return `<div class="relative flex items-center justify-center" style="width: ${size}px; height: ${size}px;">${circles}</div>`;
+            };
+
+            const getSquareSVG = (colors, size = 80) => {
+                if (colors.length === 2) {
+                    return `
+                    <div class="border-2 border-white shadow-md" style="width: ${size}px; height: ${size}px;">
+                        <div class="flex h-full">
+                            <div style="background-color: ${colors[0]}; width: 50%;"></div>
+                            <div style="background-color: ${colors[1]}; width: 50%;"></div>
+                        </div>
+                    </div>
+                `;
+                } else if (colors.length === 3) {
+                    return `
+                    <div class="border-2 border-white shadow-md" style="width: ${size}px; height: ${size}px;">
+                        <div style="background-color: ${colors[0]}; height: 50%;"></div>
+                        <div class="flex h-1/2">
+                            <div style="background-color: ${colors[1]}; width: 50%;"></div>
+                            <div style="background-color: ${colors[2]}; width: 50%;"></div>
+                        </div>
+                    </div>
+                `;
+                }
+                return getCircleSVG(colors, size);
+            };
+
+            const getTriangleSVG = (colors, size = 80) => {
+                const segments = colors
+                    .map((color, index) => {
+                        const segmentAngle = 360 / colors.length;
+                        const startAngle = index * segmentAngle - 90;
+                        const endAngle = (index + 1) * segmentAngle - 90;
+                        const centerX = size / 2;
+                        const centerY = size / 2;
+                        const radius = 30;
+
+                        const x1 = centerX + radius * Math.cos((startAngle * Math.PI) / 180);
+                        const y1 = centerY + radius * Math.sin((startAngle * Math.PI) / 180);
+                        const x2 = centerX + radius * Math.cos((endAngle * Math.PI) / 180);
+                        const y2 = centerY + radius * Math.sin((endAngle * Math.PI) / 180);
+
+                        return `<path d="M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 0 1 ${x2} ${y2} Z" fill="${color}" stroke="white" stroke-width="2" />`;
+                    })
+                    .join('');
+
+                return `<div class="relative flex items-center justify-center" style="width: ${size}px; height: ${size}px;">
+                        <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+                            <polygon points="${size / 2},0 0,${size} ${size},${size}" fill="${colors[0]}" stroke="white" stroke-width="2"/>
+                            ${segments}
+                        </svg>
+                    </div>`;
+            };
+
+            const getHexagonSVG = (colors, size = 80) => {
+                const segments = colors
+                    .map((color, index) => {
+                        const segmentAngle = 360 / colors.length;
+                        const startAngle = index * segmentAngle - 90;
+                        const endAngle = (index + 1) * segmentAngle - 90;
+                        const centerX = size / 2;
+                        const centerY = size / 2;
+                        const radius = 30;
+
+                        const x1 = centerX + radius * Math.cos((startAngle * Math.PI) / 180);
+                        const y1 = centerY + radius * Math.sin((startAngle * Math.PI) / 180);
+                        const x2 = centerX + radius * Math.cos((endAngle * Math.PI) / 180);
+                        const y2 = centerY + radius * Math.sin((endAngle * Math.PI) / 180);
+
+                        return `<path d="M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 0 1 ${x2} ${y2} Z" fill="${color}" stroke="white" stroke-width="2" />`;
+                    })
+                    .join('');
+
+                return `<div class="relative flex items-center justify-center" style="width: ${size}px; height: ${size}px;">
+                        <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+                           ${segments}
+                        </svg>
+                    </div>`;
+            };
+
+            const getStarSVG = (colors, size = 80) => {
+                const segments = colors
+                    .map((color, index) => {
+                        const numPoints = colors.length * 2;
+                        const segmentAngle = 360 / numPoints;
+                        const startAngle = index * 2 * segmentAngle - 90;
+                        const endAngle = (index * 2 + 1) * segmentAngle - 90;
+                        const centerX = size / 2;
+                        const centerY = size / 2;
+                        const outerRadius = 30;
+                        const innerRadius = 15;
+
+                        const outerX1 = centerX + outerRadius * Math.cos((startAngle * Math.PI) / 180);
+                        const outerY1 = centerY + outerRadius * Math.sin((startAngle * Math.PI) / 180);
+                        const outerX2 = centerX + outerRadius * Math.cos((endAngle * Math.PI) / 180);
+                        const outerY2 = centerY + outerRadius * Math.sin((endAngle * Math.PI) / 180);
+
+                        return `<path d="M ${centerX} ${centerY} L ${outerX1} ${outerY1} L ${outerX2} ${outerY2} Z" fill="${color}" stroke="white" stroke-width="2" />`;
+                    })
+                    .join('');
+
+                return `<div class="relative flex items-center justify-center" style="width: ${size}px; height: ${size}px;">
+                        <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+                            ${segments}
+                        </svg>
+                    </div>`;
+            };
+
+            const renderShape = (item) => {
+                if (!item || !item.colors || !Array.isArray(item.colors)) {
+                    return '<div class="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center">❌</div>';
+                }
+                const { colors, shape } = item;
+                switch (shape) {
+                    case 'square':
+                        return getSquareSVG(colors);
+                    case 'triangle':
+                        return getTriangleSVG(colors);
+                    case 'hexagon':
+                        return getHexagonSVG(colors);
+                    case 'star':
+                        return getStarSVG(colors);
+                    default:
+                        return getCircleSVG(colors);
+                }
+            };
+
+            // التحقق من تطابق الألوان
+            const colorsMatch = (colors1, colors2) => {
+                if (!Array.isArray(colors1) || !Array.isArray(colors2)) return false;
+                if (colors1.length !== colors2.length) return false;
+                return colors1.every((color, index) => color === colors2[index]);
+            };
+
+            // معالجة النقر
+            const handleSourceClick = (sourceId) => {
+                if (completedPairs.includes(sourceId)) return;
+                selectedSourceId = selectedSourceId === sourceId ? null : sourceId;
+                renderGame();
+            };
+
+            const handleTargetClick = (targetId) => {
+                if (!selectedSourceId || completedPairs.includes(targetId)) return;
+
+                const currentData = gameData[currentLevel].pages[currentPage - 1];
+                const sourceItem = currentData.sources.find((s) => s.id === selectedSourceId);
+                const targetItem = currentData.targets.find((t) => t.id === targetId);
+
+                if (!sourceItem || !targetItem) return;
+
+                if (colorsMatch(sourceItem.colors, targetItem.colors)) {
+                    playSuccessSound();
+                    stars += 1;
+                    completedPairs.push(selectedSourceId, targetId);
+                    selectedSourceId = null;
+
+                    // فحص اكتمال المرحلة
+                    const totalPairs = currentData.sources.length;
+                    if (completedPairs.length === totalPairs * 2) {
+                        setTimeout(() => {
+                            nextStage();
+                        }, 1000);
+                    }
+                } else {
+                    playErrorSound();
+                    selectedSourceId = null;
+                }
+                renderGame();
+            };
+
+            // الانتقال للمرحلة التالية
+            const nextStage = () => {
+                if (currentPage < gameData[currentLevel].pages.length) {
+                    currentPage++;
+                } else if (currentLevel < Object.keys(gameData).length) {
+                    currentLevel++;
+                    currentPage = 1;
+                } else {
+                    // نهاية اللعبة
+                    showEndModal();
+                    return;
+                }
+                resetCurrentStage();
+            };
+
+            // إعادة تعيين المرحلة الحالية
+            const resetCurrentStage = () => {
+                completedPairs = [];
+                selectedSourceId = null;
+                renderGame();
+            };
+
+            const goToPage = (direction) => {
+                if (direction === 'next' && currentPage < gameData[currentLevel].pages.length) {
+                    currentPage++;
+                    resetCurrentStage();
+                } else if (direction === 'prev' && currentPage > 1) {
+                    currentPage--;
+                    resetCurrentStage();
+                }
+            };
+
+            const goToLevel = (direction) => {
+                if (direction === 'next' && currentLevel < Object.keys(gameData).length) {
+                    currentLevel++;
+                    currentPage = 1;
+                    resetCurrentStage();
+                } else if (direction === 'prev' && currentLevel > 1) {
+                    currentLevel--;
+                    currentPage = 1;
+                    resetCurrentStage();
+                }
+            };
+
+            const showEndModal = () => {
+                finalStarCountEl.textContent = stars;
+                endModalEl.classList.remove('hidden');
+            };
+
+            // وظيفة الرسم الرئيسية
+            const renderGame = () => {
+                const currentData = gameData[currentLevel]?.pages[currentPage - 1];
+                if (!currentData) {
+                    // حالة نهاية اللعبة
+                    showEndModal();
+                    return;
+                }
+
+                // تحديث شريط التحكم
+                levelNameEl.textContent = `🎨 ${gameData[currentLevel].name}`;
+                starCountEl.textContent = stars;
+                levelDisplayEl.textContent = `مستوى ${currentLevel}`;
+                pageDisplayEl.textContent = `${currentPage}/${gameData[currentLevel].pages.length}`;
+
+                const totalPairs = currentData.sources.length;
+                const progressPercentage = (completedPairs.length / (totalPairs * 2)) * 100;
+                progressBarEl.style.width = `${progressPercentage}%`;
+                progressTextEl.textContent = `مكتمل: ${Math.floor(progressPercentage)}%`;
+
+                prevLevelBtn.disabled = currentLevel === 1;
+                nextLevelBtn.disabled = currentLevel === Object.keys(gameData).length;
+                prevPageBtn.disabled = currentPage === 1;
+                nextPageBtn.disabled = currentPage === gameData[currentLevel].pages.length;
+
+                if (soundEnabled) {
+                    soundToggleBtn.classList.remove('bg-gray-200', 'text-gray-600', 'hover:bg-gray-300');
+                    soundToggleBtn.classList.add('bg-green-200', 'text-green-800', 'hover:bg-green-300');
+                } else {
+                    soundToggleBtn.classList.remove('bg-green-200', 'text-green-800', 'hover:bg-green-300');
+                    soundToggleBtn.classList.add('bg-gray-200', 'text-gray-600', 'hover:bg-gray-300');
+                }
+                soundToggleBtn.title = soundEnabled ? 'إيقاف الصوت' : 'تشغيل الصوت';
+
+                // تحديث منطقة اللعب
+                sourcesListEl.innerHTML = '';
+                currentData.sources.forEach((source, index) => {
+                    const isSelected = selectedSourceId === source.id;
+                    const isCompleted = completedPairs.includes(source.id);
+                    const itemClass = `
+                    relative flex items-center justify-center p-4 rounded-xl border-3 transition-all duration-300 transform hover:scale-105
+                    ${isSelected ? 'border-blue-500 bg-blue-50 scale-105 shadow-xl ring-4 ring-blue-200' : 'border-gray-300 hover:border-blue-400 hover:shadow-lg'}
+                    ${isCompleted ? 'opacity-50 cursor-not-allowed bg-green-50 border-green-300 scale-95' : 'bg-white shadow-md'}
+                `;
+
+                    const itemHtml = `
+                    <div id="${source.id}" class="${itemClass}" title="${source.name} - اضغط للاختيار">
+                        ${getCircleSVG(source.colors)}
+                        <div class="absolute -top-3 -left-3 w-8 h-8 bg-blue-600 text-white text-sm font-bold rounded-full flex items-center justify-center shadow-lg border-2 border-white">
+                            ${index + 1}
+                        </div>
+                        ${isSelected && !isCompleted ? `<div class="absolute -top-3 -right-3 w-8 h-8 bg-yellow-500 text-white rounded-full flex items-center justify-center shadow-lg animate-bounce">👆</div>` : ''}
+                        ${isCompleted ? `<div class="absolute -bottom-3 -right-3 w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg animate-pulse">✅</div>` : ''}
+                    </div>
+                `;
+                    sourcesListEl.innerHTML += itemHtml;
+                });
+
+                targetsListEl.innerHTML = '';
+                currentData.targets.forEach((target, index) => {
+                    const isCompleted = completedPairs.includes(target.id);
+                    const isClickable = selectedSourceId && !isCompleted;
+                    const itemClass = `
+                    relative flex items-center justify-center p-4 rounded-xl border-3 transition-all duration-300 transform
+                    ${isCompleted ? 'opacity-50 cursor-not-allowed bg-green-50 border-green-300 scale-95' : isClickable ? 'cursor-pointer border-gray-300 hover:border-purple-400 hover:shadow-lg hover:scale-105 bg-white shadow-md' : 'cursor-not-allowed border-gray-200 bg-gray-50 opacity-60'}
+                `;
+
+                    const itemHtml = `
+                    <div id="${target.id}" class="${itemClass}" title="${!selectedSourceId ? 'اختر دائرة أولاً من الجانب الأيسر' : isCompleted ? 'تم إكمال هذا الشكل' : `${target.name} - اضغط للتوصيل`}">
+                        ${renderShape(target)}
+                        <div class="absolute -top-3 -right-3 w-8 h-8 bg-purple-600 text-white text-sm font-bold rounded-full flex items-center justify-center shadow-lg border-2 border-white">
+                            ${index + 1}
+                        </div>
+                        ${isClickable ? `<div class="absolute -top-3 -left-3 w-8 h-8 bg-yellow-400 text-white rounded-full flex items-center justify-center shadow-lg animate-pulse">👆</div>` : ''}
+                        ${isCompleted ? `<div class="absolute -bottom-3 -left-3 w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg animate-pulse">✅</div>` : ''}
+                    </div>
+                `;
+                    targetsListEl.innerHTML += itemHtml;
+                });
+
+                // تحديث رسالة التوجيه
+                if (!selectedSourceId && completedPairs.length === 0) {
+                    guidanceMessageEl.innerHTML = `
+                    <div class="bg-yellow-100 border-2 border-yellow-300 rounded-lg p-4 inline-block animate-bounce">
+                        <p class="text-yellow-800 font-bold text-lg">🌟 مرحباً! ابدأ بالنقر على أي دائرة من الجانب الأيسر</p>
+                    </div>
+                `;
+                } else if (selectedSourceId) {
+                    guidanceMessageEl.innerHTML = `
+                    <div class="bg-blue-100 border-2 border-blue-300 rounded-lg p-4 inline-block animate-pulse">
+                        <p class="text-blue-800 font-bold text-lg">✨ رائع! الآن ابحث عن الشكل المطابق في الجانب الأيمن</p>
+                    </div>
+                `;
+                } else if (completedPairs.length > 0 && completedPairs.length < totalPairs * 2) {
+                    guidanceMessageEl.innerHTML = `
+                    <div class="bg-green-100 border-2 border-green-300 rounded-lg p-4 inline-block">
+                        <p class="text-green-800 font-bold text-lg">🎉 ممتاز! استمر في العثور على المطابقات الأخرى</p>
+                    </div>
+                `;
+                } else {
+                    guidanceMessageEl.innerHTML = '';
+                }
+
+                // إضافة المستمعين للأحداث
+                document.querySelectorAll('#sources-list > div').forEach((el) => {
+                    el.addEventListener('click', () => handleSourceClick(el.id));
+                });
+                document.querySelectorAll('#targets-list > div').forEach((el) => {
+                    el.addEventListener('click', () => handleTargetClick(el.id));
+                });
+            };
+
+            // إضافة مستمعي الأحداث للأزرار
+            prevLevelBtn.addEventListener('click', () => goToLevel('prev'));
+            nextLevelBtn.addEventListener('click', () => goToLevel('next'));
+            prevPageBtn.addEventListener('click', () => goToPage('prev'));
+            nextPageBtn.addEventListener('click', () => goToPage('next'));
+            resetStageBtn.addEventListener('click', resetCurrentStage);
+            soundToggleBtn.addEventListener('click', () => {
+                soundEnabled = !soundEnabled;
+                renderGame();
+            });
+            restartButtonEl.addEventListener('click', () => {
+                currentLevel = 1;
+                currentPage = 1;
+                stars = 0;
+                endModalEl.classList.add('hidden');
+                resetCurrentStage();
+            });
+
+            // تشغيل اللعبة عند التحميل
+            window.onload = renderGame;
+        </script>
+    </body>
+</html>

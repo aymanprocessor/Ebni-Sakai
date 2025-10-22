@@ -1,0 +1,982 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>🧠 بطاقات الذاكرة</title>
+        <style>
+            :root {
+                --indigo: #6366f1;
+                --purple: #a855f7;
+                --pink: #ec4899;
+                --orange: #f97316;
+                --emerald: #10b981;
+                --blue: #3b82f6;
+                --gray-900: #111827;
+                --gray-700: #374151;
+                --gray-600: #4b5563;
+                --gray-200: #e5e7eb;
+                --card: #ffffff;
+            }
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                margin: 0;
+                font-family:
+                    system-ui,
+                    -apple-system,
+                    Segoe UI,
+                    Roboto,
+                    Helvetica,
+                    Arial,
+                    sans-serif;
+                min-height: 100vh;
+                background: linear-gradient(135deg, #8b5cf6, #ec4899 50%, #fb923c);
+                color: var(--gray-900);
+            }
+            .container {
+                max-width: 1200px;
+                margin: auto;
+                padding: 16px;
+            }
+            .center {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .card {
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: saturate(140%) blur(2px);
+                border-radius: 20px;
+                padding: 16px;
+                box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+            }
+            .btn {
+                border: 0;
+                border-radius: 999px;
+                padding: 14px 22px;
+                font-weight: 800;
+                color: #fff;
+                cursor: pointer;
+                transition:
+                    transform 0.1s,
+                    filter 0.2s,
+                    box-shadow 0.2s;
+                box-shadow: 0 10px 16px rgba(0, 0, 0, 0.15);
+                display: inline-flex;
+                gap: 8px;
+                align-items: center;
+                justify-content: center;
+            }
+            .btn:active {
+                transform: scale(0.98);
+            }
+            .btn.white {
+                background: #fff;
+                color: #6d28d9;
+            }
+            .btn.gray {
+                background: #4b5563;
+            }
+            .btn.orange {
+                background: linear-gradient(90deg, #f59e0b, #ea580c);
+            }
+            .btn.blue {
+                background: linear-gradient(90deg, #3b82f6, #2563eb);
+            }
+            .btn.green {
+                background: linear-gradient(90deg, #10b981, #059669);
+            }
+            .btn.purple {
+                background: linear-gradient(90deg, #8b5cf6, #7c3aed);
+            }
+            .title {
+                color: #fff;
+                text-align: center;
+                font-size: 56px;
+                margin: 10px 0 0;
+                font-weight: 900;
+                text-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+            }
+            .subtitle {
+                color: #fff;
+                text-align: center;
+                font-size: 22px;
+                margin: 6px 0 18px;
+            }
+            .grid {
+                display: grid;
+                gap: 16px;
+            }
+            .grid-3 {
+                grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            }
+            .grid-4 {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            .grid-5 {
+                grid-template-columns: repeat(5, 1fr);
+            }
+            .stat {
+                background: linear-gradient(90deg, #f59e0b, #ea580c);
+                border-radius: 14px;
+                color: #fff;
+                padding: 10px;
+                text-align: center;
+                font-weight: 800;
+            }
+            .stat.blue {
+                background: linear-gradient(90deg, #60a5fa, #6366f1);
+            }
+            .stat.green {
+                background: linear-gradient(90deg, #34d399, #10b981);
+            }
+            .stat.pink {
+                background: linear-gradient(90deg, #a78bfa, #ec4899);
+            }
+            .levelCard {
+                position: relative;
+                overflow: hidden;
+                border-radius: 22px;
+                color: #fff;
+                padding: 24px;
+                min-height: 220px;
+                cursor: pointer;
+                box-shadow: 0 14px 28px rgba(0, 0, 0, 0.2);
+                transition:
+                    transform 0.25s,
+                    box-shadow 0.25s,
+                    filter 0.2s;
+            }
+            .levelCard:hover {
+                transform: scale(1.03);
+                box-shadow: 0 20px 34px rgba(0, 0, 0, 0.24);
+            }
+            .badge {
+                display: inline-flex;
+                gap: 6px;
+                align-items: center;
+                justify-content: center;
+                margin-top: 10px;
+                font-weight: 800;
+            }
+            .lock {
+                opacity: 0.6;
+                filter: grayscale(0.2);
+                cursor: not-allowed;
+            }
+            .pageDots {
+                display: grid;
+                grid-template-columns: repeat(5, 1fr);
+                gap: 8px;
+                margin-top: 12px;
+            }
+            .pageDot {
+                background: rgba(255, 255, 255, 0.22);
+                border-radius: 10px;
+                padding: 8px;
+                text-align: center;
+            }
+            .headerBar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 10px;
+            }
+            .cardsGrid {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 10px;
+            }
+            @media (min-width: 768px) {
+                .cardsGrid {
+                    grid-template-columns: repeat(4, minmax(0, 1fr));
+                }
+            }
+            @media (min-width: 1024px) {
+                .cardsGrid {
+                    grid-template-columns: repeat(6, minmax(0, 1fr));
+                }
+            }
+            .cardItem {
+                position: relative;
+                aspect-ratio: 1/1;
+                border-radius: 18px;
+                cursor: pointer;
+                transition:
+                    transform 0.2s,
+                    box-shadow 0.2s,
+                    filter 0.2s;
+                box-shadow: 0 10px 18px rgba(0, 0, 0, 0.18);
+                overflow: hidden;
+            }
+            .cardItem:hover {
+                transform: scale(1.03);
+            }
+            .backFace {
+                position: absolute;
+                inset: 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                color: #fff;
+            }
+            .frontFace {
+                position: absolute;
+                inset: 0;
+                border-radius: 18px;
+                border: 2px solid var(--gray-200);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                background: #fff;
+                transition: opacity 0.2s;
+            }
+            .ring {
+                box-shadow: 0 0 0 4px #34d399 inset;
+            }
+            .pulse {
+                animation: pulse 1s infinite;
+            }
+            @keyframes pulse {
+                50% {
+                    transform: scale(1.05);
+                }
+            }
+            .bounce {
+                animation: bounce 1.2s infinite;
+            }
+            @keyframes bounce {
+                0%,
+                100% {
+                    transform: translateY(0);
+                }
+                50% {
+                    transform: translateY(-8px);
+                }
+            }
+            .spin {
+                animation: spin 1s linear;
+            }
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+            .overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.6);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 16px;
+                z-index: 50;
+            }
+            .cele {
+                position: fixed;
+                inset: 0;
+                pointer-events: none;
+                z-index: 40;
+            }
+            .cele i {
+                position: absolute;
+                font-size: 34px;
+                animation: bounce calc(2s + (var(--r) * 1s)) infinite;
+                left: var(--l);
+                top: var(--t);
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app"></div>
+
+        <script>
+            // ========= الأصوات =========
+            function playSound(type) {
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    let frequency, duration;
+                    if (type === 'click') {
+                        frequency = 800;
+                        duration = 0.1;
+                    } else if (type === 'flip') {
+                        frequency = 600;
+                        duration = 0.15;
+                    } else if (type === 'match') {
+                        return playGlitterSound(ctx);
+                    } else if (type === 'wrong') {
+                        return playBuzzSound(ctx);
+                    } else if (type === 'victory') {
+                        return playVictorySound(ctx);
+                    }
+                    const osc = ctx.createOscillator(),
+                        gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.frequency.setValueAtTime(frequency, ctx.currentTime);
+                    osc.type = 'sine';
+                    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + duration);
+                } catch (e) {
+                    console.log('Audio not supported');
+                }
+            }
+            function playGlitterSound(ctx) {
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(() => {
+                        const o = ctx.createOscillator(),
+                            g = ctx.createGain();
+                        o.connect(g);
+                        g.connect(ctx.destination);
+                        o.frequency.setValueAtTime(800 + i * 200, ctx.currentTime);
+                        o.type = 'sine';
+                        g.gain.setValueAtTime(0.2, ctx.currentTime);
+                        g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                        o.start(ctx.currentTime);
+                        o.stop(ctx.currentTime + 0.3);
+                    }, i * 100);
+                }
+            }
+            function playBuzzSound(ctx) {
+                const o = ctx.createOscillator(),
+                    g = ctx.createGain();
+                o.connect(g);
+                g.connect(ctx.destination);
+                o.frequency.setValueAtTime(200, ctx.currentTime);
+                o.type = 'sawtooth';
+                g.gain.setValueAtTime(0.3, ctx.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+                o.start(ctx.currentTime);
+                o.stop(ctx.currentTime + 0.5);
+            }
+            function playVictorySound(ctx) {
+                const notes = [523, 659, 784, 1047];
+                notes.forEach((f, i) => {
+                    setTimeout(() => {
+                        const o = ctx.createOscillator(),
+                            g = ctx.createGain();
+                        o.connect(g);
+                        g.connect(ctx.destination);
+                        o.frequency.setValueAtTime(f, ctx.currentTime);
+                        o.type = 'sine';
+                        g.gain.setValueAtTime(0.3, ctx.currentTime);
+                        g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+                        o.start(ctx.currentTime);
+                        o.stop(ctx.currentTime + 0.4);
+                    }, i * 200);
+                });
+            }
+
+            // ========= بيانات اللعبة (كما هي) =========
+            const gameData = {
+                1: {
+                    name: 'المستوى الأول',
+                    subtitle: 'الأساسيات',
+                    icon: '🌟',
+                    color: 'linear-gradient(135deg,#34d399,#3b82f6)',
+                    pages: [
+                        {
+                            name: 'الألوان',
+                            icon: '🎨',
+                            items: [
+                                { id: 1, name: 'أحمر', emoji: '🔴', color: '#FF0000' },
+                                { id: 2, name: 'أزرق', emoji: '🔵', color: '#0080FF' },
+                                { id: 3, name: 'أخضر', emoji: '🟢', color: '#00FF00' },
+                                { id: 4, name: 'أصفر', emoji: '🟡', color: '#FFD700' },
+                                { id: 5, name: 'بنفسجي', emoji: '🟣', color: '#8A2BE2' },
+                                { id: 6, name: 'برتقالي', emoji: '🟠', color: '#FF8C00' }
+                            ]
+                        },
+                        {
+                            name: 'الأشكال',
+                            icon: '🔷',
+                            items: [
+                                { id: 1, name: 'دائرة', shape: 'circle' },
+                                { id: 2, name: 'مربع', shape: 'square' },
+                                { id: 3, name: 'مثلث', shape: 'triangle' },
+                                { id: 4, name: 'نجمة', shape: 'star' },
+                                { id: 5, name: 'قلب', shape: 'heart' },
+                                { id: 6, name: 'ماسة', shape: 'diamond' }
+                            ]
+                        },
+                        {
+                            name: 'الفواكه',
+                            icon: '🍎',
+                            items: [
+                                { id: 1, name: 'تفاح', emoji: '🍎' },
+                                { id: 2, name: 'موز', emoji: '🍌' },
+                                { id: 3, name: 'برتقال', emoji: '🍊' },
+                                { id: 4, name: 'فراولة', emoji: '🍓' },
+                                { id: 5, name: 'عنب', emoji: '🍇' },
+                                { id: 6, name: 'أناناس', emoji: '🍍' }
+                            ]
+                        },
+                        {
+                            name: 'الخضروات',
+                            icon: '🥕',
+                            items: [
+                                { id: 1, name: 'جزر', emoji: '🥕' },
+                                { id: 2, name: 'طماطم', emoji: '🍅' },
+                                { id: 3, name: 'خيار', emoji: '🥒' },
+                                { id: 4, name: 'باذنجان', emoji: '🍆' },
+                                { id: 5, name: 'فلفل', emoji: '🌶️' },
+                                { id: 6, name: 'بروكلي', emoji: '🥦' }
+                            ]
+                        },
+                        {
+                            name: 'الألعاب',
+                            icon: '🎮',
+                            items: [
+                                { id: 1, name: 'كرة', emoji: '⚽' },
+                                { id: 2, name: 'دمية', emoji: '🪆' },
+                                { id: 3, name: 'سيارة', emoji: '🚗' },
+                                { id: 4, name: 'طائرة', emoji: '✈️' },
+                                { id: 5, name: 'دراجة', emoji: '🚲' },
+                                { id: 6, name: 'قطار', emoji: '🚂' }
+                            ]
+                        }
+                    ]
+                },
+                2: {
+                    name: 'المستوى الثاني',
+                    subtitle: 'عالم الحيوان',
+                    icon: '🦁',
+                    color: 'linear-gradient(135deg,#fb923c,#ef4444)',
+                    pages: [
+                        {
+                            name: 'الطيور',
+                            icon: '🦅',
+                            items: [
+                                { id: 1, name: 'عصفور', emoji: '🐦' },
+                                { id: 2, name: 'نسر', emoji: '🦅' },
+                                { id: 3, name: 'بطة', emoji: '🦆' },
+                                { id: 4, name: 'ديك', emoji: '🐓' },
+                                { id: 5, name: 'بومة', emoji: '🦉' },
+                                { id: 6, name: 'طاووس', emoji: '🦚' }
+                            ]
+                        },
+                        {
+                            name: 'حيوانات الغابة',
+                            icon: '🐅',
+                            items: [
+                                { id: 1, name: 'أسد', emoji: '🦁' },
+                                { id: 2, name: 'فيل', emoji: '🐘' },
+                                { id: 3, name: 'قرد', emoji: '🐒' },
+                                { id: 4, name: 'نمر', emoji: '🐅' },
+                                { id: 5, name: 'دب', emoji: '🐻' },
+                                { id: 6, name: 'ذئب', emoji: '🐺' }
+                            ]
+                        },
+                        {
+                            name: 'أسماك البحر',
+                            icon: '🐠',
+                            items: [
+                                { id: 1, name: 'سمكة', emoji: '🐟' },
+                                { id: 2, name: 'قرش', emoji: '🦈' },
+                                { id: 3, name: 'حوت', emoji: '🐋' },
+                                { id: 4, name: 'دولفين', emoji: '🐬' },
+                                { id: 5, name: 'أخطبوط', emoji: '🐙' },
+                                { id: 6, name: 'سلحفاة', emoji: '🐢' }
+                            ]
+                        },
+                        {
+                            name: 'الحيوانات الأليفة',
+                            icon: '🐕',
+                            items: [
+                                { id: 1, name: 'كلب', emoji: '🐕' },
+                                { id: 2, name: 'قطة', emoji: '🐱' },
+                                { id: 3, name: 'أرنب', emoji: '🐰' },
+                                { id: 4, name: 'هامستر', emoji: '🐹' },
+                                { id: 5, name: 'سمك ذهبي', emoji: '🐠' },
+                                { id: 6, name: 'ببغاء', emoji: '🦜' }
+                            ]
+                        },
+                        {
+                            name: 'حيوانات المزرعة',
+                            icon: '🐄',
+                            items: [
+                                { id: 1, name: 'بقرة', emoji: '🐄' },
+                                { id: 2, name: 'خروف', emoji: '🐑' },
+                                { id: 3, name: 'حصان', emoji: '🐎' },
+                                { id: 4, name: 'خنزير', emoji: '🐷' },
+                                { id: 5, name: 'ماعز', emoji: '🐐' },
+                                { id: 6, name: 'دجاجة', emoji: '🐔' }
+                            ]
+                        }
+                    ]
+                },
+                3: {
+                    name: 'المستوى الثالث',
+                    subtitle: 'التعلم المتقدم',
+                    icon: '🎓',
+                    color: 'linear-gradient(135deg,#a78bfa,#ec4899)',
+                    pages: [
+                        {
+                            name: 'أدوات المنزل',
+                            icon: '🏠',
+                            items: [
+                                { id: 1, name: 'كرسي', emoji: '🪑' },
+                                { id: 2, name: 'طاولة', emoji: '🪑' },
+                                { id: 3, name: 'سرير', emoji: '🛏️' },
+                                { id: 4, name: 'مصباح', emoji: '💡' },
+                                { id: 5, name: 'مفتاح', emoji: '🔑' },
+                                { id: 6, name: 'ساعة', emoji: '🕐' }
+                            ]
+                        },
+                        {
+                            name: 'الحروف العربية',
+                            icon: 'أ',
+                            items: [
+                                { id: 1, name: 'ألف', letter: 'أ' },
+                                { id: 2, name: 'باء', letter: 'ب' },
+                                { id: 3, name: 'تاء', letter: 'ت' },
+                                { id: 4, name: 'ثاء', letter: 'ث' },
+                                { id: 5, name: 'جيم', letter: 'ج' },
+                                { id: 6, name: 'حاء', letter: 'ح' }
+                            ]
+                        },
+                        {
+                            name: 'الحروف الإنجليزية',
+                            icon: 'A',
+                            items: [
+                                { id: 1, name: 'A', letter: 'A' },
+                                { id: 2, name: 'B', letter: 'B' },
+                                { id: 3, name: 'C', letter: 'C' },
+                                { id: 4, name: 'D', letter: 'D' },
+                                { id: 5, name: 'E', letter: 'E' },
+                                { id: 6, name: 'F', letter: 'F' }
+                            ]
+                        },
+                        {
+                            name: 'الأرقام العربية',
+                            icon: '١',
+                            items: [
+                                { id: 1, name: 'واحد', number: '١' },
+                                { id: 2, name: 'اثنان', number: '٢' },
+                                { id: 3, name: 'ثلاثة', number: '٣' },
+                                { id: 4, name: 'أربعة', number: '٤' },
+                                { id: 5, name: 'خمسة', number: '٥' },
+                                { id: 6, name: 'ستة', number: '٦' }
+                            ]
+                        },
+                        {
+                            name: 'الأرقام الإنجليزية',
+                            icon: '1',
+                            items: [
+                                { id: 1, name: 'One', number: '1' },
+                                { id: 2, name: 'Two', number: '2' },
+                                { id: 3, name: 'Three', number: '3' },
+                                { id: 4, name: 'Four', number: '4' },
+                                { id: 5, name: 'Five', number: '5' },
+                                { id: 6, name: 'Six', number: '6' }
+                            ]
+                        }
+                    ]
+                }
+            };
+
+            // ========= الحالة =========
+            let gameState = 'home'; // home | levelSelect | playing
+            let currentLevel = 1;
+            let currentPage = 0;
+            let cards = []; // deck
+            let flippedCards = []; // cardId[]
+            let matchedPairs = []; // [[a,b],...]
+            let score = 0;
+            let totalScore = 0;
+            let attempts = 0;
+            let gameCompleted = false;
+            let showCelebration = false;
+            let unlockedLevels = [1]; // يفتح المستوى التالي بعد إكمال المستوى
+
+            // صعوبة: عدد الكروت لكل صفحة
+            const getDifficultyCards = (pageIndex) => 6 + pageIndex * 2;
+
+            function initializeGame() {
+                const levelData = gameData[currentLevel];
+                const pageData = levelData.pages[currentPage];
+                const numCards = getDifficultyCards(currentPage);
+                const numPairs = numCards / 2;
+
+                const selected = pageData.items.slice(0, numPairs);
+                const pairs = selected.flatMap((item) => [
+                    { ...item, cardId: `${item.id}a`, pairId: item.id },
+                    { ...item, cardId: `${item.id}b`, pairId: item.id }
+                ]);
+                const shuffled = pairs.sort(() => Math.random() - 0.5);
+
+                cards = shuffled;
+                flippedCards = [];
+                matchedPairs = [];
+                attempts = 0;
+                gameCompleted = false;
+                showCelebration = false;
+                render();
+            }
+
+            function handleCardClick(cardId) {
+                if (flippedCards.includes(cardId) || matchedPairs.some((p) => p.includes(cardId))) return;
+
+                playSound('flip');
+                flippedCards = [...flippedCards, cardId];
+                render();
+
+                if (flippedCards.length === 2) {
+                    attempts += 1;
+                    const [id1, id2] = flippedCards;
+                    const c1 = cards.find((c) => c.cardId === id1);
+                    const c2 = cards.find((c) => c.cardId === id2);
+
+                    if (c1.pairId === c2.pairId) {
+                        setTimeout(() => playSound('match'), 300);
+                        matchedPairs = [...matchedPairs, [id1, id2]];
+                        score += 10;
+                        totalScore += 10;
+                        flippedCards = [];
+                        render();
+
+                        if (matchedPairs.length === cards.length / 2) {
+                            setTimeout(() => {
+                                playSound('victory');
+                                gameCompleted = true;
+                                showCelebration = true;
+
+                                // فتح المستوى التالي عند آخر صفحة
+                                if (currentPage === gameData[currentLevel].pages.length - 1 && !unlockedLevels.includes(currentLevel + 1) && currentLevel < 3) {
+                                    unlockedLevels = [...unlockedLevels, currentLevel + 1];
+                                }
+                                render();
+                                setTimeout(() => {
+                                    showCelebration = false;
+                                    render();
+                                }, 3800);
+                            }, 500);
+                        }
+                    } else {
+                        setTimeout(() => {
+                            playSound('wrong');
+                            flippedCards = [];
+                            render();
+                        }, 900);
+                    }
+                }
+            }
+
+            function startGame(level) {
+                playSound('click');
+                currentLevel = level;
+                currentPage = 0;
+                score = 0;
+                gameState = 'playing';
+                initializeGame();
+            }
+            function nextLevel() {
+                playSound('click');
+                if (currentPage < gameData[currentLevel].pages.length - 1) {
+                    currentPage += 1;
+                } else if (currentLevel < 3 && unlockedLevels.includes(currentLevel + 1)) {
+                    currentLevel += 1;
+                    currentPage = 0;
+                }
+                score = 0;
+                initializeGame();
+            }
+            function resetGame() {
+                playSound('click');
+                score = 0;
+                initializeGame();
+            }
+            function goHome() {
+                playSound('click');
+                gameState = 'home';
+                score = 0;
+                render();
+            }
+            function selectLevel() {
+                playSound('click');
+                gameState = 'levelSelect';
+                render();
+            }
+
+            function isCardVisible(cardId) {
+                return flippedCards.includes(cardId) || matchedPairs.some((p) => p.includes(cardId));
+            }
+
+            function renderCardContent(card) {
+                if (card.emoji) return `<div style="font-size:44px">${card.emoji}</div>`;
+                if (card.color) return `<div style="width:64px;height:64px;border-radius:50%;background:${card.color}"></div>`;
+                if (card.shape) {
+                    const cls = 'width:64px;height:64px;';
+                    switch (card.shape) {
+                        case 'circle':
+                            return `<div style="${cls}background:#ef4444;border-radius:50%"></div>`;
+                        case 'square':
+                            return `<div style="${cls}background:#3b82f6"></div>`;
+                        case 'triangle':
+                            return `<div style="width:0;height:0;border-left:22px solid transparent;border-right:22px solid transparent;border-bottom:44px solid #10b981"></div>`;
+                        case 'star':
+                            return `<div style="font-size:44px;color:#f59e0b">⭐</div>`;
+                        case 'heart':
+                            return `<div style="font-size:44px;color:#ef4444">❤️</div>`;
+                        case 'diamond':
+                            return `<div style="width:64px;height:64px;background:#ec4899;transform:rotate(45deg);border-radius:10px"></div>`;
+                    }
+                }
+                if (card.letter) return `<div style="font-size:44px;font-weight:900;color:#7c3aed">${card.letter}</div>`;
+                if (card.number) return `<div style="font-size:44px;font-weight:900;color:#2563eb">${card.number}</div>`;
+                return '';
+            }
+
+            // ========= الشاشات =========
+            const app = document.getElementById('app');
+
+            function viewHome() {
+                return `
+        <div class="center" style="min-height:100vh">
+          <div class="text-center" style="position:relative">
+            <div class="bounce" style="font-size:90px">🧠</div>
+            <h1 class="title">بطاقات الذاكرة</h1>
+            <p class="subtitle">اختبر ذاكرتك واستمتع بالتعلم!</p>
+
+            <div style="position:relative;height:0">
+              <div style="position:absolute;inset:auto auto -80px -80px;font-size:28px;animation:spin 6s linear infinite">⭐</div>
+              <div style="position:absolute;inset:auto -70px -60px auto;font-size:26px" class="bounce">🌟</div>
+              <div style="position:absolute;inset:-78px auto auto -70px;font-size:24px" class="pulse">✨</div>
+              <div style="position:absolute;inset:-92px -92px auto auto;font-size:28px;animation:spin 6s linear infinite">🎯</div>
+            </div>
+
+            <div style="margin:22px 0">
+              <button id="btnStart" class="btn white" style="font-size:20px;padding:16px 28px;box-shadow:0 16px 28px rgba(147,51,234,.35)">
+                ▶️ ابدأ اللعب
+              </button>
+            </div>
+
+            <div class="card" style="background:rgba(255,255,255,.22);color:#fff">
+              <div style="display:flex;gap:16px;align-items:center;justify-content:center">
+                <div style="text-align:center">
+                  <div style="font-size:28px;font-weight:900">${totalScore}</div>
+                  <div style="font-size:12px;opacity:.9">مجموع النقاط</div>
+                </div>
+                <div style="width:1px;height:48px;background:rgba(255,255,255,.35)"></div>
+                <div style="text-align:center">
+                  <div style="font-size:28px;font-weight:900">${unlockedLevels.length}</div>
+                  <div style="font-size:12px;opacity:.9">المستويات المفتوحة</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      `;
+            }
+
+            function viewLevelSelect() {
+                const levels = Object.entries(gameData)
+                    .map(([num, ld]) => {
+                        const n = parseInt(num);
+                        const unlocked = unlockedLevels.includes(n);
+                        return `
+          <div class="${unlocked ? '' : 'lock'}">
+            <div class="levelCard" style="background:${ld.color}" data-level="${n}">
+              <div style="position:absolute;inset:0;opacity:.1">
+                <div style="position:absolute;top:10px;right:14px;font-size:54px">${ld.icon}</div>
+                <div style="position:absolute;bottom:10px;left:14px;font-size:34px;transform:rotate(12deg)">✨</div>
+              </div>
+              <div style="position:relative;text-align:center">
+                <div class="bounce" style="font-size:60px">${ld.icon}</div>
+                <h3 style="margin:8px 0 4px;font-size:22px;font-weight:900">${ld.name}</h3>
+                <p style="margin:0 0 10px;opacity:.9">${ld.subtitle}</p>
+                <div class="pageDots">
+                  ${ld.pages.map((p) => `<div class="pageDot">${p.icon}</div>`).join('')}
+                </div>
+                <div class="badge" style="margin-top:12px">
+                  ${unlocked ? `<span>▶️ ابدأ اللعب</span>` : `<span>🔒 مقفل</span>`}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+                    })
+                    .join('');
+                return `
+        <div class="container">
+          <div class="text-center" style="margin-bottom:18px">
+            <button id="btnHome" class="btn white" style="background:rgba(255,255,255,.2);color:#fff">🏠 الرئيسية</button>
+            <h1 style="color:#fff;font-size:44px;margin:14px 0 4px;font-weight:900">اختر المستوى</h1>
+            <p style="color:#fff;opacity:.9">اختر المستوى الذي تريد اللعب به</p>
+          </div>
+          <div class="grid grid-3">
+            ${levels}
+          </div>
+        </div>
+      `;
+            }
+
+            function viewPlaying() {
+                const level = gameData[currentLevel];
+                const page = level.pages[currentPage];
+                const pairs = `${matchedPairs.length}/${cards.length / 2}`;
+
+                return `
+        <div class="container">
+          <div class="card" style="margin-bottom:14px">
+            <div class="headerBar">
+              <button id="btnHome" class="btn gray">🏠 الرئيسية</button>
+              <div class="center" style="flex-direction:column;text-align:center">
+                <div class="center" style="gap:10px;margin-bottom:6px">
+                  <span style="font-size:30px">${level.icon}</span>
+                  <div>
+                    <div style="font-size:20px;font-weight:900">${level.name}</div>
+                    <div class="center" style="gap:8px;color:#6d28d9">
+                      <span>${page.icon}</span><span>${page.name}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button id="btnReset" class="btn orange">🔄 إعادة</button>
+            </div>
+
+            <div class="grid grid-4" style="gap:10px;margin-top:10px">
+              <div class="stat"><div style="display:flex;align-items:center;justify-content:center;gap:6px">⭐ <span style="font-weight:900">${score}</span></div><div style="font-size:12px;opacity:.9">النقاط</div></div>
+              <div class="stat blue"><div style="font-weight:900">${attempts}</div><div style="font-size:12px;opacity:.9">المحاولات</div></div>
+              <div class="stat green"><div style="font-weight:900">${pairs}</div><div style="font-size:12px;opacity:.9">الأزواج</div></div>
+              <div class="stat pink"><div style="font-weight:900">${currentPage + 1}/5</div><div style="font-size:12px;opacity:.9">${getDifficultyCards(currentPage)} كرت</div></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="cardsGrid">
+              ${cards
+                  .map((c) => {
+                      const visible = isCardVisible(c.cardId);
+                      const matched = matchedPairs.some((p) => p.includes(c.cardId));
+                      const flipping = flippedCards.includes(c.cardId);
+                      return `
+                  <div class="cardItem ${matched ? 'ring pulse' : ''} ${flipping ? 'spin' : ''}" data-card="${c.cardId}">
+                    <div class="backFace" style="background:linear-gradient(135deg,#2563eb,#7c3aed);${visible ? 'opacity:0;' : 'opacity:1;'}">
+                      <div style="text-align:center">
+                        <div style="font-size:42px;margin-bottom:6px">🧠</div>
+                        <div style="font-size:12px;opacity:.8">؟</div>
+                      </div>
+                    </div>
+                    <div class="frontFace" style="${visible ? 'opacity:1;' : 'opacity:0;'} ${matched ? 'border-color:#34d399;background:#ecfdf5;' : ''}">
+                      <div style="flex:1" class="center">
+                        ${renderCardContent(c)}
+                      </div>
+                      <div style="font-size:12px;font-weight:800;color:#374151;padding-bottom:8px;text-align:center;padding-inline:4px">${c.name}</div>
+                    </div>
+                    ${matched ? `<div class="center" style="position:absolute;inset:0;pointer-events:none"><div class="bounce" style="font-size:34px">✨</div></div>` : ''}
+                  </div>
+                `;
+                  })
+                  .join('')}
+            </div>
+          </div>
+
+          ${
+              gameCompleted
+                  ? `
+            <div class="overlay">
+              <div class="card" style="max-width:520px;text-align:center">
+                <div class="bounce" style="font-size:80px;margin-bottom:10px">🎉</div>
+                <div style="margin-bottom:10px">
+                  <h2 style="margin:0;color:#16a34a;font-size:26px;font-weight:900">ممتاز!</h2>
+                  <p style="margin:4px 0;color:#7c3aed;font-weight:800">أحسنت!</p>
+                  <p style="margin:0;color:#6b7280">لقد نجحت في إكمال المهمة</p>
+                </div>
+                <div style="display:flex;gap:8px;justify-content:center;margin:10px 0 14px">
+                  <span class="pulse" style="color:#f59e0b;font-size:28px">⭐</span>
+                  <span class="pulse" style="color:#f59e0b;font-size:28px">⭐</span>
+                  <span class="pulse" style="color:#f59e0b;font-size:28px">⭐</span>
+                </div>
+                <div class="card" style="background:linear-gradient(90deg,#f59e0b,#ea580c);color:#fff;margin-bottom:12px">
+                  <div style="font-size:20px;font-weight:900">حصلت على ${score} نقطة</div>
+                  <div style="opacity:.9">في ${attempts} محاولة</div>
+                </div>
+                <div style="display:flex;gap:10px;justify-content:center">
+                  <button id="btnReplay" class="btn blue">إعادة المحاولة</button>
+                  ${
+                      currentPage < gameData[currentLevel].pages.length - 1 || (currentLevel < 3 && unlockedLevels.includes(currentLevel + 1))
+                          ? `
+                    <button id="btnNext" class="btn green">التالي ➤</button>
+                  `
+                          : ''
+                  }
+                </div>
+              </div>
+            </div>
+          `
+                  : ''
+          }
+
+          ${
+              showCelebration
+                  ? `
+            <div class="cele">
+              ${Array.from({ length: 12 })
+                  .map(
+                      () => `
+                <i style="--l:${Math.random() * 100}%;--t:${Math.random() * 100}%;--r:${Math.random() * 2}">
+                  ${['🎉', '⭐', '✨', '🌟'][Math.floor(Math.random() * 4)]}
+                </i>
+              `
+                  )
+                  .join('')}
+            </div>
+          `
+                  : ''
+          }
+        </div>
+      `;
+            }
+
+            // ========= رندر عام =========
+            function render() {
+                if (gameState === 'home') {
+                    app.innerHTML = viewHome();
+                } else if (gameState === 'levelSelect') {
+                    app.innerHTML = viewLevelSelect();
+                } else {
+                    app.innerHTML = viewPlaying();
+                }
+
+                // Events (delegated after render)
+                const btnStart = document.getElementById('btnStart');
+                if (btnStart) btnStart.addEventListener('click', selectLevel);
+
+                const btnHome = document.getElementById('btnHome');
+                if (btnHome) btnHome.addEventListener('click', goHome);
+
+                document.querySelectorAll('.levelCard').forEach((el) => {
+                    el.addEventListener('click', () => {
+                        const level = +el.getAttribute('data-level');
+                        if (!unlockedLevels.includes(level)) return;
+                        startGame(level);
+                    });
+                });
+
+                document.querySelectorAll('[data-card]').forEach((el) => {
+                    el.addEventListener('click', () => handleCardClick(el.getAttribute('data-card')));
+                });
+
+                const btnReset = document.getElementById('btnReset');
+                if (btnReset) btnReset.addEventListener('click', resetGame);
+
+                const btnReplay = document.getElementById('btnReplay');
+                if (btnReplay) btnReplay.addEventListener('click', resetGame);
+
+                const btnNext = document.getElementById('btnNext');
+                if (btnNext) btnNext.addEventListener('click', nextLevel);
+            }
+
+            // بداية
+            render();
+        </script>
+    </body>
+</html>

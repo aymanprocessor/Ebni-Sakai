@@ -26,23 +26,7 @@
                 </div>
             </div>
 
-            <!-- Subcategories (only shown if category has multiple subcats) -->
-            <div *ngIf="selectedCategory && hasSubcats" class="mb-2 pt-2 sm:pt-3 border-t border-gray-200 dark:border-gray-700">
-                <h3 class="text-lg sm:text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2 sm:mb-3">التصنيفات الفرعية</h3>
-                <div class="flex gap-3 sm:gap-4 flex-wrap">
-                    <button pButton pRipple class="p-button-md p-button-secondary text-base sm:text-lg" (click)="selectSubcat(null)" [ngClass]="!selectedSubcat ? 'p-button-secondary' : 'p-button-outlined p-button-secondary'">الكل</button>
-                    <button
-                        *ngFor="let sc of visibleSubcats"
-                        pButton
-                        pRipple
-                        class="p-button-md p-button-secondary text-base sm:text-lg"
-                        (click)="selectSubcat(sc.key)"
-                        [ngClass]="selectedSubcat === sc.key ? 'p-button-secondary' : 'p-button-outlined p-button-secondary'"
-                    >
-                        {{ sc.label }}
-                    </button>
-                </div>
-            </div>
+            <!-- Subcategories removed: UI hidden per request -->
         </div>
 
         <!-- Search -->
