@@ -407,6 +407,37 @@
                 }
             }
 
+            // Social Signup Button (Google)
+            .social-signup {
+                margin-bottom: 0.5rem;
+
+                ::ng-deep .google-signup-button {
+                    .p-button {
+                        width: 100%;
+                        padding: 1.1rem 1.6rem;
+                        background: white;
+                        border: 2px solid #e5e7eb;
+                        color: #374151;
+                        border-radius: 14px;
+                        font-size: 1.05rem;
+                        font-weight: 700;
+                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+                        &:enabled:hover {
+                            background: #f9fafb;
+                            border-color: #667eea;
+                            color: #667eea;
+                            transform: translateY(-2px);
+                        }
+
+                        .pi-google {
+                            color: #EA4335;
+                            font-size: 1.25rem;
+                        }
+                    }
+                }
+            }
+
             // Login Link Section
             .login-section {
                 text-align: center;

@@ -138,7 +138,38 @@
                     </div>
 
                     <!-- Register Button -->
-                    <p-button [label]="'common.buttons.register' | translate" icon="pi pi-user-plus" iconPos="right" (onClick)="onRegister()" styleClass="w-full register-button" [disabled]="!registerForm.valid" [loading]="isLoading"></p-button>
+                    <p-button
+                        [label]="'common.buttons.register' | translate"
+                        icon="pi pi-user-plus"
+                        iconPos="right"
+                        (onClick)="onRegister()"
+                        styleClass="w-full register-button"
+                        size="large"
+                        [disabled]="!registerForm.valid"
+                        [loading]="isLoading"
+                    ></p-button>
+
+                    <!-- divider -->
+
+                    <!-- divider -->
+                    <div class="divider-container">
+                        <p-divider>
+                            <span class="divider-text">{{ 'common.labels.or' | translate }}</span>
+                        </p-divider>
+                    </div>
+
+                    <!-- Social Signup (Google) -->
+                    <div class="social-signup">
+                        <p-button
+                            [label]="'common.buttons.registerWithGoogle' | translate"
+                            icon="pi pi-google"
+                            (onClick)="signInWithGoogle()"
+                            styleClass="w-full google-signup-button"
+                            [loading]="isLoading"
+                            severity="secondary"
+                            size="large"
+                        ></p-button>
+                    </div>
 
                     <!-- Login Link -->
                     <div class="login-section">

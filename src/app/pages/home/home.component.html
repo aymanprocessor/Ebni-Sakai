@@ -14,7 +14,7 @@
             </p>
             <div class="hero-actions">
                 <button pButton [label]="'pages.home.hero.startTrial' | translate" icon="pi pi-arrow-right" iconPos="right" class="p-button-lg p-button-rounded btn-primary" routerLink="/auth/register"></button>
-                <button pButton [label]="'pages.home.hero.watchDemo' | translate" icon="pi pi-play" class="p-button-lg p-button-rounded p-button-outlined btn-secondary"></button>
+                <button pButton [label]="'pages.home.hero.watchDemo' | translate" icon="pi pi-play" class="p-button-lg p-button-rounded p-button-outlined btn-secondary" (click)="openVideo()"></button>
             </div>
             <div class="hero-trust">
                 <div class="trust-badges">
@@ -43,6 +43,13 @@
         </div>
     </div>
 </section>
+
+<!-- Video Dialog -->
+<p-dialog header="" [(visible)]="showVideoDialog" [modal]="true" [closable]="true" [style]="{ width: '80vw' }" (onHide)="closeVideo()">
+    <div class="video-container" style="padding: 0">
+        <iframe *ngIf="safeVideoUrl" [src]="safeVideoUrl" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="width: 100%; height: 60vh"></iframe>
+    </div>
+</p-dialog>
 
 <!-- Stats Section -->
 <section class="stats-section">

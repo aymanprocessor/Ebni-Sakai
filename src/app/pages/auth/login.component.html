@@ -115,7 +115,7 @@
                     </div>
 
                     <!-- Login Button -->
-                    <p-button [label]="'common.buttons.login' | translate" icon="pi pi-sign-in" iconPos="right" (onClick)="onLogin()" styleClass="w-full login-button" [loading]="isLoading"></p-button>
+                    <p-button [label]="'common.buttons.login' | translate" icon="pi pi-sign-in" iconPos="right" (onClick)="onLogin()" styleClass="w-full login-button" size="large" [loading]="isLoading"></p-button>
 
                     <!-- Divider -->
                     <div class="divider-container">
@@ -126,7 +126,7 @@
 
                     <!-- Social Login -->
                     <div class="social-login">
-                        <p-button [label]="'common.buttons.loginWithGoogle' | translate" icon="pi pi-google" (onClick)="signInWithGoogle()" styleClass="w-full google-button" [loading]="isLoading" severity="secondary"></p-button>
+                        <p-button [label]="'common.buttons.loginWithGoogle' | translate" icon="pi pi-google" (onClick)="signInWithGoogle()" styleClass="w-full google-button" size="large" [loading]="isLoading" severity="secondary"></p-button>
                     </div>
 
                     <!-- Register Link -->

@@ -80,7 +80,9 @@ export class AppMenu implements OnInit {
                     { label: 'navigation.reports', icon: 'pi pi-fw pi-chart-bar', routerLink: ['reports'] },
                     { label: 'navigation.settings', icon: 'pi pi-fw pi-cog', routerLink: ['settings'] },
                     { label: 'navigation.user-profile', icon: 'pi pi-fw pi-user', routerLink: ['user-profile'] },
-                    { label: 'navigation.survey', icon: 'pi pi-fw pi-file', routerLink: ['mini-survey'] }
+                    { label: 'navigation.survey', icon: 'pi pi-fw pi-file', routerLink: ['mini-survey'] },
+                    { label: 'navigation.scales', icon: 'pi pi-fw pi-list', routerLink: ['/app', 'scales'] },
+                    { label: 'navigation.games', icon: 'pi pi-fw pi-play', routerLink: ['/app', 'game'] }
                 ]
             }
         ];
@@ -93,6 +95,8 @@ export class AppMenu implements OnInit {
                 items: [
                     { label: 'navigation.dashboard', icon: 'pi pi-fw pi-home', routerLink: ['dashboard'] },
                     // removed: myAccess, myAppointments, survey
+                    { label: 'navigation.survey', icon: 'pi pi-fw pi-file', routerLink: ['mini-survey'] },
+
                     { label: 'navigation.scales', icon: 'pi pi-fw pi-list', routerLink: ['/app', 'scales'] },
                     { label: 'navigation.games', icon: 'pi pi-fw pi-play', routerLink: ['/app', 'game'] },
                     { label: 'navigation.user-profile', icon: 'pi pi-fw pi-user', routerLink: ['user-profile'] }

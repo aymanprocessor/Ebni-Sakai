@@ -64,4 +64,23 @@ export class RegisterParentComponent implements OnInit {
             this.sweetalert.showToast('Please fill all required fields correctly', 'error');
         }
     }
+
+    async signInWithGoogle(): Promise<void> {
+        this.isLoading = true;
+        try {
+            const user = await this.authServ.googleLogin();
+            if (user) {
+                await this.authServ.waitForInitialization();
+                // small delay to ensure profile is loaded
+                setTimeout(() => {
+                    this.router.navigateByUrl('app/dashboard');
+                }, 500);
+            }
+        } catch (error) {
+            console.error('Google signup failed', error);
+            this.sweetalert.showToast('Google signup failed. Please try again.', 'error');
+        } finally {
+            this.isLoading = false;
+        }
+    }
 }

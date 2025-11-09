@@ -1,5 +1,6 @@
 import { Component, OnInit, NgZone, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 import { RouterModule } from '@angular/router';
 import { SCALES_LIST } from '../scales-list';
 import { PermissionService } from '../../../services/permission.service';
@@ -10,11 +11,15 @@ import { combineLatest } from 'rxjs';
 @Component({
     selector: 'app-scales-list',
     standalone: true,
-    imports: [CommonModule, RouterModule],
+    imports: [CommonModule, RouterModule, TranslateModule],
     template: `
         <div class="scales-page">
             <header class="hero">
                 <h1>المقاييس</h1>
+
+                <!-- Attribution (localized) -->
+                <p class="scale-note">{{ 'pages.scales.attribution' | translate }}</p>
+
                 <p>اختر المقياس لتشغيله</p>
             </header>
 
@@ -65,6 +70,21 @@ import { combineLatest } from 'rxjs';
             .hero p {
                 margin: 4px 0 0;
                 color: #666;
+            }
+
+            .scale-note {
+                margin: 6px 0 0;
+                color: #475569;
+                font-size: 0.95rem;
+                font-weight: 600;
+                opacity: 0.95;
+            }
+
+            .scale-note-en {
+                font-weight: 500;
+                color: #6b7280;
+                font-size: 0.9rem;
+                margin-top: 2px;
             }
 
             .grid {

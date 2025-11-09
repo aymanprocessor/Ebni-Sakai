@@ -19,6 +19,7 @@
             "login": "Login",
             "register": "Register",
             "loginWithGoogle": "Login with Google",
+            "registerWithGoogle": "Register with Google",
             "view": "View",
             "yes": "Yes",
             "no": "No"
@@ -200,6 +201,9 @@
             "quick": "2-Min Setup",
             "free": "Free to Start",
             "private": "100% Private"
+        },
+        "scales": {
+            "attribution": "This scale is based on the work of Dr. Fath El-Zayat."
         },
         "dashboard": {
             "welcome": "Welcome,",

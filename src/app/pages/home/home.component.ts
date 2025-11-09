@@ -8,6 +8,8 @@ import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { TimelineModule } from 'primeng/timeline';
+import { DialogModule } from 'primeng/dialog';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 interface Feature {
     icon: string;
@@ -30,7 +32,7 @@ interface Stat {
 @Component({
     selector: 'app-home',
     standalone: true,
-    imports: [CommonModule, RouterModule, TranslateModule, CardModule, ButtonModule, TagModule, TimelineModule, LandingHeaderComponent, LandingFooterComponent],
+    imports: [CommonModule, RouterModule, TranslateModule, CardModule, ButtonModule, TagModule, TimelineModule, DialogModule, LandingHeaderComponent, LandingFooterComponent],
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.scss']
 })
@@ -91,4 +93,24 @@ export class HomeComponent {
         { value: '50+', labelKey: 'pages.home.stats.expertSpecialists' },
         { value: '100+', labelKey: 'pages.home.stats.interactiveGames' }
     ];
+
+    // Video dialog state
+    showVideoDialog = false;
+    videoUrl = 'https://www.youtube.com/embed/TWcg_UN3EtA?si=m1PYWQrQd8ANVM3Y';
+    safeVideoUrl: SafeResourceUrl | null = null;
+
+    constructor(private sanitizer: DomSanitizer) {}
+
+    openVideo() {
+        // autoplay when opening
+        const autoplayUrl = this.videoUrl + '&autoplay=1';
+        this.safeVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(autoplayUrl);
+        this.showVideoDialog = true;
+    }
+
+    closeVideo() {
+        this.showVideoDialog = false;
+        // clear src to stop playback
+        this.safeVideoUrl = null;
+    }
 }
