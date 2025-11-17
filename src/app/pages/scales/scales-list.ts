@@ -2,6 +2,7 @@ export interface ScaleItem {
     number: number;
     title: string;
     slug?: string;
+    videoUrl?: string;
 }
 
 export const SCALES_LIST: ScaleItem[] = [

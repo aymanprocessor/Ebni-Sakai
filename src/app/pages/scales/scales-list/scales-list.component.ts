@@ -41,6 +41,24 @@ import { combineLatest } from 'rxjs';
                         <div class="card-inner">
                             <div class="badge">{{ s.number }}</div>
                             <h2 class="title">{{ s.title }}</h2>
+                            <a
+                                *ngIf="s.videoUrl"
+                                [href]="s.videoUrl"
+                                class="yt-link"
+                                [title]="'common.watchOnYouTube' | translate"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                [attr.aria-label]="'common.watchOnYouTube' | translate"
+                                (click)="$event.stopPropagation()"
+                            >
+                                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <path
+                                        d="M23.5 6.2s-.2-1.7-.8-2.5c-.8-1-1.7-1.1-2.1-1.2C16.6 2 12 2 12 2h-.1s-4.6 0-8.6.5c-.5.1-1.3.2-2.1 1.2C.5 4.5.3 6.2.3 6.2S0 8.1 0 10v4c0 1.9.3 3.8.3 3.8s.2 1.7.8 2.5c.8 1 1.9 1 2.4 1.2 1.7.2 7.2.5 8.5.5h.1s4.6 0 8.6-.5c.5-.1 1.3-.2 2.1-1.2.6-.8.8-2.5.8-2.5S24 15.9 24 14v-4c0-1.9-.5-3.8-.5-3.8z"
+                                        fill="#FF0000"
+                                    />
+                                    <path d="M9.5 15.6V8.4L15.8 12l-6.3 3.6z" fill="#fff" />
+                                </svg>
+                            </a>
                         </div>
                     </a>
                 </div>
@@ -141,6 +159,25 @@ import { combineLatest } from 'rxjs';
                 margin-left: auto;
                 color: #1e4ed8;
                 font-weight: 600;
+            }
+            .yt-link {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 36px;
+                height: 36px;
+                border-radius: 8px;
+                margin-inline-start: auto;
+                text-decoration: none;
+                transition:
+                    transform 120ms ease,
+                    box-shadow 120ms ease;
+            }
+            .yt-link:hover {
+                transform: translateY(-2px);
+            }
+            .yt-link svg {
+                display: block;
             }
 
             @media (max-width: 520px) {
